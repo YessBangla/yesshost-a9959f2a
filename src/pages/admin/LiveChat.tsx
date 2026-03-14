@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { MessageCircle, Send, Loader2, User, Clock, X, BellRing } from "lucide-react";
+import { MessageCircle, Send, Loader2, User, Clock, X, BellRing, Smile } from "lucide-react";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
