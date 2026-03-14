@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const servers = [
   { location: "🇨🇦 Canada", city: "Toronto", status: "operational", latency: "12ms", load: 34 },
@@ -13,6 +14,8 @@ const servers = [
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const ServerStatus = () => {
+  const { tr } = useLanguage();
+
   return (
     <section id="status" className="py-24 relative">
       <div className="container mx-auto px-4">
@@ -27,20 +30,19 @@ const ServerStatus = () => {
             Global Network
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
-            Data Center Locations
+            {tr("server.title")}
           </h2>
           <p className="text-muted-foreground text-base max-w-xl mx-auto">
-            বিশ্বব্যাপী ৬টি ডেটা সেন্টারে আপনার কন্টেন্ট ডেলিভার করুন।
+            {tr("server.subtitle")}
           </p>
         </motion.div>
 
         <div className="max-w-3xl mx-auto glass-card-elevated overflow-hidden">
-          {/* Header */}
           <div className="grid grid-cols-4 gap-4 px-6 py-3.5 text-xs text-muted-foreground font-semibold uppercase tracking-wider border-b border-border bg-secondary/30">
-            <span>Location</span>
-            <span>Status</span>
-            <span>Latency</span>
-            <span>Load</span>
+            <span>{tr("server.location")}</span>
+            <span>{tr("server.status")}</span>
+            <span>{tr("server.latency")}</span>
+            <span>{tr("server.load")}</span>
           </div>
 
           {servers.map((server, i) => (
@@ -58,7 +60,7 @@ const ServerStatus = () => {
               </div>
               <span className="flex items-center gap-2 text-sm">
                 <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
-                <span className="text-success text-xs font-medium">Operational</span>
+                <span className="text-success text-xs font-medium">{tr("server.operational")}</span>
               </span>
               <span className="text-sm text-foreground tabular-nums font-medium">{server.latency}</span>
               <div className="flex items-center gap-2">
