@@ -146,6 +146,45 @@ const AdminDashboard = () => {
     return Object.entries(statusMap).map(([name, value]) => ({ name, value }));
   }, [allTickets]);
 
+  // Daily revenue trend (last 30 days)
+  const dailyRevenueData = useMemo(() => {
+    const days: { name: string; revenue: number; orders: number }[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayKey = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString("default", { month: "short", day: "numeric" });
+      const dayInvoices = allInvoices.filter(inv => inv.status === "paid" && inv.paid_at?.startsWith(dayKey));
+      days.push({
+        name: label,
+        revenue: dayInvoices.reduce((sum, inv) => sum + Number(inv.amount_bdt), 0),
+        orders: dayInvoices.length,
+      });
+    }
+    return days;
+  }, [allInvoices]);
+
+  // Conversion metrics
+  const conversionMetrics = useMemo(() => {
+    const totalInv = allInvoices.length;
+    const paidInv = allInvoices.filter(i => i.status === "paid").length;
+    const paymentRate = totalInv > 0 ? Math.round((paidInv / totalInv) * 100) : 0;
+
+    const totalUsers = allProfiles.length;
+    const usersWithService = new Set(allServices.map(s => s.user_id)).size;
+    const activationRate = totalUsers > 0 ? Math.round((usersWithService / totalUsers) * 100) : 0;
+
+    const last7 = allInvoices.filter(i => i.status === "paid" && i.paid_at && new Date(i.paid_at) > new Date(Date.now() - 7 * 86400000));
+    const prev7 = allInvoices.filter(i => i.status === "paid" && i.paid_at && new Date(i.paid_at) > new Date(Date.now() - 14 * 86400000) && new Date(i.paid_at) <= new Date(Date.now() - 7 * 86400000));
+    const rev7 = last7.reduce((s, i) => s + Number(i.amount_bdt), 0);
+    const revPrev7 = prev7.reduce((s, i) => s + Number(i.amount_bdt), 0);
+    const revGrowth = revPrev7 > 0 ? Math.round(((rev7 - revPrev7) / revPrev7) * 100) : rev7 > 0 ? 100 : 0;
+
+    const avgOrderValue = paidInv > 0 ? Math.round(allInvoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0) / paidInv) : 0;
+
+    return { paymentRate, activationRate, revGrowth, avgOrderValue, rev7 };
+  }, [allInvoices, allProfiles, allServices]);
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
