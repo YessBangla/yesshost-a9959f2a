@@ -177,29 +177,43 @@ const Navbar = () => {
               </button>
               {navLinks.map((link) => (
                 <div key={link.label}>
-                  {isInternal(link.href) ? (
+                  {link.children ? (
+                    <>
+                      <button
+                        onClick={() => setMobileAccordion(mobileAccordion === link.label ? null : link.label)}
+                        className="flex items-center justify-between w-full py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                      >
+                        {link.label}
+                        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileAccordion === link.label ? "rotate-180" : ""}`} />
+                      </button>
+                      <AnimatePresence>
+                        {mobileAccordion === link.label && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pl-4 pb-1 space-y-0.5">
+                              {link.children.map((child) => (
+                                <Link key={child.label} to={child.href}
+                                  className="block py-2.5 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-all"
+                                  onClick={() => setMobileOpen(false)}>
+                                  {child.label}
+                                </Link>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
                     <Link to={link.href}
                       className="block py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
-                      onClick={() => !link.children && setMobileOpen(false)}>
+                      onClick={() => setMobileOpen(false)}>
                       {link.label}
                     </Link>
-                  ) : (
-                    <a href={link.href}
-                      className="block py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
-                      onClick={() => !link.children && setMobileOpen(false)}>
-                      {link.label}
-                    </a>
-                  )}
-                  {link.children && (
-                    <div className="pl-4 space-y-1">
-                      {link.children.map((child) => (
-                        <Link key={child.label} to={child.href}
-                          className="block py-2 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground"
-                          onClick={() => setMobileOpen(false)}>
-                          {child.label}
-                        </Link>
-                      ))}
-                    </div>
                   )}
                 </div>
               ))}
