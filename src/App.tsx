@@ -26,6 +26,7 @@ import AdminServices from "./pages/admin/Services";
 import AdminBilling from "./pages/admin/Billing";
 import AdminTickets from "./pages/admin/Tickets";
 import AdminCMS from "./pages/admin/CMS";
+import AdminThemes from "./pages/admin/Themes";
 import ServiceDetail from "./pages/services/ServiceDetail";
 import About from "./pages/company/About";
 import Contact from "./pages/company/Contact";
@@ -102,6 +103,7 @@ const App = () => (
               <Route path="billing" element={<AdminBilling />} />
               <Route path="tickets" element={<AdminTickets />} />
               <Route path="cms" element={<AdminCMS />} />
+              <Route path="themes" element={<AdminThemes />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
