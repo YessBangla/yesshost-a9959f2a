@@ -62,6 +62,45 @@ export type Database = {
         }
         Relationships: []
       }
+      domain_pricing: {
+        Row: {
+          created_at: string
+          ext: string
+          id: string
+          is_active: boolean
+          is_popular: boolean
+          registration_bdt: string
+          renewal_bdt: string
+          sort_order: number
+          transfer_bdt: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ext: string
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          registration_bdt: string
+          renewal_bdt: string
+          sort_order?: number
+          transfer_bdt: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ext?: string
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          registration_bdt?: string
+          renewal_bdt?: string
+          sort_order?: number
+          transfer_bdt?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           answer_bn: string
