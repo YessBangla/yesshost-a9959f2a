@@ -24,6 +24,14 @@ const DashboardOverview = () => {
       ]);
       setStats({ services: servicesRes.count || 0, invoices: invoicesRes.data?.length || 0, tickets: ticketsRes.count || 0, domains: domainsRes.count || 0 });
       setRecentInvoices(invoicesRes.data || []);
+
+      const { data: notifData } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      setRecentNotifications(notifData || []);
     };
     fetchData();
   }, [user]);
