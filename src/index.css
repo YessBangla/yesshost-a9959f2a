@@ -47,6 +47,8 @@
 
     --surface-glass: 240 5% 8%;
     --glow-primary: 190 100% 50%;
+    --success: 152 69% 53%;
+    --success-foreground: 240 10% 4%;
   }
 }
 
