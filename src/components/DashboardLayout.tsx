@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
 import { supabase } from "@/integrations/supabase/client";
 import logoWhite from "@/assets/logo-white.png";
+import NotificationBell from "@/components/NotificationBell";
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
