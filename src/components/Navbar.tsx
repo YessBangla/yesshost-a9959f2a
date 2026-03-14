@@ -166,7 +166,7 @@ const Navbar = () => {
             exit={{ opacity: 0, height: 0 }}
             className="lg:hidden glass border-t border-border overflow-hidden"
           >
-            <div className="px-4 py-4 space-y-1">
+            <div className="px-4 py-4 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
               <button
                 onClick={() => setLang(lang === "bn" ? "en" : "bn")}
                 className="flex items-center gap-2 w-full py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
