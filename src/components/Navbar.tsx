@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Phone, LogIn, Globe } from "lucide-react";
+import { Menu, X, ChevronDown, Phone, LogIn, Globe, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import logoWhite from "@/assets/logo-white.png";
 
 const Navbar = () => {
@@ -12,6 +13,7 @@ const Navbar = () => {
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const { user } = useAuth();
   const { lang, setLang, tr } = useLanguage();
+  const { itemCount, setCartOpen } = useCart();
 
   const navLinks = [
     { label: tr("nav.domain"), href: "/services/domain" },
@@ -126,6 +128,17 @@ const Navbar = () => {
           >
             <Globe className="w-4 h-4" />
             {lang === "bn" ? "EN" : "বাং"}
+          </button>
+          <button
+            onClick={() => setCartOpen(true)}
+            className="relative flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-secondary/60"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {itemCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                {itemCount}
+              </span>
+            )}
           </button>
           <a href="tel:+8809638205205"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2">
