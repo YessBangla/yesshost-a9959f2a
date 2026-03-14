@@ -83,7 +83,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: brandCurve, delay: 0.1 }}
-          className="text-4xl md:text-6xl lg:text-7xl font-display font-extrabold tracking-tight leading-[1.05] mb-6"
+          className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-extrabold tracking-tight leading-[1.1] mb-4 md:mb-6"
         >
           {getText("hero_title1", "hero.title1")}
           <br />
