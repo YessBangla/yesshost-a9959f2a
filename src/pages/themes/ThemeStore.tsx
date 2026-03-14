@@ -48,9 +48,8 @@ const ThemeStore = () => {
   }, [themes, activeCategory, search, bn]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
+    <PublicLayout>
+      <div className="pt-20 lg:pt-24 pb-16">
         {/* Hero */}
         <section className="container mx-auto px-4 text-center mb-12">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
