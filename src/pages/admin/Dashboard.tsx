@@ -357,7 +357,7 @@ const AdminDashboard = () => {
                   <XAxis type="number" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} width={80} />
                   <Tooltip />
-                  <Bar dataKey="value" name={tr("admin.tickets")} radius={[0, 6, 6, 0]} maxBarSize={24}>
+                  <Bar dataKey="value" name={tr("admin.ticketCount")} radius={[0, 6, 6, 0]} maxBarSize={24}>
                     {ticketStatusData.map((_, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
