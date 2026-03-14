@@ -28,6 +28,7 @@ const DashboardLayout = () => {
   const sidebarItems = [
     { title: tr("dash.overview"), url: "/dashboard", icon: LayoutDashboard },
     { title: tr("dash.services"), url: "/dashboard/services", icon: Server },
+    { title: isBn ? "অর্ডার হিস্ট্রি" : "Orders", url: "/dashboard/orders", icon: ShoppingBag },
     { title: tr("dash.billing"), url: "/dashboard/billing", icon: FileText },
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },

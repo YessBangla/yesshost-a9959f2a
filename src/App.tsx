@@ -96,6 +96,7 @@ const App = () => (
             >
               <Route index element={<DashboardOverview />} />
               <Route path="services" element={<DashboardServices />} />
+              <Route path="orders" element={<DashboardOrders />} />
               <Route path="billing" element={<DashboardBilling />} />
               <Route path="support" element={<DashboardSupport />} />
               <Route path="domains" element={<DashboardDomains />} />
