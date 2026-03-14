@@ -25,7 +25,7 @@ const FooterSection = () => {
     [tr("footer.support")]: [
       { label: tr("footer.knowledgeBase"), href: "/knowledge-base" },
       { label: tr("footer.contactUs"), href: "/contact" },
-      { label: bn ? "পেমেন্ট মেথড" : "Payment Methods", href: "/payment" },
+      { label: lang === "bn" ? "পেমেন্ট মেথড" : "Payment Methods", href: "/payment" },
       { label: tr("footer.supportTicket"), href: "/dashboard/support" },
       { label: tr("footer.liveChat"), href: "/contact" },
     ],
