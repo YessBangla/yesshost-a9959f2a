@@ -52,7 +52,7 @@ const CTASection = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
                 href={`tel:${contacts.phone || "+8809638205205"}`}
-                className="flex items-center gap-2 bg-white text-foreground px-8 py-4 rounded-xl font-bold text-base hover:bg-white/90 transition-all shadow-lg"
+                className="flex items-center gap-2 bg-white text-foreground px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-white/90 transition-all shadow-lg"
               >
                 <Phone className="w-5 h-5" />
                 {lang === "bn" ? (contacts.phone_label_bn || tr("cta.callUs")) : (contacts.phone_label_en || tr("cta.callUs"))}
