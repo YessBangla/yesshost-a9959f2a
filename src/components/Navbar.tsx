@@ -167,21 +167,14 @@ const Navbar = () => {
             exit={{ opacity: 0, height: 0 }}
             className="lg:hidden glass border-t border-border overflow-hidden"
           >
-            <div className="px-4 py-4 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
-              <button
-                onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-                className="flex items-center gap-2 w-full py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
-              >
-                <Globe className="w-4 h-4" />
-                {lang === "bn" ? "Switch to English" : "বাংলায় দেখুন"}
-              </button>
+            <div className="px-4 py-3 space-y-0.5 max-h-[calc(100vh-4rem-5rem)] overflow-y-auto">
               {navLinks.map((link) => (
                 <div key={link.label}>
                   {link.children ? (
                     <>
                       <button
                         onClick={() => setMobileAccordion(mobileAccordion === link.label ? null : link.label)}
-                        className="flex items-center justify-between w-full py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                        className="flex items-center justify-between w-full py-2.5 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
                       >
                         {link.label}
                         <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileAccordion === link.label ? "rotate-180" : ""}`} />
@@ -198,7 +191,7 @@ const Navbar = () => {
                             <div className="pl-4 pb-1 space-y-0.5">
                               {link.children.map((child) => (
                                 <Link key={child.label} to={child.href}
-                                  className="block py-2.5 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-all"
+                                  className="block py-2 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-all"
                                   onClick={() => setMobileOpen(false)}>
                                   {child.label}
                                 </Link>
@@ -210,32 +203,13 @@ const Navbar = () => {
                     </>
                   ) : (
                     <Link to={link.href}
-                      className="block py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                      className="block py-2.5 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
                       onClick={() => setMobileOpen(false)}>
                       {link.label}
                     </Link>
                   )}
                 </div>
               ))}
-              <div className="pt-3 space-y-2">
-                {user ? (
-                  <Link to="/dashboard" onClick={() => setMobileOpen(false)}
-                    className="block text-center text-sm gradient-primary text-primary-foreground px-4 py-3 rounded-xl font-semibold">
-                    {tr("nav.dashboard")}
-                  </Link>
-                ) : (
-                  <>
-                    <Link to="/login" onClick={() => setMobileOpen(false)}
-                      className="block text-center text-sm border border-border text-foreground px-4 py-3 rounded-xl font-semibold">
-                      {tr("nav.login")}
-                    </Link>
-                    <Link to="/signup" onClick={() => setMobileOpen(false)}
-                      className="block text-center text-sm gradient-primary text-primary-foreground px-4 py-3 rounded-xl font-semibold">
-                      {tr("nav.signup")}
-                    </Link>
-                  </>
-                )}
-              </div>
             </div>
           </motion.div>
         )}
