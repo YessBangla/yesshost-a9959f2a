@@ -19,7 +19,7 @@ const FooterSection = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           <div className="col-span-2">
-            <img src={logoWhite} alt="PutulHost" className="h-10 mb-4" />
+            <img src={logoWhite} alt="YessHost" className="h-10 mb-4" />
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               {tr("footer.desc")}
             </p>
@@ -27,8 +27,8 @@ const FooterSection = () => {
               <a href="tel:+8809638205205" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <Phone className="w-4 h-4" /> +88 096 38 205 205 (10AM-8PM)
               </a>
-              <a href="mailto:support@putulhost.com" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Mail className="w-4 h-4" /> support@putulhost.com
+              <a href="mailto:support@yesshost.com" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Mail className="w-4 h-4" /> support@yesshost.com
               </a>
             </div>
           </div>
@@ -62,7 +62,7 @@ const FooterSection = () => {
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} PutulHost.com — {tr("footer.allRights")}
+            © {new Date().getFullYear()} YessHost.com — {tr("footer.allRights")}
           </p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
