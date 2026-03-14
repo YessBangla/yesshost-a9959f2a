@@ -46,8 +46,7 @@ const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections }: {
           </motion.div>
         </div>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

@@ -110,8 +110,7 @@ const KnowledgeBase = () => {
           </div>
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

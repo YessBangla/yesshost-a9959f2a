@@ -264,8 +264,7 @@ const ThemeDetail = () => {
           </div>
         </div>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

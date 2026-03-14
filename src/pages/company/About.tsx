@@ -86,8 +86,7 @@ const About = () => {
           </div>
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

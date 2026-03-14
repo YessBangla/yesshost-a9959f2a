@@ -84,8 +84,7 @@ const Contact = () => {
           </div>
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

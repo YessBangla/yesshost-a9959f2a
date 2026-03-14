@@ -217,8 +217,7 @@ const ThemeStore = () => {
           )}
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

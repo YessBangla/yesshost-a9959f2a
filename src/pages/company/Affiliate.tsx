@@ -102,8 +102,7 @@ const Affiliate = () => {
           </Link>
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 
