@@ -66,12 +66,14 @@ const PricingSection = () => {
     const fromDb = dbPlans.filter(p => p.category === category);
     if (fromDb.length > 0) {
       return fromDb.map(p => ({
+        id: p.id,
         name: p.name,
         price: p.price_bdt,
         annual: p.annual_price_bdt || undefined,
         subtitle: p.subtitle || undefined,
         features: Array.isArray(p.features) ? p.features : [],
         highlighted: p.is_highlighted,
+        category,
       }));
     }
     return staticPlans[category] || [];
