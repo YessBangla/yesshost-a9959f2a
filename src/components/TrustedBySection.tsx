@@ -1,17 +1,22 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Building2 } from "lucide-react";
-
-const placeholder = "/placeholder.svg";
+import bkashLogo from "@/assets/partners/bkash.png";
+import nagadLogo from "@/assets/partners/nagad.png";
+import gpLogo from "@/assets/partners/grameenphone.png";
+import robiLogo from "@/assets/partners/robi.png";
+import banglalinkLogo from "@/assets/partners/banglalink.png";
+import pathaoLogo from "@/assets/partners/pathao.png";
+import darazLogo from "@/assets/partners/daraz.png";
+import sslLogo from "@/assets/partners/ssl-wireless.png";
 
 const partners = [
-  { name: "bKash", logo: placeholder },
-  { name: "Nagad", logo: placeholder },
-  { name: "Grameenphone", logo: placeholder },
-  { name: "Robi", logo: placeholder },
-  { name: "Banglalink", logo: placeholder },
-  { name: "Pathao", logo: placeholder },
-  { name: "Daraz", logo: placeholder },
-  { name: "SSL Wireless", logo: placeholder },
+  { name: "bKash", logo: bkashLogo },
+  { name: "Nagad", logo: nagadLogo },
+  { name: "Grameenphone", logo: gpLogo },
+  { name: "Robi", logo: robiLogo },
+  { name: "Banglalink", logo: banglalinkLogo },
+  { name: "Pathao", logo: pathaoLogo },
+  { name: "Daraz", logo: darazLogo },
+  { name: "SSL Wireless", logo: sslLogo },
 ];
 
 const TrustedBySection = () => {
