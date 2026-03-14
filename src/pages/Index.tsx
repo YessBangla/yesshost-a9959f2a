@@ -1,8 +1,8 @@
 import PublicLayout from "@/components/PublicLayout";
 import HeroSection from "@/components/HeroSection";
 import CorporateSlider from "@/components/CorporateSlider";
-import CategoryScroller from "@/components/CategoryScroller";
 import TrustedBySection from "@/components/TrustedBySection";
+import WhyChooseUs from "@/components/WhyChooseUs";
 import FeaturesSection from "@/components/FeaturesSection";
 import PricingSection from "@/components/PricingSection";
 import ServerStatus from "@/components/ServerStatus";
@@ -15,8 +15,8 @@ const Index = () => {
     <PublicLayout>
       <CorporateSlider />
       <HeroSection />
-      <CategoryScroller />
       <TrustedBySection />
+      <WhyChooseUs />
       <FeaturesSection />
       <PricingSection />
       <ServerStatus />
