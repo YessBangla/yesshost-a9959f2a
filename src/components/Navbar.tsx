@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Phone, MessageCircle } from "lucide-react";
+import { Menu, X, ChevronDown, Phone, MessageCircle, LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import logoWhite from "@/assets/logo-white.png";
 
 const navLinks = [
@@ -25,6 +27,7 @@ const navLinks = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { user } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-surface">
@@ -50,7 +53,6 @@ const Navbar = () => {
                 {link.children && <ChevronDown className="w-3.5 h-3.5" />}
               </a>
 
-              {/* Dropdown */}
               <AnimatePresence>
                 {link.children && activeDropdown === link.label && (
                   <motion.div
@@ -79,29 +81,30 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-3">
-          <a
-            href="#"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
-          >
+          <a href="tel:+8801234567890"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2">
             <Phone className="w-4 h-4" />
             <span className="hidden xl:inline">+880 1234-567890</span>
           </a>
-          <a
-            href="#"
-            className="flex items-center gap-2 text-sm text-primary-foreground px-5 py-2.5 rounded-xl font-semibold gradient-primary hover:opacity-90 transition-all shadow-lg shadow-primary/20"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Live Chat
-          </a>
-          <a
-            href="#"
-            className="text-sm px-5 py-2.5 rounded-xl font-semibold border border-border hover:bg-secondary/60 text-foreground transition-all"
-          >
-            Client Area
-          </a>
+          {user ? (
+            <Link to="/dashboard"
+              className="text-sm px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login"
+                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl font-semibold border border-border hover:bg-secondary/60 text-foreground transition-all">
+                <LogIn className="w-4 h-4" /> Login
+              </Link>
+              <Link to="/signup"
+                className="text-sm px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
 
-        {/* Mobile toggle */}
         <button
           className="lg:hidden text-foreground p-2 rounded-lg hover:bg-secondary/60 transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -110,7 +113,6 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -122,22 +124,17 @@ const Navbar = () => {
             <div className="px-4 py-4 space-y-1">
               {navLinks.map((link) => (
                 <div key={link.label}>
-                  <a
-                    href={link.href}
+                  <a href={link.href}
                     className="block py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
-                    onClick={() => !link.children && setMobileOpen(false)}
-                  >
+                    onClick={() => !link.children && setMobileOpen(false)}>
                     {link.label}
                   </a>
                   {link.children && (
                     <div className="pl-4 space-y-1">
                       {link.children.map((child) => (
-                        <a
-                          key={child.label}
-                          href={child.href}
+                        <a key={child.label} href={child.href}
                           className="block py-2 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground"
-                          onClick={() => setMobileOpen(false)}
-                        >
+                          onClick={() => setMobileOpen(false)}>
                           {child.label}
                         </a>
                       ))}
@@ -146,18 +143,23 @@ const Navbar = () => {
                 </div>
               ))}
               <div className="pt-3 space-y-2">
-                <a
-                  href="#"
-                  className="block text-center text-sm gradient-primary text-primary-foreground px-4 py-3 rounded-xl font-semibold"
-                >
-                  Live Chat
-                </a>
-                <a
-                  href="#"
-                  className="block text-center text-sm border border-border text-foreground px-4 py-3 rounded-xl font-semibold"
-                >
-                  Client Area
-                </a>
+                {user ? (
+                  <Link to="/dashboard" onClick={() => setMobileOpen(false)}
+                    className="block text-center text-sm gradient-primary text-primary-foreground px-4 py-3 rounded-xl font-semibold">
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setMobileOpen(false)}
+                      className="block text-center text-sm border border-border text-foreground px-4 py-3 rounded-xl font-semibold">
+                      Login
+                    </Link>
+                    <Link to="/signup" onClick={() => setMobileOpen(false)}
+                      className="block text-center text-sm gradient-primary text-primary-foreground px-4 py-3 rounded-xl font-semibold">
+                      Sign Up
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
