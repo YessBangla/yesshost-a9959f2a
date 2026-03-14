@@ -196,10 +196,7 @@ const Checkout = () => {
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-sm font-bold text-foreground">৳{item.price_bdt}</span>
                       <button
-                        onClick={() => {
-                          const { removeItem } = useCart();
-                          removeItem(item.domain);
-                        }}
+                        onClick={() => removeItem(item.domain)}
                         className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
