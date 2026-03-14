@@ -34,6 +34,8 @@ import Affiliate from "./pages/company/Affiliate";
 import Terms from "./pages/legal/Terms";
 import Privacy from "./pages/legal/Privacy";
 import Refund from "./pages/legal/Refund";
+import ThemeStore from "./pages/themes/ThemeStore";
+import ThemeDetail from "./pages/themes/ThemeDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
