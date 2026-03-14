@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -55,6 +55,21 @@ const CorporateSlider = () => {
   const { lang } = useLanguage();
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (sectionRef.current) {
+        const rect = sectionRef.current.getBoundingClientRect();
+        if (rect.bottom > 0 && rect.top < window.innerHeight) {
+          setScrollY(-rect.top * 0.3);
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const goTo = useCallback((index: number) => {
     if (isTransitioning) return;
@@ -72,7 +87,7 @@ const CorporateSlider = () => {
   }, [next]);
 
   return (
-    <section className="relative w-full h-[45vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
+    <section ref={sectionRef} className="relative w-full h-[45vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
       {/* Slides */}
       {slides.map((slide, i) => (
         <div
@@ -84,9 +99,10 @@ const CorporateSlider = () => {
           <img
             src={slide.img}
             alt={lang === "bn" ? slide.titleBn : slide.titleEn}
-            className={`w-full h-full object-cover transition-transform duration-[6000ms] ease-out ${
+            className={`w-full h-[120%] object-cover transition-transform duration-[6000ms] ease-out ${
               i === current ? "scale-[1.12]" : "scale-100"
             }`}
+            style={{ transform: `translateY(${scrollY}px) ${i === current ? "scale(1.12)" : "scale(1)"}` }}
           />
           {/* Texture + gradient overlays */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/25 to-black/5" />
