@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Search, Palette, Star, Eye, ShoppingCart, Sparkles } from "lucide-react";
+import { Search, Palette, Star, Eye, ShoppingCart, Sparkles, Check } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
