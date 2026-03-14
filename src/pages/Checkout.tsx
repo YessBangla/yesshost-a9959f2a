@@ -438,6 +438,23 @@ const Checkout = () => {
                 </p>
               </div>
             </div>
+
+            {/* Order Note */}
+            <div className="glass-card-elevated rounded-xl p-5">
+              <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-primary" />
+                {bn ? "অর্ডার নোট (ঐচ্ছিক)" : "Order Note (Optional)"}
+              </h2>
+              <textarea
+                value={orderNote}
+                onChange={(e) => setOrderNote(e.target.value)}
+                placeholder={bn ? "বিশেষ নির্দেশনা বা মন্তব্য লিখুন..." : "Any special instructions or comments..."}
+                maxLength={500}
+                rows={3}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30 resize-none"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1 text-right">{orderNote.length}/500</p>
+            </div>
           </div>
 
           {/* Order summary */}
