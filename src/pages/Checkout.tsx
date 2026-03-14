@@ -210,7 +210,7 @@ const Checkout = () => {
 
       // Increment coupon used_count
       if (appliedCoupon) {
-        await supabase.rpc("increment_coupon_usage" as any, { coupon_id: appliedCoupon.id }).catch(() => {});
+        await supabase.from("coupons").update({ used_count: (appliedCoupon as any).used_count + 1 } as any).eq("id", appliedCoupon.id);
       }
 
       // Create invoice
