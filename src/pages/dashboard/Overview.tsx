@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Server, FileText, HeadphonesIcon, Globe, ArrowUpRight, AlertCircle } from "lucide-react";
+import { Server, FileText, HeadphonesIcon, Globe, ArrowUpRight, AlertCircle, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
