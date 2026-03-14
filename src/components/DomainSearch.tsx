@@ -49,6 +49,20 @@ const DomainSearch = () => {
   const [expandedDomain, setExpandedDomain] = useState<string | null>(null);
   const [whoisData, setWhoisData] = useState<Record<string, WhoisInfo | null>>({});
   const [whoisLoading, setWhoisLoading] = useState<Record<string, boolean>>({});
+  const [domainPrices, setDomainPrices] = useState(staticDomainPrices);
+
+  useEffect(() => {
+    (supabase.from("domain_pricing" as any) as any)
+      .select("ext, registration_bdt, is_popular")
+      .eq("is_active", true)
+      .order("sort_order")
+      .limit(5)
+      .then(({ data }: any) => {
+        if (data && data.length > 0) {
+          setDomainPrices(data.map((d: any) => ({ ext: d.ext, price: d.registration_bdt, popular: d.is_popular })));
+        }
+      });
+  }, []);
 
   const handleSearch = async (e?: React.FormEvent) => {
     e?.preventDefault();
