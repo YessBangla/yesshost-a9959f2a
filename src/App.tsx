@@ -51,7 +51,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <LanguageProvider>
+        <CartProvider>
         <AuthProvider>
+          <CartDrawer />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
