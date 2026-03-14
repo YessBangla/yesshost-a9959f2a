@@ -34,6 +34,8 @@ import Affiliate from "./pages/company/Affiliate";
 import Terms from "./pages/legal/Terms";
 import Privacy from "./pages/legal/Privacy";
 import Refund from "./pages/legal/Refund";
+import ThemeStore from "./pages/themes/ThemeStore";
+import ThemeDetail from "./pages/themes/ThemeDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +63,10 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/knowledge-base" element={<KnowledgeBase />} />
             <Route path="/affiliate" element={<Affiliate />} />
+
+            {/* Theme pages */}
+            <Route path="/themes" element={<ThemeStore />} />
+            <Route path="/themes/:slug" element={<ThemeDetail />} />
 
             {/* Legal pages */}
             <Route path="/terms" element={<Terms />} />

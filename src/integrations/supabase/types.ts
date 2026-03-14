@@ -384,6 +384,122 @@ export type Database = {
         }
         Relationships: []
       }
+      theme_orders: {
+        Row: {
+          amount_bdt: number
+          created_at: string
+          id: string
+          include_hosting: boolean | null
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          theme_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_bdt: number
+          created_at?: string
+          id?: string
+          include_hosting?: boolean | null
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          theme_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_bdt?: number
+          created_at?: string
+          id?: string
+          include_hosting?: boolean | null
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          theme_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theme_orders_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      themes: {
+        Row: {
+          category: Database["public"]["Enums"]["theme_category"]
+          created_at: string
+          description_bn: string | null
+          description_en: string | null
+          discount_price_bdt: number | null
+          features: Json | null
+          hosting_bundle_features: Json | null
+          hosting_bundle_price_bdt: number | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string
+          preview_url: string | null
+          price_bdt: number
+          screenshots: Json | null
+          slug: string
+          sort_order: number | null
+          tags: Json | null
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["theme_category"]
+          created_at?: string
+          description_bn?: string | null
+          description_en?: string | null
+          discount_price_bdt?: number | null
+          features?: Json | null
+          hosting_bundle_features?: Json | null
+          hosting_bundle_price_bdt?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          preview_url?: string | null
+          price_bdt?: number
+          screenshots?: Json | null
+          slug: string
+          sort_order?: number | null
+          tags?: Json | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["theme_category"]
+          created_at?: string
+          description_bn?: string | null
+          description_en?: string | null
+          discount_price_bdt?: number | null
+          features?: Json | null
+          hosting_bundle_features?: Json | null
+          hosting_bundle_price_bdt?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          preview_url?: string | null
+          price_bdt?: number
+          screenshots?: Json | null
+          slug?: string
+          sort_order?: number | null
+          tags?: Json | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ticket_replies: {
         Row: {
           created_at: string
@@ -468,6 +584,13 @@ export type Database = {
         | "domain"
         | "ssl"
         | "email"
+      theme_category:
+        | "business"
+        | "ecommerce"
+        | "portfolio"
+        | "restaurant"
+        | "blog"
+        | "landing"
       ticket_department: "billing" | "technical" | "sales" | "general"
       ticket_priority: "low" | "medium" | "high" | "urgent"
       ticket_status: "open" | "in_progress" | "waiting" | "resolved" | "closed"
@@ -616,6 +739,14 @@ export const Constants = {
         "domain",
         "ssl",
         "email",
+      ],
+      theme_category: [
+        "business",
+        "ecommerce",
+        "portfolio",
+        "restaurant",
+        "blog",
+        "landing",
       ],
       ticket_department: ["billing", "technical", "sales", "general"],
       ticket_priority: ["low", "medium", "high", "urgent"],
