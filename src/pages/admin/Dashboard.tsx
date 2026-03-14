@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Users, Server, FileText, HeadphonesIcon, TrendingUp,
-  DollarSign, Activity, ArrowUpRight, ArrowDownRight
+  DollarSign, Activity, ArrowUpRight, ArrowDownRight, Tag
 } from "lucide-react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
