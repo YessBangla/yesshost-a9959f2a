@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 
 const iconMap: Record<string, typeof Shield> = { Shield, Users, Globe, Server, Award, Clock };
 
@@ -51,6 +52,7 @@ const About = () => {
 
   return (
     <PublicLayout>
+      <SEOHead title="About Us - YessHost" description="Learn about YessHost, Bangladesh's trusted cloud hosting provider with 99.9% uptime, 24/7 support, and 10+ years of experience." canonical="/about" />
       <div className="pt-20 lg:pt-24 pb-16">
         <section className="container mx-auto px-4 text-center mb-16">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>

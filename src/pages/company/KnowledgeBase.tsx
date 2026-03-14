@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 
 const iconMap: Record<string, any> = { Server, Globe, Mail, Shield, BookOpen };
 
@@ -68,6 +69,7 @@ const KnowledgeBase = () => {
 
   return (
     <PublicLayout>
+      <SEOHead title="Knowledge Base - YessHost" description="Hosting guides, tutorials and FAQs. Learn about cPanel, FTP, SSL, DNS, email setup and more." canonical="/knowledge-base" />
       <div className="pt-20 lg:pt-24 pb-16">
         <section className="container mx-auto px-4 text-center mb-12">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>

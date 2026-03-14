@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
@@ -182,6 +183,7 @@ const ServiceDetail = () => {
 
   return (
     <PublicLayout>
+      <SEOHead title={`${title} - YessHost`} description={description || `${title} - Enterprise-grade hosting solution from YessHost Bangladesh.`} canonical={`/services/${slug}`} />
       <div className="pt-20 lg:pt-24 pb-16">
         {/* Hero */}
         <section className="container mx-auto px-4 mb-16">

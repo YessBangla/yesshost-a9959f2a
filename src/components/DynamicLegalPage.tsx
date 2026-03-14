@@ -2,12 +2,14 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 import { motion } from "framer-motion";
 
-const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections }: {
+const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections, seoDescription }: {
   pageKey: string;
   fallbackTitle: { bn: string; en: string };
   fallbackSections: { title_bn: string; title_en: string; content_bn: string; content_en: string }[];
+  seoDescription?: string;
 }) => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
@@ -30,6 +32,7 @@ const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections }: {
 
   return (
     <PublicLayout>
+      <SEOHead title={`${title} - YessHost`} description={seoDescription || `${fallbackTitle.en} - YessHost Bangladesh hosting provider.`} canonical={`/${pageKey}`} />
       <div className="pt-20 lg:pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>

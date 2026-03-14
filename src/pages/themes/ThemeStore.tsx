@@ -6,6 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
 
 const categoryLabels: Record<string, { bn: string; en: string }> = {
@@ -51,6 +52,7 @@ const ThemeStore = () => {
 
   return (
     <PublicLayout>
+      <SEOHead title="Theme Store - YessHost" description="Browse professional ready-made website themes. Business, eCommerce, portfolio and more — with hosting bundle offers." canonical="/themes" />
       <div className="pt-20 lg:pt-24 pb-16">
         {/* Hero */}
         <section className="container mx-auto px-4 text-center mb-12">

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 
 const iconMap: Record<string, typeof Mail> = { Mail, Phone, MapPin, Clock };
 
@@ -41,6 +42,7 @@ const Contact = () => {
 
   return (
     <PublicLayout>
+      <SEOHead title="Contact Us - YessHost" description="Get in touch with YessHost support team. Call +88 096 38 205 205 or email support@yesshost.com. Available Saturday to Thursday, 10AM-8PM." canonical="/contact" />
       <div className="pt-20 lg:pt-24 pb-16">
         <section className="container mx-auto px-4 text-center mb-12">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
