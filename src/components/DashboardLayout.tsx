@@ -16,6 +16,13 @@ const DashboardLayout = () => {
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
+    }
+  }, [user]);
 
   const sidebarItems = [
     { title: tr("dash.overview"), url: "/dashboard", icon: LayoutDashboard },
