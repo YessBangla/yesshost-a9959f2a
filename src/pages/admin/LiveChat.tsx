@@ -228,7 +228,7 @@ const AdminLiveChat = () => {
               <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
                 <div>
                   <p className="text-sm font-bold text-foreground">{selected.visitor_name}</p>
-                  <p className="text-[10px] text-muted-foreground">{selected.visitor_email || "ইমেইল নেই"} • {formatTime(selected.created_at)}</p>
+                  <p className="text-[10px] text-muted-foreground">{selected.visitor_email || "ইমেইল নেই"} • {selected.visitor_phone || "ফোন নেই"} • {formatTime(selected.created_at)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {selected.status === "open" && (
