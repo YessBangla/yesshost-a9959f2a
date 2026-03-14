@@ -51,6 +51,7 @@ const Navbar = () => {
       ],
     },
     { label: tr("nav.about"), href: "/about" },
+    { label: tr("nav.themes"), href: "/themes" },
     { label: tr("nav.contact"), href: "/contact" },
   ];
 

@@ -25,6 +25,7 @@ const t: Translations = {
   "nav.graphicsDesign": { bn: "গ্রাফিক্স ডিজাইন", en: "Graphics Design" },
   "nav.about": { bn: "আমাদের সম্পর্কে", en: "About" },
   "nav.contact": { bn: "যোগাযোগ", en: "Contact" },
+  "nav.themes": { bn: "থিম স্টোর", en: "Theme Store" },
   "nav.login": { bn: "লগইন", en: "Login" },
   "nav.signup": { bn: "সাইন আপ", en: "Sign Up" },
   "nav.dashboard": { bn: "ড্যাশবোর্ড", en: "Dashboard" },
