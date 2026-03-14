@@ -150,6 +150,7 @@ const LiveChatWidget = () => {
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             onClick={() => setOpen(true)}
+            data-livechat-trigger
             className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:opacity-90 transition-opacity"
           >
             <MessageCircle className="w-6 h-6" />
