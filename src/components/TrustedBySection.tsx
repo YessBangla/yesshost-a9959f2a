@@ -1,6 +1,6 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import bkashLogo from "@/assets/partners/bkash.png";
-import nagadLogo from "@/assets/partners/nagad.png";
+import bkashLogo from "@/assets/partners/bkash.svg";
+import nagadLogo from "@/assets/partners/nagad.svg";
 import gpLogo from "@/assets/partners/grameenphone.png";
 import robiLogo from "@/assets/partners/robi.png";
 import banglalinkLogo from "@/assets/partners/banglalink.png";
@@ -16,7 +16,7 @@ const partners = [
   { name: "Banglalink", logo: banglalinkLogo },
   { name: "Pathao", logo: pathaoLogo },
   { name: "Daraz", logo: darazLogo },
-  { name: "SSL Wireless", logo: sslLogo },
+  { name: "SSLCommerz", logo: sslLogo },
 ];
 
 const TrustedBySection = () => {
@@ -39,7 +39,6 @@ const TrustedBySection = () => {
       </div>
 
       <div className="relative">
-        {/* Fade edges */}
         <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-muted/80 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-muted/80 to-transparent z-10 pointer-events-none" />
 
