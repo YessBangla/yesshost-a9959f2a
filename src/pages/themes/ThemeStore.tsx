@@ -4,8 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 import { Badge } from "@/components/ui/badge";
 
 const categoryLabels: Record<string, { bn: string; en: string }> = {
@@ -49,9 +48,8 @@ const ThemeStore = () => {
   }, [themes, activeCategory, search, bn]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
+    <PublicLayout>
+      <div className="pt-20 lg:pt-24 pb-16">
         {/* Hero */}
         <section className="container mx-auto px-4 text-center mb-12">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
@@ -219,8 +217,7 @@ const ThemeStore = () => {
           )}
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

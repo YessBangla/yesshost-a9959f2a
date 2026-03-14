@@ -3,8 +3,7 @@ import { Search, BookOpen, Server, Globe, Mail, Shield, HelpCircle } from "lucid
 import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 
 const iconMap: Record<string, any> = { Server, Globe, Mail, Shield, BookOpen };
 
@@ -68,9 +67,8 @@ const KnowledgeBase = () => {
   })).filter((cat: any) => cat.articles.length > 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
+    <PublicLayout>
+      <div className="pt-20 lg:pt-24 pb-16">
         <section className="container mx-auto px-4 text-center mb-12">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex justify-center mb-4"><BookOpen className="w-10 h-10 text-primary" /></div>
@@ -112,8 +110,7 @@ const KnowledgeBase = () => {
           </div>
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

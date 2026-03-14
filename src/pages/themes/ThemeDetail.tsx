@@ -7,8 +7,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -80,8 +79,7 @@ const ThemeDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <PublicLayout>
         <div className="pt-24 pb-16 container mx-auto px-4">
           <div className="animate-pulse space-y-6 max-w-4xl mx-auto">
             <div className="h-8 bg-secondary/50 rounded w-1/3" />
@@ -89,21 +87,20 @@ const ThemeDetail = () => {
             <div className="h-6 bg-secondary/50 rounded w-2/3" />
           </div>
         </div>
-      </div>
+      </PublicLayout>
     );
   }
 
   if (!theme) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <PublicLayout>
         <div className="pt-24 pb-16 container mx-auto px-4 text-center">
           <p className="text-muted-foreground text-lg">{bn ? "থিম পাওয়া যায়নি" : "Theme not found"}</p>
           <Link to="/themes" className="text-primary hover:underline mt-4 inline-block">
             {bn ? "সকল থিম দেখুন" : "View all themes"}
           </Link>
         </div>
-      </div>
+      </PublicLayout>
     );
   }
 
@@ -111,9 +108,8 @@ const ThemeDetail = () => {
   const bundleFeatures = Array.isArray(theme.hosting_bundle_features) ? theme.hosting_bundle_features : [];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
+    <PublicLayout>
+      <div className="pt-20 lg:pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Breadcrumb */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
@@ -268,8 +264,7 @@ const ThemeDetail = () => {
           </div>
         </div>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

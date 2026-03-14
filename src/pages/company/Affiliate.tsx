@@ -4,8 +4,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 
 const iconMap: Record<string, any> = { DollarSign, Users, Share2, Award };
 
@@ -50,9 +49,8 @@ const Affiliate = () => {
   }, [siteContent]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
+    <PublicLayout>
+      <div className="pt-20 lg:pt-24 pb-16">
         <section className="container mx-auto px-4 text-center mb-16">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
             <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
@@ -104,8 +102,7 @@ const Affiliate = () => {
           </Link>
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 

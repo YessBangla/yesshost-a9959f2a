@@ -1,8 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 import { motion } from "framer-motion";
 
 const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections }: {
@@ -30,9 +29,8 @@ const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections }: {
   }, [content]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
+    <PublicLayout>
+      <div className="pt-20 lg:pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="text-3xl md:text-4xl font-display font-extrabold tracking-tight mb-6 text-foreground">{title}</h1>
@@ -48,8 +46,7 @@ const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections }: {
           </motion.div>
         </div>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 
