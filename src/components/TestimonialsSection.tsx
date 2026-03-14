@@ -41,12 +41,12 @@ const TestimonialsSection = () => {
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
             Testimonials
           </span>
-          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
             {tr("testimonials.title")}
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {items.map((t, i) => (
             <motion.div
               key={t.name + i}

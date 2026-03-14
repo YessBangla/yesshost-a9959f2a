@@ -40,9 +40,9 @@ const FooterSection = () => {
   const payments = ["bKash", "Nagad", "Rocket", "Visa", "Mastercard"];
 
   return (
-    <footer className="border-t border-border py-16 bg-secondary/30">
+    <footer className="border-t border-border py-10 sm:py-16 bg-secondary/30">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 sm:gap-8 mb-10 sm:mb-12">
           <div className="col-span-2">
             <img src={logoWhite} alt="YessHost" className="h-10 mb-4" />
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">

@@ -33,7 +33,7 @@ const CTASection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="relative overflow-hidden rounded-3xl gradient-primary p-12 md:p-16 text-center"
+          className="relative overflow-hidden rounded-2xl sm:rounded-3xl gradient-primary p-6 sm:p-10 md:p-16 text-center"
         >
           <div className="absolute top-0 left-0 w-64 h-64 rounded-full bg-white/10 blur-3xl -translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-white/5 blur-3xl translate-x-1/3 translate-y-1/3" />
@@ -43,7 +43,7 @@ const CTASection = () => {
               <Zap className="w-4 h-4" />
               {text("cta_badge", "cta.needHelp")}
             </div>
-            <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-primary-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight text-primary-foreground mb-4">
               {text("cta_title", "cta.title")}
             </h2>
             <p className="text-base md:text-lg text-primary-foreground/80 max-w-xl mx-auto mb-8">
@@ -52,21 +52,21 @@ const CTASection = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
                 href={`tel:${contacts.phone || "+8809638205205"}`}
-                className="flex items-center gap-2 bg-white text-foreground px-8 py-4 rounded-xl font-bold text-base hover:bg-white/90 transition-all shadow-lg"
+                className="flex items-center gap-2 bg-white text-foreground px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-white/90 transition-all shadow-lg"
               >
                 <Phone className="w-5 h-5" />
                 {lang === "bn" ? (contacts.phone_label_bn || tr("cta.callUs")) : (contacts.phone_label_en || tr("cta.callUs"))}
               </a>
               <a
                 href="#"
-                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base hover:bg-white/10 transition-all"
               >
                 <MessageCircle className="w-5 h-5" />
                 {lang === "bn" ? (contacts.chat_label_bn || tr("cta.liveChat")) : (contacts.chat_label_en || tr("cta.liveChat"))}
               </a>
               <a
                 href={`mailto:${contacts.email || "support@yesshost.com"}`}
-                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base hover:bg-white/10 transition-all"
               >
                 <Mail className="w-5 h-5" />
                 {lang === "bn" ? (contacts.email_label_bn || tr("cta.email")) : (contacts.email_label_en || tr("cta.email"))}

@@ -89,7 +89,7 @@ const PricingSection = () => {
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
             Pricing
           </span>
-          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
             {tr("pricing.title")}
           </h2>
           <p className="text-muted-foreground text-base max-w-xl mx-auto mb-8">
@@ -113,7 +113,7 @@ const PricingSection = () => {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {currentPlans.map((plan, i) => (
             <motion.div
               key={`${activeTab}-${plan.name}`}
@@ -132,12 +132,12 @@ const PricingSection = () => {
                 </div>
               )}
 
-              <div className="p-8">
+              <div className="p-5 sm:p-8">
                 <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
                 {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
 
                 <div className="flex items-baseline gap-1 my-4">
-                  <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{plan.price}</span>
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{plan.price}</span>
                   <span className="text-sm text-muted-foreground">{tr("pricing.mo")}</span>
                 </div>
 

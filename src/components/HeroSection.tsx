@@ -63,7 +63,7 @@ const HeroSection = () => {
   }, [siteContent, lang]);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+    <section className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden pt-16">
       <div className="absolute inset-0 hero-gradient" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
@@ -83,7 +83,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: brandCurve, delay: 0.1 }}
-          className="text-4xl md:text-6xl lg:text-7xl font-display font-extrabold tracking-tight leading-[1.05] mb-6"
+          className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-extrabold tracking-tight leading-[1.1] mb-4 md:mb-6"
         >
           {getText("hero_title1", "hero.title1")}
           <br />
@@ -106,7 +106,7 @@ const HeroSection = () => {
           transition={{ duration: 0.7, ease: brandCurve, delay: 0.3 }}
           className="max-w-2xl mx-auto mb-8"
         >
-          <div className="flex items-center gap-2 p-2 rounded-2xl glass-card-elevated">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-2xl glass-card-elevated">
             <div className="flex items-center gap-3 flex-1 px-4">
               <Search className="w-5 h-5 text-muted-foreground shrink-0" />
               <input
@@ -114,10 +114,10 @@ const HeroSection = () => {
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
                 placeholder={getText("hero_placeholder", "hero.placeholder")}
-                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base py-3"
+                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm sm:text-base py-3"
               />
             </div>
-            <button className="shrink-0 flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+            <button className="shrink-0 flex items-center justify-center gap-2 gradient-primary text-primary-foreground px-5 sm:px-6 py-3 rounded-xl font-semibold text-sm sm:text-base hover:opacity-90 transition-all shadow-lg shadow-primary/20">
               {getText("hero_register", "hero.register")}
               <ArrowRight className="w-4 h-4" />
             </button>
