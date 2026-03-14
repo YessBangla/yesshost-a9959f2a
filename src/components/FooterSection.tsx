@@ -4,7 +4,7 @@ import { Mail, Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const FooterSection = () => {
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
 
   const footerLinks: Record<string, { label: string; href: string }[]> = {
     [tr("footer.hosting")]: [
@@ -25,6 +25,7 @@ const FooterSection = () => {
     [tr("footer.support")]: [
       { label: tr("footer.knowledgeBase"), href: "/knowledge-base" },
       { label: tr("footer.contactUs"), href: "/contact" },
+      { label: lang === "bn" ? "পেমেন্ট মেথড" : "Payment Methods", href: "/payment" },
       { label: tr("footer.supportTicket"), href: "/dashboard/support" },
       { label: tr("footer.liveChat"), href: "/contact" },
     ],

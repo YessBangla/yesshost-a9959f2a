@@ -44,6 +44,7 @@ import ThemeStore from "./pages/themes/ThemeStore";
 import ThemeDetail from "./pages/themes/ThemeDetail";
 import NotFound from "./pages/NotFound";
 import Checkout from "./pages/Checkout";
+import PaymentMethods from "./pages/PaymentMethods";
 import { PaymentSuccess, PaymentFail, PaymentCancel } from "./pages/PaymentResult";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/payment" element={<PaymentMethods />} />
             <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/payment/fail" element={<PaymentFail />} />
             <Route path="/payment/cancel" element={<PaymentCancel />} />
