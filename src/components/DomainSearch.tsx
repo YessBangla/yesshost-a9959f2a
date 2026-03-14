@@ -23,6 +23,7 @@ const domainPrices = [
 
 const DomainSearch = () => {
   const { lang } = useLanguage();
+  const { addItem, isInCart } = useCart();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<DomainResult[]>([]);
   const [loading, setLoading] = useState(false);
