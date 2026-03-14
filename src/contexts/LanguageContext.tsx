@@ -290,7 +290,7 @@ const t: Translations = {
   "admin.revenue": { bn: "আয়", en: "Revenue" },
   "admin.due": { bn: "বকেয়া", en: "Due" },
   "admin.newUsers": { bn: "নতুন ইউজার", en: "New Users" },
-  "admin.tickets": { bn: "টিকেট", en: "Tickets" },
+  "admin.ticketCount": { bn: "টিকেট", en: "Tickets" },
   "admin.userManagement": { bn: "ইউজার ম্যানেজমেন্ট", en: "User Management" },
   "admin.searchUsers": { bn: "নাম, ফোন বা আইডি দিয়ে সার্চ...", en: "Search by name, phone or ID..." },
   "admin.name": { bn: "নাম", en: "Name" },
