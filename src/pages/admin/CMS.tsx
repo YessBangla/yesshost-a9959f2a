@@ -24,6 +24,7 @@ const AdminCMS = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
+  const [domainPrices, setDomainPrices] = useState<any[]>([]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
