@@ -20,6 +20,7 @@ interface DomainResult {
   available: boolean;
   price_bdt: string;
   price_usd: string;
+  renewal_bdt?: string;
 }
 
 const staticDomainPrices = [
