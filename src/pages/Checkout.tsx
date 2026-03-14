@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Smartphone, Building2, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
+import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Building2, CheckCircle2, AlertCircle, Loader2, Server, Palette } from "lucide-react";
+import { useCart, CartItem } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -20,9 +20,26 @@ const paymentMethods = [
   { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, desc: "Manual Bank Transfer", ready: true },
 ];
 
+const itemIcon = (type: CartItem["type"]) => {
+  switch (type) {
+    case "hosting": return Server;
+    case "theme": return Palette;
+    default: return Globe;
+  }
+};
+
+const itemTypeLabel = (item: CartItem, bn: boolean) => {
+  switch (item.type) {
+    case "domain": return bn ? "ডোমেইন রেজিস্ট্রেশন • ১ বছর" : "Domain Registration • 1 Year";
+    case "hosting": return item.description || (bn ? "হোস্টিং প্ল্যান" : "Hosting Plan");
+    case "theme": return item.description || (bn ? "ওয়েবসাইট থিম" : "Website Theme");
+  }
+};
+
 const Checkout = () => {
   const { items, clearCart, removeItem } = useCart();
   const { lang } = useLanguage();
+  const bn = lang === "bn";
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -30,38 +47,29 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
 
-  const parseBdtPrice = (price: string): number => {
-    return parseInt(price.replace(/[^\d]/g, ""), 10) || 0;
-  };
-
+  const parseBdtPrice = (price: string): number => parseInt(price.replace(/[^\d]/g, ""), 10) || 0;
   const totalBdt = items.reduce((sum, item) => sum + parseBdtPrice(item.price_bdt), 0);
 
   const handlePlaceOrder = async () => {
     if (!user) {
-      toast({
-        title: lang === "bn" ? "লগইন প্রয়োজন" : "Login Required",
-        description: lang === "bn" ? "অর্ডার করতে লগইন করুন" : "Please login to place an order",
-        variant: "destructive",
-      });
+      toast({ title: bn ? "লগইন প্রয়োজন" : "Login Required", description: bn ? "অর্ডার করতে লগইন করুন" : "Please login to place an order", variant: "destructive" });
       navigate("/login");
       return;
     }
-
     if (!selectedPayment) {
-      toast({
-        title: lang === "bn" ? "পেমেন্ট মেথড নির্বাচন করুন" : "Select Payment Method",
-        description: lang === "bn" ? "একটি পেমেন্ট পদ্ধতি বেছে নিন" : "Please select a payment method",
-        variant: "destructive",
-      });
+      toast({ title: bn ? "পেমেন্ট মেথড নির্বাচন করুন" : "Select Payment Method", description: bn ? "একটি পেমেন্ট পদ্ধতি বেছে নিন" : "Please select a payment method", variant: "destructive" });
       return;
     }
 
     setLoading(true);
-
     try {
-      // Create services for each domain
-      for (const item of items) {
-        const { error: serviceError } = await supabase.from("services").insert({
+      const domainItems = items.filter(i => i.type === "domain");
+      const hostingItems = items.filter(i => i.type === "hosting");
+      const themeItems = items.filter(i => i.type === "theme");
+
+      // Create domain services
+      for (const item of domainItems) {
+        const { error } = await supabase.from("services").insert({
           user_id: user.id,
           name: `Domain: ${item.domain}`,
           service_type: "domain" as const,
@@ -70,8 +78,40 @@ const Checkout = () => {
           billing_cycle: "yearly",
           status: "pending" as const,
         });
-        if (serviceError) throw serviceError;
+        if (error) throw error;
       }
+
+      // Create hosting services
+      for (const item of hostingItems) {
+        const { error } = await supabase.from("services").insert({
+          user_id: user.id,
+          name: item.name,
+          service_type: item.category === "vps" ? "vps" : item.category === "reseller" ? "reseller" : "shared_hosting",
+          price_bdt: parseBdtPrice(item.price_bdt),
+          billing_cycle: item.billing_cycle || "monthly",
+          plan: item.plan_id,
+          status: "pending" as const,
+        });
+        if (error) throw error;
+      }
+
+      // Create theme orders
+      for (const item of themeItems) {
+        const { error } = await supabase.from("theme_orders").insert({
+          user_id: user.id,
+          theme_id: item.theme_id,
+          amount_bdt: parseBdtPrice(item.price_bdt),
+          include_hosting: item.include_hosting || false,
+          status: "pending",
+        });
+        if (error) throw error;
+      }
+
+      // Build description
+      const descParts: string[] = [];
+      if (domainItems.length) descParts.push(`Domain: ${domainItems.map(i => i.domain).join(", ")}`);
+      if (hostingItems.length) descParts.push(`Hosting: ${hostingItems.map(i => i.name).join(", ")}`);
+      if (themeItems.length) descParts.push(`Theme: ${themeItems.map(i => i.name).join(", ")}`);
 
       // Create invoice
       const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
@@ -79,17 +119,15 @@ const Checkout = () => {
         user_id: user.id,
         invoice_number: invoiceNumber,
         amount_bdt: totalBdt,
-        description: `Domain Registration: ${items.map((i) => i.domain).join(", ")}`,
+        description: descParts.join(" | "),
         status: "unpaid" as const,
         payment_method: selectedPayment,
         due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
       }).select("id").single();
 
       if (invoiceError) throw invoiceError;
-
       const invoiceId = invoiceData.id;
 
-      // Get user profile for payment
       const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
       // Route to payment gateway
@@ -101,23 +139,15 @@ const Checkout = () => {
             customer_name: profile?.full_name || "Customer",
             customer_email: user.email,
             customer_phone: profile?.phone || "01700000000",
-            description: `Domain: ${items.map((i) => i.domain).join(", ")}`,
+            description: descParts.join(" | "),
           },
         });
-
         if (error) throw error;
-
         if (data?.gateway_url) {
           clearCart();
           if (data.is_sandbox) {
-            toast({
-              title: "🧪 Sandbox Mode",
-              description: lang === "bn"
-                ? "এটি টেস্ট পেমেন্ট। লাইভ পেমেন্টের জন্য credentials যোগ করুন।"
-                : "This is a test payment. Add live credentials for real payments.",
-            });
+            toast({ title: "🧪 Sandbox Mode", description: bn ? "এটি টেস্ট পেমেন্ট।" : "This is a test payment." });
           }
-          // Redirect to SSLCommerz
           window.location.href = data.gateway_url;
           return;
         } else {
@@ -125,70 +155,41 @@ const Checkout = () => {
         }
       } else if (selectedPayment === "bkash") {
         const { data, error } = await supabase.functions.invoke("bkash-init", {
-          body: {
-            invoice_id: invoiceId,
-            amount: totalBdt,
-            payer_reference: user.email,
-          },
+          body: { invoice_id: invoiceId, amount: totalBdt, payer_reference: user.email },
         });
-
         if (error || data?.error) {
           if (data?.is_sandbox) {
-            toast({
-              title: "⚠️ bKash Not Configured",
-              description: data?.message || "bKash credentials not yet configured",
-              variant: "destructive",
-            });
+            toast({ title: "⚠️ bKash Not Configured", description: data?.message || "bKash credentials not yet configured", variant: "destructive" });
             setLoading(false);
             return;
           }
           throw new Error(data?.error || error?.message);
         }
-
-        if (data?.bkash_url) {
-          clearCart();
-          window.location.href = data.bkash_url;
-          return;
-        }
+        if (data?.bkash_url) { clearCart(); window.location.href = data.bkash_url; return; }
       } else if (selectedPayment === "nagad") {
         const { data, error } = await supabase.functions.invoke("nagad-init", {
-          body: {
-            invoice_id: invoiceId,
-            amount: totalBdt,
-          },
+          body: { invoice_id: invoiceId, amount: totalBdt },
         });
-
         if (error || data?.error) {
           if (data?.is_sandbox) {
-            toast({
-              title: "⚠️ Nagad Not Configured",
-              description: data?.message || "Nagad credentials not yet configured",
-              variant: "destructive",
-            });
+            toast({ title: "⚠️ Nagad Not Configured", description: data?.message || "Nagad credentials not yet configured", variant: "destructive" });
             setLoading(false);
             return;
           }
           throw new Error(data?.error || error?.message);
         }
       } else if (selectedPayment === "bank") {
-        // Manual bank transfer - just mark as pending
         setOrderPlaced(true);
         clearCart();
         toast({
-          title: lang === "bn" ? "অর্ডার সফল!" : "Order Placed!",
-          description: lang === "bn"
-            ? `ইনভয়েস: ${invoiceNumber}। ব্যাংক ট্রান্সফারের পর আমাদের জানান।`
-            : `Invoice: ${invoiceNumber}. Notify us after bank transfer.`,
+          title: bn ? "অর্ডার সফল!" : "Order Placed!",
+          description: bn ? `ইনভয়েস: ${invoiceNumber}। ব্যাংক ট্রান্সফারের পর আমাদের জানান।` : `Invoice: ${invoiceNumber}. Notify us after bank transfer.`,
         });
         return;
       }
     } catch (err: any) {
       console.error("Order error:", err);
-      toast({
-        title: lang === "bn" ? "ত্রুটি!" : "Error!",
-        description: err.message || "Something went wrong",
-        variant: "destructive",
-      });
+      toast({ title: bn ? "ত্রুটি!" : "Error!", description: err.message || "Something went wrong", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -198,32 +199,19 @@ const Checkout = () => {
     return (
       <PublicLayout>
         <div className="min-h-[60vh] flex items-center justify-center px-4 pt-20">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center max-w-md"
-          >
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-md">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="w-10 h-10 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">
-              {lang === "bn" ? "অর্ডার সফল হয়েছে!" : "Order Placed Successfully!"}
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">{bn ? "অর্ডার সফল হয়েছে!" : "Order Placed Successfully!"}</h1>
             <p className="text-sm text-muted-foreground mb-6">
               {selectedPayment === "bank"
-                ? lang === "bn"
-                  ? "অনুগ্রহ করে নিচের ব্যাংক অ্যাকাউন্টে টাকা পাঠান এবং আমাদের জানান।"
-                  : "Please transfer the amount to our bank account and notify us."
-                : lang === "bn"
-                  ? "আপনার অর্ডার প্রসেস করা হচ্ছে।"
-                  : "Your order is being processed."}
+                ? (bn ? "অনুগ্রহ করে নিচের ব্যাংক অ্যাকাউন্টে টাকা পাঠান এবং আমাদের জানান।" : "Please transfer the amount to our bank account and notify us.")
+                : (bn ? "আপনার অর্ডার প্রসেস করা হচ্ছে।" : "Your order is being processed.")}
             </p>
-
             {selectedPayment === "bank" && (
               <div className="glass-card p-4 mb-6 text-left text-sm space-y-2">
-                <p className="font-semibold text-foreground">
-                  {lang === "bn" ? "ব্যাংক তথ্য:" : "Bank Details:"}
-                </p>
+                <p className="font-semibold text-foreground">{bn ? "ব্যাংক তথ্য:" : "Bank Details:"}</p>
                 <div className="text-muted-foreground space-y-1 text-xs">
                   <p>Bank: Dutch Bangla Bank Ltd</p>
                   <p>Account: YessHost Technologies</p>
@@ -232,19 +220,12 @@ const Checkout = () => {
                 </div>
               </div>
             )}
-
             <div className="flex gap-3 justify-center">
-              <Link
-                to="/dashboard/billing"
-                className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20"
-              >
-                {lang === "bn" ? "বিলিং দেখুন" : "View Billing"}
+              <Link to="/dashboard/billing" className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                {bn ? "বিলিং দেখুন" : "View Billing"}
               </Link>
-              <Link
-                to="/"
-                className="px-6 py-3 rounded-xl font-semibold text-sm border border-border hover:bg-secondary/60 text-foreground transition-all"
-              >
-                {lang === "bn" ? "হোমে যান" : "Go Home"}
+              <Link to="/" className="px-6 py-3 rounded-xl font-semibold text-sm border border-border hover:bg-secondary/60 text-foreground transition-all">
+                {bn ? "হোমে যান" : "Go Home"}
               </Link>
             </div>
           </motion.div>
@@ -259,17 +240,10 @@ const Checkout = () => {
         <div className="min-h-[60vh] flex items-center justify-center px-4 pt-20">
           <div className="text-center">
             <ShoppingCart className="w-16 h-16 text-muted-foreground/20 mx-auto mb-4" />
-            <h1 className="text-xl font-bold text-foreground mb-2">
-              {lang === "bn" ? "কার্ট খালি" : "Cart is Empty"}
-            </h1>
-            <p className="text-sm text-muted-foreground mb-6">
-              {lang === "bn" ? "ডোমেইন সার্চ করে কার্টে যোগ করুন" : "Search for domains to add to cart"}
-            </p>
-            <Link
-              to="/"
-              className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20"
-            >
-              {lang === "bn" ? "ডোমেইন খুঁজুন" : "Search Domains"}
+            <h1 className="text-xl font-bold text-foreground mb-2">{bn ? "কার্ট খালি" : "Cart is Empty"}</h1>
+            <p className="text-sm text-muted-foreground mb-6">{bn ? "ডোমেইন, হোস্টিং বা থিম যোগ করুন" : "Add domains, hosting or themes to cart"}</p>
+            <Link to="/" className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+              {bn ? "সার্ভিস দেখুন" : "Browse Services"}
             </Link>
           </div>
         </div>
@@ -280,41 +254,38 @@ const Checkout = () => {
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 pt-24 pb-12">
-        <h1 className="text-2xl font-bold text-foreground mb-8">
-          {lang === "bn" ? "চেকআউট" : "Checkout"}
-        </h1>
-
+        <h1 className="text-2xl font-bold text-foreground mb-8">{bn ? "চেকআউট" : "Checkout"}</h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Items */}
           <div className="lg:col-span-2 space-y-4">
             <div className="glass-card-elevated rounded-xl p-5">
               <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Globe className="w-4 h-4 text-primary" />
-                {lang === "bn" ? "আপনার ডোমেইনসমূহ" : "Your Domains"}
+                <ShoppingCart className="w-4 h-4 text-primary" />
+                {bn ? "আপনার আইটেমসমূহ" : "Your Items"}
               </h2>
               <div className="space-y-3">
-                {items.map((item) => (
-                  <div
-                    key={item.domain}
-                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-secondary/30 border border-border"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{item.domain}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {lang === "bn" ? "রেজিস্ট্রেশন • ১ বছর" : "Registration • 1 Year"}
-                      </p>
+                {items.map((item) => {
+                  const Icon = itemIcon(item.type);
+                  return (
+                    <div key={item.id} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-secondary/30 border border-border">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Icon className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
+                          <p className="text-[11px] text-muted-foreground">{itemTypeLabel(item, bn)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-bold text-foreground">৳{item.price_bdt}</span>
+                        <button onClick={() => removeItem(item.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-sm font-bold text-foreground">৳{item.price_bdt}</span>
-                      <button
-                        onClick={() => removeItem(item.domain)}
-                        className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -322,7 +293,7 @@ const Checkout = () => {
             <div className="glass-card-elevated rounded-xl p-5">
               <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-primary" />
-                {lang === "bn" ? "পেমেন্ট পদ্ধতি নির্বাচন করুন" : "Select Payment Method"}
+                {bn ? "পেমেন্ট পদ্ধতি নির্বাচন করুন" : "Select Payment Method"}
               </h2>
               <div className="space-y-3">
                 {paymentMethods.map((method) => (
@@ -330,9 +301,7 @@ const Checkout = () => {
                     key={method.id}
                     onClick={() => setSelectedPayment(method.id)}
                     className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
-                      selectedPayment === method.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/30 hover:bg-secondary/30"
+                      selectedPayment === method.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/30 hover:bg-secondary/30"
                     }`}
                   >
                     {method.logo ? (
@@ -344,42 +313,26 @@ const Checkout = () => {
                     ) : null}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground">
-                          {lang === "bn" ? method.labelBn : method.label}
-                        </span>
+                        <span className="text-sm font-semibold text-foreground">{bn ? method.labelBn : method.label}</span>
                         {!method.ready && (
-                          <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
-                            {lang === "bn" ? "শীঘ্রই আসছে" : "Coming Soon"}
-                          </span>
+                          <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded">{bn ? "শীঘ্রই আসছে" : "Coming Soon"}</span>
                         )}
                         {method.id === "sslcommerz" && (
-                          <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded">
-                            🧪 Sandbox
-                          </span>
+                          <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded">🧪 Sandbox</span>
                         )}
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{method.desc}</p>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                      selectedPayment === method.id
-                        ? "border-primary bg-primary"
-                        : "border-border"
-                    }`}>
-                      {selectedPayment === method.id && (
-                        <div className="w-2 h-2 rounded-full bg-primary-foreground" />
-                      )}
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedPayment === method.id ? "border-primary bg-primary" : "border-border"}`}>
+                      {selectedPayment === method.id && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
                     </div>
                   </button>
                 ))}
               </div>
-
-              {/* Sandbox notice */}
               <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                 <p className="text-[11px] text-muted-foreground">
-                  {lang === "bn"
-                    ? "বর্তমানে SSLCommerz Sandbox (টেস্ট) মোডে চলছে। লাইভ পেমেন্টের জন্য মার্চেন্ট credentials প্রয়োজন।"
-                    : "SSLCommerz is currently in Sandbox (test) mode. Merchant credentials needed for live payments."}
+                  {bn ? "বর্তমানে SSLCommerz Sandbox (টেস্ট) মোডে চলছে। লাইভ পেমেন্টের জন্য মার্চেন্ট credentials প্রয়োজন।" : "SSLCommerz is currently in Sandbox (test) mode. Merchant credentials needed for live payments."}
                 </p>
               </div>
             </div>
@@ -388,38 +341,26 @@ const Checkout = () => {
           {/* Order summary */}
           <div>
             <div className="glass-card-elevated rounded-xl p-5 sticky top-24">
-              <h2 className="text-sm font-semibold text-foreground mb-4">
-                {lang === "bn" ? "অর্ডার সামারি" : "Order Summary"}
-              </h2>
+              <h2 className="text-sm font-semibold text-foreground mb-4">{bn ? "অর্ডার সামারি" : "Order Summary"}</h2>
               <div className="space-y-2 mb-4">
                 {items.map((item) => (
-                  <div key={item.domain} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground truncate mr-2">{item.domain}</span>
+                  <div key={item.id} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground truncate mr-2">{item.name}</span>
                     <span className="text-foreground font-medium shrink-0">৳{item.price_bdt}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-border pt-3 mb-4">
                 <div className="flex justify-between">
-                  <span className="text-sm font-semibold text-foreground">
-                    {lang === "bn" ? "সর্বমোট" : "Total"}
-                  </span>
-                  <span className="text-xl font-bold text-foreground">
-                    ৳{totalBdt.toLocaleString("bn-BD")}
-                  </span>
+                  <span className="text-sm font-semibold text-foreground">{bn ? "সর্বমোট" : "Total"}</span>
+                  <span className="text-xl font-bold text-foreground">৳{totalBdt.toLocaleString("bn-BD")}</span>
                 </div>
               </div>
 
               {!user && (
                 <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
-                  <p className="text-xs text-muted-foreground">
-                    {lang === "bn"
-                      ? "অর্ডার করতে আপনাকে লগইন করতে হবে।"
-                      : "You need to login to place an order."}
-                  </p>
-                  <Link to="/login" className="text-xs text-primary font-semibold hover:underline">
-                    {lang === "bn" ? "লগইন করুন" : "Login now"}
-                  </Link>
+                  <p className="text-xs text-muted-foreground">{bn ? "অর্ডার করতে আপনাকে লগইন করতে হবে।" : "You need to login to place an order."}</p>
+                  <Link to="/login" className="text-xs text-primary font-semibold hover:underline">{bn ? "লগইন করুন" : "Login now"}</Link>
                 </div>
               )}
 
@@ -428,15 +369,9 @@ const Checkout = () => {
                 disabled={loading || !selectedPayment}
                 className="w-full flex items-center justify-center gap-2 gradient-primary text-primary-foreground py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
               >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                   <>
-                    {selectedPayment === "sslcommerz"
-                      ? lang === "bn" ? "পেমেন্ট করুন" : "Pay Now"
-                      : selectedPayment === "bank"
-                        ? lang === "bn" ? "অর্ডার দিন" : "Place Order"
-                        : lang === "bn" ? "পেমেন্ট করুন" : "Pay Now"}
+                    {selectedPayment === "bank" ? (bn ? "অর্ডার দিন" : "Place Order") : (bn ? "পেমেন্ট করুন" : "Pay Now")}
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

@@ -1,19 +1,20 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Check, ArrowRight, ArrowLeft, Star, Server, Globe, Shield, Zap, Clock, Headphones } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft, Star, Server, Globe, Shield, Zap, Clock, Headphones, ShoppingCart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
-
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
 
 const ServiceDetail = () => {
   const { slug } = useParams();
   const { lang, tr } = useLanguage();
   const isBn = lang === "bn";
+  const { addItem, isInCart } = useCart();
 
   const [plans, setPlans] = useState<any[]>([]);
   const [serviceInfo, setServiceInfo] = useState<any>(null);
@@ -44,6 +45,20 @@ const ServiceDetail = () => {
     }));
   }, [serviceInfo, isBn]);
 
+  const addPlanToCart = (plan: any) => {
+    const cartId = `hosting-${plan.id}`;
+    addItem({
+      id: cartId,
+      type: "hosting",
+      name: plan.name,
+      description: `${title} • ${plan.subtitle || (isBn ? "মাসিক" : "Monthly")}`,
+      price_bdt: plan.price_bdt,
+      plan_id: plan.id,
+      billing_cycle: "monthly",
+      category: slug || "",
+    });
+  };
+
   if (loading) {
     return (
       <PublicLayout>
@@ -70,12 +85,7 @@ const ServiceDetail = () => {
       <div className="pt-20 lg:pt-24 pb-16">
         {/* Hero */}
         <section className="container mx-auto px-4 mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: brandCurve }}
-            className="text-center max-w-3xl mx-auto"
-          >
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: brandCurve }} className="text-center max-w-3xl mx-auto">
             <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
               <ArrowLeft className="w-4 h-4" /> {isBn ? "হোমপেইজ" : "Home"}
             </Link>
@@ -84,22 +94,12 @@ const ServiceDetail = () => {
                 <ServiceIcon className="w-10 h-10 text-primary" />
               </div>
             </div>
-            <h1 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4 text-foreground">
-              {title}
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              {description}
-            </p>
+            <h1 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4 text-foreground">{title}</h1>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto">{description}</p>
           </motion.div>
 
-          {/* Highlights */}
           {highlights.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-wrap justify-center gap-4 mt-10"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="flex flex-wrap justify-center gap-4 mt-10">
               {highlights.map((h: any, i: number) => (
                 <div key={i} className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-card text-sm">
                   <h.icon className="w-4 h-4 text-primary" />
@@ -115,6 +115,8 @@ const ServiceDetail = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {plans.map((plan, i) => {
               const features = Array.isArray(plan.features) ? plan.features : [];
+              const cartId = `hosting-${plan.id}`;
+              const inCart = isInCart(cartId);
               return (
                 <motion.div
                   key={plan.id}
@@ -150,17 +152,24 @@ const ServiceDetail = () => {
                         </li>
                       ))}
                     </ul>
-                    <Link
-                      to="/signup"
-                      className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                        plan.is_highlighted
-                          ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
-                          : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
-                      }`}
-                    >
-                      {tr("pricing.orderNow")}
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
+                    {inCart ? (
+                      <div className="w-full py-3.5 font-semibold rounded-xl flex items-center justify-center gap-2 bg-secondary text-foreground border border-border">
+                        <Check className="w-4 h-4 text-primary" />
+                        {isBn ? "কার্টে যোগ হয়েছে" : "Added to Cart"}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => addPlanToCart(plan)}
+                        className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                          plan.is_highlighted
+                            ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
+                            : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
+                        }`}
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        {isBn ? "কার্টে যোগ করুন" : "Add to Cart"}
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               );
