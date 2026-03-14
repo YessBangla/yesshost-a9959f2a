@@ -79,8 +79,7 @@ const ThemeDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <PublicLayout>
         <div className="pt-24 pb-16 container mx-auto px-4">
           <div className="animate-pulse space-y-6 max-w-4xl mx-auto">
             <div className="h-8 bg-secondary/50 rounded w-1/3" />
@@ -88,7 +87,7 @@ const ThemeDetail = () => {
             <div className="h-6 bg-secondary/50 rounded w-2/3" />
           </div>
         </div>
-      </div>
+      </PublicLayout>
     );
   }
 
