@@ -1,13 +1,28 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const TestimonialsSection = () => {
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const [testimonials, setTestimonials] = useState<any[]>([]);
 
-  const testimonials = [
+  useEffect(() => {
+    supabase.from("testimonials").select("*").eq("is_active", true).order("sort_order")
+      .then(({ data }) => setTestimonials(data || []));
+  }, []);
+
+  // Fallback to hardcoded if no DB data
+  const items = testimonials.length > 0 ? testimonials.map(t => ({
+    name: t.name,
+    company: t.company || "",
+    text: lang === "bn" ? t.content_bn : t.content_en,
+    rating: t.rating || 5,
+    avatar: t.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase(),
+  })) : [
     { name: "Rahim Ahmed", company: "TechBD Solutions", text: tr("testimonials.t1"), rating: 5, avatar: "RA" },
     { name: "Fatima Khan", company: "ShopNow BD", text: tr("testimonials.t2"), rating: 5, avatar: "FK" },
     { name: "Kamal Hossain", company: "DevStudio BD", text: tr("testimonials.t3"), rating: 5, avatar: "KH" },
@@ -32,9 +47,9 @@ const TestimonialsSection = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {testimonials.map((t, i) => (
+          {items.map((t, i) => (
             <motion.div
-              key={t.name}
+              key={t.name + i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

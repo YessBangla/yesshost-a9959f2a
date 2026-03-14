@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      faqs: {
+        Row: {
+          answer_bn: string
+          answer_en: string
+          category: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          question_bn: string
+          question_en: string
+          sort_order: number | null
+        }
+        Insert: {
+          answer_bn: string
+          answer_en: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          question_bn: string
+          question_en: string
+          sort_order?: number | null
+        }
+        Update: {
+          answer_bn?: string
+          answer_en?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          question_bn?: string
+          question_en?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount_bdt: number
@@ -66,6 +102,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pricing_plans: {
+        Row: {
+          annual_price_bdt: string | null
+          category: string
+          created_at: string
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          is_highlighted: boolean | null
+          name: string
+          price_bdt: string
+          slug: string
+          sort_order: number | null
+          subtitle: string | null
+          updated_at: string
+        }
+        Insert: {
+          annual_price_bdt?: string | null
+          category: string
+          created_at?: string
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_highlighted?: boolean | null
+          name: string
+          price_bdt: string
+          slug: string
+          sort_order?: number | null
+          subtitle?: string | null
+          updated_at?: string
+        }
+        Update: {
+          annual_price_bdt?: string | null
+          category?: string
+          created_at?: string
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_highlighted?: boolean | null
+          name?: string
+          price_bdt?: string
+          slug?: string
+          sort_order?: number | null
+          subtitle?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -169,6 +253,51 @@ export type Database = {
         }
         Relationships: []
       }
+      site_content: {
+        Row: {
+          content_bn: string | null
+          content_en: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          page: string
+          section_key: string
+          sort_order: number | null
+          title_bn: string | null
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_bn?: string | null
+          content_en?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          page: string
+          section_key: string
+          sort_order?: number | null
+          title_bn?: string | null
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_bn?: string | null
+          content_en?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          page?: string
+          section_key?: string
+          sort_order?: number | null
+          title_bn?: string | null
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           created_at: string
@@ -215,6 +344,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          company: string | null
+          content_bn: string
+          content_en: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          rating: number | null
+          sort_order: number | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          company?: string | null
+          content_bn: string
+          content_en: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          rating?: number | null
+          sort_order?: number | null
+        }
+        Update: {
+          avatar_url?: string | null
+          company?: string | null
+          content_bn?: string
+          content_en?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          rating?: number | null
+          sort_order?: number | null
+        }
+        Relationships: []
       }
       ticket_replies: {
         Row: {

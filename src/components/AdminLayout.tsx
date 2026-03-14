@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
-  LogOut, ChevronLeft, Menu, Globe, Shield
+  LogOut, ChevronLeft, Menu, Globe, Shield, Layers
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +22,7 @@ const AdminLayout = () => {
     { title: tr("admin.services"), url: "/admin/services", icon: Server },
     { title: tr("admin.billing"), url: "/admin/billing", icon: FileText },
     { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
+    { title: "CMS", url: "/admin/cms", icon: Layers },
   ];
 
   const handleSignOut = async () => {

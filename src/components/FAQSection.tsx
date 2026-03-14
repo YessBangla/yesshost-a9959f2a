@@ -1,15 +1,25 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const [dbFaqs, setDbFaqs] = useState<any[]>([]);
 
-  const faqs = [
+  useEffect(() => {
+    supabase.from("faqs").select("*").eq("is_active", true).order("sort_order")
+      .then(({ data }) => setDbFaqs(data || []));
+  }, []);
+
+  const faqs = dbFaqs.length > 0 ? dbFaqs.map(f => ({
+    q: lang === "bn" ? f.question_bn : f.question_en,
+    a: lang === "bn" ? f.answer_bn : f.answer_en,
+  })) : [
     { q: tr("faq.q1"), a: tr("faq.a1") },
     { q: tr("faq.q2"), a: tr("faq.a2") },
     { q: tr("faq.q3"), a: tr("faq.a3") },
