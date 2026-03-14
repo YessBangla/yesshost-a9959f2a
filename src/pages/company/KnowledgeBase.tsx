@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 
 const iconMap: Record<string, any> = { Server, Globe, Mail, Shield, BookOpen };
 

@@ -6,6 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
 
 const categoryLabels: Record<string, { bn: string; en: string }> = {

@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 
 const iconMap: Record<string, typeof Shield> = { Shield, Users, Globe, Server, Award, Clock };
 
