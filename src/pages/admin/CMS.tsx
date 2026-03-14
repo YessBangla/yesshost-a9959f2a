@@ -324,6 +324,65 @@ const AdminCMS = () => {
     );
   };
 
+  const renderDomains = () => {
+    const filtered = domainPrices.filter(d =>
+      !search || d.ext.toLowerCase().includes(search.toLowerCase())
+    );
+    return (
+      <div className="space-y-2">
+        {filtered.map((dp: any, index: number) => (
+          <motion.div key={dp.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.02 }}
+            className="glass-card rounded-xl border border-border/30 overflow-hidden">
+            {editingId === dp.id ? (
+              <div className="p-4 space-y-3 bg-secondary/10">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <InputField label="Extension" value={editForm.ext} onChange={v => setEditForm({ ...editForm, ext: v })} />
+                  <InputField label={isBn ? "রেজিস্ট্রেশন (BDT)" : "Registration (BDT)"} value={editForm.registration_bdt} onChange={v => setEditForm({ ...editForm, registration_bdt: v })} />
+                  <InputField label={isBn ? "রিনিউয়াল (BDT)" : "Renewal (BDT)"} value={editForm.renewal_bdt} onChange={v => setEditForm({ ...editForm, renewal_bdt: v })} />
+                  <InputField label={isBn ? "ট্রান্সফার (BDT)" : "Transfer (BDT)"} value={editForm.transfer_bdt} onChange={v => setEditForm({ ...editForm, transfer_bdt: v })} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label="Sort Order" value={String(editForm.sort_order || 0)} onChange={v => setEditForm({ ...editForm, sort_order: parseInt(v) || 0 })} />
+                  <div className="flex items-end gap-4 pb-1">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={editForm.is_popular || false} onChange={e => setEditForm({ ...editForm, is_popular: e.target.checked })} className="rounded" />
+                      {isBn ? "জনপ্রিয়" : "Popular"}
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={editForm.is_active !== false} onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })} className="rounded" />
+                      {isBn ? "সক্রিয়" : "Active"}
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit("domain_pricing")} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold"><Save className="w-3.5 h-3.5" /> {isBn ? "সেভ" : "Save"}</button>
+                  <button onClick={cancelEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-semibold"><X className="w-3.5 h-3.5" /> {isBn ? "বাতিল" : "Cancel"}</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 hover:bg-secondary/10 transition-colors">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <span className="text-sm font-bold text-foreground w-12">{dp.ext}</span>
+                  {dp.is_popular && <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">{isBn ? "জনপ্রিয়" : "Popular"}</Badge>}
+                  <div className="flex gap-4 text-xs text-muted-foreground">
+                    <span>৳{dp.registration_bdt}</span>
+                    <span>৳{dp.renewal_bdt}</span>
+                    <span>৳{dp.transfer_bdt}</span>
+                  </div>
+                  {!dp.is_active && <Badge variant="outline" className="text-[10px] text-destructive">{isBn ? "নিষ্ক্রিয়" : "Inactive"}</Badge>}
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <button onClick={() => startEdit(dp)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteItem("domain_pricing", dp.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
