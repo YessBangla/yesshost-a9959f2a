@@ -69,10 +69,10 @@ const LiveChatWidget = () => {
   }, [messages]);
 
   const startChat = async () => {
-    if (!name.trim()) return;
+    if (!name.trim() || !email.trim() || !phone.trim()) return;
     const { data, error } = await supabase
       .from("live_chats")
-      .insert({ visitor_name: name.trim(), visitor_email: email.trim() || null })
+      .insert({ visitor_name: name.trim(), visitor_email: email.trim(), visitor_phone: phone.trim() })
       .select("id")
       .single();
     if (error || !data) return;
