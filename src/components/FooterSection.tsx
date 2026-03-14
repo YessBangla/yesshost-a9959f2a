@@ -4,7 +4,7 @@ import { Mail, Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const FooterSection = () => {
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
 
   const footerLinks: Record<string, { label: string; href: string }[]> = {
     [tr("footer.hosting")]: [
