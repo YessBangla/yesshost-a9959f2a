@@ -1,27 +1,29 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
   UserCircle, LogOut, ChevronLeft, Menu
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
 import logoWhite from "@/assets/logo-white.png";
-
-const sidebarItems = [
-  { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Services", url: "/dashboard/services", icon: Server },
-  { title: "Billing", url: "/dashboard/billing", icon: FileText },
-  { title: "Support", url: "/dashboard/support", icon: HeadphonesIcon },
-  { title: "Domains", url: "/dashboard/domains", icon: Globe },
-  { title: "Profile", url: "/dashboard/profile", icon: UserCircle },
-];
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
+  const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
+
+  const sidebarItems = [
+    { title: tr("dash.overview"), url: "/dashboard", icon: LayoutDashboard },
+    { title: tr("dash.services"), url: "/dashboard/services", icon: Server },
+    { title: tr("dash.billing"), url: "/dashboard/billing", icon: FileText },
+    { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
+    { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
+    { title: tr("dash.profile"), url: "/dashboard/profile", icon: UserCircle },
+  ];
 
   const handleSignOut = async () => {
     await signOut();
@@ -31,7 +33,7 @@ const DashboardLayout = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border flex items-center justify-between">
-        {!collapsed && <img src={logoWhite} alt="YessHost" className="h-8" />}
+        {!collapsed && <img src={logoWhite} alt="PutulHost" className="h-8" />}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground"
@@ -58,17 +60,26 @@ const DashboardLayout = () => {
 
       <div className="p-3 border-t border-border">
         {!collapsed && (
-          <div className="px-3 py-2 mb-2">
-            <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || "User"}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-          </div>
+          <>
+            <div className="px-3 py-2 mb-2">
+              <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || "User"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+            <button
+              onClick={() => setLang(lang === "bn" ? "en" : "bn")}
+              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/60 w-full transition-all mb-1"
+            >
+              <Globe className="w-5 h-5 shrink-0" />
+              {lang === "bn" ? "English" : "বাংলা"}
+            </button>
+          </>
         )}
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 w-full transition-all"
         >
           <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Sign Out</span>}
+          {!collapsed && <span>{tr("dash.signOut")}</span>}
         </button>
       </div>
     </div>
@@ -76,16 +87,10 @@ const DashboardLayout = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Desktop Sidebar */}
-      <aside
-        className={`hidden lg:flex flex-col glass border-r border-border transition-all duration-300 ${
-          collapsed ? "w-16" : "w-64"
-        }`}
-      >
+      <aside className={`hidden lg:flex flex-col glass border-r border-border transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
         <SidebarContent />
       </aside>
 
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
@@ -95,27 +100,18 @@ const DashboardLayout = () => {
         </div>
       )}
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 flex items-center gap-3 px-4 border-b border-border glass">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"
-          >
+          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground">
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex-1" />
-          <span className="text-sm text-muted-foreground hidden sm:block">
-            {profile?.full_name || user?.email}
-          </span>
+          <span className="text-sm text-muted-foreground hidden sm:block">{profile?.full_name || user?.email}</span>
           <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
             {(profile?.full_name || "U").charAt(0).toUpperCase()}
           </div>
         </header>
-
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
-          <Outlet />
-        </main>
+        <main className="flex-1 p-4 md:p-6 overflow-auto"><Outlet /></main>
       </div>
     </div>
   );
