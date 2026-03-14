@@ -46,6 +46,8 @@ const AdminLiveChat = () => {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [visitorTyping, setVisitorTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Request notification permission
@@ -98,7 +100,7 @@ const AdminLiveChat = () => {
 
   // Load messages when chat selected
   useEffect(() => {
-    if (!selected) { setMessages([]); return; }
+    if (!selected) { setMessages([]); setVisitorTyping(false); return; }
     supabase
       .from("live_chat_messages")
       .select("*")
@@ -118,9 +120,35 @@ const AdminLiveChat = () => {
           if (prev.some(m => m.id === (payload.new as Message).id)) return prev;
           return [...prev, payload.new as Message];
         });
+        if ((payload.new as Message).sender_type === "visitor") setVisitorTyping(false);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    // Typing indicator channel (broadcast)
+    const typingChannel = supabase
+      .channel(`live-chat-${selected.id}`)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender === "visitor") {
+          setVisitorTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setVisitorTyping(false), 3000);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+      supabase.removeChannel(typingChannel);
+    };
+  }, [selected?.id]);
+
+  const broadcastAdminTyping = useCallback(() => {
+    if (!selected) return;
+    supabase.channel(`live-chat-${selected.id}`).send({
+      type: "broadcast",
+      event: "typing",
+      payload: { sender: "admin" },
+    });
   }, [selected?.id]);
 
   useEffect(() => {
@@ -258,6 +286,16 @@ const AdminLiveChat = () => {
                     </div>
                   </div>
                 ))}
+                {visitorTyping && (
+                  <div className="flex justify-start px-4 pb-2">
+                    <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2 flex items-center gap-1.5">
+                      <span className="text-[10px] text-muted-foreground mr-1">টাইপ করছে</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Reply input */}
@@ -267,7 +305,7 @@ const AdminLiveChat = () => {
                     <input
                       type="text"
                       value={input}
-                      onChange={(e) => setInput(e.target.value)}
+                      onChange={(e) => { setInput(e.target.value); broadcastAdminTyping(); }}
                       onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendReply()}
                       placeholder="উত্তর লিখুন..."
                       maxLength={1000}

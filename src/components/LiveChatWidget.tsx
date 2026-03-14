@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +23,8 @@ const LiveChatWidget = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [started, setStarted] = useState(false);
+  const [adminTyping, setAdminTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { lang } = useLanguage();
   const bn = lang === "bn";
@@ -43,7 +45,7 @@ const LiveChatWidget = () => {
     }
   }, []);
 
-  // Realtime subscription
+  // Realtime subscription + typing indicator
   useEffect(() => {
     if (!chatId) return;
     const channel = supabase
@@ -58,9 +60,26 @@ const LiveChatWidget = () => {
           if (prev.some(m => m.id === (payload.new as Message).id)) return prev;
           return [...prev, payload.new as Message];
         });
+        if ((payload.new as Message).sender_type === "admin") setAdminTyping(false);
+      })
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender === "admin") {
+          setAdminTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setAdminTyping(false), 3000);
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+  }, [chatId]);
+
+  const broadcastTyping = useCallback(() => {
+    if (!chatId) return;
+    supabase.channel(`live-chat-${chatId}`).send({
+      type: "broadcast",
+      event: "typing",
+      payload: { sender: "visitor" },
+    });
   }, [chatId]);
 
   // Auto-scroll
@@ -227,6 +246,15 @@ const LiveChatWidget = () => {
                       </div>
                     </div>
                   ))}
+                  {adminTyping && (
+                    <div className="flex justify-start px-1 pb-1">
+                      <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Input */}
@@ -235,7 +263,7 @@ const LiveChatWidget = () => {
                     <input
                       type="text"
                       value={input}
-                      onChange={(e) => setInput(e.target.value)}
+                      onChange={(e) => { setInput(e.target.value); broadcastTyping(); }}
                       onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                       placeholder={bn ? "মেসেজ লিখুন..." : "Type a message..."}
                       maxLength={1000}
