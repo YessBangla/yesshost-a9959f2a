@@ -170,13 +170,14 @@ serve(async (req) => {
       checkList.map(async (ext) => {
         const fullDomain = `${name}${ext}`;
         const available = await checkDomainAvailability(fullDomain);
-        const price = PRICES[ext] || { bdt: "N/A", usd: "N/A" };
+        const price = PRICES[ext] || { bdt: "N/A", usd: "N/A", renewal_bdt: "N/A" };
         return {
           domain: fullDomain,
           ext,
           available,
           price_bdt: price.bdt,
           price_usd: price.usd,
+          renewal_bdt: price.renewal_bdt,
         };
       })
     );
