@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { CreditCard, Building2, Smartphone, Globe, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PublicLayout from "@/components/PublicLayout";
+import SEOHead from "@/components/SEOHead";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
