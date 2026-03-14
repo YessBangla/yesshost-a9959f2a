@@ -237,6 +237,12 @@ const t: Translations = {
   "dash.vatId": { bn: "VAT/Tax ID", en: "VAT/Tax ID" },
   "dash.saveChanges": { bn: "পরিবর্তন সংরক্ষণ করুন", en: "Save Changes" },
   "dash.profileUpdated": { bn: "প্রোফাইল আপডেট হয়েছে!", en: "Profile updated!" },
+  "dash.personalInfo": { bn: "ব্যক্তিগত তথ্য", en: "Personal Information" },
+  "dash.addressInfo": { bn: "ঠিকানার তথ্য", en: "Address Information" },
+  "dash.memberSince": { bn: "সদস্য হয়েছেন", en: "Member since" },
+  "dash.clientId": { bn: "ক্লায়েন্ট আইডি", en: "Client ID" },
+  "dash.avatarUpdated": { bn: "প্রোফাইল ছবি আপডেট হয়েছে!", en: "Avatar updated!" },
+  "dash.avatarTooLarge": { bn: "ছবি ২MB এর কম হতে হবে", en: "Image must be less than 2MB" },
 
   // === Auth Pages ===
   "auth.welcomeBack": { bn: "স্বাগতম!", en: "Welcome Back" },
