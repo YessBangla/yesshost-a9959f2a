@@ -16,7 +16,6 @@ const Index = () => {
     <PublicLayout showOfferBanner>
       <CorporateSlider />
       <HeroSection />
-      <TrustedBySection />
       <WhyChooseUs />
       <FeaturesSection />
       <PricingSection />
@@ -25,6 +24,7 @@ const Index = () => {
       <TestimonialsSection />
       <FAQSection />
       <CTASection />
+      <TrustedBySection />
     </PublicLayout>
   );
 };
