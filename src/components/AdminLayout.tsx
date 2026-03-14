@@ -22,6 +22,7 @@ const AdminLayout = () => {
     { title: tr("admin.services"), url: "/admin/services", icon: Server },
     { title: tr("admin.billing"), url: "/admin/billing", icon: FileText },
     { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
+    { title: "থিম স্টোর", url: "/admin/themes", icon: Palette },
     { title: "CMS", url: "/admin/cms", icon: Layers },
   ];
 
