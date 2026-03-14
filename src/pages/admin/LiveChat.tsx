@@ -100,7 +100,7 @@ const AdminLiveChat = () => {
 
   // Load messages when chat selected
   useEffect(() => {
-    if (!selected) { setMessages([]); return; }
+    if (!selected) { setMessages([]); setVisitorTyping(false); return; }
     supabase
       .from("live_chat_messages")
       .select("*")
@@ -120,9 +120,35 @@ const AdminLiveChat = () => {
           if (prev.some(m => m.id === (payload.new as Message).id)) return prev;
           return [...prev, payload.new as Message];
         });
+        if ((payload.new as Message).sender_type === "visitor") setVisitorTyping(false);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    // Typing indicator channel (broadcast)
+    const typingChannel = supabase
+      .channel(`live-chat-${selected.id}`)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender === "visitor") {
+          setVisitorTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setVisitorTyping(false), 3000);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+      supabase.removeChannel(typingChannel);
+    };
+  }, [selected?.id]);
+
+  const broadcastAdminTyping = useCallback(() => {
+    if (!selected) return;
+    supabase.channel(`live-chat-${selected.id}`).send({
+      type: "broadcast",
+      event: "typing",
+      payload: { sender: "admin" },
+    });
   }, [selected?.id]);
 
   useEffect(() => {
