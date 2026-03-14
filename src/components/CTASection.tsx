@@ -33,7 +33,7 @@ const CTASection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="relative overflow-hidden rounded-3xl gradient-primary p-12 md:p-16 text-center"
+          className="relative overflow-hidden rounded-2xl sm:rounded-3xl gradient-primary p-6 sm:p-10 md:p-16 text-center"
         >
           <div className="absolute top-0 left-0 w-64 h-64 rounded-full bg-white/10 blur-3xl -translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-white/5 blur-3xl translate-x-1/3 translate-y-1/3" />
