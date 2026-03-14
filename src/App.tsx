@@ -44,6 +44,7 @@ import ThemeStore from "./pages/themes/ThemeStore";
 import ThemeDetail from "./pages/themes/ThemeDetail";
 import NotFound from "./pages/NotFound";
 import Checkout from "./pages/Checkout";
+import PaymentMethods from "./pages/PaymentMethods";
 import { PaymentSuccess, PaymentFail, PaymentCancel } from "./pages/PaymentResult";
 
 const queryClient = new QueryClient();
