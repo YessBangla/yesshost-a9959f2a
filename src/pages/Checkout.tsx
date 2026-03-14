@@ -206,6 +206,12 @@ const Checkout = () => {
       if (domainItems.length) descParts.push(`Domain: ${domainItems.map(i => i.domain).join(", ")}`);
       if (hostingItems.length) descParts.push(`Hosting: ${hostingItems.map(i => i.name).join(", ")}`);
       if (themeItems.length) descParts.push(`Theme: ${themeItems.map(i => i.name).join(", ")}`);
+      if (appliedCoupon) descParts.push(`Coupon: ${appliedCoupon.code} (-৳${discountAmount})`);
+
+      // Increment coupon used_count
+      if (appliedCoupon) {
+        await supabase.rpc("increment_coupon_usage" as any, { coupon_id: appliedCoupon.id }).catch(() => {});
+      }
 
       // Create invoice
       const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
