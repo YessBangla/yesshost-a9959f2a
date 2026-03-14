@@ -64,6 +64,7 @@ const PricingSection = () => {
     { key: "web", label: tr("pricing.webHosting") },
     { key: "reseller", label: tr("pricing.resellerHosting") },
     { key: "vps", label: tr("pricing.vpsServer") },
+    { key: "dedicated", label: isBn ? "ডেডিকেটেড সার্ভার" : "Dedicated Server" },
     { key: "email", label: tr("pricing.emailHosting") },
   ];
 
