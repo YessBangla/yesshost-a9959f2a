@@ -1,20 +1,40 @@
 import { motion } from "framer-motion";
-import { MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const servers = [
-  { location: "🇨🇦 Canada", city: "Toronto", status: "operational", latency: "12ms", load: 34 },
-  { location: "🇺🇸 United States", city: "New York", status: "operational", latency: "18ms", load: 52 },
-  { location: "🇫🇮 Finland", city: "Helsinki", status: "operational", latency: "28ms", load: 41 },
-  { location: "🇮🇳 India", city: "Mumbai", status: "operational", latency: "35ms", load: 27 },
-  { location: "🇦🇺 Australia", city: "Sydney", status: "operational", latency: "42ms", load: 19 },
-  { location: "🇧🇩 Bangladesh", city: "Dhaka (BDIX)", status: "operational", latency: "5ms", load: 63 },
-];
+import { useEffect, useState, useMemo } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
+const defaultServers = [
+  { location: "🇨🇦 Canada", city: "Toronto", latency: "12ms", load: 34 },
+  { location: "🇺🇸 United States", city: "New York", latency: "18ms", load: 52 },
+  { location: "🇫🇮 Finland", city: "Helsinki", latency: "28ms", load: 41 },
+  { location: "🇮🇳 India", city: "Mumbai", latency: "35ms", load: 27 },
+  { location: "🇦🇺 Australia", city: "Sydney", latency: "42ms", load: 19 },
+  { location: "🇧🇩 Bangladesh", city: "Dhaka (BDIX)", latency: "5ms", load: 63 },
+];
+
 const ServerStatus = () => {
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const [content, setContent] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
+      .in("section_key", ["server_title", "server_subtitle", "server_list"])
+      .then(({ data }) => setContent(data || []));
+  }, []);
+
+  const get = (key: string) => content.find(c => c.section_key === key);
+  const text = (key: string, fallback: string) => {
+    const item = get(key);
+    if (!item) return tr(fallback);
+    return lang === "bn" ? (item.title_bn || tr(fallback)) : (item.title_en || tr(fallback));
+  };
+
+  const servers = useMemo(() => {
+    const item = get("server_list");
+    return item?.metadata?.servers || defaultServers;
+  }, [content]);
 
   return (
     <section id="status" className="py-24 relative">
@@ -30,10 +50,10 @@ const ServerStatus = () => {
             Global Network
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
-            {tr("server.title")}
+            {text("server_title", "server.title")}
           </h2>
           <p className="text-muted-foreground text-base max-w-xl mx-auto">
-            {tr("server.subtitle")}
+            {text("server_subtitle", "server.subtitle")}
           </p>
         </motion.div>
 
@@ -45,7 +65,7 @@ const ServerStatus = () => {
             <span>{tr("server.load")}</span>
           </div>
 
-          {servers.map((server, i) => (
+          {servers.map((server: any, i: number) => (
             <motion.div
               key={server.location}
               initial={{ opacity: 0, x: -20 }}

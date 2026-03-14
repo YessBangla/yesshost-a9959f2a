@@ -1,11 +1,29 @@
 import { motion } from "framer-motion";
 import { Phone, MessageCircle, Mail, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const CTASection = () => {
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const [content, setContent] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
+      .in("section_key", ["cta_badge", "cta_title", "cta_subtitle", "cta_contacts"])
+      .then(({ data }) => setContent(data || []));
+  }, []);
+
+  const get = (key: string) => content.find(c => c.section_key === key);
+  const text = (key: string, fallback: string) => {
+    const item = get(key);
+    if (!item) return tr(fallback);
+    return lang === "bn" ? (item.title_bn || tr(fallback)) : (item.title_en || tr(fallback));
+  };
+
+  const contacts = get("cta_contacts")?.metadata || {};
 
   return (
     <section id="contact" className="py-24 relative">
@@ -23,35 +41,35 @@ const CTASection = () => {
           <div className="relative z-10">
             <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-primary-foreground text-sm">
               <Zap className="w-4 h-4" />
-              {tr("cta.needHelp")}
+              {text("cta_badge", "cta.needHelp")}
             </div>
             <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-primary-foreground mb-4">
-              {tr("cta.title")}
+              {text("cta_title", "cta.title")}
             </h2>
             <p className="text-base md:text-lg text-primary-foreground/80 max-w-xl mx-auto mb-8">
-              {tr("cta.subtitle")}
+              {text("cta_subtitle", "cta.subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
-                href="tel:+8809638205205"
+                href={`tel:${contacts.phone || "+8809638205205"}`}
                 className="flex items-center gap-2 bg-white text-foreground px-8 py-4 rounded-xl font-bold text-base hover:bg-white/90 transition-all shadow-lg"
               >
                 <Phone className="w-5 h-5" />
-                {tr("cta.callUs")}
+                {lang === "bn" ? (contacts.phone_label_bn || tr("cta.callUs")) : (contacts.phone_label_en || tr("cta.callUs"))}
               </a>
               <a
                 href="#"
                 className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all"
               >
                 <MessageCircle className="w-5 h-5" />
-                {tr("cta.liveChat")}
+                {lang === "bn" ? (contacts.chat_label_bn || tr("cta.liveChat")) : (contacts.chat_label_en || tr("cta.liveChat"))}
               </a>
               <a
-                href="mailto:support@yesshost.com"
+                href={`mailto:${contacts.email || "support@yesshost.com"}`}
                 className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all"
               >
                 <Mail className="w-5 h-5" />
-                {tr("cta.email")}
+                {lang === "bn" ? (contacts.email_label_bn || tr("cta.email")) : (contacts.email_label_en || tr("cta.email"))}
               </a>
             </div>
           </div>
