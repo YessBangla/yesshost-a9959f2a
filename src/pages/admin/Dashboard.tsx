@@ -46,6 +46,7 @@ const AdminDashboard = () => {
   const [allServices, setAllServices] = useState<any[]>([]);
   const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [allTickets, setAllTickets] = useState<any[]>([]);
+  const [allCoupons, setAllCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
