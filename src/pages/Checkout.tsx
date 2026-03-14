@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Building2, CheckCircle2, AlertCircle, Loader2, Server, Palette } from "lucide-react";
+import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Building2, CheckCircle2, AlertCircle, Loader2, Server, Palette, Tag, X } from "lucide-react";
 import { useCart, CartItem } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,8 +47,102 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
 
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    id: string;
+    code: string;
+    discount_type: "percentage" | "fixed";
+    discount_value: number;
+    max_discount_amount: number | null;
+  } | null>(null);
+  const [couponError, setCouponError] = useState("");
+
   const parseBdtPrice = (price: string): number => parseInt(price.replace(/[^\d]/g, ""), 10) || 0;
-  const totalBdt = items.reduce((sum, item) => sum + parseBdtPrice(item.price_bdt), 0);
+  const subtotalBdt = items.reduce((sum, item) => sum + parseBdtPrice(item.price_bdt), 0);
+
+  // Calculate discount
+  const discountAmount = appliedCoupon
+    ? appliedCoupon.discount_type === "percentage"
+      ? Math.min(
+          Math.round(subtotalBdt * appliedCoupon.discount_value / 100),
+          appliedCoupon.max_discount_amount ?? Infinity
+        )
+      : Math.min(appliedCoupon.discount_value, subtotalBdt)
+    : 0;
+  const totalBdt = subtotalBdt - discountAmount;
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+    setCouponError("");
+    setCouponLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("coupons")
+        .select("*")
+        .eq("code", code)
+        .eq("is_active", true)
+        .single();
+
+      if (error || !data) {
+        setCouponError(bn ? "কুপন কোড ভুল বা মেয়াদ শেষ" : "Invalid or expired coupon code");
+        setCouponLoading(false);
+        return;
+      }
+
+      // Check expiry
+      if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setCouponError(bn ? "কুপনের মেয়াদ শেষ হয়ে গেছে" : "Coupon has expired");
+        setCouponLoading(false);
+        return;
+      }
+
+      // Check max uses
+      if (data.max_uses !== null && data.used_count >= data.max_uses) {
+        setCouponError(bn ? "কুপন ব্যবহারের সীমা শেষ" : "Coupon usage limit reached");
+        setCouponLoading(false);
+        return;
+      }
+
+      // Check min order
+      if (data.min_order_amount && subtotalBdt < data.min_order_amount) {
+        setCouponError(
+          bn
+            ? `সর্বনিম্ন অর্ডার ৳${data.min_order_amount} প্রয়োজন`
+            : `Minimum order of ৳${data.min_order_amount} required`
+        );
+        setCouponLoading(false);
+        return;
+      }
+
+      setAppliedCoupon({
+        id: data.id,
+        code: data.code,
+        discount_type: data.discount_type as "percentage" | "fixed",
+        discount_value: Number(data.discount_value),
+        max_discount_amount: data.max_discount_amount ? Number(data.max_discount_amount) : null,
+      });
+      toast({
+        title: bn ? "কুপন প্রয়োগ হয়েছে!" : "Coupon Applied!",
+        description: data.discount_type === "percentage"
+          ? `${data.discount_value}% ${bn ? "ডিসকাউন্ট" : "discount"}`
+          : `৳${data.discount_value} ${bn ? "ছাড়" : "off"}`,
+      });
+    } catch {
+      setCouponError(bn ? "কুপন যাচাই করতে সমস্যা হয়েছে" : "Failed to validate coupon");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+  };
 
   const handlePlaceOrder = async () => {
     if (!user) {
@@ -112,6 +206,12 @@ const Checkout = () => {
       if (domainItems.length) descParts.push(`Domain: ${domainItems.map(i => i.domain).join(", ")}`);
       if (hostingItems.length) descParts.push(`Hosting: ${hostingItems.map(i => i.name).join(", ")}`);
       if (themeItems.length) descParts.push(`Theme: ${themeItems.map(i => i.name).join(", ")}`);
+      if (appliedCoupon) descParts.push(`Coupon: ${appliedCoupon.code} (-৳${discountAmount})`);
+
+      // Increment coupon used_count
+      if (appliedCoupon) {
+        await supabase.rpc("increment_coupon_usage" as any, { coupon_id: appliedCoupon.id });
+      }
 
       // Create invoice
       const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
@@ -350,8 +450,64 @@ const Checkout = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Coupon Code */}
               <div className="border-t border-border pt-3 mb-4">
-                <div className="flex justify-between">
+                <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-primary" />
+                  {bn ? "কুপন কোড" : "Coupon Code"}
+                </p>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-primary/5 border border-primary/20">
+                    <div>
+                      <span className="text-xs font-bold text-primary">{appliedCoupon.code}</span>
+                      <p className="text-[10px] text-muted-foreground">
+                        {appliedCoupon.discount_type === "percentage"
+                          ? `${appliedCoupon.discount_value}% ${bn ? "ছাড়" : "off"}`
+                          : `৳${appliedCoupon.discount_value} ${bn ? "ছাড়" : "off"}`}
+                      </p>
+                    </div>
+                    <button onClick={removeCoupon} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                      placeholder={bn ? "কোড লিখুন" : "Enter code"}
+                      maxLength={30}
+                      className="flex-1 px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                      className="px-3 py-2 rounded-lg gradient-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
+                    >
+                      {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (bn ? "প্রয়োগ" : "Apply")}
+                    </button>
+                  </div>
+                )}
+                {couponError && (
+                  <p className="text-[11px] text-destructive mt-1.5">{couponError}</p>
+                )}
+              </div>
+
+              {/* Totals */}
+              <div className="border-t border-border pt-3 mb-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{bn ? "সাবটোটাল" : "Subtotal"}</span>
+                  <span className="text-foreground font-medium">৳{subtotalBdt.toLocaleString("bn-BD")}</span>
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-primary font-medium">{bn ? "ডিসকাউন্ট" : "Discount"}</span>
+                    <span className="text-primary font-semibold">-৳{discountAmount.toLocaleString("bn-BD")}</span>
+                  </div>
+                )}
+                <div className="flex justify-between pt-2 border-t border-border">
                   <span className="text-sm font-semibold text-foreground">{bn ? "সর্বমোট" : "Total"}</span>
                   <span className="text-xl font-bold text-foreground">৳{totalBdt.toLocaleString("bn-BD")}</span>
                 </div>
