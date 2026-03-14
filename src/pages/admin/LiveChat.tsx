@@ -201,7 +201,7 @@ const AdminLiveChat = () => {
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-muted-foreground truncate">{c.visitor_email || "—"}</span>
+                    <span className="text-[10px] text-muted-foreground truncate">{c.visitor_email || "—"} • {c.visitor_phone || ""}</span>
                     <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                       <Clock className="w-3 h-3" />
                       {timeAgo(c.updated_at)}
