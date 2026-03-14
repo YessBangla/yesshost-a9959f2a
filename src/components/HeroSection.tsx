@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, ArrowRight, Shield, Zap, Clock, Globe } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
@@ -12,15 +13,16 @@ const domainPrices = [
   { ext: ".com", price: "৯৯০", popular: true },
 ];
 
-const stats = [
-  { icon: Globe, value: "50K+", label: "Active Websites" },
-  { icon: Clock, value: "99.9%", label: "Uptime Guarantee" },
-  { icon: Zap, value: "LiteSpeed", label: "Web Server" },
-  { icon: Shield, value: "24/7", label: "Expert Support" },
-];
-
 const HeroSection = () => {
   const [domain, setDomain] = useState("");
+  const { tr } = useLanguage();
+
+  const stats = [
+    { icon: Globe, value: "50K+", label: tr("hero.activeWebsites") },
+    { icon: Clock, value: "99.9%", label: tr("hero.uptimeGuarantee") },
+    { icon: Zap, value: "LiteSpeed", label: tr("hero.webServer") },
+    { icon: Shield, value: "24/7", label: tr("hero.expertSupport") },
+  ];
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
@@ -29,7 +31,6 @@ const HeroSection = () => {
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
 
       <div className="relative z-10 container mx-auto px-4 text-center py-20">
-        {/* Offer banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -37,32 +38,29 @@ const HeroSection = () => {
           className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full glass-card text-sm"
         >
           <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
-          <span className="text-muted-foreground">⭐ .TOP ডোমেইন মাত্র <strong className="text-foreground">১৮০ টাকা!</strong> .COM ডোমেইন <strong className="text-foreground">৯৯০ টাকা</strong></span>
+          <span className="text-muted-foreground">{tr("hero.offer")}</span>
         </motion.div>
 
-        {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: brandCurve, delay: 0.1 }}
           className="text-4xl md:text-6xl lg:text-7xl font-display font-extrabold tracking-tight leading-[1.05] mb-6"
         >
-          Perfect Domain
+          {tr("hero.title1")}
           <br />
-          <span className="text-gradient-primary">Premium Quality</span>
+          <span className="text-gradient-primary">{tr("hero.title2")}</span>
         </motion.h1>
 
-        {/* Sub-headline */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: brandCurve, delay: 0.2 }}
           className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
         >
-          Free DNS Management • Full Domain Control Panel • Domain Privacy Protection
+          {tr("hero.subtitle")}
         </motion.p>
 
-        {/* Domain Search */}
         <motion.div
           id="domain"
           initial={{ opacity: 0, y: 30 }}
@@ -77,18 +75,17 @@ const HeroSection = () => {
                 type="text"
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
-                placeholder="Enter domain name here.."
+                placeholder={tr("hero.placeholder")}
                 className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base py-3"
               />
             </div>
             <button className="shrink-0 flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20">
-              Register
+              {tr("hero.register")}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </motion.div>
 
-        {/* Domain prices */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -106,14 +103,13 @@ const HeroSection = () => {
               <span className="text-muted-foreground">৳{d.price}</span>
               {d.popular && (
                 <span className="text-[10px] font-bold gradient-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                  Popular
+                  {tr("pricing.popular")}
                 </span>
               )}
             </div>
           ))}
         </motion.div>
 
-        {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

@@ -1,105 +1,35 @@
 import { motion } from "framer-motion";
-import { Globe, Server, HardDrive, Mail, Radio, Palette, ArrowUpRight, Shield, Headphones, Cpu, Lock, RefreshCw, Rocket, MousePointerClick, BarChart3 } from "lucide-react";
-
-const services = [
-  {
-    icon: Globe,
-    title: "Domain",
-    description: "Register Your Domain Names .COM .NET .ORG .XYZ and more",
-    price: "199 BDT/Year",
-    color: "from-blue-500/20 to-blue-600/5",
-  },
-  {
-    icon: HardDrive,
-    title: "Web Hosting",
-    description: "Get fast and secure Web hosting for small & medium sites.",
-    price: "130 BDT/Month",
-    color: "from-green-500/20 to-green-600/5",
-  },
-  {
-    icon: Cpu,
-    title: "Pro Hosting",
-    description: "Faster Pro NVMe cPanel Web Hosting for your website!",
-    price: "200 BDT/Month",
-    color: "from-purple-500/20 to-purple-600/5",
-  },
-  {
-    icon: Rocket,
-    title: "Premium Hosting",
-    description: "Premium Hosting designed for larger resources and more features",
-    price: "500 BDT/Month",
-    color: "from-orange-500/20 to-orange-600/5",
-  },
-  {
-    icon: Server,
-    title: "Reseller Hosting",
-    description: "Pick the best reseller hosting plan for your Business",
-    price: "1,499 BDT/Month",
-    color: "from-pink-500/20 to-pink-600/5",
-  },
-  {
-    icon: Shield,
-    title: "VPS Server",
-    description: "Powerful and 100% Configurable VPS Servers",
-    price: "750 BDT/Month",
-    color: "from-cyan-500/20 to-cyan-600/5",
-  },
-  {
-    icon: Mail,
-    title: "Email Hosting",
-    description: "Professional email hosting with CrossBox Suite Panel",
-    price: "799 BDT/Month",
-    color: "from-yellow-500/20 to-yellow-600/5",
-  },
-  {
-    icon: HardDrive,
-    title: "Dedicated Server",
-    description: "Dedicated servers are entirely different from shared hostings",
-    price: "11,200 BDT/Month",
-    color: "from-red-500/20 to-red-600/5",
-  },
-];
-
-const features = [
-  {
-    icon: RefreshCw,
-    title: "Free Migration Service",
-    description: "Transfer your website to us free with the help of our migration experts. Migrate WordPress by just a click!",
-  },
-  {
-    icon: Shield,
-    title: "7 Days Money Back Guarantee",
-    description: "If you're not completely satisfied, simply cancel and request a refund within 7 days.",
-  },
-  {
-    icon: MousePointerClick,
-    title: "One-Click Deploy",
-    description: "With our one click installer tool, available on every plan, you can install any type of website.",
-  },
-  {
-    icon: BarChart3,
-    title: "99.9% Uptime Guarantee",
-    description: "Our servers ensure your websites stay online without downtime. Uptime backed by our SLA.",
-  },
-  {
-    icon: Headphones,
-    title: "24/7 Chat with Experts",
-    description: "Our customer support is 24x7x365. Gain 24x7 access to our expert support team.",
-  },
-  {
-    icon: Lock,
-    title: "Free SSL Certificate",
-    description: "Free SSL Certificate, automated, and open certificate authority for Internet Security.",
-  },
-];
+import { Globe, Server, HardDrive, Mail, Cpu, Lock, RefreshCw, Rocket, MousePointerClick, BarChart3, Shield, Headphones, ArrowUpRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const FeaturesSection = () => {
+  const { tr } = useLanguage();
+
+  const services = [
+    { icon: Globe, title: tr("features.domain"), description: tr("features.domainDesc"), price: "199 BDT/Year", color: "from-blue-500/20 to-blue-600/5" },
+    { icon: HardDrive, title: tr("nav.webHosting"), description: tr("features.webHostingDesc"), price: "130 BDT/Month", color: "from-green-500/20 to-green-600/5" },
+    { icon: Cpu, title: tr("nav.proHosting"), description: tr("features.proHostingDesc"), price: "200 BDT/Month", color: "from-purple-500/20 to-purple-600/5" },
+    { icon: Rocket, title: tr("nav.premiumHosting"), description: tr("features.premiumHostingDesc"), price: "500 BDT/Month", color: "from-orange-500/20 to-orange-600/5" },
+    { icon: Server, title: tr("nav.reseller"), description: tr("features.resellerHostingDesc"), price: "1,499 BDT/Month", color: "from-pink-500/20 to-pink-600/5" },
+    { icon: Shield, title: tr("nav.vps"), description: tr("features.vpsServerDesc"), price: "750 BDT/Month", color: "from-cyan-500/20 to-cyan-600/5" },
+    { icon: Mail, title: tr("nav.emailHosting"), description: tr("features.emailHostingDesc"), price: "799 BDT/Month", color: "from-yellow-500/20 to-yellow-600/5" },
+    { icon: HardDrive, title: tr("nav.dedicated"), description: tr("features.dedicatedServerDesc"), price: "11,200 BDT/Month", color: "from-red-500/20 to-red-600/5" },
+  ];
+
+  const features = [
+    { icon: RefreshCw, title: tr("features.freeMigration"), description: tr("features.freeMigrationDesc") },
+    { icon: Shield, title: tr("features.moneyBack"), description: tr("features.moneyBackDesc") },
+    { icon: MousePointerClick, title: tr("features.oneClick"), description: tr("features.oneClickDesc") },
+    { icon: BarChart3, title: tr("features.uptime"), description: tr("features.uptimeDesc") },
+    { icon: Headphones, title: tr("features.support"), description: tr("features.supportDesc") },
+    { icon: Lock, title: tr("features.freeSSL"), description: tr("features.freeSSLDesc") },
+  ];
+
   return (
     <section id="features" className="py-24 relative">
       <div className="container mx-auto px-4">
-        {/* Services Grid */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -108,13 +38,13 @@ const FeaturesSection = () => {
           className="text-center mb-12"
         >
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
-            Our Services
+            {tr("features.ourServices")}
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
-            All Hosting Solutions
+            {tr("features.allHosting")}
           </h2>
           <p className="text-muted-foreground text-base max-w-xl mx-auto">
-            আপনার অনলাইন বিজনেসের জন্য সেরা হোস্টিং সার্ভিস।
+            {tr("features.servicesSubtitle")}
           </p>
         </motion.div>
 
@@ -136,16 +66,15 @@ const FeaturesSection = () => {
                 </div>
                 <h3 className="text-base font-bold text-foreground mb-2">{service.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-3">{service.description}</p>
-                <p className="text-sm font-bold text-primary">Starting From {service.price}</p>
+                <p className="text-sm font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
                 <span className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold mt-3 group-hover:gap-3 transition-all">
-                  View Plan <ArrowUpRight className="w-4 h-4" />
+                  {tr("features.viewPlan")} <ArrowUpRight className="w-4 h-4" />
                 </span>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Features Grid */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -154,10 +83,10 @@ const FeaturesSection = () => {
           className="text-center mb-12"
         >
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
-            Extra Benefits
+            {tr("features.extraBenefits")}
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
-            We Have the Features You Deserve!
+            {tr("features.benefitsTitle")}
           </h2>
         </motion.div>
 

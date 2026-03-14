@@ -1,34 +1,21 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ChevronDown, Plus, Minus } from "lucide-react";
-
-const faqs = [
-  {
-    q: "হোস্টিং প্ল্যান কি যেকোনো সময় আপগ্রেড করা যায়?",
-    a: "হ্যাঁ, আপনি যেকোনো সময় আপনার হোস্টিং প্ল্যান আপগ্রেড বা ডাউনগ্রেড করতে পারেন। আপগ্রেডের পর আপনার ডেটা এবং সেটিংস সব ঠিক থাকবে।",
-  },
-  {
-    q: "ফ্রি মাইগ্রেশন সার্ভিস কীভাবে কাজ করে?",
-    a: "আমাদের এক্সপার্ট টিম আপনার বর্তমান হোস্টিং থেকে সব ডেটা, ওয়েবসাইট, ইমেইল এবং ডাটাবেজ ফ্রিতে মাইগ্রেট করে দিবে। কোনো ডাউনটাইম ছাড়াই।",
-  },
-  {
-    q: "পেমেন্ট মেথড কী কী সাপোর্ট করে?",
-    a: "আমরা bKash, Nagad, Rocket, ব্যাংক ট্রান্সফার, SSLCommerz (Visa/Mastercard), Stripe এবং PayPal সাপোর্ট করি।",
-  },
-  {
-    q: "মানি-ব্যাক গ্যারান্টি আছে?",
-    a: "হ্যাঁ, ৩০ দিনের মানি-ব্যাক গ্যারান্টি আছে। যদি সন্তুষ্ট না হন, সম্পূর্ণ রিফান্ড পাবেন।",
-  },
-  {
-    q: "সাপোর্ট টিমের সাথে কীভাবে যোগাযোগ করব?",
-    a: "আমাদের সাথে লাইভ চ্যাট, ফোন, ইমেইল এবং সাপোর্ট টিকেটের মাধ্যমে যোগাযোগ করতে পারেন। আমরা ২৪/৭ সাপোর্ট দিই।",
-  },
-];
+import { Plus, Minus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const { tr } = useLanguage();
+
+  const faqs = [
+    { q: tr("faq.q1"), a: tr("faq.a1") },
+    { q: tr("faq.q2"), a: tr("faq.a2") },
+    { q: tr("faq.q3"), a: tr("faq.a3") },
+    { q: tr("faq.q4"), a: tr("faq.a4") },
+    { q: tr("faq.q5"), a: tr("faq.a5") },
+  ];
 
   return (
     <section className="py-24 relative">
@@ -44,7 +31,7 @@ const FAQSection = () => {
             FAQ
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
-            সচরাচর জিজ্ঞাসা
+            {tr("faq.title")}
           </h2>
         </motion.div>
 

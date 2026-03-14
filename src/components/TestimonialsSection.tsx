@@ -1,33 +1,18 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
-
-const testimonials = [
-  {
-    name: "Rahim Ahmed",
-    company: "TechBD Solutions",
-    text: "YessHost এর সার্ভিস অসাধারণ। আমাদের ওয়েবসাইট এখন অনেক ফাস্ট এবং সাপোর্ট টিম সবসময় সাহায্য করতে প্রস্তুত।",
-    rating: 5,
-    avatar: "RA",
-  },
-  {
-    name: "Fatima Khan",
-    company: "ShopNow BD",
-    text: "২ বছর ধরে YessHost ব্যবহার করছি। কোনো ডাউনটাইম নেই, প্রাইসিং ট্রান্সপারেন্ট এবং মাইগ্রেশন একদম ফ্রি ছিলো।",
-    rating: 5,
-    avatar: "FK",
-  },
-  {
-    name: "Kamal Hossain",
-    company: "DevStudio BD",
-    text: "VPS হোস্টিং নিয়ে খুবই সন্তুষ্ট। ডেডিকেটেড রিসোর্স, ফুল root access এবং 24/7 সাপোর্ট — সব মিলিয়ে বেস্ট চয়েস।",
-    rating: 5,
-    avatar: "KH",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const TestimonialsSection = () => {
+  const { tr } = useLanguage();
+
+  const testimonials = [
+    { name: "Rahim Ahmed", company: "TechBD Solutions", text: tr("testimonials.t1"), rating: 5, avatar: "RA" },
+    { name: "Fatima Khan", company: "ShopNow BD", text: tr("testimonials.t2"), rating: 5, avatar: "FK" },
+    { name: "Kamal Hossain", company: "DevStudio BD", text: tr("testimonials.t3"), rating: 5, avatar: "KH" },
+  ];
+
   return (
     <section className="py-24 relative">
       <div className="container mx-auto px-4">
@@ -42,7 +27,7 @@ const TestimonialsSection = () => {
             Testimonials
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
-            আমাদের ক্লায়েন্টরা কী বলেন
+            {tr("testimonials.title")}
           </h2>
         </motion.div>
 

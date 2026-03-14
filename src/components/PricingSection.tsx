@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Check, Star, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
@@ -11,7 +12,6 @@ type Plan = {
   subtitle?: string;
   features: string[];
   highlighted?: boolean;
-  cta: string;
 };
 
 const webHostingPlans: Plan[] = [
@@ -19,56 +19,20 @@ const webHostingPlans: Plan[] = [
     name: "PH 1GB Host",
     price: "১৩০",
     annual: "১,২০০",
-    features: [
-      "Host 2 Domain",
-      "1GB NVMe Storage",
-      "Unlimited Bandwidth",
-      "10 Sub Domain",
-      "10 Email Accounts",
-      "10 Databases",
-      "Ruby, Python, NodeJS",
-      "Free SSL Certificate",
-      "LiteSpeed Web Server",
-      "cPanel Control Panel",
-    ],
-    cta: "Order Now",
+    features: ["Host 2 Domain", "1GB NVMe Storage", "Unlimited Bandwidth", "10 Sub Domain", "10 Email Accounts", "10 Databases", "Ruby, Python, NodeJS", "Free SSL Certificate", "LiteSpeed Web Server", "cPanel Control Panel"],
   },
   {
     name: "PRO 5GB Host",
     price: "২০০",
     annual: "২,২০০",
-    features: [
-      "Host 5 Domain",
-      "5GB NVMe Storage",
-      "Unlimited Bandwidth",
-      "30 Email Accounts",
-      "30 Databases",
-      "Ruby, Python, NodeJS",
-      "Free SSL Certificate",
-      "LiteSpeed Web Server",
-      "Singapore Location Server",
-      "cPanel Control Panel",
-    ],
+    features: ["Host 5 Domain", "5GB NVMe Storage", "Unlimited Bandwidth", "30 Email Accounts", "30 Databases", "Ruby, Python, NodeJS", "Free SSL Certificate", "LiteSpeed Web Server", "Singapore Location Server", "cPanel Control Panel"],
     highlighted: true,
-    cta: "Order Now",
   },
   {
     name: "Premium 5",
     price: "৫০০",
     annual: "৫,৫০০",
-    features: [
-      "10 Website Hosted",
-      "5GB NVMe Storage",
-      "Unlimited Bandwidth",
-      "20 Email Accounts",
-      "20 Sub Domain",
-      "Unlimited Databases",
-      "Ruby, Python, NodeJS",
-      "Free SSL Certificate",
-      "Shell (SSH) Access",
-      "cPanel Control Panel",
-    ],
-    cta: "Order Now",
+    features: ["10 Website Hosted", "5GB NVMe Storage", "Unlimited Bandwidth", "20 Email Accounts", "20 Sub Domain", "Unlimited Databases", "Ruby, Python, NodeJS", "Free SSL Certificate", "Shell (SSH) Access", "cPanel Control Panel"],
   },
 ];
 
@@ -77,53 +41,20 @@ const resellerPlans: Plan[] = [
     name: "RH Linux 10",
     price: "১,৩০০",
     subtitle: "Good package for beginners",
-    features: [
-      "10 cPanel Accounts",
-      "10GB SSD Storage",
-      "Unlimited Bandwidth",
-      "cPanel / WHM Access",
-      "Daily Remote Backups",
-      "1-Click App Installs",
-      "Ruby, Python, NodeJS",
-      "Free SSL Certificate",
-      "LiteSpeed Web Server",
-    ],
-    cta: "Order Now",
+    features: ["10 cPanel Accounts", "10GB SSD Storage", "Unlimited Bandwidth", "cPanel / WHM Access", "Daily Remote Backups", "1-Click App Installs", "Ruby, Python, NodeJS", "Free SSL Certificate", "LiteSpeed Web Server"],
   },
   {
     name: "RH Linux 50",
     price: "৩,২৯৯",
     subtitle: "50% OFF — COUPON: RH50",
-    features: [
-      "50 cPanel Accounts",
-      "200GB SSD Storage",
-      "Unlimited Bandwidth",
-      "cPanel / WHM Access",
-      "Daily Remote Backups",
-      "1-Click App Installs",
-      "Ruby, Python, NodeJS",
-      "Free SSL Certificate",
-      "LiteSpeed Web Server",
-    ],
+    features: ["50 cPanel Accounts", "200GB SSD Storage", "Unlimited Bandwidth", "cPanel / WHM Access", "Daily Remote Backups", "1-Click App Installs", "Ruby, Python, NodeJS", "Free SSL Certificate", "LiteSpeed Web Server"],
     highlighted: true,
-    cta: "Order Now",
   },
   {
     name: "BDIX RH 20",
     price: "১,৪৯৯",
     subtitle: "BDIX web reseller hosting",
-    features: [
-      "20 cPanel Accounts",
-      "20GB NVMe Storage",
-      "500 GB Bandwidth",
-      "cPanel / WHM Access",
-      "Daily Remote Backups",
-      "1-Click App Installs",
-      "Ruby, Python, NodeJS",
-      "Free SSL Certificate",
-      "LiteSpeed Web Server",
-    ],
-    cta: "Order Now",
+    features: ["20 cPanel Accounts", "20GB NVMe Storage", "500 GB Bandwidth", "cPanel / WHM Access", "Daily Remote Backups", "1-Click App Installs", "Ruby, Python, NodeJS", "Free SSL Certificate", "LiteSpeed Web Server"],
   },
 ];
 
@@ -131,49 +62,19 @@ const vpsPlans: Plan[] = [
   {
     name: "USA VPS",
     price: "৭৫০",
-    features: [
-      "1 CPU Core",
-      "2 GB RAM",
-      "25GB SSD Disk",
-      "1TB Bandwidth",
-      "1 Dedicated IP",
-      "Full Root Access",
-      "KVM Virtualization",
-      "CentOS / Ubuntu / AlmaLinux",
-    ],
-    cta: "Order Now",
+    features: ["1 CPU Core", "2 GB RAM", "25GB SSD Disk", "1TB Bandwidth", "1 Dedicated IP", "Full Root Access", "KVM Virtualization", "CentOS / Ubuntu / AlmaLinux"],
   },
   {
     name: "BDIX VPS",
     price: "৯৯৯",
-    features: [
-      "1 CPU Core",
-      "1 GB RAM",
-      "20GB NVMe Disk",
-      "500 GB Bandwidth",
-      "1 Dedicated IP",
-      "Full Root Access",
-      "KVM Virtualization",
-      "CentOS / Ubuntu / AlmaLinux",
-    ],
+    features: ["1 CPU Core", "1 GB RAM", "20GB NVMe Disk", "500 GB Bandwidth", "1 Dedicated IP", "Full Root Access", "KVM Virtualization", "CentOS / Ubuntu / AlmaLinux"],
     highlighted: true,
-    cta: "Order Now",
   },
   {
     name: "AMD Ryzen 5600X",
     price: "১১,৯০০",
     subtitle: "Dedicated Server",
-    features: [
-      "6 Cores 3.40 GHz",
-      "64GB DDR3 ECC",
-      "512GB NVMe PCIe 4.0",
-      "1Gbps Port",
-      "1 IP Address",
-      "Fully Managed Service",
-      "Powerful Hardware",
-      "24/7 Customer Support",
-    ],
-    cta: "Order Now",
+    features: ["6 Cores 3.40 GHz", "64GB DDR3 ECC", "512GB NVMe PCIe 4.0", "1Gbps Port", "1 IP Address", "Fully Managed Service", "Powerful Hardware", "24/7 Customer Support"],
   },
 ];
 
@@ -181,54 +82,32 @@ const emailPlans: Plan[] = [
   {
     name: "Workspace 30GB",
     price: "৭৯৯",
-    features: [
-      "Up To 5 Email Accounts",
-      "30GB Mail Storage",
-      "CrossBox Suite Panel",
-      "250 Email Per Hour",
-      "IMAP, SMTP, POP Support",
-      "MailChannels SPAM Protection",
-    ],
-    cta: "Order Now",
+    features: ["Up To 5 Email Accounts", "30GB Mail Storage", "CrossBox Suite Panel", "250 Email Per Hour", "IMAP, SMTP, POP Support", "MailChannels SPAM Protection"],
   },
   {
     name: "Workspace 100GB",
     price: "১,২৫০",
-    features: [
-      "Up To 10 Email Accounts",
-      "100GB Mail Storage",
-      "CrossBox Suite Panel",
-      "250 Email Per Hour",
-      "IMAP, SMTP, POP Support",
-      "MailChannels SPAM Protection",
-    ],
+    features: ["Up To 10 Email Accounts", "100GB Mail Storage", "CrossBox Suite Panel", "250 Email Per Hour", "IMAP, SMTP, POP Support", "MailChannels SPAM Protection"],
     highlighted: true,
-    cta: "Order Now",
   },
   {
     name: "Workspace 250GB",
     price: "১,৭৯৯",
-    features: [
-      "Up To 25 Email Accounts",
-      "250GB Mail Storage",
-      "CrossBox Suite Panel",
-      "250 Email Per Hour",
-      "IMAP, SMTP, POP Support",
-      "MailChannels SPAM Protection",
-    ],
-    cta: "Order Now",
+    features: ["Up To 25 Email Accounts", "250GB Mail Storage", "CrossBox Suite Panel", "250 Email Per Hour", "IMAP, SMTP, POP Support", "MailChannels SPAM Protection"],
   },
-];
-
-const tabs = [
-  { key: "web", label: "Web Hosting", plans: webHostingPlans },
-  { key: "reseller", label: "Reseller Hosting", plans: resellerPlans },
-  { key: "vps", label: "VPS Server", plans: vpsPlans },
-  { key: "email", label: "Email Hosting", plans: emailPlans },
 ];
 
 const PricingSection = () => {
   const [activeTab, setActiveTab] = useState("web");
+  const { tr } = useLanguage();
+
+  const tabs = [
+    { key: "web", label: tr("pricing.webHosting"), plans: webHostingPlans },
+    { key: "reseller", label: tr("pricing.resellerHosting"), plans: resellerPlans },
+    { key: "vps", label: tr("pricing.vpsServer"), plans: vpsPlans },
+    { key: "email", label: tr("pricing.emailHosting"), plans: emailPlans },
+  ];
+
   const currentTab = tabs.find((t) => t.key === activeTab)!;
 
   return (
@@ -246,13 +125,12 @@ const PricingSection = () => {
             Pricing
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
-            Select Your Perfect Plan
+            {tr("pricing.title")}
           </h2>
           <p className="text-muted-foreground text-base max-w-xl mx-auto mb-8">
-            ট্রান্সপারেন্ট প্রাইসিং, কোনো হিডেন ফি নেই। যেকোনো সময় আপগ্রেড বা ডাউনগ্রেড করুন।
+            {tr("pricing.subtitle")}
           </p>
 
-          {/* Tabs */}
           <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl glass-card">
             {tabs.map((tab) => (
               <button
@@ -282,32 +160,24 @@ const PricingSection = () => {
                 plan.highlighted ? "glass-card-elevated glow-border" : "glass-card"
               }`}
             >
-              {plan.highlighted && (
-                <div className="absolute top-0 left-0 right-0 h-1 gradient-primary" />
-              )}
+              {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-1 gradient-primary" />}
               {plan.highlighted && (
                 <div className="absolute -top-0 right-4 flex items-center gap-1 px-3 py-1.5 gradient-primary text-primary-foreground text-xs font-bold rounded-b-lg">
-                  <Star className="w-3 h-3 fill-current" /> Popular
+                  <Star className="w-3 h-3 fill-current" /> {tr("pricing.popular")}
                 </div>
               )}
 
               <div className="p-8">
                 <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-                {plan.subtitle && (
-                  <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>
-                )}
+                {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
 
                 <div className="flex items-baseline gap-1 my-4">
-                  <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">
-                    ৳{plan.price}
-                  </span>
-                  <span className="text-sm text-muted-foreground">/mo</span>
+                  <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">{tr("pricing.mo")}</span>
                 </div>
 
                 {plan.annual && (
-                  <p className="text-xs text-muted-foreground mb-4">
-                    ৳{plan.annual} billed annually
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-4">৳{plan.annual} {tr("pricing.billedAnnually")}</p>
                 )}
 
                 <ul className="space-y-3 mb-8">
@@ -328,7 +198,7 @@ const PricingSection = () => {
                       : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
                   }`}
                 >
-                  {plan.cta}
+                  {tr("pricing.orderNow")}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
