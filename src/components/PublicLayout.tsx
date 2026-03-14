@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import FooterSection from "@/components/FooterSection";
+import LiveChatWidget from "@/components/LiveChatWidget";
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ const PublicLayout = ({ children, hideFooter }: PublicLayoutProps) => {
       {children}
       {!hideFooter && <FooterSection />}
       <MobileBottomNav />
+      <LiveChatWidget />
     </div>
   );
 };

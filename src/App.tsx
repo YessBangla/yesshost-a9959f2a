@@ -31,6 +31,7 @@ import AdminTickets from "./pages/admin/Tickets";
 import AdminCMS from "./pages/admin/CMS";
 import AdminThemes from "./pages/admin/Themes";
 import AdminCoupons from "./pages/admin/Coupons";
+import AdminLiveChat from "./pages/admin/LiveChat";
 import ServiceDetail from "./pages/services/ServiceDetail";
 import About from "./pages/company/About";
 import Contact from "./pages/company/Contact";
@@ -118,6 +119,7 @@ const App = () => (
               <Route path="cms" element={<AdminCMS />} />
               <Route path="themes" element={<AdminThemes />} />
               <Route path="coupons" element={<AdminCoupons />} />
+              <Route path="live-chat" element={<AdminLiveChat />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
-  LogOut, ChevronLeft, Menu, Globe, Shield, Layers, Palette, Tag
+  LogOut, ChevronLeft, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +24,7 @@ const AdminLayout = () => {
     { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
     { title: "থিম স্টোর", url: "/admin/themes", icon: Palette },
     { title: lang === "bn" ? "কুপন" : "Coupons", url: "/admin/coupons", icon: Tag },
+    { title: lang === "bn" ? "লাইভ চ্যাট" : "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
     { title: "CMS", url: "/admin/cms", icon: Layers },
   ];
 
