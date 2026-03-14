@@ -1,14 +1,16 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Building2 } from "lucide-react";
+import placeholder from "@/assets/placeholder.svg";
 
 const partners = [
-  { name: "bKash", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Bkash_logo.png/320px-Bkash_logo.png" },
-  { name: "Nagad", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Nagad-Logo.wine.svg/320px-Nagad-Logo.wine.svg.png" },
-  { name: "Grameenphone", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Grameenphone_Logo.svg/320px-Grameenphone_Logo.svg.png" },
-  { name: "Robi", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Robi_Logo.svg/320px-Robi_Logo.svg.png" },
-  { name: "Banglalink", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Banglalink-logo.svg/320px-Banglalink-logo.svg.png" },
-  { name: "Pathao", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Pathao_logo.svg/320px-Pathao_logo.svg.png" },
-  { name: "Daraz", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Daraz_Logo.svg/320px-Daraz_Logo.svg.png" },
-  { name: "SSL Wireless", logo: "https://sslwireless.com/wp-content/uploads/2020/08/ssl-wireless-logo.png" },
+  { name: "bKash", logo: placeholder },
+  { name: "Nagad", logo: placeholder },
+  { name: "Grameenphone", logo: placeholder },
+  { name: "Robi", logo: placeholder },
+  { name: "Banglalink", logo: placeholder },
+  { name: "Pathao", logo: placeholder },
+  { name: "Daraz", logo: placeholder },
+  { name: "SSL Wireless", logo: placeholder },
 ];
 
 const TrustedBySection = () => {
@@ -39,14 +41,20 @@ const TrustedBySection = () => {
           {doubled.map((p, i) => (
             <div
               key={i}
-              className="flex-shrink-0 flex items-center justify-center w-28 h-14 sm:w-36 sm:h-16 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+              className="flex-shrink-0 flex flex-col items-center justify-center w-28 sm:w-36 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
             >
-              <img
-                src={p.logo}
-                alt={p.name}
-                className="max-w-full max-h-full object-contain"
-                loading="lazy"
-              />
+              <div className="w-20 h-20 rounded-xl bg-white flex items-center justify-center shadow-sm mb-2 overflow-hidden">
+                <img
+                  src={p.logo}
+                  alt={p.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex items-center gap-1">
+                <Building2 className="w-3 h-3 text-muted-foreground" />
+                <span className="text-xs font-medium text-muted-foreground">{p.name}</span>
+              </div>
             </div>
           ))}
         </div>
