@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Smile } from "lucide-react";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -24,6 +26,7 @@ const LiveChatWidget = () => {
   const [phone, setPhone] = useState("");
   const [started, setStarted] = useState(false);
   const [adminTyping, setAdminTyping] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { lang } = useLanguage();
@@ -258,13 +261,22 @@ const LiveChatWidget = () => {
                 </div>
 
                 {/* Input */}
-                <div className="p-3 border-t border-border shrink-0">
-                  <div className="flex items-center gap-2">
+                <div className="p-3 border-t border-border shrink-0 relative">
+                  {showEmoji && (
+                    <div className="absolute bottom-14 left-2 right-2 z-10">
+                      <Picker data={data} onEmojiSelect={(e: any) => { setInput(prev => prev + e.native); setShowEmoji(false); }} theme="dark" previewPosition="none" skinTonePosition="none" maxFrequentRows={1} perLine={7} />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5">
+                    <button onClick={() => setShowEmoji(!showEmoji)} className="p-2 rounded-xl hover:bg-secondary/70 text-muted-foreground transition-colors shrink-0">
+                      <Smile className="w-4 h-4" />
+                    </button>
                     <input
                       type="text"
                       value={input}
                       onChange={(e) => { setInput(e.target.value); broadcastTyping(); }}
                       onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                      onFocus={() => setShowEmoji(false)}
                       placeholder={bn ? "মেসেজ লিখুন..." : "Type a message..."}
                       maxLength={1000}
                       className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
