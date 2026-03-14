@@ -184,7 +184,7 @@ const ThemeStore = () => {
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                       {bn ? theme.description_bn : theme.description_en}
                     </p>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-baseline gap-2">
                         <span className="text-xl font-extrabold text-primary">
                           ৳{theme.discount_price_bdt || theme.price_bdt}
@@ -203,7 +203,7 @@ const ThemeStore = () => {
                       </Link>
                     </div>
                     {theme.hosting_bundle_price_bdt && (
-                      <div className="mt-3 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
+                      <div className="mb-3 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
                         <p className="text-xs font-semibold text-primary flex items-center gap-1">
                           <Star className="w-3 h-3" />
                           {bn
@@ -212,6 +212,36 @@ const ThemeStore = () => {
                         </p>
                       </div>
                     )}
+                    {(() => {
+                      const cartId = `theme-${theme.id}`;
+                      const inCart = isInCart(cartId);
+                      return inCart ? (
+                        <div className="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-sm font-semibold">
+                          <Check className="w-4 h-4 text-primary" />
+                          {bn ? "কার্টে আছে" : "In Cart"}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            addItem({
+                              id: cartId,
+                              type: "theme",
+                              name: theme.name,
+                              description: bn ? "ওয়েবসাইট থিম" : "Website Theme",
+                              price_bdt: String(theme.discount_price_bdt || theme.price_bdt),
+                              theme_id: theme.id,
+                              theme_slug: theme.slug,
+                              thumbnail_url: theme.thumbnail_url,
+                            });
+                          }}
+                          className="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-sm shadow-primary/20"
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          {bn ? "কার্টে যোগ করুন" : "Add to Cart"}
+                        </button>
+                      );
+                    })()}
                   </div>
                 </motion.div>
               ))}
