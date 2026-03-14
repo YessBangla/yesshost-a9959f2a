@@ -1,8 +1,24 @@
-import { useEffect, useState, useRef } from "react";
-import { MessageCircle, Send, Loader2, User, Clock, X } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { MessageCircle, Send, Loader2, User, Clock, X, BellRing } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+
+const NOTIFICATION_SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
+
+const playNotificationSound = () => {
+  try {
+    const audio = new Audio(NOTIFICATION_SOUND_URL);
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+  } catch {}
+};
+
+const showBrowserNotification = (title: string, body: string) => {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body, icon: "/favicon.ico" });
+  }
+};
 
 type Chat = {
   id: string;
