@@ -1,24 +1,30 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Save, X, FileText, MessageSquare, HelpCircle, Layout, ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Plus, Pencil, Trash2, Save, X, FileText, MessageSquare,
+  HelpCircle, Layout, Eye, EyeOff, GripVertical, Search
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Tab = "content" | "plans" | "testimonials" | "faqs";
 
 const AdminCMS = () => {
-  const { tr } = useLanguage();
+  const { lang } = useLanguage();
+  const isBn = lang === "bn";
   const { toast } = useToast();
   const [tab, setTab] = useState<Tab>("content");
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
-  // Data states
   const [contents, setContents] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
 
-  // Edit states
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [showAdd, setShowAdd] = useState(false);
@@ -47,17 +53,17 @@ const AdminCMS = () => {
   const saveEdit = async (table: string) => {
     const { id, created_at, ...rest } = editForm;
     if (table === "pricing_plans" && typeof rest.features === "string") {
-      try { rest.features = JSON.parse(rest.features); } catch { /* keep as is */ }
+      try { rest.features = JSON.parse(rest.features); } catch { /* keep */ }
     }
     await (supabase.from(table as any) as any).update(rest).eq("id", id);
-    toast({ title: "সফলভাবে আপডেট হয়েছে" });
+    toast({ title: isBn ? "সফলভাবে আপডেট হয়েছে" : "Updated successfully" });
     cancelEdit();
     fetchAll();
   };
 
   const deleteItem = async (table: string, id: string) => {
     await (supabase.from(table as any) as any).delete().eq("id", id);
-    toast({ title: "সফলভাবে মুছে ফেলা হয়েছে" });
+    toast({ title: isBn ? "সফলভাবে মুছে ফেলা হয়েছে" : "Deleted successfully" });
     fetchAll();
   };
 
@@ -67,271 +73,321 @@ const AdminCMS = () => {
       try { form.features = JSON.parse(form.features); } catch { form.features = []; }
     }
     await (supabase.from(table as any) as any).insert(form);
-    toast({ title: "সফলভাবে যোগ করা হয়েছে" });
+    toast({ title: isBn ? "সফলভাবে যোগ করা হয়েছে" : "Added successfully" });
     setShowAdd(false);
     setAddForm({});
     fetchAll();
   };
 
-  const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
-    { key: "content", label: "সাইট কন্টেন্ট", icon: Layout },
-    { key: "plans", label: "প্রাইসিং প্ল্যান", icon: FileText },
-    { key: "testimonials", label: "টেস্টিমোনিয়াল", icon: MessageSquare },
-    { key: "faqs", label: "FAQ", icon: HelpCircle },
+  const tabs: { key: Tab; label: string; labelEn: string; icon: typeof FileText; count: number }[] = [
+    { key: "content", label: "সাইট কন্টেন্ট", labelEn: "Site Content", icon: Layout, count: contents.length },
+    { key: "plans", label: "প্রাইসিং", labelEn: "Pricing", icon: FileText, count: plans.length },
+    { key: "testimonials", label: "টেস্টিমোনিয়াল", labelEn: "Testimonials", icon: MessageSquare, count: testimonials.length },
+    { key: "faqs", label: "FAQ", labelEn: "FAQs", icon: HelpCircle, count: faqs.length },
   ];
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  const tableForTab: Record<Tab, string> = { content: "site_content", plans: "pricing_plans", testimonials: "testimonials", faqs: "faqs" };
 
   const InputField = ({ label, value, onChange, multiline }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean }) => (
     <div>
-      <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
+      <label className="text-[11px] font-semibold text-muted-foreground mb-1.5 block uppercase tracking-wider">{label}</label>
       {multiline ? (
         <textarea value={value || ""} onChange={e => onChange(e.target.value)} rows={3}
-          className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+          className="w-full px-3 py-2.5 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 resize-none transition-all" />
       ) : (
         <input value={value || ""} onChange={e => onChange(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+          className="w-full px-3 py-2.5 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all" />
       )}
     </div>
   );
 
-  const renderContent = () => (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">{contents.length} টি কন্টেন্ট</p>
-        <button onClick={() => { setShowAdd(true); setAddForm({ page: "home", section_key: "", title_bn: "", title_en: "", content_bn: "", content_en: "", is_active: true, sort_order: 0 }); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">
-          <Plus className="w-4 h-4" /> যোগ করুন
-        </button>
-      </div>
-      {contents.map(item => (
-        <div key={item.id} className="glass-card p-4">
-          {editingId === item.id ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <InputField label="Page" value={editForm.page} onChange={v => setEditForm({ ...editForm, page: v })} />
-                <InputField label="Section Key" value={editForm.section_key} onChange={v => setEditForm({ ...editForm, section_key: v })} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <InputField label="Title (BN)" value={editForm.title_bn} onChange={v => setEditForm({ ...editForm, title_bn: v })} />
-                <InputField label="Title (EN)" value={editForm.title_en} onChange={v => setEditForm({ ...editForm, title_en: v })} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <InputField label="Content (BN)" value={editForm.content_bn} onChange={v => setEditForm({ ...editForm, content_bn: v })} multiline />
-                <InputField label="Content (EN)" value={editForm.content_en} onChange={v => setEditForm({ ...editForm, content_en: v })} multiline />
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => saveEdit("site_content")} className="flex items-center gap-1 px-3 py-1.5 rounded-lg gradient-primary text-primary-foreground text-xs font-semibold"><Save className="w-3 h-3" /> সেভ</button>
-                <button onClick={cancelEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-semibold"><X className="w-3 h-3" /> বাতিল</button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{item.page}</span>
-                  <span className="text-xs text-muted-foreground">{item.section_key}</span>
-                  {!item.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">নিষ্ক্রিয়</span>}
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+
+  const getAddDefaults = (): any => {
+    switch (tab) {
+      case "content": return { page: "home", section_key: "", title_bn: "", title_en: "", content_bn: "", content_en: "", is_active: true, sort_order: 0 };
+      case "plans": return { category: "web", slug: "", name: "", price_bdt: "", annual_price_bdt: "", subtitle: "", features: "[]", is_highlighted: false, is_active: true, sort_order: 0 };
+      case "testimonials": return { name: "", company: "", rating: 5, content_bn: "", content_en: "", is_active: true, sort_order: 0 };
+      case "faqs": return { question_bn: "", question_en: "", answer_bn: "", answer_en: "", category: "general", is_active: true, sort_order: 0 };
+    }
+  };
+
+  const renderContent = () => {
+    const filteredContents = contents.filter(c =>
+      !search || (c.title_bn || "").includes(search) || (c.title_en || "").toLowerCase().includes(search.toLowerCase()) || c.page.includes(search)
+    );
+    return (
+      <div className="space-y-3">
+        {filteredContents.map(item => (
+          <motion.div key={item.id} layout className="glass-card rounded-xl overflow-hidden">
+            {editingId === item.id ? (
+              <div className="p-5 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label="Page" value={editForm.page} onChange={v => setEditForm({ ...editForm, page: v })} />
+                  <InputField label="Section Key" value={editForm.section_key} onChange={v => setEditForm({ ...editForm, section_key: v })} />
                 </div>
-                <p className="text-sm font-medium text-foreground">{item.title_bn || item.title_en}</p>
-                <p className="text-xs text-muted-foreground truncate">{item.content_bn || item.content_en}</p>
-              </div>
-              <div className="flex gap-1 shrink-0">
-                <button onClick={() => startEdit(item)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => deleteItem("site_content", item.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderPlans = () => (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">{plans.length} টি প্ল্যান</p>
-        <button onClick={() => { setShowAdd(true); setAddForm({ category: "web", slug: "", name: "", price_bdt: "", annual_price_bdt: "", subtitle: "", features: "[]", is_highlighted: false, is_active: true, sort_order: 0 }); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">
-          <Plus className="w-4 h-4" /> প্ল্যান যোগ করুন
-        </button>
-      </div>
-      {plans.map(plan => (
-        <div key={plan.id} className="glass-card p-4">
-          {editingId === plan.id ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-3 gap-3">
-                <InputField label="Category" value={editForm.category} onChange={v => setEditForm({ ...editForm, category: v })} />
-                <InputField label="Slug" value={editForm.slug} onChange={v => setEditForm({ ...editForm, slug: v })} />
-                <InputField label="Name" value={editForm.name} onChange={v => setEditForm({ ...editForm, name: v })} />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <InputField label="Price (BDT)" value={editForm.price_bdt} onChange={v => setEditForm({ ...editForm, price_bdt: v })} />
-                <InputField label="Annual Price" value={editForm.annual_price_bdt} onChange={v => setEditForm({ ...editForm, annual_price_bdt: v })} />
-                <InputField label="Subtitle" value={editForm.subtitle} onChange={v => setEditForm({ ...editForm, subtitle: v })} />
-              </div>
-              <InputField label="Features (JSON array)" value={typeof editForm.features === "string" ? editForm.features : JSON.stringify(editForm.features)} onChange={v => setEditForm({ ...editForm, features: v })} multiline />
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={editForm.is_highlighted} onChange={e => setEditForm({ ...editForm, is_highlighted: e.target.checked })} /> হাইলাইটেড
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={editForm.is_active} onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })} /> সক্রিয়
-                </label>
-                <InputField label="Sort Order" value={String(editForm.sort_order || 0)} onChange={v => setEditForm({ ...editForm, sort_order: parseInt(v) || 0 })} />
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => saveEdit("pricing_plans")} className="flex items-center gap-1 px-3 py-1.5 rounded-lg gradient-primary text-primary-foreground text-xs font-semibold"><Save className="w-3 h-3" /> সেভ</button>
-                <button onClick={cancelEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-semibold"><X className="w-3 h-3" /> বাতিল</button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{plan.category}</span>
-                  <span className="text-sm font-bold text-foreground">{plan.name}</span>
-                  {plan.is_highlighted && <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning">⭐ Popular</span>}
-                  {!plan.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">নিষ্ক্রিয়</span>}
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label={isBn ? "শিরোনাম (বাংলা)" : "Title (BN)"} value={editForm.title_bn} onChange={v => setEditForm({ ...editForm, title_bn: v })} />
+                  <InputField label={isBn ? "শিরোনাম (English)" : "Title (EN)"} value={editForm.title_en} onChange={v => setEditForm({ ...editForm, title_en: v })} />
                 </div>
-                <p className="text-sm text-muted-foreground">৳{plan.price_bdt}/মাস {plan.annual_price_bdt ? `• ৳${plan.annual_price_bdt}/বছর` : ""}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label={isBn ? "কন্টেন্ট (বাংলা)" : "Content (BN)"} value={editForm.content_bn} onChange={v => setEditForm({ ...editForm, content_bn: v })} multiline />
+                  <InputField label={isBn ? "কন্টেন্ট (English)" : "Content (EN)"} value={editForm.content_en} onChange={v => setEditForm({ ...editForm, content_en: v })} multiline />
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button onClick={() => saveEdit("site_content")} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"><Save className="w-3.5 h-3.5" /> {isBn ? "সেভ" : "Save"}</button>
+                  <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary text-foreground text-sm font-semibold hover:bg-secondary/80 transition-colors"><X className="w-3.5 h-3.5" /> {isBn ? "বাতিল" : "Cancel"}</button>
+                </div>
               </div>
-              <div className="flex gap-1 shrink-0">
-                <button onClick={() => startEdit(plan)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => deleteItem("pricing_plans", plan.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
+            ) : (
+              <div className="flex items-center justify-between p-4 hover:bg-secondary/10 transition-colors">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex flex-col items-center gap-1">
+                    <Badge variant="outline" className="text-[10px] font-mono">{item.page}</Badge>
+                    {!item.is_active && <EyeOff className="w-3 h-3 text-muted-foreground" />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{item.title_bn || item.title_en || item.section_key}</p>
+                    <p className="text-xs text-muted-foreground truncate">{item.section_key} • {(item.content_bn || item.content_en || "").slice(0, 60)}...</p>
+                  </div>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <button onClick={() => startEdit(item)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteItem("site_content", item.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderTestimonials = () => (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">{testimonials.length} টি টেস্টিমোনিয়াল</p>
-        <button onClick={() => { setShowAdd(true); setAddForm({ name: "", company: "", rating: 5, content_bn: "", content_en: "", is_active: true, sort_order: 0 }); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">
-          <Plus className="w-4 h-4" /> যোগ করুন
-        </button>
+            )}
+          </motion.div>
+        ))}
       </div>
-      {testimonials.map(t => (
-        <div key={t.id} className="glass-card p-4">
-          {editingId === t.id ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-3 gap-3">
-                <InputField label="Name" value={editForm.name} onChange={v => setEditForm({ ...editForm, name: v })} />
-                <InputField label="Company" value={editForm.company} onChange={v => setEditForm({ ...editForm, company: v })} />
-                <InputField label="Rating (1-5)" value={String(editForm.rating)} onChange={v => setEditForm({ ...editForm, rating: parseInt(v) || 5 })} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <InputField label="Content (BN)" value={editForm.content_bn} onChange={v => setEditForm({ ...editForm, content_bn: v })} multiline />
-                <InputField label="Content (EN)" value={editForm.content_en} onChange={v => setEditForm({ ...editForm, content_en: v })} multiline />
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => saveEdit("testimonials")} className="flex items-center gap-1 px-3 py-1.5 rounded-lg gradient-primary text-primary-foreground text-xs font-semibold"><Save className="w-3 h-3" /> সেভ</button>
-                <button onClick={cancelEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-semibold"><X className="w-3 h-3" /> বাতিল</button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-foreground">{t.name} <span className="font-normal text-muted-foreground">— {t.company}</span></p>
-                <p className="text-xs text-muted-foreground truncate">{t.content_bn}</p>
-              </div>
-              <div className="flex gap-1 shrink-0">
-                <button onClick={() => startEdit(t)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => deleteItem("testimonials", t.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+    );
+  };
 
-  const renderFaqs = () => (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">{faqs.length} টি FAQ</p>
-        <button onClick={() => { setShowAdd(true); setAddForm({ question_bn: "", question_en: "", answer_bn: "", answer_en: "", category: "general", is_active: true, sort_order: 0 }); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">
-          <Plus className="w-4 h-4" /> যোগ করুন
-        </button>
+  const renderPlans = () => {
+    const filteredPlans = plans.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.category.includes(search));
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filteredPlans.map(plan => (
+          <motion.div key={plan.id} layout className="glass-card rounded-xl overflow-hidden">
+            {editingId === plan.id ? (
+              <div className="p-5 space-y-3">
+                <div className="grid grid-cols-3 gap-3">
+                  <InputField label="Category" value={editForm.category} onChange={v => setEditForm({ ...editForm, category: v })} />
+                  <InputField label="Slug" value={editForm.slug} onChange={v => setEditForm({ ...editForm, slug: v })} />
+                  <InputField label="Name" value={editForm.name} onChange={v => setEditForm({ ...editForm, name: v })} />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <InputField label={isBn ? "মাসিক মূল্য" : "Monthly Price"} value={editForm.price_bdt} onChange={v => setEditForm({ ...editForm, price_bdt: v })} />
+                  <InputField label={isBn ? "বার্ষিক মূল্য" : "Annual Price"} value={editForm.annual_price_bdt} onChange={v => setEditForm({ ...editForm, annual_price_bdt: v })} />
+                  <InputField label="Subtitle" value={editForm.subtitle} onChange={v => setEditForm({ ...editForm, subtitle: v })} />
+                </div>
+                <InputField label="Features (JSON)" value={typeof editForm.features === "string" ? editForm.features : JSON.stringify(editForm.features)} onChange={v => setEditForm({ ...editForm, features: v })} multiline />
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" checked={editForm.is_highlighted} onChange={e => setEditForm({ ...editForm, is_highlighted: e.target.checked })} className="rounded" /> {isBn ? "হাইলাইটেড" : "Highlighted"}
+                  </label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" checked={editForm.is_active} onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })} className="rounded" /> {isBn ? "সক্রিয়" : "Active"}
+                  </label>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit("pricing_plans")} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"><Save className="w-3.5 h-3.5" /> {isBn ? "সেভ" : "Save"}</button>
+                  <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary text-foreground text-sm font-semibold"><X className="w-3.5 h-3.5" /> {isBn ? "বাতিল" : "Cancel"}</button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-[10px] font-mono">{plan.category}</Badge>
+                      {plan.is_highlighted && <Badge className="text-[10px] bg-warning/15 text-warning border-warning/30">⭐ Popular</Badge>}
+                      {!plan.is_active && <Badge variant="destructive" className="text-[10px]">{isBn ? "নিষ্ক্রিয়" : "Inactive"}</Badge>}
+                    </div>
+                    <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
+                    {plan.subtitle && <p className="text-xs text-muted-foreground">{plan.subtitle}</p>}
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => startEdit(plan)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => deleteItem("pricing_plans", plan.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-2xl font-bold text-primary">৳{plan.price_bdt}</span>
+                  <span className="text-xs text-muted-foreground">/{isBn ? "মাস" : "mo"}</span>
+                  {plan.annual_price_bdt && <span className="text-xs text-muted-foreground ml-2">• ৳{plan.annual_price_bdt}/{isBn ? "বছর" : "yr"}</span>}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ))}
       </div>
-      {faqs.map(faq => (
-        <div key={faq.id} className="glass-card p-4">
-          {editingId === faq.id ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <InputField label="Question (BN)" value={editForm.question_bn} onChange={v => setEditForm({ ...editForm, question_bn: v })} />
-                <InputField label="Question (EN)" value={editForm.question_en} onChange={v => setEditForm({ ...editForm, question_en: v })} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <InputField label="Answer (BN)" value={editForm.answer_bn} onChange={v => setEditForm({ ...editForm, answer_bn: v })} multiline />
-                <InputField label="Answer (EN)" value={editForm.answer_en} onChange={v => setEditForm({ ...editForm, answer_en: v })} multiline />
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => saveEdit("faqs")} className="flex items-center gap-1 px-3 py-1.5 rounded-lg gradient-primary text-primary-foreground text-xs font-semibold"><Save className="w-3 h-3" /> সেভ</button>
-                <button onClick={cancelEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-semibold"><X className="w-3 h-3" /> বাতিল</button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{faq.question_bn}</p>
-                <p className="text-xs text-muted-foreground truncate">{faq.answer_bn}</p>
-              </div>
-              <div className="flex gap-1 shrink-0">
-                <button onClick={() => startEdit(faq)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => deleteItem("faqs", faq.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+    );
+  };
 
-  const tableForTab = { content: "site_content", plans: "pricing_plans", testimonials: "testimonials", faqs: "faqs" };
+  const renderTestimonials = () => {
+    const filteredTest = testimonials.filter(t => !search || t.name.toLowerCase().includes(search.toLowerCase()));
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filteredTest.map(t => (
+          <motion.div key={t.id} layout className="glass-card rounded-xl overflow-hidden">
+            {editingId === t.id ? (
+              <div className="p-5 space-y-3">
+                <div className="grid grid-cols-3 gap-3">
+                  <InputField label={isBn ? "নাম" : "Name"} value={editForm.name} onChange={v => setEditForm({ ...editForm, name: v })} />
+                  <InputField label={isBn ? "কোম্পানি" : "Company"} value={editForm.company} onChange={v => setEditForm({ ...editForm, company: v })} />
+                  <InputField label="Rating (1-5)" value={String(editForm.rating)} onChange={v => setEditForm({ ...editForm, rating: parseInt(v) || 5 })} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label={isBn ? "কন্টেন্ট (বাংলা)" : "Content (BN)"} value={editForm.content_bn} onChange={v => setEditForm({ ...editForm, content_bn: v })} multiline />
+                  <InputField label={isBn ? "কন্টেন্ট (English)" : "Content (EN)"} value={editForm.content_en} onChange={v => setEditForm({ ...editForm, content_en: v })} multiline />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit("testimonials")} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"><Save className="w-3.5 h-3.5" /> {isBn ? "সেভ" : "Save"}</button>
+                  <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary text-foreground text-sm font-semibold"><X className="w-3.5 h-3.5" /> {isBn ? "বাতিল" : "Cancel"}</button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 hover:bg-secondary/10 transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">{t.name.charAt(0)}</div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.company || "—"}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => startEdit(t)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => deleteItem("testimonials", t.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground line-clamp-2">{t.content_bn || t.content_en}</p>
+                <div className="flex items-center gap-1 mt-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className={`text-xs ${i < (t.rating || 5) ? "text-warning" : "text-muted"}`}>★</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderFaqs = () => {
+    const filteredFaqs = faqs.filter(f => !search || (f.question_bn || "").includes(search) || (f.question_en || "").toLowerCase().includes(search.toLowerCase()));
+    return (
+      <div className="space-y-3">
+        {filteredFaqs.map((faq, index) => (
+          <motion.div key={faq.id} layout className="glass-card rounded-xl overflow-hidden">
+            {editingId === faq.id ? (
+              <div className="p-5 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label={isBn ? "প্রশ্ন (বাংলা)" : "Question (BN)"} value={editForm.question_bn} onChange={v => setEditForm({ ...editForm, question_bn: v })} />
+                  <InputField label={isBn ? "প্রশ্ন (English)" : "Question (EN)"} value={editForm.question_en} onChange={v => setEditForm({ ...editForm, question_en: v })} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label={isBn ? "উত্তর (বাংলা)" : "Answer (BN)"} value={editForm.answer_bn} onChange={v => setEditForm({ ...editForm, answer_bn: v })} multiline />
+                  <InputField label={isBn ? "উত্তর (English)" : "Answer (EN)"} value={editForm.answer_en} onChange={v => setEditForm({ ...editForm, answer_en: v })} multiline />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit("faqs")} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"><Save className="w-3.5 h-3.5" /> {isBn ? "সেভ" : "Save"}</button>
+                  <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary text-foreground text-sm font-semibold"><X className="w-3.5 h-3.5" /> {isBn ? "বাতিল" : "Cancel"}</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 hover:bg-secondary/10 transition-colors">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <span className="text-lg font-bold text-muted-foreground/30 tabular-nums w-8 text-center shrink-0">{index + 1}</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{faq.question_bn || faq.question_en}</p>
+                    <p className="text-xs text-muted-foreground truncate">{faq.answer_bn || faq.answer_en}</p>
+                  </div>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Badge variant="outline" className="text-[10px]">{faq.category || "general"}</Badge>
+                  <button onClick={() => startEdit(faq)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteItem("faqs", faq.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Layout className="w-6 h-6" /> সাইট কন্টেন্ট ম্যানেজমেন্ট
-        </h1>
-        <p className="text-sm text-muted-foreground">সাইটের সকল ডায়নামিক কন্টেন্ট এখান থেকে পরিচালনা করুন</p>
+        <h1 className="text-2xl font-bold text-foreground">{isBn ? "কন্টেন্ট ম্যানেজমেন্ট" : "Content Management"}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{isBn ? "সাইটের সকল ডায়নামিক কন্টেন্ট পরিচালনা করুন" : "Manage all dynamic site content"}</p>
       </div>
 
-      <div className="flex flex-wrap gap-1 p-1 rounded-xl glass-card w-fit">
-        {tabs.map(t => (
-          <button key={t.key} onClick={() => { setTab(t.key); setShowAdd(false); cancelEdit(); }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${tab === t.key ? "gradient-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:text-foreground"}`}>
-            <t.icon className="w-4 h-4" /> {t.label}
+      {/* Tabs + Search + Add */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex gap-1 p-1 rounded-xl bg-secondary/30 border border-border/50">
+          {tabs.map(t => (
+            <button
+              key={t.key}
+              onClick={() => { setTab(t.key); setShowAdd(false); cancelEdit(); setSearch(""); }}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+                tab === t.key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <t.icon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{isBn ? t.label : t.labelEn}</span>
+              <span className="text-[10px] opacity-60">({t.count})</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-48">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={isBn ? "সার্চ..." : "Search..."}
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          <button
+            onClick={() => { setShowAdd(true); setAddForm(getAddDefaults()); }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shrink-0"
+          >
+            <Plus className="w-4 h-4" /> {isBn ? "যোগ করুন" : "Add New"}
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* Add Modal */}
-      {showAdd && (
-        <div className="glass-card p-5 border-2 border-primary/20">
-          <h3 className="text-sm font-bold text-foreground mb-3">নতুন আইটেম যোগ করুন</h3>
+      {/* Add Form Dialog */}
+      <Dialog open={showAdd} onOpenChange={open => { if (!open) { setShowAdd(false); setAddForm({}); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{isBn ? "নতুন আইটেম যোগ করুন" : "Add New Item"}</DialogTitle>
+          </DialogHeader>
           <div className="space-y-3">
             {Object.entries(addForm).filter(([k]) => k !== "is_active" && k !== "is_highlighted").map(([key, val]) => (
-              <InputField key={key} label={key} value={String(val || "")}
+              <InputField
+                key={key}
+                label={key.replace(/_/g, " ")}
+                value={String(val || "")}
                 onChange={v => setAddForm({ ...addForm, [key]: key === "sort_order" || key === "rating" ? parseInt(v) || 0 : v })}
-                multiline={key.includes("content") || key.includes("answer") || key === "features"} />
+                multiline={key.includes("content") || key.includes("answer") || key === "features"}
+              />
             ))}
-            <div className="flex gap-2">
-              <button onClick={() => addItem(tableForTab[tab])} className="flex items-center gap-1 px-4 py-2 rounded-lg gradient-primary text-primary-foreground text-sm font-semibold"><Save className="w-4 h-4" /> সেভ করুন</button>
-              <button onClick={() => { setShowAdd(false); setAddForm({}); }} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-secondary text-foreground text-sm font-semibold"><X className="w-4 h-4" /> বাতিল</button>
+            <div className="flex gap-2 pt-2">
+              <button onClick={() => addItem(tableForTab[tab])} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"><Save className="w-4 h-4" /> {isBn ? "সেভ করুন" : "Save"}</button>
+              <button onClick={() => { setShowAdd(false); setAddForm({}); }} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary text-foreground text-sm font-semibold"><X className="w-4 h-4" /> {isBn ? "বাতিল" : "Cancel"}</button>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
+      {/* Tab Content */}
       {tab === "content" && renderContent()}
       {tab === "plans" && renderPlans()}
       {tab === "testimonials" && renderTestimonials()}
