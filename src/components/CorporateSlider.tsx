@@ -200,61 +200,8 @@ const CorporateSlider = () => {
       </section>
 
       {/* Domain Search Section */}
-      <div className="relative bg-gradient-to-b from-muted/80 to-background border-b border-border">
-        <div className="container mx-auto px-4 py-6 sm:py-8">
-          <div className="max-w-3xl mx-auto">
-            {/* Label */}
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Globe className="w-4 h-4 text-primary" />
-              <span className="text-xs sm:text-sm font-semibold text-foreground tracking-wide uppercase">
-                {lang === "bn" ? "আপনার পারফেক্ট ডোমেইন খুঁজুন" : "Find Your Perfect Domain"}
-              </span>
-            </div>
-
-            {/* Search bar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1.5 sm:p-2 rounded-2xl glass-card-elevated shadow-lg">
-              <div className="flex items-center gap-3 flex-1 px-4">
-                <Search className="w-5 h-5 text-muted-foreground shrink-0" />
-                <input
-                  type="text"
-                  placeholder={lang === "bn" ? "example.com" : "example.com"}
-                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm sm:text-base py-3"
-                />
-              </div>
-              <button className="shrink-0 flex items-center justify-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
-                {lang === "bn" ? "ডোমেইন খুঁজুন" : "Search Domain"}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Price tags */}
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mt-4">
-              {[
-                { ext: ".com", price: "৯৯০", popular: true },
-                { ext: ".top", price: "১৮০", popular: false },
-                { ext: ".xyz", price: "২৯৫", popular: false },
-                { ext: ".shop", price: "৩৯০", popular: false },
-                { ext: ".fun", price: "৩৮০", popular: false },
-              ].map((d) => (
-                <div
-                  key={d.ext}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass-card text-xs cursor-pointer hover:scale-105 transition-transform ${
-                    d.popular ? "glow-border" : ""
-                  }`}
-                >
-                  <span className="font-bold text-foreground">{d.ext}</span>
-                  <span className="text-muted-foreground">৳{d.price}</span>
-                  {d.popular && (
-                    <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
-                      {lang === "bn" ? "জনপ্রিয়" : "Popular"}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <DomainSearch />
+    </div>
     </div>
   );
 };
