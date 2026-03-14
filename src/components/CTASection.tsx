@@ -59,7 +59,7 @@ const CTASection = () => {
               </a>
               <a
                 href="#"
-                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base hover:bg-white/10 transition-all"
               >
                 <MessageCircle className="w-5 h-5" />
                 {lang === "bn" ? (contacts.chat_label_bn || tr("cta.liveChat")) : (contacts.chat_label_en || tr("cta.liveChat"))}
