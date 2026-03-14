@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
+import InvoiceReport from "@/components/InvoiceReport";
 
 const statusColors: Record<string, string> = {
   paid: "bg-success/10 text-success",
@@ -15,9 +16,11 @@ const statusColors: Record<string, string> = {
 
 const DashboardBilling = () => {
   const { user } = useAuth();
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const isBn = lang === "bn";
   const [invoices, setInvoices] = useState<Tables<"invoices">[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reportInvoice, setReportInvoice] = useState<Tables<"invoices"> | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -67,6 +70,7 @@ const DashboardBilling = () => {
                   <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.amount")}</th>
                   <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.status")}</th>
                   <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.dueDate")}</th>
+                  <th className="text-left p-4 font-semibold text-muted-foreground">{isBn ? "রিপোর্ট" : "Report"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -77,6 +81,15 @@ const DashboardBilling = () => {
                     <td className="p-4 font-bold text-foreground">৳{inv.amount_bdt}</td>
                     <td className="p-4"><span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[inv.status]}`}>{inv.status}</span></td>
                     <td className="p-4 text-muted-foreground">{inv.due_date ? new Date(inv.due_date).toLocaleDateString("bn-BD") : "-"}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => setReportInvoice(inv)}
+                        className="p-1.5 rounded-lg hover:bg-secondary/60 text-primary hover:text-primary/80 transition-colors"
+                        title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -84,6 +97,12 @@ const DashboardBilling = () => {
           </div>
         </div>
       )}
+
+      <InvoiceReport
+        invoice={reportInvoice}
+        open={!!reportInvoice}
+        onClose={() => setReportInvoice(null)}
+      />
     </div>
   );
 };

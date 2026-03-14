@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingBag, FileText, Calendar, CreditCard, Eye } from "lucide-react";
+import { ShoppingBag, FileText, CreditCard, Eye } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import InvoiceReport from "@/components/InvoiceReport";
 
 type Invoice = {
   id: string;
@@ -29,12 +29,12 @@ const statusConfig: Record<string, { label_en: string; label_bn: string; variant
 };
 
 const OrdersPage = () => {
-  const { tr, lang } = useLanguage();
+  const { lang } = useLanguage();
   const isBn = lang === "bn";
   const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<Invoice | null>(null);
+  const [reportInvoice, setReportInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -123,7 +123,7 @@ const OrdersPage = () => {
                   <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "পরিমাণ" : "Amount"}</th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "স্ট্যাটাস" : "Status"}</th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "তারিখ" : "Date"}</th>
-                  <th className="px-4 py-3 font-semibold text-muted-foreground" />
+                  <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "রিপোর্ট" : "Report"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,7 +139,11 @@ const OrdersPage = () => {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{formatDate(inv.created_at)}</td>
                       <td className="px-4 py-3">
-                        <button onClick={() => setSelected(inv)} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors">
+                        <button
+                          onClick={() => setReportInvoice(inv)}
+                          className="p-1.5 rounded-lg hover:bg-secondary/60 text-primary hover:text-primary/80 transition-colors"
+                          title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
+                        >
                           <Eye className="w-4 h-4" />
                         </button>
                       </td>
@@ -155,7 +159,7 @@ const OrdersPage = () => {
             {invoices.map((inv) => {
               const sc = statusConfig[inv.status] || statusConfig.unpaid;
               return (
-                <button key={inv.id} onClick={() => setSelected(inv)} className="w-full text-left p-4 hover:bg-secondary/30 transition-colors">
+                <button key={inv.id} onClick={() => setReportInvoice(inv)} className="w-full text-left p-4 hover:bg-secondary/30 transition-colors">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-mono text-xs text-primary">{inv.invoice_number}</span>
                     <Badge variant={sc.variant} className="text-xs">{isBn ? sc.label_bn : sc.label_en}</Badge>
@@ -172,53 +176,11 @@ const OrdersPage = () => {
         </div>
       )}
 
-      {/* Detail dialog */}
-      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="glass-card-elevated max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-display">{isBn ? "অর্ডার বিবরণ" : "Order Details"}</DialogTitle>
-          </DialogHeader>
-          {selected && (() => {
-            const sc = statusConfig[selected.status] || statusConfig.unpaid;
-            return (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm text-primary">{selected.invoice_number}</span>
-                  <Badge variant={sc.variant}>{isBn ? sc.label_bn : sc.label_en}</Badge>
-                </div>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{isBn ? "বিবরণ" : "Description"}</span>
-                    <span className="text-foreground text-right max-w-[60%]">{selected.description || "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{isBn ? "পরিমাণ" : "Amount"}</span>
-                    <span className="font-bold text-foreground">৳{Number(selected.amount_bdt).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{isBn ? "পেমেন্ট মেথড" : "Payment Method"}</span>
-                    <span className="text-foreground capitalize">{selected.payment_method || "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{isBn ? "অর্ডারের তারিখ" : "Order Date"}</span>
-                    <span className="text-foreground">{formatDate(selected.created_at)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{isBn ? "ডিউ তারিখ" : "Due Date"}</span>
-                    <span className="text-foreground">{formatDate(selected.due_date)}</span>
-                  </div>
-                  {selected.paid_at && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">{isBn ? "পরিশোধের তারিখ" : "Paid At"}</span>
-                      <span className="text-foreground">{formatDate(selected.paid_at)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
+      <InvoiceReport
+        invoice={reportInvoice}
+        open={!!reportInvoice}
+        onClose={() => setReportInvoice(null)}
+      />
     </div>
   );
 };
