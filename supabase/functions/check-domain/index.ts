@@ -21,18 +21,88 @@ const PRICES: Record<string, { bdt: string; usd: string }> = {
   ".co": { bdt: "২,৪৯০", usd: "24.90" },
 };
 
+interface WhoisInfo {
+  registrar?: string;
+  creation_date?: string;
+  expiry_date?: string;
+  updated_date?: string;
+  status?: string[];
+  nameservers?: string[];
+}
+
 async function checkDomainAvailability(domain: string): Promise<boolean> {
   try {
     const records = await Deno.resolveDns(domain, "A");
     return records.length === 0;
   } catch (error) {
-    // If DNS resolution fails, the domain likely doesn't exist (available)
-    if (error instanceof Deno.errors.NotFound || 
-        (error instanceof Error && error.message.includes("no record"))) {
+    if (error instanceof Deno.errors.NotFound ||
+      (error instanceof Error && error.message.includes("no record"))) {
       return true;
     }
-    // For NXDOMAIN or similar errors, domain is available
     return true;
+  }
+}
+
+async function fetchWhoisInfo(domain: string): Promise<WhoisInfo | null> {
+  try {
+    const response = await fetch(`https://rdap.org/domain/${domain}`, {
+      headers: { "Accept": "application/rdap+json" },
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      await response.text();
+      return null;
+    }
+
+    const data = await response.json();
+
+    const whois: WhoisInfo = {};
+
+    // Extract registrar
+    if (data.entities) {
+      const registrarEntity = data.entities.find((e: any) =>
+        e.roles?.includes("registrar")
+      );
+      if (registrarEntity?.vcardArray?.[1]) {
+        const fnEntry = registrarEntity.vcardArray[1].find((v: any) => v[0] === "fn");
+        if (fnEntry) whois.registrar = fnEntry[3];
+      }
+      if (!whois.registrar && registrarEntity?.publicIds?.[0]?.identifier) {
+        whois.registrar = registrarEntity.publicIds[0].identifier;
+      }
+    }
+
+    // Extract dates from events
+    if (data.events) {
+      for (const event of data.events) {
+        if (event.eventAction === "registration") {
+          whois.creation_date = event.eventDate;
+        } else if (event.eventAction === "expiration") {
+          whois.expiry_date = event.eventDate;
+        } else if (event.eventAction === "last changed") {
+          whois.updated_date = event.eventDate;
+        }
+      }
+    }
+
+    // Extract status
+    if (data.status) {
+      whois.status = data.status.slice(0, 3);
+    }
+
+    // Extract nameservers
+    if (data.nameservers) {
+      whois.nameservers = data.nameservers
+        .map((ns: any) => ns.ldhName || ns.unicodeName)
+        .filter(Boolean)
+        .slice(0, 4);
+    }
+
+    return whois;
+  } catch (error) {
+    console.error(`RDAP lookup failed for ${domain}:`, error);
+    return null;
   }
 }
 
@@ -42,7 +112,7 @@ serve(async (req) => {
   }
 
   try {
-    const { domain } = await req.json();
+    const { domain, whois: requestWhois } = await req.json();
 
     if (!domain || typeof domain !== "string") {
       return new Response(
@@ -51,14 +121,10 @@ serve(async (req) => {
       );
     }
 
-    // Clean the input - extract the name part
-    const cleaned = domain
-      .trim()
-      .toLowerCase()
+    const cleaned = domain.trim().toLowerCase()
       .replace(/^(https?:\/\/)?(www\.)?/, "")
       .replace(/\/.*$/, "");
 
-    // Split name and extension
     const parts = cleaned.split(".");
     const name = parts[0];
 
@@ -69,18 +135,24 @@ serve(async (req) => {
       );
     }
 
-    // Determine which extensions to check
+    // If requesting WHOIS for a specific domain
+    if (requestWhois && parts.length > 1) {
+      const whoisInfo = await fetchWhoisInfo(cleaned);
+      return new Response(
+        JSON.stringify({ whois: whoisInfo, domain: cleaned }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Normal availability check
     let extensionsToCheck = EXTENSIONS;
-    
-    // If user provided a specific extension, check that first
     const userExt = parts.length > 1 ? `.${parts.slice(1).join(".")}` : null;
     if (userExt && EXTENSIONS.includes(userExt)) {
       extensionsToCheck = [userExt, ...EXTENSIONS.filter(e => e !== userExt)];
     }
 
-    // Check availability for each extension (limit to 6 for speed)
     const checkList = extensionsToCheck.slice(0, 6);
-    
+
     const results = await Promise.all(
       checkList.map(async (ext) => {
         const fullDomain = `${name}${ext}`;
