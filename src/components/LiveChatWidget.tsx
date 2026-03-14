@@ -111,6 +111,7 @@ const LiveChatWidget = () => {
     setStarted(false);
     setName("");
     setEmail("");
+    setPhone("");
     setOpen(false);
   };
 
