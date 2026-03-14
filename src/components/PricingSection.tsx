@@ -162,17 +162,46 @@ const PricingSection = () => {
                   ))}
                 </ul>
 
-                <Link
-                  to="/signup"
-                  className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                    plan.highlighted
-                      ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
-                      : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
-                  }`}
-                >
-                  {tr("pricing.orderNow")}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                {(() => {
+                  const cartId = plan.id ? `hosting-${plan.id}-monthly` : "";
+                  const inCart = cartId ? isInCart(cartId) : false;
+                  
+                  if (inCart) {
+                    return (
+                      <div className="w-full py-3.5 font-semibold rounded-xl flex items-center justify-center gap-2 bg-secondary text-foreground border border-border">
+                        <Check className="w-4 h-4 text-primary" />
+                        {isBn ? "কার্টে আছে" : "In Cart"}
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <button
+                      onClick={() => {
+                        if (plan.id) {
+                          addItem({
+                            id: cartId,
+                            type: "hosting",
+                            name: plan.name,
+                            description: `${plan.subtitle || plan.name} • ${isBn ? "মাসিক" : "Monthly"}`,
+                            price_bdt: plan.price,
+                            plan_id: plan.id,
+                            billing_cycle: "monthly",
+                            category: plan.category || activeTab,
+                          });
+                        }
+                      }}
+                      className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                        plan.highlighted
+                          ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
+                          : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
+                      }`}
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      {isBn ? "কার্টে যোগ করুন" : "Add to Cart"}
+                    </button>
+                  );
+                })()}
               </div>
             </motion.div>
           ))}
