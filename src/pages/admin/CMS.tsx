@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus, Pencil, Trash2, Save, X, FileText, MessageSquare,
-  HelpCircle, Layout, Eye, EyeOff, GripVertical, Search
+  HelpCircle, Layout, Eye, EyeOff, GripVertical, Search, Globe
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
