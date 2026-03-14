@@ -14,16 +14,295 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      invoices: {
+        Row: {
+          amount_bdt: number
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          invoice_number: string
+          paid_at: string | null
+          payment_method: string | null
+          service_id: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_bdt: number
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          paid_at?: string | null
+          payment_method?: string | null
+          service_id?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_bdt?: number
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          service_id?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          city: string | null
+          company_name: string | null
+          company_website: string | null
+          country: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+          vat_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          company_name?: string | null
+          company_website?: string | null
+          country?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+          vat_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          company_name?: string | null
+          company_website?: string | null
+          country?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+          vat_id?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          billing_cycle: string | null
+          created_at: string
+          domain: string | null
+          expiry_date: string | null
+          id: string
+          ip_address: string | null
+          name: string
+          plan: string | null
+          price_bdt: number
+          service_type: Database["public"]["Enums"]["service_type"]
+          specs: Json | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["service_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle?: string | null
+          created_at?: string
+          domain?: string | null
+          expiry_date?: string | null
+          id?: string
+          ip_address?: string | null
+          name: string
+          plan?: string | null
+          price_bdt?: number
+          service_type: Database["public"]["Enums"]["service_type"]
+          specs?: Json | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["service_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle?: string | null
+          created_at?: string
+          domain?: string | null
+          expiry_date?: string | null
+          id?: string
+          ip_address?: string | null
+          name?: string
+          plan?: string | null
+          price_bdt?: number
+          service_type?: Database["public"]["Enums"]["service_type"]
+          specs?: Json | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["service_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          department: Database["public"]["Enums"]["ticket_department"]
+          id: string
+          priority: Database["public"]["Enums"]["ticket_priority"]
+          service_id: string | null
+          status: Database["public"]["Enums"]["ticket_status"]
+          subject: string
+          ticket_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department?: Database["public"]["Enums"]["ticket_department"]
+          id?: string
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          service_id?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          subject: string
+          ticket_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department?: Database["public"]["Enums"]["ticket_department"]
+          id?: string
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          service_id?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          subject?: string
+          ticket_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_replies: {
+        Row: {
+          created_at: string
+          id: string
+          is_staff: boolean | null
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_staff?: boolean | null
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_staff?: boolean | null
+          message?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_replies_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      invoice_status: "paid" | "unpaid" | "overdue" | "cancelled" | "refunded"
+      service_status:
+        | "active"
+        | "pending"
+        | "suspended"
+        | "cancelled"
+        | "expired"
+      service_type:
+        | "shared_hosting"
+        | "cloud_hosting"
+        | "vps"
+        | "wordpress"
+        | "reseller"
+        | "domain"
+        | "ssl"
+        | "email"
+      ticket_department: "billing" | "technical" | "sales" | "general"
+      ticket_priority: "low" | "medium" | "high" | "urgent"
+      ticket_status: "open" | "in_progress" | "waiting" | "resolved" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +429,29 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      invoice_status: ["paid", "unpaid", "overdue", "cancelled", "refunded"],
+      service_status: [
+        "active",
+        "pending",
+        "suspended",
+        "cancelled",
+        "expired",
+      ],
+      service_type: [
+        "shared_hosting",
+        "cloud_hosting",
+        "vps",
+        "wordpress",
+        "reseller",
+        "domain",
+        "ssl",
+        "email",
+      ],
+      ticket_department: ["billing", "technical", "sales", "general"],
+      ticket_priority: ["low", "medium", "high", "urgent"],
+      ticket_status: ["open", "in_progress", "waiting", "resolved", "closed"],
+    },
   },
 } as const
