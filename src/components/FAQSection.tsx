@@ -40,7 +40,7 @@ const FAQSection = () => {
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
             FAQ
           </span>
-          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
             {tr("faq.title")}
           </h2>
         </motion.div>

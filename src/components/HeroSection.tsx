@@ -106,7 +106,7 @@ const HeroSection = () => {
           transition={{ duration: 0.7, ease: brandCurve, delay: 0.3 }}
           className="max-w-2xl mx-auto mb-8"
         >
-          <div className="flex items-center gap-2 p-2 rounded-2xl glass-card-elevated">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-2xl glass-card-elevated">
             <div className="flex items-center gap-3 flex-1 px-4">
               <Search className="w-5 h-5 text-muted-foreground shrink-0" />
               <input
@@ -114,10 +114,10 @@ const HeroSection = () => {
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
                 placeholder={getText("hero_placeholder", "hero.placeholder")}
-                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base py-3"
+                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm sm:text-base py-3"
               />
             </div>
-            <button className="shrink-0 flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+            <button className="shrink-0 flex items-center justify-center gap-2 gradient-primary text-primary-foreground px-5 sm:px-6 py-3 rounded-xl font-semibold text-sm sm:text-base hover:opacity-90 transition-all shadow-lg shadow-primary/20">
               {getText("hero_register", "hero.register")}
               <ArrowRight className="w-4 h-4" />
             </button>

@@ -66,7 +66,7 @@ const CTASection = () => {
               </a>
               <a
                 href={`mailto:${contacts.email || "support@yesshost.com"}`}
-                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base hover:bg-white/10 transition-all"
               >
                 <Mail className="w-5 h-5" />
                 {lang === "bn" ? (contacts.email_label_bn || tr("cta.email")) : (contacts.email_label_en || tr("cta.email"))}

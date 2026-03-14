@@ -137,7 +137,7 @@ const PricingSection = () => {
                 {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
 
                 <div className="flex items-baseline gap-1 my-4">
-                  <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{plan.price}</span>
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{plan.price}</span>
                   <span className="text-sm text-muted-foreground">{tr("pricing.mo")}</span>
                 </div>
 
