@@ -24,6 +24,7 @@ type Chat = {
   id: string;
   visitor_name: string;
   visitor_email: string | null;
+  visitor_phone: string | null;
   status: string;
   created_at: string;
   updated_at: string;
