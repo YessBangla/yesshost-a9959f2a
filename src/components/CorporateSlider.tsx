@@ -202,7 +202,6 @@ const CorporateSlider = () => {
       {/* Domain Search Section */}
       <DomainSearch />
     </div>
-    </div>
   );
 };
 
