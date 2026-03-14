@@ -103,7 +103,7 @@ const PricingSection = () => {
             {tr("pricing.subtitle")}
           </p>
 
-          <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl glass-card">
+          <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl glass-card mb-4">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -117,6 +117,31 @@ const PricingSection = () => {
                 {tab.label}
               </button>
             ))}
+          </div>
+
+          {/* Billing cycle toggle */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl glass-card">
+            <button
+              onClick={() => setBillingCycle("monthly")}
+              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                billingCycle === "monthly"
+                  ? "gradient-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {isBn ? "মাসিক" : "Monthly"}
+            </button>
+            <button
+              onClick={() => setBillingCycle("yearly")}
+              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                billingCycle === "yearly"
+                  ? "gradient-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {isBn ? "বাৎসরিক" : "Yearly"}
+              <span className="ml-1.5 text-xs opacity-80">{isBn ? "সেভ করুন" : "Save"}</span>
+            </button>
           </div>
         </motion.div>
 
