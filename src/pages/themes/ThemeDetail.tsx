@@ -108,9 +108,8 @@ const ThemeDetail = () => {
   const bundleFeatures = Array.isArray(theme.hosting_bundle_features) ? theme.hosting_bundle_features : [];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
+    <PublicLayout>
+      <div className="pt-20 lg:pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Breadcrumb */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
