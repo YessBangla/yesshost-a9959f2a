@@ -17,7 +17,7 @@ const paymentMethods = [
 ];
 
 const Checkout = () => {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, removeItem } = useCart();
   const { lang, tr } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
