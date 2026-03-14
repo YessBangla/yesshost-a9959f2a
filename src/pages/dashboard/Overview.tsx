@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 const DashboardOverview = () => {
   const { user, profile } = useAuth();
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
   const [stats, setStats] = useState({ services: 0, invoices: 0, tickets: 0, domains: 0 });
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
