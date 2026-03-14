@@ -13,6 +13,7 @@ const Navbar = () => {
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const { user } = useAuth();
   const { lang, setLang, tr } = useLanguage();
+  const { itemCount, setCartOpen } = useCart();
 
   const navLinks = [
     { label: tr("nav.domain"), href: "/services/domain" },

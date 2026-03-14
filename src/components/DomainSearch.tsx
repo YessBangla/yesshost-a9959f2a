@@ -156,10 +156,26 @@ const DomainSearch = () => {
                             </span>
                           </span>
                           {result.available && (
-                            <button className="flex items-center gap-1.5 gradient-primary text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-all shadow-sm">
-                              <ShoppingCart className="w-3.5 h-3.5" />
-                              {lang === "bn" ? "নিন" : "Add"}
-                            </button>
+                            isInCart(result.domain) ? (
+                              <span className="flex items-center gap-1.5 bg-secondary text-foreground px-3 py-1.5 rounded-lg text-xs font-semibold border border-border">
+                                <Check className="w-3.5 h-3.5 text-primary" />
+                                {lang === "bn" ? "যোগ হয়েছে" : "Added"}
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => addItem({
+                                  domain: result.domain,
+                                  ext: result.ext,
+                                  price_bdt: result.price_bdt,
+                                  price_usd: result.price_usd,
+                                  type: "domain",
+                                })}
+                                className="flex items-center gap-1.5 gradient-primary text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-all shadow-sm"
+                              >
+                                <ShoppingCart className="w-3.5 h-3.5" />
+                                {lang === "bn" ? "নিন" : "Add"}
+                              </button>
+                            )
                           )}
                         </div>
                       </motion.div>
