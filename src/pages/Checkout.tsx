@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Smartphone, Building2, CheckCircle2 } from "lucide-react";
+import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Smartphone, Building2, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,16 +9,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PublicLayout from "@/components/PublicLayout";
 
+import bkashLogo from "@/assets/partners/bkash.svg";
+import nagadLogo from "@/assets/partners/nagad.svg";
+import sslLogo from "@/assets/partners/ssl-wireless.png";
+
 const paymentMethods = [
-  { id: "bkash", label: "bKash", icon: Smartphone, color: "text-pink-500" },
-  { id: "nagad", label: "Nagad", icon: Smartphone, color: "text-orange-500" },
-  { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, color: "text-primary" },
-  { id: "card", label: "Card Payment", labelBn: "কার্ড পেমেন্ট", icon: CreditCard, color: "text-primary" },
+  { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", ready: true },
+  { id: "bkash", label: "bKash", labelBn: "বিকাশ", logo: bkashLogo, desc: "bKash Tokenized Payment", ready: false },
+  { id: "nagad", label: "Nagad", labelBn: "নগদ", logo: nagadLogo, desc: "Nagad Digital Payment", ready: false },
+  { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, desc: "Manual Bank Transfer", ready: true },
 ];
 
 const Checkout = () => {
   const { items, clearCart, removeItem } = useCart();
-  const { lang, tr } = useLanguage();
+  const { lang } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -71,7 +75,7 @@ const Checkout = () => {
 
       // Create invoice
       const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
-      const { error: invoiceError } = await supabase.from("invoices").insert({
+      const { data: invoiceData, error: invoiceError } = await supabase.from("invoices").insert({
         user_id: user.id,
         invoice_number: invoiceNumber,
         amount_bdt: totalBdt,
@@ -79,17 +83,105 @@ const Checkout = () => {
         status: "unpaid" as const,
         payment_method: selectedPayment,
         due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-      });
+      }).select("id").single();
+
       if (invoiceError) throw invoiceError;
 
-      setOrderPlaced(true);
-      clearCart();
-      toast({
-        title: lang === "bn" ? "অর্ডার সফল!" : "Order Placed!",
-        description: lang === "bn"
-          ? `ইনভয়েস নম্বর: ${invoiceNumber}`
-          : `Invoice: ${invoiceNumber}`,
-      });
+      const invoiceId = invoiceData.id;
+
+      // Get user profile for payment
+      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+
+      // Route to payment gateway
+      if (selectedPayment === "sslcommerz") {
+        const { data, error } = await supabase.functions.invoke("sslcommerz-init", {
+          body: {
+            invoice_id: invoiceId,
+            amount: totalBdt,
+            customer_name: profile?.full_name || "Customer",
+            customer_email: user.email,
+            customer_phone: profile?.phone || "01700000000",
+            description: `Domain: ${items.map((i) => i.domain).join(", ")}`,
+          },
+        });
+
+        if (error) throw error;
+
+        if (data?.gateway_url) {
+          clearCart();
+          if (data.is_sandbox) {
+            toast({
+              title: "🧪 Sandbox Mode",
+              description: lang === "bn"
+                ? "এটি টেস্ট পেমেন্ট। লাইভ পেমেন্টের জন্য credentials যোগ করুন।"
+                : "This is a test payment. Add live credentials for real payments.",
+            });
+          }
+          // Redirect to SSLCommerz
+          window.location.href = data.gateway_url;
+          return;
+        } else {
+          throw new Error(data?.error || "Failed to create payment session");
+        }
+      } else if (selectedPayment === "bkash") {
+        const { data, error } = await supabase.functions.invoke("bkash-init", {
+          body: {
+            invoice_id: invoiceId,
+            amount: totalBdt,
+            payer_reference: user.email,
+          },
+        });
+
+        if (error || data?.error) {
+          if (data?.is_sandbox) {
+            toast({
+              title: "⚠️ bKash Not Configured",
+              description: data?.message || "bKash credentials not yet configured",
+              variant: "destructive",
+            });
+            setLoading(false);
+            return;
+          }
+          throw new Error(data?.error || error?.message);
+        }
+
+        if (data?.bkash_url) {
+          clearCart();
+          window.location.href = data.bkash_url;
+          return;
+        }
+      } else if (selectedPayment === "nagad") {
+        const { data, error } = await supabase.functions.invoke("nagad-init", {
+          body: {
+            invoice_id: invoiceId,
+            amount: totalBdt,
+          },
+        });
+
+        if (error || data?.error) {
+          if (data?.is_sandbox) {
+            toast({
+              title: "⚠️ Nagad Not Configured",
+              description: data?.message || "Nagad credentials not yet configured",
+              variant: "destructive",
+            });
+            setLoading(false);
+            return;
+          }
+          throw new Error(data?.error || error?.message);
+        }
+      } else if (selectedPayment === "bank") {
+        // Manual bank transfer - just mark as pending
+        setOrderPlaced(true);
+        clearCart();
+        toast({
+          title: lang === "bn" ? "অর্ডার সফল!" : "Order Placed!",
+          description: lang === "bn"
+            ? `ইনভয়েস: ${invoiceNumber}। ব্যাংক ট্রান্সফারের পর আমাদের জানান।`
+            : `Invoice: ${invoiceNumber}. Notify us after bank transfer.`,
+        });
+        return;
+      }
     } catch (err: any) {
       console.error("Order error:", err);
       toast({
@@ -118,10 +210,29 @@ const Checkout = () => {
               {lang === "bn" ? "অর্ডার সফল হয়েছে!" : "Order Placed Successfully!"}
             </h1>
             <p className="text-sm text-muted-foreground mb-6">
-              {lang === "bn"
-                ? "আপনার অর্ডার প্রসেস করা হচ্ছে। পেমেন্ট সম্পন্ন করতে ড্যাশবোর্ডে যান।"
-                : "Your order is being processed. Visit your dashboard to complete payment."}
+              {selectedPayment === "bank"
+                ? lang === "bn"
+                  ? "অনুগ্রহ করে নিচের ব্যাংক অ্যাকাউন্টে টাকা পাঠান এবং আমাদের জানান।"
+                  : "Please transfer the amount to our bank account and notify us."
+                : lang === "bn"
+                  ? "আপনার অর্ডার প্রসেস করা হচ্ছে।"
+                  : "Your order is being processed."}
             </p>
+
+            {selectedPayment === "bank" && (
+              <div className="glass-card p-4 mb-6 text-left text-sm space-y-2">
+                <p className="font-semibold text-foreground">
+                  {lang === "bn" ? "ব্যাংক তথ্য:" : "Bank Details:"}
+                </p>
+                <div className="text-muted-foreground space-y-1 text-xs">
+                  <p>Bank: Dutch Bangla Bank Ltd</p>
+                  <p>Account: YessHost Technologies</p>
+                  <p>A/C No: 123-456-7890</p>
+                  <p>Branch: Dhaka Main</p>
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3 justify-center">
               <Link
                 to="/dashboard/billing"
@@ -211,25 +322,65 @@ const Checkout = () => {
             <div className="glass-card-elevated rounded-xl p-5">
               <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-primary" />
-                {lang === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method"}
+                {lang === "bn" ? "পেমেন্ট পদ্ধতি নির্বাচন করুন" : "Select Payment Method"}
               </h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 {paymentMethods.map((method) => (
                   <button
                     key={method.id}
                     onClick={() => setSelectedPayment(method.id)}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
                       selectedPayment === method.id
                         ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/30 hover:bg-secondary/30"
                     }`}
                   >
-                    <method.icon className={`w-5 h-5 ${method.color}`} />
-                    <span className="text-sm font-medium text-foreground">
-                      {lang === "bn" && method.labelBn ? method.labelBn : method.label}
-                    </span>
+                    {method.logo ? (
+                      <img src={method.logo} alt={method.label} className="w-10 h-10 object-contain rounded-lg" />
+                    ) : method.icon ? (
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <method.icon className="w-5 h-5 text-primary" />
+                      </div>
+                    ) : null}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-foreground">
+                          {lang === "bn" ? method.labelBn : method.label}
+                        </span>
+                        {!method.ready && (
+                          <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                            {lang === "bn" ? "শীঘ্রই আসছে" : "Coming Soon"}
+                          </span>
+                        )}
+                        {method.id === "sslcommerz" && (
+                          <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                            🧪 Sandbox
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{method.desc}</p>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      selectedPayment === method.id
+                        ? "border-primary bg-primary"
+                        : "border-border"
+                    }`}>
+                      {selectedPayment === method.id && (
+                        <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                      )}
+                    </div>
                   </button>
                 ))}
+              </div>
+
+              {/* Sandbox notice */}
+              <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                <p className="text-[11px] text-muted-foreground">
+                  {lang === "bn"
+                    ? "বর্তমানে SSLCommerz Sandbox (টেস্ট) মোডে চলছে। লাইভ পেমেন্টের জন্য মার্চেন্ট credentials প্রয়োজন।"
+                    : "SSLCommerz is currently in Sandbox (test) mode. Merchant credentials needed for live payments."}
+                </p>
               </div>
             </div>
           </div>
@@ -274,14 +425,18 @@ const Checkout = () => {
 
               <button
                 onClick={handlePlaceOrder}
-                disabled={loading}
+                disabled={loading || !selectedPayment}
                 className="w-full flex items-center justify-center gap-2 gradient-primary text-primary-foreground py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    {lang === "bn" ? "অর্ডার দিন" : "Place Order"}
+                    {selectedPayment === "sslcommerz"
+                      ? lang === "bn" ? "পেমেন্ট করুন" : "Pay Now"
+                      : selectedPayment === "bank"
+                        ? lang === "bn" ? "অর্ডার দিন" : "Place Order"
+                        : lang === "bn" ? "পেমেন্ট করুন" : "Pay Now"}
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
