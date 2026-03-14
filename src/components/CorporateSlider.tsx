@@ -87,7 +87,7 @@ const CorporateSlider = () => {
   }, [next]);
 
   return (
-    <section ref={sectionRef} className="relative w-full h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
+    <section ref={sectionRef} className="relative w-full h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-visible mb-16">
       {/* Slides */}
       {slides.map((slide, i) => (
         <div
