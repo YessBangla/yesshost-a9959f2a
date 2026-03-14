@@ -125,6 +125,7 @@ const DashboardLayout = () => {
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex-1" />
+          <NotificationBell />
           <span className="text-sm text-muted-foreground hidden sm:block">{profile?.full_name || user?.email}</span>
           <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
             {(profile?.full_name || "U").charAt(0).toUpperCase()}
