@@ -1,32 +1,33 @@
 import { motion } from "framer-motion";
 
 const servers = [
-  { location: "New York, US", status: "operational", latency: "12ms", load: 34 },
-  { location: "Frankfurt, DE", status: "operational", latency: "18ms", load: 52 },
-  { location: "Singapore, SG", status: "operational", latency: "28ms", load: 41 },
-  { location: "Tokyo, JP", status: "operational", latency: "35ms", load: 27 },
-  { location: "São Paulo, BR", status: "operational", latency: "42ms", load: 19 },
+  { location: "Canada", status: "operational", latency: "12ms", load: 34 },
+  { location: "United States", status: "operational", latency: "18ms", load: 52 },
+  { location: "Finland", status: "operational", latency: "28ms", load: 41 },
+  { location: "India", status: "operational", latency: "35ms", load: 27 },
+  { location: "Australia", status: "operational", latency: "42ms", load: 19 },
 ];
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const ServerStatus = () => {
   return (
-    <section id="status" className="py-[20vh] relative">
+    <section id="status" className="py-[15vh] relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <p className="text-primary text-sm font-mono uppercase tracking-widest mb-4">Network</p>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tighter mb-4">
-            Global infrastructure.
+          <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tighter mb-4">
+            Our Data Centers Location
           </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            5 data centers across 4 continents. Real-time status monitoring.
+          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+            YessHost offers a low latency worldwide network, enabling you to deploy your
+            service infrastructure in close proximity to your customer base.
           </p>
         </motion.div>
 

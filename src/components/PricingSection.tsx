@@ -1,75 +1,103 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { useState } from "react";
+
+const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const plans = [
   {
-    name: "Starter",
-    price: "4.99",
-    description: "Perfect for personal sites and blogs.",
+    name: "Cloud Starter",
+    subtitle: "Medium traffic personal sites",
+    monthly: "১,৫৯৯",
+    yearly: "৫,৯৯৯",
     features: [
-      "50GB NVMe Storage",
-      "Unlimited Bandwidth",
+      "10 Hosted Domains",
+      "25 GB RAID 10 Storage",
+      "200 GB Bandwidth",
+      "1 Free Domain included",
+      "Super Fast SSD Storage",
       "Free SSL Certificate",
-      "1 Website",
-      "Weekly Backups",
-      "Email Support",
+      "99.95% Uptime",
+      "24/7 Phone Support",
     ],
     highlighted: false,
   },
   {
-    name: "Pro",
-    price: "19.99",
-    description: "For growing businesses and traffic.",
+    name: "Cloud Business",
+    subtitle: "High traffic corporate sites",
+    monthly: "৪,৯৯৯",
+    yearly: "১৫,৯৯৯",
     features: [
-      "100GB NVMe Storage",
-      "Unlimited Bandwidth",
-      "Free SSL + Dedicated IP",
-      "Unlimited Websites",
-      "Daily Backups",
-      "Priority Support",
-      "LiteSpeed Cache",
-      "Staging Environment",
+      "30 Hosted Domains",
+      "75 GB RAID 10 Storage",
+      "700 GB Bandwidth",
+      "3 Free Domain included",
+      "Super Fast SSD Storage",
+      "Free SSL Certificate",
+      "99.95% Uptime",
+      "24/7 Phone Support",
     ],
     highlighted: true,
   },
   {
-    name: "Enterprise",
-    price: "49.99",
-    description: "Mission-critical applications.",
+    name: "Cloud Enterprise",
+    subtitle: "Enterprise content management",
+    monthly: "৬,৯৯৯",
+    yearly: "২৫,৯৯৯",
     features: [
-      "500GB NVMe Storage",
-      "10Gbps Uplink",
-      "Free SSL + Dedicated IP",
-      "Unlimited Websites",
-      "Real-time Backups",
+      "60 Hosted Domains",
+      "175 GB RAID 10 Storage",
+      "1500 GB Bandwidth",
+      "6 Free Domain included",
+      "Super Fast SSD Storage",
+      "Free SSL Certificate",
+      "99.95% Uptime",
       "24/7 Phone Support",
-      "Custom Firewall Rules",
-      "SLA Guarantee",
     ],
     highlighted: false,
   },
 ];
 
-const brandCurve = [0.2, 0.8, 0.2, 1] as const;
-
 const PricingSection = () => {
+  const [isYearly, setIsYearly] = useState(false);
+
   return (
-    <section id="pricing" className="py-[20vh] relative">
+    <section id="pricing" className="py-[15vh] relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <p className="text-primary text-sm font-mono uppercase tracking-widest mb-4">Pricing</p>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tighter mb-4">
-            Transparent pricing.
+          <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tighter mb-4">
+            Managed Hosting Price
           </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            No hidden fees. No surprise charges. Scale when you're ready.
+          <p className="text-muted-foreground text-base max-w-xl mx-auto mb-8">
+            Professional hosting at an affordable price. Transparent pricing, no hidden fees.
           </p>
+
+          {/* Toggle */}
+          <div className="inline-flex items-center gap-3 bg-secondary/60 rounded-full p-1 border border-border">
+            <button
+              onClick={() => setIsYearly(false)}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                !isYearly ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setIsYearly(true)}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                isYearly ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+              }`}
+            >
+              Yearly
+            </button>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -89,17 +117,17 @@ const PricingSection = () => {
               style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.5)" }}
             >
               {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
-                  Most Popular
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full whitespace-nowrap">
+                  Popular
                 </div>
               )}
               <div className="rounded-[12px] p-4 bg-background/40">
                 <h3 className="text-primary font-mono text-sm uppercase tracking-widest">{plan.name}</h3>
-                <p className="text-4xl font-bold mt-2 tabular-nums text-foreground">
-                  ${plan.price}
-                  <span className="text-sm text-muted-foreground font-normal">/mo</span>
+                <p className="text-3xl md:text-4xl font-bold mt-2 tabular-nums text-foreground">
+                  ৳{isYearly ? plan.yearly : plan.monthly}
+                  <span className="text-sm text-muted-foreground font-normal">/{isYearly ? "yr" : "mo"}</span>
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
+                <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>
               </div>
               <ul className="mt-6 space-y-3">
                 {plan.features.map((feature) => (
@@ -116,7 +144,7 @@ const PricingSection = () => {
                     : "bg-card text-foreground border border-border hover:border-primary/30"
                 }`}
               >
-                Get Started
+                Purchase Now
               </button>
             </motion.div>
           ))}
