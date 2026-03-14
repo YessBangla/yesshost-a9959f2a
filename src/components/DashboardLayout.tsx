@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
-  UserCircle, LogOut, ChevronLeft, Menu, Shield
+  UserCircle, LogOut, ChevronLeft, Menu, Shield, ShoppingBag
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
