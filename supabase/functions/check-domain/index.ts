@@ -32,23 +32,28 @@ interface WhoisInfo {
   nameservers?: string[];
 }
 
-async function loadPricesFromDb(): Promise<Record<string, { bdt: string; usd: string }>> {
+async function loadPricesFromDb(): Promise<Record<string, { bdt: string; usd: string; renewal_bdt: string }>> {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const client = createClient(supabaseUrl, supabaseKey);
-    const { data } = await client.from("domain_pricing").select("ext, registration_bdt").eq("is_active", true);
+    const { data } = await client.from("domain_pricing").select("ext, registration_bdt, renewal_bdt").eq("is_active", true);
     if (data && data.length > 0) {
-      const prices: Record<string, { bdt: string; usd: string }> = {};
+      const prices: Record<string, { bdt: string; usd: string; renewal_bdt: string }> = {};
       for (const row of data) {
-        prices[row.ext] = { bdt: row.registration_bdt, usd: "N/A" };
+        prices[row.ext] = { bdt: row.registration_bdt, usd: "N/A", renewal_bdt: row.renewal_bdt };
       }
       return prices;
     }
   } catch (e) {
     console.error("Failed to load prices from DB:", e);
   }
-  return FALLBACK_PRICES;
+  // Fallback with no renewal info
+  const fallback: Record<string, { bdt: string; usd: string; renewal_bdt: string }> = {};
+  for (const [ext, p] of Object.entries(FALLBACK_PRICES)) {
+    fallback[ext] = { ...p, renewal_bdt: p.bdt };
+  }
+  return fallback;
 }
 
 async function checkDomainAvailability(domain: string): Promise<boolean> {
@@ -165,13 +170,14 @@ serve(async (req) => {
       checkList.map(async (ext) => {
         const fullDomain = `${name}${ext}`;
         const available = await checkDomainAvailability(fullDomain);
-        const price = PRICES[ext] || { bdt: "N/A", usd: "N/A" };
+        const price = PRICES[ext] || { bdt: "N/A", usd: "N/A", renewal_bdt: "N/A" };
         return {
           domain: fullDomain,
           ext,
           available,
           price_bdt: price.bdt,
           price_usd: price.usd,
+          renewal_bdt: price.renewal_bdt,
         };
       })
     );

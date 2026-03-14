@@ -20,6 +20,7 @@ interface DomainResult {
   available: boolean;
   price_bdt: string;
   price_usd: string;
+  renewal_bdt?: string;
 }
 
 const staticDomainPrices = [
@@ -170,9 +171,16 @@ const DomainSearch = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-sm font-bold text-foreground">
-                              ৳{result.price_bdt}<span className="text-[10px] text-muted-foreground font-normal">/{lang === "bn" ? "বছর" : "yr"}</span>
-                            </span>
+                            <div className="text-right">
+                              <span className="text-sm font-bold text-foreground">
+                                ৳{result.price_bdt}<span className="text-[10px] text-muted-foreground font-normal">/{lang === "bn" ? "বছর" : "yr"}</span>
+                              </span>
+                              {result.renewal_bdt && (
+                                <p className="text-[10px] text-muted-foreground">
+                                  {lang === "bn" ? "রিনিউয়াল:" : "Renew:"} ৳{result.renewal_bdt}/{lang === "bn" ? "বছর" : "yr"}
+                                </p>
+                              )}
+                            </div>
                             {result.available ? (
                               isInCart(result.domain) ? (
                                 <span className="flex items-center gap-1.5 bg-secondary text-foreground px-3 py-1.5 rounded-lg text-xs font-semibold border border-border">
