@@ -286,6 +286,16 @@ const AdminLiveChat = () => {
                     </div>
                   </div>
                 ))}
+                {visitorTyping && (
+                  <div className="flex justify-start px-4 pb-2">
+                    <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2 flex items-center gap-1.5">
+                      <span className="text-[10px] text-muted-foreground mr-1">টাইপ করছে</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Reply input */}
@@ -295,7 +305,7 @@ const AdminLiveChat = () => {
                     <input
                       type="text"
                       value={input}
-                      onChange={(e) => setInput(e.target.value)}
+                      onChange={(e) => { setInput(e.target.value); broadcastAdminTyping(); }}
                       onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendReply()}
                       placeholder="উত্তর লিখুন..."
                       maxLength={1000}
