@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
 import { Mail, Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -5,11 +6,35 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const FooterSection = () => {
   const { tr } = useLanguage();
 
-  const footerLinks = {
-    [tr("footer.hosting")]: [tr("nav.basicHosting"), tr("nav.proHosting"), tr("nav.premiumHosting"), tr("nav.bdixHosting"), tr("nav.reseller")],
-    [tr("footer.services")]: [tr("footer.domainReg"), tr("footer.vpsServer"), tr("footer.dedicatedServer"), tr("nav.emailHosting"), tr("footer.radioHosting"), tr("footer.graphicsDesign")],
-    [tr("footer.support")]: [tr("footer.knowledgeBase"), tr("footer.contactUs"), tr("footer.supportTicket"), tr("footer.liveChat")],
-    [tr("footer.company")]: [tr("footer.aboutUs"), tr("footer.affiliate"), tr("footer.tos"), tr("footer.refund"), tr("footer.privacy")],
+  const footerLinks: Record<string, { label: string; href: string }[]> = {
+    [tr("footer.hosting")]: [
+      { label: tr("nav.basicHosting"), href: "/services/basic-hosting" },
+      { label: tr("nav.proHosting"), href: "/services/pro-hosting" },
+      { label: tr("nav.premiumHosting"), href: "/services/premium-hosting" },
+      { label: tr("nav.bdixHosting"), href: "/services/bdix-hosting" },
+      { label: tr("nav.reseller"), href: "/services/linux-reseller" },
+    ],
+    [tr("footer.services")]: [
+      { label: tr("footer.domainReg"), href: "/services/domain" },
+      { label: tr("footer.vpsServer"), href: "/services/usa-vps" },
+      { label: tr("footer.dedicatedServer"), href: "/services/dedicated" },
+      { label: tr("nav.emailHosting"), href: "/services/email-hosting" },
+      { label: tr("footer.radioHosting"), href: "/services/radio-hosting" },
+      { label: tr("footer.graphicsDesign"), href: "/services/graphics-design" },
+    ],
+    [tr("footer.support")]: [
+      { label: tr("footer.knowledgeBase"), href: "/knowledge-base" },
+      { label: tr("footer.contactUs"), href: "/contact" },
+      { label: tr("footer.supportTicket"), href: "/dashboard/support" },
+      { label: tr("footer.liveChat"), href: "/contact" },
+    ],
+    [tr("footer.company")]: [
+      { label: tr("footer.aboutUs"), href: "/about" },
+      { label: tr("footer.affiliate"), href: "/affiliate" },
+      { label: tr("footer.tos"), href: "/terms" },
+      { label: tr("footer.refund"), href: "/refund" },
+      { label: tr("footer.privacy"), href: "/privacy" },
+    ],
   };
 
   const payments = ["bKash", "Nagad", "Rocket", "Visa", "Mastercard"];
@@ -38,10 +63,10 @@ const FooterSection = () => {
               <h4 className="text-sm font-bold text-foreground mb-4">{title}</h4>
               <ul className="space-y-2.5">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {link}
-                    </a>
+                  <li key={link.label}>
+                    <Link to={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

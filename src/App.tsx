@@ -25,6 +25,14 @@ import AdminUsers from "./pages/admin/Users";
 import AdminServices from "./pages/admin/Services";
 import AdminBilling from "./pages/admin/Billing";
 import AdminTickets from "./pages/admin/Tickets";
+import ServiceDetail from "./pages/services/ServiceDetail";
+import About from "./pages/company/About";
+import Contact from "./pages/company/Contact";
+import KnowledgeBase from "./pages/company/KnowledgeBase";
+import Affiliate from "./pages/company/Affiliate";
+import Terms from "./pages/legal/Terms";
+import Privacy from "./pages/legal/Privacy";
+import Refund from "./pages/legal/Refund";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +51,21 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+
+            {/* Service detail pages */}
+            <Route path="/services/:slug" element={<ServiceDetail />} />
+
+            {/* Company pages */}
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/knowledge-base" element={<KnowledgeBase />} />
+            <Route path="/affiliate" element={<Affiliate />} />
+
+            {/* Legal pages */}
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/refund" element={<Refund />} />
+
             <Route
               path="/dashboard"
               element={
