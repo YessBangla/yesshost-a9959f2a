@@ -24,6 +24,7 @@ type Chat = {
   id: string;
   visitor_name: string;
   visitor_email: string | null;
+  visitor_phone: string | null;
   status: string;
   created_at: string;
   updated_at: string;
@@ -200,7 +201,7 @@ const AdminLiveChat = () => {
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-muted-foreground truncate">{c.visitor_email || "—"}</span>
+                    <span className="text-[10px] text-muted-foreground truncate">{c.visitor_email || "—"} • {c.visitor_phone || ""}</span>
                     <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                       <Clock className="w-3 h-3" />
                       {timeAgo(c.updated_at)}
@@ -227,7 +228,7 @@ const AdminLiveChat = () => {
               <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
                 <div>
                   <p className="text-sm font-bold text-foreground">{selected.visitor_name}</p>
-                  <p className="text-[10px] text-muted-foreground">{selected.visitor_email || "ইমেইল নেই"} • {formatTime(selected.created_at)}</p>
+                  <p className="text-[10px] text-muted-foreground">{selected.visitor_email || "ইমেইল নেই"} • {selected.visitor_phone || "ফোন নেই"} • {formatTime(selected.created_at)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {selected.status === "open" && (

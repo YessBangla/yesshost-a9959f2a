@@ -21,6 +21,7 @@ const LiveChatWidget = () => {
   const [sending, setSending] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [started, setStarted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { lang } = useLanguage();
@@ -68,10 +69,10 @@ const LiveChatWidget = () => {
   }, [messages]);
 
   const startChat = async () => {
-    if (!name.trim()) return;
+    if (!name.trim() || !email.trim() || !phone.trim()) return;
     const { data, error } = await supabase
       .from("live_chats")
-      .insert({ visitor_name: name.trim(), visitor_email: email.trim() || null })
+      .insert({ visitor_name: name.trim(), visitor_email: email.trim(), visitor_phone: phone.trim() })
       .select("id")
       .single();
     if (error || !data) return;
@@ -110,6 +111,7 @@ const LiveChatWidget = () => {
     setStarted(false);
     setName("");
     setEmail("");
+    setPhone("");
     setOpen(false);
   };
 
@@ -186,13 +188,21 @@ const LiveChatWidget = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder={bn ? "ইমেইল (ঐচ্ছিক)" : "Email (optional)"}
+                    placeholder={bn ? "ইমেইল *" : "Email *"}
                     maxLength={255}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                  />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder={bn ? "ফোন নাম্বার *" : "Phone number *"}
+                    maxLength={20}
                     className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
                   />
                   <button
                     onClick={startChat}
-                    disabled={!name.trim()}
+                    disabled={!name.trim() || !email.trim() || !phone.trim()}
                     className="w-full py-2.5 gradient-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
                   >
                     {bn ? "চ্যাট শুরু করুন" : "Start Chat"}
