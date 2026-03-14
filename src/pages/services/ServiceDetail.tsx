@@ -157,19 +157,7 @@ const ServiceDetail = () => {
     }));
   }, [serviceInfo, isBn]);
 
-  const addPlanToCart = (plan: any) => {
-    const cartId = `hosting-${plan.id}`;
-    addItem({
-      id: cartId,
-      type: "hosting",
-      name: plan.name,
-      description: `${title} • ${plan.subtitle || (isBn ? "মাসিক" : "Monthly")}`,
-      price_bdt: plan.price_bdt,
-      plan_id: plan.id,
-      billing_cycle: "monthly",
-      category: slug || "",
-    });
-  };
+  // addPlanToCart moved to PlanCard component
 
   if (loading) {
     return (
