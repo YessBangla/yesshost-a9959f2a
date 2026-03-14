@@ -85,11 +85,12 @@ const AdminCMS = () => {
   const tabs: { key: Tab; label: string; labelEn: string; icon: typeof FileText; count: number }[] = [
     { key: "content", label: "সাইট কন্টেন্ট", labelEn: "Site Content", icon: Layout, count: contents.length },
     { key: "plans", label: "প্রাইসিং", labelEn: "Pricing", icon: FileText, count: plans.length },
+    { key: "domains", label: "ডোমেইন মূল্য", labelEn: "Domain Pricing", icon: Globe, count: domainPrices.length },
     { key: "testimonials", label: "টেস্টিমোনিয়াল", labelEn: "Testimonials", icon: MessageSquare, count: testimonials.length },
     { key: "faqs", label: "FAQ", labelEn: "FAQs", icon: HelpCircle, count: faqs.length },
   ];
 
-  const tableForTab: Record<Tab, string> = { content: "site_content", plans: "pricing_plans", testimonials: "testimonials", faqs: "faqs" };
+  const tableForTab: Record<Tab, string> = { content: "site_content", plans: "pricing_plans", testimonials: "testimonials", faqs: "faqs", domains: "domain_pricing" };
 
   const InputField = ({ label, value, onChange, multiline }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean }) => (
     <div>
