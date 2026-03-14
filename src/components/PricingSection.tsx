@@ -169,12 +169,18 @@ const PricingSection = () => {
                 {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
 
                 <div className="flex items-baseline gap-1 my-4">
-                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{tr("pricing.mo")}</span>
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">
+                    ৳{billingCycle === "yearly" && plan.annual ? plan.annual : plan.price}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {billingCycle === "yearly" ? (isBn ? "/বছর" : "/yr") : tr("pricing.mo")}
+                  </span>
                 </div>
 
-                {plan.annual && (
-                  <p className="text-xs text-muted-foreground mb-4">৳{plan.annual} {tr("pricing.billedAnnually")}</p>
+                {billingCycle === "monthly" && plan.annual && (
+                  <p className="text-xs text-primary font-medium mb-4">
+                    💰 {isBn ? `বাৎসরিকে ৳${plan.annual}` : `৳${plan.annual} if billed yearly`}
+                  </p>
                 )}
 
                 <ul className="space-y-3 mb-8">
@@ -189,7 +195,7 @@ const PricingSection = () => {
                 </ul>
 
                 {(() => {
-                  const cartId = plan.id ? `hosting-${plan.id}-monthly` : "";
+                  const cartId = plan.id ? `hosting-${plan.id}-${billingCycle}` : "";
                   const inCart = cartId ? isInCart(cartId) : false;
                   
                   if (inCart) {
@@ -205,14 +211,15 @@ const PricingSection = () => {
                     <button
                       onClick={() => {
                         if (plan.id) {
+                          const price = billingCycle === "yearly" && plan.annual ? plan.annual : plan.price;
                           addItem({
                             id: cartId,
                             type: "hosting",
                             name: plan.name,
-                            description: `${plan.subtitle || plan.name} • ${isBn ? "মাসিক" : "Monthly"}`,
-                            price_bdt: plan.price,
+                            description: `${plan.subtitle || plan.name} • ${billingCycle === "yearly" ? (isBn ? "বাৎসরিক" : "Yearly") : (isBn ? "মাসিক" : "Monthly")}`,
+                            price_bdt: price,
                             plan_id: plan.id,
-                            billing_cycle: "monthly",
+                            billing_cycle: billingCycle,
                             category: plan.category || activeTab,
                           });
                         }
