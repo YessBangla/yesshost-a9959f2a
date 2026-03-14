@@ -1,0 +1,252 @@
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const CHAT_STORAGE_KEY = "yesshost_live_chat_id";
+
+type Message = {
+  id: string;
+  sender_type: string;
+  message: string;
+  created_at: string;
+};
+
+const LiveChatWidget = () => {
+  const [open, setOpen] = useState(false);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [started, setStarted] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { lang } = useLanguage();
+  const bn = lang === "bn";
+
+  // Restore chat from localStorage
+  useEffect(() => {
+    const savedId = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (savedId) {
+      setChatId(savedId);
+      setStarted(true);
+      // Load existing messages
+      supabase
+        .from("live_chat_messages")
+        .select("*")
+        .eq("chat_id", savedId)
+        .order("created_at")
+        .then(({ data }) => setMessages((data as Message[]) || []));
+    }
+  }, []);
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!chatId) return;
+    const channel = supabase
+      .channel(`live-chat-${chatId}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "live_chat_messages",
+        filter: `chat_id=eq.${chatId}`,
+      }, (payload) => {
+        setMessages((prev) => {
+          if (prev.some(m => m.id === (payload.new as Message).id)) return prev;
+          return [...prev, payload.new as Message];
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [chatId]);
+
+  // Auto-scroll
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+
+  const startChat = async () => {
+    if (!name.trim()) return;
+    const { data, error } = await supabase
+      .from("live_chats")
+      .insert({ visitor_name: name.trim(), visitor_email: email.trim() || null })
+      .select("id")
+      .single();
+    if (error || !data) return;
+    const id = data.id;
+    localStorage.setItem(CHAT_STORAGE_KEY, id);
+    setChatId(id);
+    setStarted(true);
+
+    // Auto greeting
+    await supabase.from("live_chat_messages").insert({
+      chat_id: id,
+      sender_type: "admin",
+      message: bn
+        ? `হ্যালো ${name.trim()}! 👋 আপনাকে স্বাগতম। কিভাবে সাহায্য করতে পারি?`
+        : `Hello ${name.trim()}! 👋 Welcome! How can we help you?`,
+    });
+  };
+
+  const sendMessage = async () => {
+    const msg = input.trim();
+    if (!msg || !chatId) return;
+    setInput("");
+    setSending(true);
+    await supabase.from("live_chat_messages").insert({
+      chat_id: chatId,
+      sender_type: "visitor",
+      message: msg,
+    });
+    setSending(false);
+  };
+
+  const endChat = () => {
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    setChatId(null);
+    setMessages([]);
+    setStarted(false);
+    setName("");
+    setEmail("");
+    setOpen(false);
+  };
+
+  const formatTime = (d: string) =>
+    new Date(d).toLocaleTimeString(bn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" });
+
+  return (
+    <>
+      {/* Floating button */}
+      <AnimatePresence>
+        {!open && (
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            onClick={() => setOpen(true)}
+            className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:opacity-90 transition-opacity"
+          >
+            <MessageCircle className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Chat window */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-[340px] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden glass-card-elevated border border-border shadow-2xl flex flex-col"
+            style={{ height: "460px" }}
+          >
+            {/* Header */}
+            <div className="gradient-primary p-4 flex items-center justify-between shrink-0">
+              <div>
+                <p className="text-primary-foreground font-bold text-sm">YessHost Support</p>
+                <p className="text-primary-foreground/70 text-[10px]">
+                  {bn ? "সাধারণত কয়েক মিনিটে উত্তর দিই" : "We typically reply in a few minutes"}
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                {started && (
+                  <button onClick={endChat} className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground/70 text-[10px] font-medium transition-colors">
+                    {bn ? "শেষ" : "End"}
+                  </button>
+                )}
+                <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {!started ? (
+              /* Pre-chat form */
+              <div className="flex-1 p-5 flex flex-col justify-center">
+                <div className="text-center mb-6">
+                  <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center mx-auto mb-3">
+                    <MessageCircle className="w-7 h-7 text-primary-foreground" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">{bn ? "চ্যাট শুরু করুন" : "Start a Chat"}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{bn ? "আপনার তথ্য দিন" : "Enter your details"}</p>
+                </div>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={bn ? "আপনার নাম *" : "Your name *"}
+                    maxLength={100}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                  />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={bn ? "ইমেইল (ঐচ্ছিক)" : "Email (optional)"}
+                    maxLength={255}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                  />
+                  <button
+                    onClick={startChat}
+                    disabled={!name.trim()}
+                    className="w-full py-2.5 gradient-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
+                  >
+                    {bn ? "চ্যাট শুরু করুন" : "Start Chat"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Messages */}
+                <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {messages.map((m) => (
+                    <div key={m.id} className={`flex ${m.sender_type === "visitor" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
+                        m.sender_type === "visitor"
+                          ? "gradient-primary text-primary-foreground rounded-br-md"
+                          : "bg-secondary text-foreground rounded-bl-md"
+                      }`}>
+                        <p className="break-words whitespace-pre-wrap">{m.message}</p>
+                        <p className={`text-[9px] mt-1 ${m.sender_type === "visitor" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                          {formatTime(m.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Input */}
+                <div className="p-3 border-t border-border shrink-0">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                      placeholder={bn ? "মেসেজ লিখুন..." : "Type a message..."}
+                      maxLength={1000}
+                      className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                    />
+                    <button
+                      onClick={sendMessage}
+                      disabled={sending || !input.trim()}
+                      className="p-2.5 rounded-xl gradient-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-all shrink-0"
+                    >
+                      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+export default LiveChatWidget;
