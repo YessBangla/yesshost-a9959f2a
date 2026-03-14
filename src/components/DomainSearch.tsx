@@ -126,7 +126,7 @@ const DomainSearch = () => {
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           {result.available ? (
-                            <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                            <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
                           ) : (
                             <XCircle className="w-5 h-5 text-destructive shrink-0" />
                           )}
