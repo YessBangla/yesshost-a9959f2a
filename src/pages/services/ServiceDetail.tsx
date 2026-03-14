@@ -56,14 +56,12 @@ const ServiceDetail = () => {
 
   if (!serviceInfo && plans.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <PublicLayout>
         <div className="pt-24 pb-16 text-center">
           <h1 className="text-3xl font-bold text-foreground mb-4">{isBn ? "পেইজ পাওয়া যায়নি" : "Page Not Found"}</h1>
           <Link to="/" className="text-primary hover:underline">{isBn ? "হোমপেইজে ফিরুন" : "Go Home"}</Link>
         </div>
-        <FooterSection />
-      </div>
+      </PublicLayout>
     );
   }
 
