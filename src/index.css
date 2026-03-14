@@ -228,4 +228,13 @@
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-12px); }
   }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
 }
