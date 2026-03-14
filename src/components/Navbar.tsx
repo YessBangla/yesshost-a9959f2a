@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Phone, LogIn, Globe } from "lucide-react";
+import { Menu, X, ChevronDown, Phone, LogIn, Globe, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import logoWhite from "@/assets/logo-white.png";
 
 const Navbar = () => {
