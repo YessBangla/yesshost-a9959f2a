@@ -111,6 +111,7 @@ const AdminCMS = () => {
     switch (tab) {
       case "content": return { page: "home", section_key: "", title_bn: "", title_en: "", content_bn: "", content_en: "", is_active: true, sort_order: 0 };
       case "plans": return { category: "web", slug: "", name: "", price_bdt: "", annual_price_bdt: "", subtitle: "", features: "[]", is_highlighted: false, is_active: true, sort_order: 0 };
+      case "domains": return { ext: "", registration_bdt: "", renewal_bdt: "", transfer_bdt: "", is_popular: false, is_active: true, sort_order: 0 };
       case "testimonials": return { name: "", company: "", rating: 5, content_bn: "", content_en: "", is_active: true, sort_order: 0 };
       case "faqs": return { question_bn: "", question_en: "", answer_bn: "", answer_en: "", category: "general", is_active: true, sort_order: 0 };
     }
