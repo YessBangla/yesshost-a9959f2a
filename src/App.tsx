@@ -119,6 +119,7 @@ const App = () => (
               <Route path="cms" element={<AdminCMS />} />
               <Route path="themes" element={<AdminThemes />} />
               <Route path="coupons" element={<AdminCoupons />} />
+              <Route path="live-chat" element={<AdminLiveChat />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
