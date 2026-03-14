@@ -10,6 +10,118 @@ import PublicLayout from "@/components/PublicLayout";
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
 
+// Per-plan billing cycle selector component
+const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart }: any) => {
+  const [cycle, setCycle] = useState<"monthly" | "yearly">(plan.annual_price_bdt ? "yearly" : "monthly");
+  const features = Array.isArray(plan.features) ? plan.features : [];
+  const price = cycle === "yearly" && plan.annual_price_bdt ? plan.annual_price_bdt : plan.price_bdt;
+  const cartId = `hosting-${plan.id}-${cycle}`;
+  const inCart = isInCart(cartId);
+
+  const handleAdd = () => {
+    addItem({
+      id: cartId,
+      type: "hosting",
+      name: plan.name,
+      description: `${title} • ${cycle === "yearly" ? (isBn ? "বাৎসরিক" : "Yearly") : (isBn ? "মাসিক" : "Monthly")}`,
+      price_bdt: price,
+      plan_id: plan.id,
+      billing_cycle: cycle,
+      category: slug || "",
+    });
+  };
+
+  return (
+    <motion.div
+      key={plan.id}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: i * 0.1 }}
+      whileHover={{ y: -8 }}
+      className={`relative rounded-2xl overflow-hidden ${plan.is_highlighted ? "glass-card-elevated glow-border" : "glass-card"}`}
+    >
+      {plan.is_highlighted && <div className="absolute top-0 left-0 right-0 h-1 gradient-primary" />}
+      {plan.is_highlighted && (
+        <div className="absolute -top-0 right-4 flex items-center gap-1 px-3 py-1.5 gradient-primary text-primary-foreground text-xs font-bold rounded-b-lg">
+          <Star className="w-3 h-3 fill-current" /> {tr("pricing.popular")}
+        </div>
+      )}
+      <div className="p-8">
+        <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
+        {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
+
+        {/* Billing cycle toggle */}
+        {plan.annual_price_bdt && (
+          <div className="flex items-center gap-1 mt-4 p-1 rounded-xl bg-secondary/50 border border-border">
+            <button
+              onClick={() => setCycle("monthly")}
+              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                cycle === "monthly"
+                  ? "gradient-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {isBn ? "মাসিক" : "Monthly"}
+            </button>
+            <button
+              onClick={() => setCycle("yearly")}
+              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                cycle === "yearly"
+                  ? "gradient-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {isBn ? "বাৎসরিক" : "Yearly"}
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-baseline gap-1 my-4">
+          <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{price}</span>
+          <span className="text-sm text-muted-foreground">
+            {cycle === "yearly" ? (isBn ? "/বছর" : "/yr") : tr("pricing.mo")}
+          </span>
+        </div>
+
+        {cycle === "monthly" && plan.annual_price_bdt && (
+          <p className="text-xs text-primary font-medium mb-4">
+            💰 {isBn ? `বাৎসরিকে ৳${plan.annual_price_bdt}` : `৳${plan.annual_price_bdt} if billed yearly`}
+          </p>
+        )}
+
+        <ul className="space-y-3 mb-8">
+          {features.map((f: string) => (
+            <li key={f} className="flex items-center gap-3 text-sm text-muted-foreground">
+              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Check className="w-3 h-3 text-primary" />
+              </div>
+              {f}
+            </li>
+          ))}
+        </ul>
+        {inCart ? (
+          <div className="w-full py-3.5 font-semibold rounded-xl flex items-center justify-center gap-2 bg-secondary text-foreground border border-border">
+            <Check className="w-4 h-4 text-primary" />
+            {isBn ? "কার্টে যোগ হয়েছে" : "Added to Cart"}
+          </div>
+        ) : (
+          <button
+            onClick={handleAdd}
+            className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+              plan.is_highlighted
+                ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
+                : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
+            }`}
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {isBn ? "কার্টে যোগ করুন" : "Add to Cart"}
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
 const ServiceDetail = () => {
   const { slug } = useParams();
   const { lang, tr } = useLanguage();
@@ -45,19 +157,7 @@ const ServiceDetail = () => {
     }));
   }, [serviceInfo, isBn]);
 
-  const addPlanToCart = (plan: any) => {
-    const cartId = `hosting-${plan.id}`;
-    addItem({
-      id: cartId,
-      type: "hosting",
-      name: plan.name,
-      description: `${title} • ${plan.subtitle || (isBn ? "মাসিক" : "Monthly")}`,
-      price_bdt: plan.price_bdt,
-      plan_id: plan.id,
-      billing_cycle: "monthly",
-      category: slug || "",
-    });
-  };
+  // addPlanToCart moved to PlanCard component
 
   if (loading) {
     return (
@@ -113,67 +213,19 @@ const ServiceDetail = () => {
         {/* Plans */}
         <section className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {plans.map((plan, i) => {
-              const features = Array.isArray(plan.features) ? plan.features : [];
-              const cartId = `hosting-${plan.id}`;
-              const inCart = isInCart(cartId);
-              return (
-                <motion.div
-                  key={plan.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  whileHover={{ y: -8 }}
-                  className={`relative rounded-2xl overflow-hidden ${plan.is_highlighted ? "glass-card-elevated glow-border" : "glass-card"}`}
-                >
-                  {plan.is_highlighted && <div className="absolute top-0 left-0 right-0 h-1 gradient-primary" />}
-                  {plan.is_highlighted && (
-                    <div className="absolute -top-0 right-4 flex items-center gap-1 px-3 py-1.5 gradient-primary text-primary-foreground text-xs font-bold rounded-b-lg">
-                      <Star className="w-3 h-3 fill-current" /> {tr("pricing.popular")}
-                    </div>
-                  )}
-                  <div className="p-8">
-                    <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-                    {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
-                    <div className="flex items-baseline gap-1 my-4">
-                      <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{plan.price_bdt}</span>
-                      <span className="text-sm text-muted-foreground">{tr("pricing.mo")}</span>
-                    </div>
-                    {plan.annual_price_bdt && (
-                      <p className="text-xs text-muted-foreground mb-4">৳{plan.annual_price_bdt} {tr("pricing.billedAnnually")}</p>
-                    )}
-                    <ul className="space-y-3 mb-8">
-                      {features.map((f: string) => (
-                        <li key={f} className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <Check className="w-3 h-3 text-primary" />
-                          </div>
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                    {inCart ? (
-                      <div className="w-full py-3.5 font-semibold rounded-xl flex items-center justify-center gap-2 bg-secondary text-foreground border border-border">
-                        <Check className="w-4 h-4 text-primary" />
-                        {isBn ? "কার্টে যোগ হয়েছে" : "Added to Cart"}
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => addPlanToCart(plan)}
-                        className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                          plan.is_highlighted
-                            ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
-                            : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
-                        }`}
-                      >
-                        <ShoppingCart className="w-4 h-4" />
-                        {isBn ? "কার্টে যোগ করুন" : "Add to Cart"}
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
+            {plans.map((plan, i) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                i={i}
+                title={title}
+                slug={slug}
+                isBn={isBn}
+                tr={tr}
+                addItem={addItem}
+                isInCart={isInCart}
+              />
+            ))}
           </div>
         </section>
       </div>
