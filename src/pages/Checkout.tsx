@@ -47,8 +47,102 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
 
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    id: string;
+    code: string;
+    discount_type: "percentage" | "fixed";
+    discount_value: number;
+    max_discount_amount: number | null;
+  } | null>(null);
+  const [couponError, setCouponError] = useState("");
+
   const parseBdtPrice = (price: string): number => parseInt(price.replace(/[^\d]/g, ""), 10) || 0;
-  const totalBdt = items.reduce((sum, item) => sum + parseBdtPrice(item.price_bdt), 0);
+  const subtotalBdt = items.reduce((sum, item) => sum + parseBdtPrice(item.price_bdt), 0);
+
+  // Calculate discount
+  const discountAmount = appliedCoupon
+    ? appliedCoupon.discount_type === "percentage"
+      ? Math.min(
+          Math.round(subtotalBdt * appliedCoupon.discount_value / 100),
+          appliedCoupon.max_discount_amount ?? Infinity
+        )
+      : Math.min(appliedCoupon.discount_value, subtotalBdt)
+    : 0;
+  const totalBdt = subtotalBdt - discountAmount;
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+    setCouponError("");
+    setCouponLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("coupons")
+        .select("*")
+        .eq("code", code)
+        .eq("is_active", true)
+        .single();
+
+      if (error || !data) {
+        setCouponError(bn ? "কুপন কোড ভুল বা মেয়াদ শেষ" : "Invalid or expired coupon code");
+        setCouponLoading(false);
+        return;
+      }
+
+      // Check expiry
+      if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setCouponError(bn ? "কুপনের মেয়াদ শেষ হয়ে গেছে" : "Coupon has expired");
+        setCouponLoading(false);
+        return;
+      }
+
+      // Check max uses
+      if (data.max_uses !== null && data.used_count >= data.max_uses) {
+        setCouponError(bn ? "কুপন ব্যবহারের সীমা শেষ" : "Coupon usage limit reached");
+        setCouponLoading(false);
+        return;
+      }
+
+      // Check min order
+      if (data.min_order_amount && subtotalBdt < data.min_order_amount) {
+        setCouponError(
+          bn
+            ? `সর্বনিম্ন অর্ডার ৳${data.min_order_amount} প্রয়োজন`
+            : `Minimum order of ৳${data.min_order_amount} required`
+        );
+        setCouponLoading(false);
+        return;
+      }
+
+      setAppliedCoupon({
+        id: data.id,
+        code: data.code,
+        discount_type: data.discount_type as "percentage" | "fixed",
+        discount_value: Number(data.discount_value),
+        max_discount_amount: data.max_discount_amount ? Number(data.max_discount_amount) : null,
+      });
+      toast({
+        title: bn ? "কুপন প্রয়োগ হয়েছে!" : "Coupon Applied!",
+        description: data.discount_type === "percentage"
+          ? `${data.discount_value}% ${bn ? "ডিসকাউন্ট" : "discount"}`
+          : `৳${data.discount_value} ${bn ? "ছাড়" : "off"}`,
+      });
+    } catch {
+      setCouponError(bn ? "কুপন যাচাই করতে সমস্যা হয়েছে" : "Failed to validate coupon");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+  };
 
   const handlePlaceOrder = async () => {
     if (!user) {
