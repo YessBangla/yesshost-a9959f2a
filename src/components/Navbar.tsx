@@ -9,6 +9,7 @@ import logoWhite from "@/assets/logo-white.png";
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const { user } = useAuth();
   const { lang, setLang, tr } = useLanguage();
 
