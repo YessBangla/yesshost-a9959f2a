@@ -47,6 +47,13 @@ const AdminLiveChat = () => {
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Request notification permission
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
   // Fetch all chats
   useEffect(() => {
     supabase
@@ -58,15 +65,34 @@ const AdminLiveChat = () => {
         setLoading(false);
       });
 
-    // Realtime for new chats
-    const channel = supabase
+    // Realtime for new chats & visitor messages
+    const chatChannel = supabase
       .channel("admin-live-chats")
       .on("postgres_changes", { event: "*", schema: "public", table: "live_chats" }, () => {
         supabase.from("live_chats").select("*").order("updated_at", { ascending: false })
           .then(({ data }) => setChats((data as Chat[]) || []));
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    const msgChannel = supabase
+      .channel("admin-new-visitor-msgs")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "live_chat_messages",
+      }, (payload) => {
+        const msg = payload.new as Message;
+        if (msg.sender_type === "visitor") {
+          playNotificationSound();
+          showBrowserNotification("নতুন মেসেজ", msg.message.slice(0, 100));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(chatChannel);
+      supabase.removeChannel(msgChannel);
+    };
   }, []);
 
   // Load messages when chat selected
