@@ -19,7 +19,7 @@ const FooterSection = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           <div className="col-span-2">
-            <img src={logoWhite} alt="PutulHost" className="h-10 mb-4" />
+            <img src={logoWhite} alt="YessHost" className="h-10 mb-4" />
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               {tr("footer.desc")}
             </p>
