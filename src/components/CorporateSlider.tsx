@@ -55,6 +55,21 @@ const CorporateSlider = () => {
   const { lang } = useLanguage();
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (sectionRef.current) {
+        const rect = sectionRef.current.getBoundingClientRect();
+        if (rect.bottom > 0 && rect.top < window.innerHeight) {
+          setScrollY(-rect.top * 0.3);
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const goTo = useCallback((index: number) => {
     if (isTransitioning) return;
