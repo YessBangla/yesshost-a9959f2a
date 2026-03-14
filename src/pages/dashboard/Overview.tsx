@@ -108,6 +108,45 @@ const DashboardOverview = () => {
             </div>
           )}
         </div>
+
+        <div className="glass-card p-6 lg:col-span-2">
+          <h3 className="text-base font-bold text-foreground mb-4 flex items-center gap-2">
+            <Bell className="w-4 h-4 text-primary" />
+            {lang === "bn" ? "সাম্প্রতিক নোটিফিকেশন" : "Recent Notifications"}
+          </h3>
+          {recentNotifications.length === 0 ? (
+            <div className="text-center py-8">
+              <Bell className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
+                {lang === "bn" ? "কোনো নোটিফিকেশন নেই" : "No notifications yet"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {recentNotifications.map((n: any) => {
+                const icon = n.type === "payment_success" ? "✅" : n.type === "payment_failed" ? "❌" : "📢";
+                const ago = (() => {
+                  const mins = Math.floor((Date.now() - new Date(n.created_at).getTime()) / 60000);
+                  if (mins < 1) return lang === "bn" ? "এইমাত্র" : "Just now";
+                  if (mins < 60) return lang === "bn" ? `${mins} মিনিট আগে` : `${mins}m ago`;
+                  const hrs = Math.floor(mins / 60);
+                  if (hrs < 24) return lang === "bn" ? `${hrs} ঘন্টা আগে` : `${hrs}h ago`;
+                  return lang === "bn" ? `${Math.floor(hrs / 24)} দিন আগে` : `${Math.floor(hrs / 24)}d ago`;
+                })();
+                return (
+                  <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${!n.is_read ? "bg-primary/5 border border-primary/10" : "bg-secondary/30"}`}>
+                    <span className="text-lg mt-0.5">{icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">{n.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{n.message}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground/60 shrink-0 mt-1">{ago}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
