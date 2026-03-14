@@ -1,19 +1,21 @@
 import { motion } from "framer-motion";
-import { Check, Star, ArrowRight } from "lucide-react";
+import { Check, Star, ShoppingCart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 type Plan = {
+  id?: string;
   name: string;
   price: string;
   annual?: string;
   subtitle?: string;
   features: string[];
   highlighted?: boolean;
+  category?: string;
 };
 
 // Static fallback plans
@@ -42,7 +44,9 @@ const staticPlans: Record<string, Plan[]> = {
 
 const PricingSection = () => {
   const [activeTab, setActiveTab] = useState("web");
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const isBn = lang === "bn";
+  const { addItem, isInCart } = useCart();
   const [dbPlans, setDbPlans] = useState<any[]>([]);
 
   useEffect(() => {
@@ -62,12 +66,14 @@ const PricingSection = () => {
     const fromDb = dbPlans.filter(p => p.category === category);
     if (fromDb.length > 0) {
       return fromDb.map(p => ({
+        id: p.id,
         name: p.name,
         price: p.price_bdt,
         annual: p.annual_price_bdt || undefined,
         subtitle: p.subtitle || undefined,
         features: Array.isArray(p.features) ? p.features : [],
         highlighted: p.is_highlighted,
+        category,
       }));
     }
     return staticPlans[category] || [];
@@ -156,17 +162,46 @@ const PricingSection = () => {
                   ))}
                 </ul>
 
-                <Link
-                  to="/signup"
-                  className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                    plan.highlighted
-                      ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
-                      : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
-                  }`}
-                >
-                  {tr("pricing.orderNow")}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                {(() => {
+                  const cartId = plan.id ? `hosting-${plan.id}-monthly` : "";
+                  const inCart = cartId ? isInCart(cartId) : false;
+                  
+                  if (inCart) {
+                    return (
+                      <div className="w-full py-3.5 font-semibold rounded-xl flex items-center justify-center gap-2 bg-secondary text-foreground border border-border">
+                        <Check className="w-4 h-4 text-primary" />
+                        {isBn ? "কার্টে আছে" : "In Cart"}
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <button
+                      onClick={() => {
+                        if (plan.id) {
+                          addItem({
+                            id: cartId,
+                            type: "hosting",
+                            name: plan.name,
+                            description: `${plan.subtitle || plan.name} • ${isBn ? "মাসিক" : "Monthly"}`,
+                            price_bdt: plan.price,
+                            plan_id: plan.id,
+                            billing_cycle: "monthly",
+                            category: plan.category || activeTab,
+                          });
+                        }
+                      }}
+                      className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                        plan.highlighted
+                          ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
+                          : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
+                      }`}
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      {isBn ? "কার্টে যোগ করুন" : "Add to Cart"}
+                    </button>
+                  );
+                })()}
               </div>
             </motion.div>
           ))}
