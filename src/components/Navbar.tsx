@@ -152,10 +152,10 @@ const Navbar = () => {
         </div>
 
         <button
-          className="lg:hidden text-foreground p-2 rounded-lg hover:bg-secondary/60 transition-colors"
+          className="lg:hidden text-foreground p-1.5 rounded-lg hover:bg-secondary/60 transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          {mobileOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
       </div>
 
