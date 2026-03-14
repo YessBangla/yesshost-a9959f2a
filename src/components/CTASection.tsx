@@ -43,7 +43,7 @@ const CTASection = () => {
               <Zap className="w-4 h-4" />
               {text("cta_badge", "cta.needHelp")}
             </div>
-            <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-primary-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight text-primary-foreground mb-4">
               {text("cta_title", "cta.title")}
             </h2>
             <p className="text-base md:text-lg text-primary-foreground/80 max-w-xl mx-auto mb-8">
