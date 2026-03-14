@@ -3,14 +3,12 @@ import {
   ArrowLeft, Eye, ShoppingCart, Check, Star, Package, Server, Shield, Globe, ChevronRight,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
 
 const categoryLabels: Record<string, { bn: string; en: string }> = {
   business: { bn: "ব্যবসা/কর্পোরেট", en: "Business" },
@@ -24,13 +22,11 @@ const categoryLabels: Record<string, { bn: string; en: string }> = {
 const ThemeDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLanguage();
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { addItem, isInCart } = useCart();
   const bn = lang === "bn";
   const [theme, setTheme] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [includeHosting, setIncludeHosting] = useState(false);
-  const [ordering, setOrdering] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -51,31 +47,26 @@ const ThemeDetail = () => {
     ? theme.hosting_bundle_price_bdt
     : currentPrice;
 
-  const handleOrder = async () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    setOrdering(true);
-    const { error } = await supabase.from("theme_orders").insert({
-      user_id: user.id,
+  const cartId = theme ? `theme-${theme.id}${includeHosting ? "-bundle" : ""}` : "";
+
+  const handleAddToCart = () => {
+    if (!theme) return;
+    addItem({
+      id: cartId,
+      type: "theme",
+      name: theme.name,
+      description: includeHosting
+        ? (bn ? "থিম + হোস্টিং বান্ডেল" : "Theme + Hosting Bundle")
+        : (bn ? "ওয়েবসাইট থিম" : "Website Theme"),
+      price_bdt: String(totalPrice),
       theme_id: theme.id,
-      amount_bdt: totalPrice,
+      theme_slug: theme.slug,
       include_hosting: includeHosting,
-      status: "pending",
+      thumbnail_url: theme.thumbnail_url,
     });
-    setOrdering(false);
-    if (error) {
-      toast({ title: bn ? "ত্রুটি হয়েছে" : "Error occurred", variant: "destructive" });
-    } else {
-      toast({
-        title: bn ? "অর্ডার সফল!" : "Order placed!",
-        description: bn
-          ? "আমাদের টিম শীঘ্রই আপনার সাথে যোগাযোগ করবে।"
-          : "Our team will contact you shortly.",
-      });
-    }
   };
+
+  const inCart = isInCart(cartId);
 
   if (loading) {
     return (
@@ -123,38 +114,25 @@ const ThemeDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             {/* Left: Preview & Features */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-3 space-y-6">
-              {/* Thumbnail */}
               <div className="relative rounded-2xl overflow-hidden border border-border">
                 <img src={theme.thumbnail_url} alt={theme.name} className="w-full h-auto object-cover" />
                 {theme.preview_url && (
-                  <a
-                    href={theme.preview_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute bottom-4 right-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-lg"
-                  >
+                  <a href={theme.preview_url} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 right-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-lg">
                     <Eye className="w-4 h-4" /> {bn ? "লাইভ প্রিভিউ" : "Live Preview"}
                   </a>
                 )}
               </div>
-
-              {/* Description */}
               <div className="glass-card p-6">
                 <h2 className="text-lg font-bold text-foreground mb-3">{bn ? "বিবরণ" : "Description"}</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {bn ? theme.description_bn : theme.description_en}
-                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{bn ? theme.description_bn : theme.description_en}</p>
               </div>
-
-              {/* Features */}
               {features.length > 0 && (
                 <div className="glass-card p-6">
                   <h2 className="text-lg font-bold text-foreground mb-4">{bn ? "ফিচারসমূহ" : "Features"}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {features.map((f: string, i: number) => (
                       <div key={i} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-primary shrink-0" />
-                        {f}
+                        <Check className="w-4 h-4 text-primary shrink-0" />{f}
                       </div>
                     ))}
                   </div>
@@ -171,8 +149,6 @@ const ThemeDetail = () => {
                   </Badge>
                   <h1 className="text-2xl font-extrabold text-foreground">{theme.name}</h1>
                 </div>
-
-                {/* Price */}
                 <div className="flex items-baseline gap-3">
                   <span className="text-3xl font-extrabold text-primary">৳{currentPrice}</span>
                   {theme.discount_price_bdt && (
@@ -184,38 +160,26 @@ const ThemeDetail = () => {
                 {theme.hosting_bundle_price_bdt && (
                   <div
                     onClick={() => setIncludeHosting(!includeHosting)}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      includeHosting
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${includeHosting ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Package className="w-5 h-5 text-primary" />
-                        <span className="font-bold text-foreground text-sm">
-                          {bn ? "হোস্টিং বান্ডেল" : "Hosting Bundle"}
-                        </span>
+                        <span className="font-bold text-foreground text-sm">{bn ? "হোস্টিং বান্ডেল" : "Hosting Bundle"}</span>
                       </div>
-                      <span className="text-lg font-extrabold text-primary">
-                        ৳{theme.hosting_bundle_price_bdt}
-                      </span>
+                      <span className="text-lg font-extrabold text-primary">৳{theme.hosting_bundle_price_bdt}</span>
                     </div>
                     <div className="space-y-1.5 mt-3">
                       {bundleFeatures.map((f: string, i: number) => (
                         <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Check className="w-3 h-3 text-primary shrink-0" />
-                          {f}
+                          <Check className="w-3 h-3 text-primary shrink-0" />{f}
                         </div>
                       ))}
                     </div>
                     {includeHosting && (
                       <div className="mt-3 pt-3 border-t border-border">
                         <p className="text-xs font-semibold text-primary flex items-center gap-1">
-                          <Star className="w-3 h-3" />
-                          {bn
-                            ? `সাশ্রয় করুন ৳${currentPrice + (theme.hosting_bundle_price_bdt - currentPrice > 0 ? 0 : Math.abs(theme.hosting_bundle_price_bdt - currentPrice))}`
-                            : "Bundle selected!"}
+                          <Star className="w-3 h-3" />{bn ? "বান্ডেল নির্বাচিত!" : "Bundle selected!"}
                         </p>
                       </div>
                     )}
@@ -228,22 +192,24 @@ const ThemeDetail = () => {
                   <span className="text-2xl font-extrabold text-foreground">৳{totalPrice}</span>
                 </div>
 
-                {/* Order Button */}
-                <Button
-                  onClick={handleOrder}
-                  disabled={ordering}
-                  className="w-full gradient-primary text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg shadow-primary/20"
-                >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  {ordering
-                    ? (bn ? "প্রসেসিং..." : "Processing...")
-                    : (bn ? "অর্ডার করুন" : "Order Now")}
-                </Button>
+                {/* Add to Cart Button */}
+                {inCart ? (
+                  <div className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-secondary text-foreground border border-border font-semibold">
+                    <Check className="w-5 h-5 text-primary" />
+                    {bn ? "কার্টে যোগ হয়েছে" : "Added to Cart"}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleAddToCart}
+                    className="w-full gradient-primary text-primary-foreground py-4 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    {bn ? "কার্টে যোগ করুন" : "Add to Cart"}
+                  </button>
+                )}
 
                 <p className="text-xs text-center text-muted-foreground">
-                  {bn
-                    ? "অর্ডার করার পর আমাদের টিম আপনার সাথে যোগাযোগ করবে পেমেন্ট ও সেটআপের জন্য।"
-                    : "After ordering, our team will contact you for payment and setup."}
+                  {bn ? "কার্টে যোগ করে চেকআউট থেকে পেমেন্ট করুন।" : "Add to cart and pay from checkout."}
                 </p>
 
                 {/* Trust badges */}

@@ -1,19 +1,34 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+export type CartItemType = "domain" | "hosting" | "theme";
+
 export interface CartItem {
-  domain: string;
-  ext: string;
+  id: string; // unique key (domain name, plan slug, theme slug)
+  type: CartItemType;
+  name: string;
+  description?: string;
   price_bdt: string;
-  price_usd: string;
-  type: "domain";
+  price_usd?: string;
+  // domain specific
+  domain?: string;
+  ext?: string;
+  // hosting specific
+  plan_id?: string;
+  billing_cycle?: string;
+  category?: string;
+  // theme specific
+  theme_id?: string;
+  theme_slug?: string;
+  include_hosting?: boolean;
+  thumbnail_url?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (domain: string) => void;
+  removeItem: (id: string) => void;
   clearCart: () => void;
-  isInCart: (domain: string) => boolean;
+  isInCart: (id: string) => boolean;
   itemCount: number;
   isCartOpen: boolean;
   setCartOpen: (open: boolean) => void;
@@ -40,19 +55,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {
-      if (prev.some((i) => i.domain === item.domain)) return prev;
+      if (prev.some((i) => i.id === item.id)) return prev;
       return [...prev, item];
     });
     setCartOpen(true);
   };
 
-  const removeItem = (domain: string) => {
-    setItems((prev) => prev.filter((i) => i.domain !== domain));
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
   const clearCart = () => setItems([]);
 
-  const isInCart = (domain: string) => items.some((i) => i.domain === domain);
+  const isInCart = (id: string) => items.some((i) => i.id === id);
 
   return (
     <CartContext.Provider
