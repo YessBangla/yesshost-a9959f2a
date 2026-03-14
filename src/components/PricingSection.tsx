@@ -1,19 +1,21 @@
 import { motion } from "framer-motion";
-import { Check, Star, ArrowRight } from "lucide-react";
+import { Check, Star, ShoppingCart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 type Plan = {
+  id?: string;
   name: string;
   price: string;
   annual?: string;
   subtitle?: string;
   features: string[];
   highlighted?: boolean;
+  category?: string;
 };
 
 // Static fallback plans
