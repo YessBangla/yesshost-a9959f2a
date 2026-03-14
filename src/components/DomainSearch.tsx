@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, ArrowRight, Globe, CheckCircle2, XCircle, Loader2, ShoppingCart, Check, Info, Calendar, Server, Shield, ChevronDown, ChevronUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
