@@ -4,7 +4,7 @@ import {
   DollarSign, Activity, ArrowUpRight, ArrowDownRight, Tag, BarChart3, Target
 } from "lucide-react";
 import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
