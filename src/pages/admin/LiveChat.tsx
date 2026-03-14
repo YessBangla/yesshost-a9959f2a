@@ -1,8 +1,24 @@
-import { useEffect, useState, useRef } from "react";
-import { MessageCircle, Send, Loader2, User, Clock, X } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { MessageCircle, Send, Loader2, User, Clock, X, BellRing } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+
+const NOTIFICATION_SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
+
+const playNotificationSound = () => {
+  try {
+    const audio = new Audio(NOTIFICATION_SOUND_URL);
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+  } catch {}
+};
+
+const showBrowserNotification = (title: string, body: string) => {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body, icon: "/favicon.ico" });
+  }
+};
 
 type Chat = {
   id: string;
@@ -31,6 +47,13 @@ const AdminLiveChat = () => {
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Request notification permission
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
   // Fetch all chats
   useEffect(() => {
     supabase
@@ -42,15 +65,34 @@ const AdminLiveChat = () => {
         setLoading(false);
       });
 
-    // Realtime for new chats
-    const channel = supabase
+    // Realtime for new chats & visitor messages
+    const chatChannel = supabase
       .channel("admin-live-chats")
       .on("postgres_changes", { event: "*", schema: "public", table: "live_chats" }, () => {
         supabase.from("live_chats").select("*").order("updated_at", { ascending: false })
           .then(({ data }) => setChats((data as Chat[]) || []));
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    const msgChannel = supabase
+      .channel("admin-new-visitor-msgs")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "live_chat_messages",
+      }, (payload) => {
+        const msg = payload.new as Message;
+        if (msg.sender_type === "visitor") {
+          playNotificationSound();
+          showBrowserNotification("নতুন মেসেজ", msg.message.slice(0, 100));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(chatChannel);
+      supabase.removeChannel(msgChannel);
+    };
   }, []);
 
   // Load messages when chat selected
