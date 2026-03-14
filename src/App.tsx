@@ -64,6 +64,10 @@ const App = () => (
             <Route path="/knowledge-base" element={<KnowledgeBase />} />
             <Route path="/affiliate" element={<Affiliate />} />
 
+            {/* Theme pages */}
+            <Route path="/themes" element={<ThemeStore />} />
+            <Route path="/themes/:slug" element={<ThemeDetail />} />
+
             {/* Legal pages */}
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
