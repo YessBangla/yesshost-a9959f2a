@@ -183,6 +183,7 @@ const ServiceDetail = () => {
 
   return (
     <PublicLayout>
+      <SEOHead title={`${title} - YessHost`} description={description || `${title} - Enterprise-grade hosting solution from YessHost Bangladesh.`} canonical={`/services/${slug}`} />
       <div className="pt-20 lg:pt-24 pb-16">
         {/* Hero */}
         <section className="container mx-auto px-4 mb-16">
