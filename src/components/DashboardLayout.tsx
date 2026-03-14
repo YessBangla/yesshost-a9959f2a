@@ -33,7 +33,7 @@ const DashboardLayout = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border flex items-center justify-between">
-        {!collapsed && <img src={logoWhite} alt="PutulHost" className="h-8" />}
+        {!collapsed && <img src={logoWhite} alt="YessHost" className="h-8" />}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground"

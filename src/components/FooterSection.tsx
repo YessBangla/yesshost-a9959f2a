@@ -62,7 +62,7 @@ const FooterSection = () => {
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} PutulHost.com — {tr("footer.allRights")}
+            © {new Date().getFullYear()} YessHost.com — {tr("footer.allRights")}
           </p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />

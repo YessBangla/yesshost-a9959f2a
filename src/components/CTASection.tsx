@@ -47,7 +47,7 @@ const CTASection = () => {
                 {tr("cta.liveChat")}
               </a>
               <a
-                href="mailto:support@putulhost.com"
+                href="mailto:support@yesshost.com"
                 className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all"
               >
                 <Mail className="w-5 h-5" />
