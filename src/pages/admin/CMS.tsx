@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus, Pencil, Trash2, Save, X, FileText, MessageSquare,
-  HelpCircle, Layout, Eye, EyeOff, GripVertical, Search
+  HelpCircle, Layout, Eye, EyeOff, GripVertical, Search, Globe
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-type Tab = "content" | "plans" | "testimonials" | "faqs";
+type Tab = "content" | "plans" | "testimonials" | "faqs" | "domains";
 
 const AdminCMS = () => {
   const { lang } = useLanguage();
@@ -24,6 +24,7 @@ const AdminCMS = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
+  const [domainPrices, setDomainPrices] = useState<any[]>([]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
@@ -32,16 +33,18 @@ const AdminCMS = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [c, p, t, f] = await Promise.all([
+    const [c, p, t, f, d] = await Promise.all([
       supabase.from("site_content").select("*").order("page").order("sort_order"),
       supabase.from("pricing_plans").select("*").order("category").order("sort_order"),
       supabase.from("testimonials").select("*").order("sort_order"),
       supabase.from("faqs").select("*").order("sort_order"),
+      (supabase.from("domain_pricing" as any) as any).select("*").order("sort_order"),
     ]);
     setContents(c.data || []);
     setPlans(p.data || []);
     setTestimonials(t.data || []);
     setFaqs(f.data || []);
+    setDomainPrices(d.data || []);
     setLoading(false);
   };
 
@@ -82,11 +85,12 @@ const AdminCMS = () => {
   const tabs: { key: Tab; label: string; labelEn: string; icon: typeof FileText; count: number }[] = [
     { key: "content", label: "সাইট কন্টেন্ট", labelEn: "Site Content", icon: Layout, count: contents.length },
     { key: "plans", label: "প্রাইসিং", labelEn: "Pricing", icon: FileText, count: plans.length },
+    { key: "domains", label: "ডোমেইন মূল্য", labelEn: "Domain Pricing", icon: Globe, count: domainPrices.length },
     { key: "testimonials", label: "টেস্টিমোনিয়াল", labelEn: "Testimonials", icon: MessageSquare, count: testimonials.length },
     { key: "faqs", label: "FAQ", labelEn: "FAQs", icon: HelpCircle, count: faqs.length },
   ];
 
-  const tableForTab: Record<Tab, string> = { content: "site_content", plans: "pricing_plans", testimonials: "testimonials", faqs: "faqs" };
+  const tableForTab: Record<Tab, string> = { content: "site_content", plans: "pricing_plans", testimonials: "testimonials", faqs: "faqs", domains: "domain_pricing" };
 
   const InputField = ({ label, value, onChange, multiline }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean }) => (
     <div>
@@ -107,6 +111,7 @@ const AdminCMS = () => {
     switch (tab) {
       case "content": return { page: "home", section_key: "", title_bn: "", title_en: "", content_bn: "", content_en: "", is_active: true, sort_order: 0 };
       case "plans": return { category: "web", slug: "", name: "", price_bdt: "", annual_price_bdt: "", subtitle: "", features: "[]", is_highlighted: false, is_active: true, sort_order: 0 };
+      case "domains": return { ext: "", registration_bdt: "", renewal_bdt: "", transfer_bdt: "", is_popular: false, is_active: true, sort_order: 0 };
       case "testimonials": return { name: "", company: "", rating: 5, content_bn: "", content_en: "", is_active: true, sort_order: 0 };
       case "faqs": return { question_bn: "", question_en: "", answer_bn: "", answer_en: "", category: "general", is_active: true, sort_order: 0 };
     }
@@ -319,6 +324,65 @@ const AdminCMS = () => {
     );
   };
 
+  const renderDomains = () => {
+    const filtered = domainPrices.filter(d =>
+      !search || d.ext.toLowerCase().includes(search.toLowerCase())
+    );
+    return (
+      <div className="space-y-2">
+        {filtered.map((dp: any, index: number) => (
+          <motion.div key={dp.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.02 }}
+            className="glass-card rounded-xl border border-border/30 overflow-hidden">
+            {editingId === dp.id ? (
+              <div className="p-4 space-y-3 bg-secondary/10">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <InputField label="Extension" value={editForm.ext} onChange={v => setEditForm({ ...editForm, ext: v })} />
+                  <InputField label={isBn ? "রেজিস্ট্রেশন (BDT)" : "Registration (BDT)"} value={editForm.registration_bdt} onChange={v => setEditForm({ ...editForm, registration_bdt: v })} />
+                  <InputField label={isBn ? "রিনিউয়াল (BDT)" : "Renewal (BDT)"} value={editForm.renewal_bdt} onChange={v => setEditForm({ ...editForm, renewal_bdt: v })} />
+                  <InputField label={isBn ? "ট্রান্সফার (BDT)" : "Transfer (BDT)"} value={editForm.transfer_bdt} onChange={v => setEditForm({ ...editForm, transfer_bdt: v })} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label="Sort Order" value={String(editForm.sort_order || 0)} onChange={v => setEditForm({ ...editForm, sort_order: parseInt(v) || 0 })} />
+                  <div className="flex items-end gap-4 pb-1">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={editForm.is_popular || false} onChange={e => setEditForm({ ...editForm, is_popular: e.target.checked })} className="rounded" />
+                      {isBn ? "জনপ্রিয়" : "Popular"}
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={editForm.is_active !== false} onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })} className="rounded" />
+                      {isBn ? "সক্রিয়" : "Active"}
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit("domain_pricing")} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold"><Save className="w-3.5 h-3.5" /> {isBn ? "সেভ" : "Save"}</button>
+                  <button onClick={cancelEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-semibold"><X className="w-3.5 h-3.5" /> {isBn ? "বাতিল" : "Cancel"}</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 hover:bg-secondary/10 transition-colors">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <span className="text-sm font-bold text-foreground w-12">{dp.ext}</span>
+                  {dp.is_popular && <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">{isBn ? "জনপ্রিয়" : "Popular"}</Badge>}
+                  <div className="flex gap-4 text-xs text-muted-foreground">
+                    <span>৳{dp.registration_bdt}</span>
+                    <span>৳{dp.renewal_bdt}</span>
+                    <span>৳{dp.transfer_bdt}</span>
+                  </div>
+                  {!dp.is_active && <Badge variant="outline" className="text-[10px] text-destructive">{isBn ? "নিষ্ক্রিয়" : "Inactive"}</Badge>}
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <button onClick={() => startEdit(dp)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteItem("domain_pricing", dp.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -390,6 +454,7 @@ const AdminCMS = () => {
       {/* Tab Content */}
       {tab === "content" && renderContent()}
       {tab === "plans" && renderPlans()}
+      {tab === "domains" && renderDomains()}
       {tab === "testimonials" && renderTestimonials()}
       {tab === "faqs" && renderFaqs()}
     </div>
