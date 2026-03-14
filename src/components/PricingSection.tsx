@@ -132,7 +132,7 @@ const PricingSection = () => {
                 </div>
               )}
 
-              <div className="p-8">
+              <div className="p-5 sm:p-8">
                 <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
                 {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
 
