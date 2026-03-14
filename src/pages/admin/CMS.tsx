@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-type Tab = "content" | "plans" | "testimonials" | "faqs";
+type Tab = "content" | "plans" | "testimonials" | "faqs" | "domains";
 
 const AdminCMS = () => {
   const { lang } = useLanguage();
