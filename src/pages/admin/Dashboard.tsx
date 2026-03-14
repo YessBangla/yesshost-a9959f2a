@@ -269,6 +269,54 @@ const AdminDashboard = () => {
         ))}
       </div>
 
+      {/* Conversion Metrics */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "পেমেন্ট কনভার্সন", value: `${conversionMetrics.paymentRate}%`, icon: Target, color: "text-emerald-500", bg: "bg-emerald-500/10", desc: "ইনভয়েস → পেমেন্ট" },
+          { label: "ইউজার অ্যাক্টিভেশন", value: `${conversionMetrics.activationRate}%`, icon: Users, color: "text-primary", bg: "bg-primary/10", desc: "সাইনআপ → সার্ভিস" },
+          { label: "সাপ্তাহিক গ্রোথ", value: `${conversionMetrics.revGrowth > 0 ? "+" : ""}${conversionMetrics.revGrowth}%`, icon: TrendingUp, color: conversionMetrics.revGrowth >= 0 ? "text-emerald-500" : "text-destructive", bg: conversionMetrics.revGrowth >= 0 ? "bg-emerald-500/10" : "bg-destructive/10", desc: `৳${conversionMetrics.rev7.toLocaleString()} গত ৭ দিনে` },
+          { label: "গড় অর্ডার ভ্যালু", value: `৳${conversionMetrics.avgOrderValue.toLocaleString()}`, icon: BarChart3, color: "text-violet-500", bg: "bg-violet-500/10", desc: "পেইড অর্ডার প্রতি" },
+        ].map((m, i) => (
+          <div key={i} className="glass-card p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`p-2 rounded-lg ${m.bg}`}><m.icon className={`w-4 h-4 ${m.color}`} /></div>
+              <span className="text-xs text-muted-foreground font-medium">{m.label}</span>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{m.value}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{m.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Daily Revenue Trend */}
+      <div className="glass-card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-muted-foreground" />
+            দৈনিক রেভিনিউ ট্রেন্ড (৩০ দিন)
+          </h2>
+        </div>
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={dailyRevenueData}>
+              <defs>
+                <linearGradient id="dailyRevGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={4} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Line type="monotone" dataKey="revenue" name="রেভিনিউ" stroke="#6366f1" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="orders" name="অর্ডার সংখ্যা" stroke="#22c55e" strokeWidth={2} dot={false} activeDot={{ r: 5 }} yAxisId={0} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {/* Charts Row 1: Revenue + User Growth */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Revenue Chart */}
