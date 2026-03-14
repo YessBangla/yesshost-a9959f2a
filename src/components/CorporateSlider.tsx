@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import slideDatacenter from "@/assets/slides/slide-datacenter.jpg";
 import slideTeam from "@/assets/slides/slide-team.jpg";
@@ -14,6 +15,9 @@ const slides = [
     titleEn: "Bangladesh's Best Data Center",
     descBn: "হাই পারফরম্যান্স সার্ভার, ৯৯.৯% আপটাইম গ্যারান্টি এবং ২৪/৭ মনিটরিং।",
     descEn: "High performance servers, 99.9% uptime guarantee, and 24/7 monitoring.",
+    ctaBn: "প্ল্যান দেখুন",
+    ctaEn: "View Plans",
+    link: "/#pricing",
   },
   {
     img: slideTeam,
@@ -21,6 +25,9 @@ const slides = [
     titleEn: "Expert Support Team",
     descBn: "আমাদের দক্ষ ইঞ্জিনিয়ার টিম সবসময় আপনার পাশে — ২৪/৭ সাপোর্ট।",
     descEn: "Our skilled engineering team is always by your side — 24/7 support.",
+    ctaBn: "যোগাযোগ করুন",
+    ctaEn: "Contact Us",
+    link: "/contact",
   },
   {
     img: slideNetwork,
@@ -28,6 +35,9 @@ const slides = [
     titleEn: "Global Network Connectivity",
     descBn: "বিশ্বব্যাপী ৬টি ডেটা সেন্টার থেকে আপনার কন্টেন্ট দ্রুত ডেলিভার করুন।",
     descEn: "Deliver your content fast from 6 data centers worldwide.",
+    ctaBn: "আরো জানুন",
+    ctaEn: "Learn More",
+    link: "/about",
   },
   {
     img: slideSecurity,
@@ -35,6 +45,9 @@ const slides = [
     titleEn: "Enterprise-Grade Security",
     descBn: "ফ্রি SSL, DDoS প্রোটেকশন এবং অটোমেটেড ব্যাকআপ সহ সম্পূর্ণ সুরক্ষা।",
     descEn: "Complete protection with free SSL, DDoS protection, and automated backups.",
+    ctaBn: "শুরু করুন",
+    ctaEn: "Get Started",
+    link: "/signup",
   },
 ];
 
@@ -47,7 +60,7 @@ const CorporateSlider = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     setCurrent(index);
-    setTimeout(() => setIsTransitioning(false), 600);
+    setTimeout(() => setIsTransitioning(false), 700);
   }, [isTransitioning]);
 
   const next = useCallback(() => goTo((current + 1) % slides.length), [current, goTo]);
@@ -59,13 +72,13 @@ const CorporateSlider = () => {
   }, [next]);
 
   return (
-    <section className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[75vh] overflow-hidden">
+    <section className="relative w-full h-[45vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
       {/* Slides */}
       {slides.map((slide, i) => (
         <div
           key={i}
-          className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-            i === current ? "opacity-100 scale-100" : "opacity-0 scale-105"
+          className={`absolute inset-0 transition-all duration-[800ms] ease-out ${
+            i === current ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
           }`}
         >
           <img
@@ -73,63 +86,86 @@ const CorporateSlider = () => {
             alt={lang === "bn" ? slide.titleBn : slide.titleEn}
             className="w-full h-full object-cover"
           />
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+          {/* Gradient overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
           {/* Text Content */}
           <div className="absolute inset-0 flex items-center">
-            <div className="max-w-7xl mx-auto px-6 sm:px-8 w-full">
-              <div className="max-w-xl">
+            <div className="max-w-7xl mx-auto px-5 sm:px-8 w-full">
+              <div className="max-w-lg">
+                {/* Accent line */}
+                <div
+                  className={`w-12 h-1 rounded-full bg-primary mb-4 transition-all duration-700 delay-100 ${
+                    i === current ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+                  } origin-left`}
+                />
                 <h2
-                  className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight transition-all duration-700 delay-200 ${
-                    i === current ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                  className={`text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight transition-all duration-700 delay-200 ${
+                    i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
                   }`}
                 >
                   {lang === "bn" ? slide.titleBn : slide.titleEn}
                 </h2>
                 <p
-                  className={`mt-3 md:mt-4 text-sm sm:text-base md:text-lg text-white/80 leading-relaxed transition-all duration-700 delay-400 ${
-                    i === current ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                  className={`mt-2 md:mt-4 text-xs sm:text-sm md:text-base text-white/75 leading-relaxed max-w-md transition-all duration-700 delay-300 ${
+                    i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
                   }`}
                 >
                   {lang === "bn" ? slide.descBn : slide.descEn}
                 </p>
+                {/* CTA Button */}
+                <Link
+                  to={slide.link}
+                  className={`inline-flex items-center gap-2 mt-4 md:mt-6 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs sm:text-sm font-semibold hover:bg-white/20 transition-all duration-700 delay-[400ms] ${
+                    i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+                  }`}
+                >
+                  {lang === "bn" ? slide.ctaBn : slide.ctaEn}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             </div>
           </div>
         </div>
       ))}
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - glass style */}
       <button
         onClick={prev}
-        className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all z-10"
+        className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/5 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-all z-10"
         aria-label="Previous"
       >
-        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
       <button
         onClick={next}
-        className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all z-10"
+        className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/5 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-all z-10"
         aria-label="Next"
       >
-        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
-      {/* Dots */}
-      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+      {/* Dots + Progress */}
+      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm z-10">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => goTo(i)}
-            className={`rounded-full transition-all duration-300 ${
-              i === current
-                ? "w-8 h-2.5 bg-white"
-                : "w-2.5 h-2.5 bg-white/40 hover:bg-white/60"
-            }`}
+            className="relative h-2 rounded-full overflow-hidden transition-all duration-300"
+            style={{ width: i === current ? 28 : 8 }}
             aria-label={`Slide ${i + 1}`}
-          />
+          >
+            <div className={`absolute inset-0 rounded-full transition-colors duration-300 ${
+              i === current ? "bg-white" : "bg-white/30 hover:bg-white/50"
+            }`} />
+          </button>
         ))}
+      </div>
+
+      {/* Slide counter */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 px-3 py-1 rounded-full bg-black/20 backdrop-blur-sm text-white/60 text-xs font-mono z-10">
+        {String(current + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
       </div>
     </section>
   );
