@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChevronLeft, ChevronRight, ArrowRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, Search, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import slideDatacenter from "@/assets/slides/slide-datacenter.jpg";
@@ -87,151 +87,174 @@ const CorporateSlider = () => {
   }, [next]);
 
   return (
-    <section ref={sectionRef} className="relative w-full h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-visible mb-16">
-      {/* Slides */}
-      {slides.map((slide, i) => (
-        <div
-          key={i}
-          className={`absolute inset-0 transition-all duration-[800ms] ease-out ${
-            i === current ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
-          }`}
-        >
-          <img
-            src={slide.img}
-            alt={lang === "bn" ? slide.titleBn : slide.titleEn}
-            className={`w-full h-[120%] object-cover transition-transform duration-[6000ms] ease-out ${
-              i === current ? "scale-[1.12]" : "scale-100"
+    <div>
+      <section ref={sectionRef} className="relative w-full h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
+        {/* Slides */}
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            className={`absolute inset-0 transition-all duration-[800ms] ease-out ${
+              i === current ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
             }`}
-            style={{ transform: `translateY(${scrollY}px) ${i === current ? "scale(1.12)" : "scale(1)"}` }}
-          />
-          {/* Texture + gradient overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/25 to-black/5" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-          <div
-            className="absolute inset-0 opacity-[0.08] mix-blend-overlay"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.5'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)`,
-            }}
-          />
+          >
+            <img
+              src={slide.img}
+              alt={lang === "bn" ? slide.titleBn : slide.titleEn}
+              className={`w-full h-[120%] object-cover transition-transform duration-[6000ms] ease-out ${
+                i === current ? "scale-[1.12]" : "scale-100"
+              }`}
+              style={{ transform: `translateY(${scrollY}px) ${i === current ? "scale(1.12)" : "scale(1)"}` }}
+            />
+            {/* Texture + gradient overlays */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/25 to-black/5" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            <div
+              className="absolute inset-0 opacity-[0.08] mix-blend-overlay"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.5'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+              }}
+            />
+            <div
+              className="absolute inset-0 opacity-[0.04]"
+              style={{
+                backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)`,
+              }}
+            />
 
-          {/* Text Content */}
-          <div className="absolute inset-0 flex items-center">
-            <div className="max-w-7xl mx-auto px-5 sm:px-8 w-full">
-              <div className="max-w-lg">
-                {/* Accent line */}
-                <div
-                  className={`w-12 h-1 rounded-full bg-primary mb-4 transition-all duration-700 delay-100 ${
-                    i === current ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
-                  } origin-left`}
-                />
-                <h2
-                  className={`text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight transition-all duration-700 delay-200 ${
-                    i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-                  }`}
-                >
-                  {lang === "bn" ? slide.titleBn : slide.titleEn}
-                </h2>
-                <p
-                  className={`mt-2 md:mt-4 text-xs sm:text-sm md:text-base text-white/75 leading-relaxed max-w-md transition-all duration-700 delay-300 ${
-                    i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-                  }`}
-                >
-                  {lang === "bn" ? slide.descBn : slide.descEn}
-                </p>
-                {/* CTA Button */}
-                <Link
-                  to={slide.link}
-                  className={`inline-flex items-center gap-2 mt-4 md:mt-6 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs sm:text-sm font-semibold hover:bg-white/20 transition-all duration-700 delay-[400ms] ${
-                    i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-                  }`}
-                >
-                  {lang === "bn" ? slide.ctaBn : slide.ctaEn}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+            {/* Text Content */}
+            <div className="absolute inset-0 flex items-center">
+              <div className="max-w-7xl mx-auto px-5 sm:px-8 w-full">
+                <div className="max-w-lg">
+                  <div
+                    className={`w-12 h-1 rounded-full bg-primary mb-4 transition-all duration-700 delay-100 ${
+                      i === current ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+                    } origin-left`}
+                  />
+                  <h2
+                    className={`text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight transition-all duration-700 delay-200 ${
+                      i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+                    }`}
+                  >
+                    {lang === "bn" ? slide.titleBn : slide.titleEn}
+                  </h2>
+                  <p
+                    className={`mt-2 md:mt-4 text-xs sm:text-sm md:text-base text-white/75 leading-relaxed max-w-md transition-all duration-700 delay-300 ${
+                      i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+                    }`}
+                  >
+                    {lang === "bn" ? slide.descBn : slide.descEn}
+                  </p>
+                  <Link
+                    to={slide.link}
+                    className={`inline-flex items-center gap-2 mt-4 md:mt-6 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs sm:text-sm font-semibold hover:bg-white/20 transition-all duration-700 delay-[400ms] ${
+                      i === current ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+                    }`}
+                  >
+                    {lang === "bn" ? slide.ctaBn : slide.ctaEn}
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
-
-      {/* Navigation Arrows - glass style */}
-      <button
-        onClick={prev}
-        className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/5 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-all z-10"
-        aria-label="Previous"
-      >
-        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-      </button>
-      <button
-        onClick={next}
-        className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/5 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-all z-10"
-        aria-label="Next"
-      >
-        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-      </button>
-
-      {/* Dots + Progress */}
-      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm z-10">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goTo(i)}
-            className="relative h-2 rounded-full overflow-hidden transition-all duration-300"
-            style={{ width: i === current ? 28 : 8 }}
-            aria-label={`Slide ${i + 1}`}
-          >
-            <div className={`absolute inset-0 rounded-full transition-colors duration-300 ${
-              i === current ? "bg-white" : "bg-white/30 hover:bg-white/50"
-            }`} />
-          </button>
         ))}
-      </div>
 
-      {/* Slide counter */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 px-3 py-1 rounded-full bg-black/20 backdrop-blur-sm text-white/60 text-xs font-mono z-10">
-        {String(current + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
-      </div>
+        {/* Navigation Arrows */}
+        <button
+          onClick={prev}
+          className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/5 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-all z-10"
+          aria-label="Previous"
+        >
+          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+        <button
+          onClick={next}
+          className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/5 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-all z-10"
+          aria-label="Next"
+        >
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
 
-      {/* Domain Search Bar - pinned at bottom edge */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-1/2">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-2xl bg-background border border-border shadow-xl">
+        {/* Dots */}
+        <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm z-10">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className="relative h-2 rounded-full overflow-hidden transition-all duration-300"
+              style={{ width: i === current ? 28 : 8 }}
+              aria-label={`Slide ${i + 1}`}
+            >
+              <div className={`absolute inset-0 rounded-full transition-colors duration-300 ${
+                i === current ? "bg-white" : "bg-white/30 hover:bg-white/50"
+              }`} />
+            </button>
+          ))}
+        </div>
+
+        {/* Slide counter */}
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 px-3 py-1 rounded-full bg-black/20 backdrop-blur-sm text-white/60 text-xs font-mono z-10">
+          {String(current + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
+        </div>
+      </section>
+
+      {/* Domain Search Section */}
+      <div className="relative bg-gradient-to-b from-muted/80 to-background border-b border-border">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
+          <div className="max-w-3xl mx-auto">
+            {/* Label */}
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Globe className="w-4 h-4 text-primary" />
+              <span className="text-xs sm:text-sm font-semibold text-foreground tracking-wide uppercase">
+                {lang === "bn" ? "আপনার পারফেক্ট ডোমেইন খুঁজুন" : "Find Your Perfect Domain"}
+              </span>
+            </div>
+
+            {/* Search bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1.5 sm:p-2 rounded-2xl glass-card-elevated shadow-lg">
               <div className="flex items-center gap-3 flex-1 px-4">
                 <Search className="w-5 h-5 text-muted-foreground shrink-0" />
                 <input
                   type="text"
-                  placeholder={lang === "bn" ? "আপনার ডোমেইন নাম খুঁজুন..." : "Search your domain name..."}
-                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm py-3"
+                  placeholder={lang === "bn" ? "example.com" : "example.com"}
+                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm sm:text-base py-3"
                 />
               </div>
-              <button className="shrink-0 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all">
-                {lang === "bn" ? "খুঁজুন" : "Search"}
+              <button className="shrink-0 flex items-center justify-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                {lang === "bn" ? "ডোমেইন খুঁজুন" : "Search Domain"}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex flex-wrap justify-center gap-2 mt-3">
+
+            {/* Price tags */}
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mt-4">
               {[
-                { ext: ".com", price: "৯৯০" },
-                { ext: ".top", price: "১৮০" },
-                { ext: ".xyz", price: "২৯৫" },
-                { ext: ".shop", price: "৩৯০" },
+                { ext: ".com", price: "৯৯০", popular: true },
+                { ext: ".top", price: "১৮০", popular: false },
+                { ext: ".xyz", price: "২৯৫", popular: false },
+                { ext: ".shop", price: "৩৯০", popular: false },
+                { ext: ".fun", price: "৩৮০", popular: false },
               ].map((d) => (
-                <span key={d.ext} className="text-xs text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full border border-border">
-                  <span className="font-bold text-foreground">{d.ext}</span> ৳{d.price}
-                </span>
+                <div
+                  key={d.ext}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass-card text-xs cursor-pointer hover:scale-105 transition-transform ${
+                    d.popular ? "glow-border" : ""
+                  }`}
+                >
+                  <span className="font-bold text-foreground">{d.ext}</span>
+                  <span className="text-muted-foreground">৳{d.price}</span>
+                  {d.popular && (
+                    <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
+                      {lang === "bn" ? "জনপ্রিয়" : "Popular"}
+                    </span>
+                  )}
+                </div>
               ))}
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
