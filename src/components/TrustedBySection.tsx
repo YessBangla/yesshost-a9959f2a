@@ -1,17 +1,22 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Building2 } from "lucide-react";
-
-const placeholder = "/placeholder.svg";
+import bkashLogo from "@/assets/partners/bkash.png";
+import nagadLogo from "@/assets/partners/nagad.png";
+import gpLogo from "@/assets/partners/grameenphone.png";
+import robiLogo from "@/assets/partners/robi.png";
+import banglalinkLogo from "@/assets/partners/banglalink.png";
+import pathaoLogo from "@/assets/partners/pathao.png";
+import darazLogo from "@/assets/partners/daraz.png";
+import sslLogo from "@/assets/partners/ssl-wireless.png";
 
 const partners = [
-  { name: "bKash", logo: placeholder },
-  { name: "Nagad", logo: placeholder },
-  { name: "Grameenphone", logo: placeholder },
-  { name: "Robi", logo: placeholder },
-  { name: "Banglalink", logo: placeholder },
-  { name: "Pathao", logo: placeholder },
-  { name: "Daraz", logo: placeholder },
-  { name: "SSL Wireless", logo: placeholder },
+  { name: "bKash", logo: bkashLogo },
+  { name: "Nagad", logo: nagadLogo },
+  { name: "Grameenphone", logo: gpLogo },
+  { name: "Robi", logo: robiLogo },
+  { name: "Banglalink", logo: banglalinkLogo },
+  { name: "Pathao", logo: pathaoLogo },
+  { name: "Daraz", logo: darazLogo },
+  { name: "SSL Wireless", logo: sslLogo },
 ];
 
 const TrustedBySection = () => {
@@ -42,20 +47,14 @@ const TrustedBySection = () => {
           {doubled.map((p, i) => (
             <div
               key={i}
-              className="flex-shrink-0 flex flex-col items-center justify-center w-28 sm:w-36 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+              className="flex-shrink-0 flex items-center justify-center w-28 h-14 sm:w-36 sm:h-16 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
             >
-              <div className="w-20 h-20 rounded-xl bg-white flex items-center justify-center shadow-sm mb-2 overflow-hidden">
-                <img
-                  src={p.logo}
-                  alt={p.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-              <div className="flex items-center gap-1">
-                <Building2 className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground">{p.name}</span>
-              </div>
+              <img
+                src={p.logo}
+                alt={p.name}
+                className="max-w-full max-h-full object-contain"
+                loading="lazy"
+              />
             </div>
           ))}
         </div>
