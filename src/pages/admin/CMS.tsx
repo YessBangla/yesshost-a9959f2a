@@ -49,14 +49,14 @@ const AdminCMS = () => {
     if (table === "pricing_plans" && typeof rest.features === "string") {
       try { rest.features = JSON.parse(rest.features); } catch { /* keep as is */ }
     }
-    await supabase.from(table).update(rest).eq("id", id);
+    await (supabase.from(table as any) as any).update(rest).eq("id", id);
     toast({ title: "সফলভাবে আপডেট হয়েছে" });
     cancelEdit();
     fetchAll();
   };
 
   const deleteItem = async (table: string, id: string) => {
-    await supabase.from(table).delete().eq("id", id);
+    await (supabase.from(table as any) as any).delete().eq("id", id);
     toast({ title: "সফলভাবে মুছে ফেলা হয়েছে" });
     fetchAll();
   };
@@ -66,7 +66,7 @@ const AdminCMS = () => {
     if (table === "pricing_plans" && typeof form.features === "string") {
       try { form.features = JSON.parse(form.features); } catch { form.features = []; }
     }
-    await supabase.from(table).insert(form);
+    await (supabase.from(table as any) as any).insert(form);
     toast({ title: "সফলভাবে যোগ করা হয়েছে" });
     setShowAdd(false);
     setAddForm({});
