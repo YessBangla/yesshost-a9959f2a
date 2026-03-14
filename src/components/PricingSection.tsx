@@ -89,7 +89,7 @@ const PricingSection = () => {
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
             Pricing
           </span>
-          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
             {tr("pricing.title")}
           </h2>
           <p className="text-muted-foreground text-base max-w-xl mx-auto mb-8">
