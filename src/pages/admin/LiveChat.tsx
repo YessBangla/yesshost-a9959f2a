@@ -49,6 +49,7 @@ const AdminLiveChat = () => {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [visitorTyping, setVisitorTyping] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
