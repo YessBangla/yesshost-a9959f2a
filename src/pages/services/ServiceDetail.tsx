@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import { Check, ArrowRight, ArrowLeft, Star, Server, Globe, Shield, Zap, Clock, Headphones } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 

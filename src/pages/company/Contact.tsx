@@ -3,8 +3,7 @@ import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 
 const iconMap: Record<string, typeof Mail> = { Mail, Phone, MapPin, Clock };
 

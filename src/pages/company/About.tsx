@@ -3,8 +3,7 @@ import { Shield, Users, Globe, Server, Award, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 
 const iconMap: Record<string, typeof Shield> = { Shield, Users, Globe, Server, Award, Clock };
 

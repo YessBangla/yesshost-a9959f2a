@@ -1,8 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 import { motion } from "framer-motion";
 
 const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections }: {

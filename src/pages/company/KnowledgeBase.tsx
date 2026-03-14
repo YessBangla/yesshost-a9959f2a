@@ -3,8 +3,7 @@ import { Search, BookOpen, Server, Globe, Mail, Shield, HelpCircle } from "lucid
 import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import PublicLayout from "@/components/PublicLayout";
 
 const iconMap: Record<string, any> = { Server, Globe, Mail, Shield, BookOpen };
 
