@@ -63,11 +63,13 @@ const AdminDashboard = () => {
       const servicesData = services.data || [];
       const invoicesData = invoices.data || [];
       const ticketsData = tickets.data || [];
+      const couponsData = coupons.data || [];
 
       setAllProfiles(profilesData);
       setAllServices(servicesData);
       setAllInvoices(invoicesData);
       setAllTickets(ticketsData);
+      setAllCoupons(couponsData);
 
       setStats({
         totalUsers: profilesData.length,
