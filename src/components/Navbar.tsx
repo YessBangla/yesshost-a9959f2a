@@ -16,7 +16,14 @@ const Navbar = () => {
   const { itemCount, setCartOpen } = useCart();
 
   const navLinks = [
-    { label: tr("nav.domain"), href: "/services/domain" },
+    {
+      label: tr("nav.domain"),
+      href: "/services/domain",
+      children: [
+        { label: lang === "bn" ? "ডোমেইন রেজিস্ট্রেশন" : "Domain Registration", href: "/services/domain" },
+        { label: lang === "bn" ? "ডোমেইন মূল্য তালিকা" : "Domain Pricing", href: "/domain-pricing" },
+      ],
+    },
     {
       label: tr("nav.webHosting"),
       href: "/services/basic-hosting",

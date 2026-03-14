@@ -43,6 +43,7 @@ import Refund from "./pages/legal/Refund";
 import ThemeStore from "./pages/themes/ThemeStore";
 import ThemeDetail from "./pages/themes/ThemeDetail";
 import NotFound from "./pages/NotFound";
+import DomainPricing from "./pages/DomainPricing";
 import Checkout from "./pages/Checkout";
 import PaymentMethods from "./pages/PaymentMethods";
 import { PaymentSuccess, PaymentFail, PaymentCancel } from "./pages/PaymentResult";
@@ -70,6 +71,9 @@ const App = () => (
             <Route path="/payment/cancel" element={<PaymentCancel />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+
+            {/* Domain pricing */}
+            <Route path="/domain-pricing" element={<DomainPricing />} />
 
             {/* Service detail pages */}
             <Route path="/services/:slug" element={<ServiceDetail />} />
