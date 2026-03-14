@@ -93,15 +93,14 @@ const ThemeDetail = () => {
 
   if (!theme) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <PublicLayout>
         <div className="pt-24 pb-16 container mx-auto px-4 text-center">
           <p className="text-muted-foreground text-lg">{bn ? "থিম পাওয়া যায়নি" : "Theme not found"}</p>
           <Link to="/themes" className="text-primary hover:underline mt-4 inline-block">
             {bn ? "সকল থিম দেখুন" : "View all themes"}
           </Link>
         </div>
-      </div>
+      </PublicLayout>
     );
   }
 
