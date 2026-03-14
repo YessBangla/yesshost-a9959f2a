@@ -80,6 +80,16 @@ const DashboardLayout = () => {
               <Globe className="w-5 h-5 shrink-0" />
               {lang === "bn" ? "English" : "বাংলা"}
             </button>
+            {isAdmin && (
+              <NavLink
+                to="/admin"
+                className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 w-full transition-all mb-1"
+                activeClassName=""
+              >
+                <Shield className="w-5 h-5 shrink-0" />
+                {tr("admin.panel")}
+              </NavLink>
+            )}
           </>
         )}
         <button
