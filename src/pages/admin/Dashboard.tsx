@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Users, Server, FileText, HeadphonesIcon, TrendingUp,
-  DollarSign, Activity, ArrowUpRight, ArrowDownRight
+  DollarSign, Activity, ArrowUpRight, ArrowDownRight, Tag
 } from "lucide-react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -46,26 +46,30 @@ const AdminDashboard = () => {
   const [allServices, setAllServices] = useState<any[]>([]);
   const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [allTickets, setAllTickets] = useState<any[]>([]);
+  const [allCoupons, setAllCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [profiles, services, invoices, tickets] = await Promise.all([
+      const [profiles, services, invoices, tickets, coupons] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase.from("services").select("*"),
         supabase.from("invoices").select("*"),
         supabase.from("support_tickets").select("*"),
+        supabase.from("coupons").select("*"),
       ]);
 
       const profilesData = profiles.data || [];
       const servicesData = services.data || [];
       const invoicesData = invoices.data || [];
       const ticketsData = tickets.data || [];
+      const couponsData = coupons.data || [];
 
       setAllProfiles(profilesData);
       setAllServices(servicesData);
       setAllInvoices(invoicesData);
       setAllTickets(ticketsData);
+      setAllCoupons(couponsData);
 
       setStats({
         totalUsers: profilesData.length,
@@ -367,6 +371,69 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Coupon Usage Analytics */}
+      <div className="glass-card p-5">
+        <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Tag className="w-5 h-5 text-muted-foreground" />
+          কুপন ইউসেজ অ্যানালিটিক্স
+        </h2>
+        {allCoupons.length === 0 ? (
+          <p className="text-sm text-muted-foreground">কোনো কুপন নেই</p>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Usage Bar Chart */}
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-3">ব্যবহারের সংখ্যা</p>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={allCoupons.filter(c => c.used_count > 0).sort((a: any, b: any) => b.used_count - a.used_count).slice(0, 10).map((c: any) => ({ name: c.code, uses: c.used_count }))} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis type="number" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+                    <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} width={100} />
+                    <Tooltip content={<SimpleTooltip />} />
+                    <Bar dataKey="uses" name="ব্যবহার" fill="#8b5cf6" radius={[0, 6, 6, 0]} maxBarSize={24} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Coupon Summary Table */}
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-3">কুপন সামারি</p>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {allCoupons.sort((a: any, b: any) => b.used_count - a.used_count).map((c: any) => {
+                  const totalDiscount = c.discount_type === "percentage"
+                    ? `${c.discount_value}% × ${c.used_count}`
+                    : `৳${Number(c.discount_value).toLocaleString()} × ${c.used_count}`;
+                  const estimatedSaved = c.discount_type === "fixed"
+                    ? Number(c.discount_value) * c.used_count
+                    : null;
+                  return (
+                    <div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-primary font-mono">{c.code}</span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${c.is_active ? "bg-emerald-500/10 text-emerald-500" : "bg-muted text-muted-foreground"}`}>
+                            {c.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{totalDiscount}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-bold text-foreground tabular-nums">{c.used_count} বার</p>
+                        {estimatedSaved !== null && estimatedSaved > 0 && (
+                          <p className="text-[10px] text-muted-foreground">৳{estimatedSaved.toLocaleString()} ছাড়</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Recent Activity */}
