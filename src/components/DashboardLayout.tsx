@@ -1,12 +1,13 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
-  UserCircle, LogOut, ChevronLeft, Menu
+  UserCircle, LogOut, ChevronLeft, Menu, Shield
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
+import { supabase } from "@/integrations/supabase/client";
 import logoWhite from "@/assets/logo-white.png";
 
 const DashboardLayout = () => {
