@@ -45,7 +45,7 @@ const LiveChatWidget = () => {
     }
   }, []);
 
-  // Realtime subscription
+  // Realtime subscription + typing indicator
   useEffect(() => {
     if (!chatId) return;
     const channel = supabase
@@ -60,9 +60,26 @@ const LiveChatWidget = () => {
           if (prev.some(m => m.id === (payload.new as Message).id)) return prev;
           return [...prev, payload.new as Message];
         });
+        if ((payload.new as Message).sender_type === "admin") setAdminTyping(false);
+      })
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender === "admin") {
+          setAdminTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setAdminTyping(false), 3000);
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+  }, [chatId]);
+
+  const broadcastTyping = useCallback(() => {
+    if (!chatId) return;
+    supabase.channel(`live-chat-${chatId}`).send({
+      type: "broadcast",
+      event: "typing",
+      payload: { sender: "visitor" },
+    });
   }, [chatId]);
 
   // Auto-scroll
