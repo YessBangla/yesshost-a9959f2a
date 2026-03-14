@@ -33,7 +33,12 @@ const staticPlans: Record<string, Plan[]> = {
   vps: [
     { name: "USA VPS", price: "৭৫০", features: ["1 CPU Core","2 GB RAM","25GB SSD Disk","1TB Bandwidth","1 Dedicated IP","Full Root Access","KVM Virtualization","CentOS / Ubuntu / AlmaLinux"] },
     { name: "BDIX VPS", price: "৯৯৯", features: ["1 CPU Core","1 GB RAM","20GB NVMe Disk","500 GB Bandwidth","1 Dedicated IP","Full Root Access","KVM Virtualization","CentOS / Ubuntu / AlmaLinux"], highlighted: true },
-    { name: "AMD Ryzen 5600X", price: "১১,৯০০", subtitle: "Dedicated Server", features: ["6 Cores 3.40 GHz","64GB DDR3 ECC","512GB NVMe PCIe 4.0","1Gbps Port","1 IP Address","Fully Managed Service","Powerful Hardware","24/7 Customer Support"] },
+    { name: "Premium VPS", price: "২,৫০০", features: ["4 CPU Cores","8 GB RAM","100GB NVMe Disk","2TB Bandwidth","1 Dedicated IP","Full Root Access","KVM Virtualization","CentOS / Ubuntu / AlmaLinux"] },
+  ],
+  dedicated: [
+    { name: "Intel Xeon E3", price: "৮,৯০০", features: ["4 Cores 3.30 GHz","16GB DDR4 ECC","256GB SSD","1Gbps Port","1 IP Address","Full Root Access","Fully Managed","24/7 Customer Support"] },
+    { name: "AMD Ryzen 5600X", price: "১১,৯০০", features: ["6 Cores 3.40 GHz","64GB DDR3 ECC","512GB NVMe PCIe 4.0","1Gbps Port","1 IP Address","Fully Managed Service","Powerful Hardware","24/7 Customer Support"], highlighted: true },
+    { name: "Dual Xeon Gold", price: "২৪,৯০০", features: ["16 Cores 2.10 GHz","128GB DDR4 ECC","2x 1TB NVMe SSD","10Gbps Port","5 IP Addresses","Fully Managed Service","RAID Configuration","24/7 Priority Support"] },
   ],
   email: [
     { name: "Workspace 30GB", price: "৭৯৯", features: ["Up To 5 Email Accounts","30GB Mail Storage","CrossBox Suite Panel","250 Email Per Hour","IMAP, SMTP, POP Support","MailChannels SPAM Protection"] },
@@ -59,6 +64,7 @@ const PricingSection = () => {
     { key: "web", label: tr("pricing.webHosting") },
     { key: "reseller", label: tr("pricing.resellerHosting") },
     { key: "vps", label: tr("pricing.vpsServer") },
+    { key: "dedicated", label: isBn ? "ডেডিকেটেড সার্ভার" : "Dedicated Server" },
     { key: "email", label: tr("pricing.emailHosting") },
   ];
 
