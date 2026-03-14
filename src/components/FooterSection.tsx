@@ -44,7 +44,7 @@ const FooterSection = () => {
             © 2026 HostForge. All rights reserved.
           </p>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-glow" />
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
             <span className="text-xs text-muted-foreground">All systems operational</span>
           </div>
         </div>

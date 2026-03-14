@@ -24,7 +24,7 @@ const HeroSection = () => {
           transition={{ duration: 0.6, ease: brandCurve }}
           className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border border-border bg-secondary/50 backdrop-blur-sm"
         >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-glow" />
+          <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
           <span className="text-xs text-muted-foreground">All systems operational — 99.99% uptime</span>
         </motion.div>
 

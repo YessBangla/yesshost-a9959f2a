@@ -50,8 +50,8 @@ const ServerStatus = () => {
             >
               <span className="text-sm text-foreground font-medium">{server.location}</span>
               <span className="flex items-center gap-2 text-sm">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-                <span className="text-emerald-400 text-xs">Operational</span>
+                <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
+                <span className="text-success text-xs">Operational</span>
               </span>
               <span className="text-sm text-foreground tabular-nums">{server.latency}</span>
               <div className="flex items-center gap-2">
