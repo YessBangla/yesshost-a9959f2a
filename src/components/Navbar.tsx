@@ -20,8 +20,8 @@ const Navbar = () => {
       label: tr("nav.domain"),
       href: "/services/domain",
       children: [
-        { label: bn ? "ডোমেইন রেজিস্ট্রেশন" : "Domain Registration", href: "/services/domain" },
-        { label: bn ? "ডোমেইন মূল্য তালিকা" : "Domain Pricing", href: "/domain-pricing" },
+        { label: lang === "bn" ? "ডোমেইন রেজিস্ট্রেশন" : "Domain Registration", href: "/services/domain" },
+        { label: lang === "bn" ? "ডোমেইন মূল্য তালিকা" : "Domain Pricing", href: "/domain-pricing" },
       ],
     },
     {
