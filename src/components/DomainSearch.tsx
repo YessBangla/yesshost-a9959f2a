@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, ArrowRight, Globe, CheckCircle2, XCircle, Loader2, ShoppingCart, Check, Info, Calendar, Server, Shield, ChevronDown, ChevronUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +22,7 @@ interface DomainResult {
   price_usd: string;
 }
 
-const domainPrices = [
+const staticDomainPrices = [
   { ext: ".com", price: "৯৯০", popular: true },
   { ext: ".top", price: "১৮০", popular: false },
   { ext: ".xyz", price: "২৯৫", popular: false },
@@ -49,6 +49,20 @@ const DomainSearch = () => {
   const [expandedDomain, setExpandedDomain] = useState<string | null>(null);
   const [whoisData, setWhoisData] = useState<Record<string, WhoisInfo | null>>({});
   const [whoisLoading, setWhoisLoading] = useState<Record<string, boolean>>({});
+  const [domainPrices, setDomainPrices] = useState(staticDomainPrices);
+
+  useEffect(() => {
+    (supabase.from("domain_pricing" as any) as any)
+      .select("ext, registration_bdt, is_popular")
+      .eq("is_active", true)
+      .order("sort_order")
+      .limit(5)
+      .then(({ data }: any) => {
+        if (data && data.length > 0) {
+          setDomainPrices(data.map((d: any) => ({ ext: d.ext, price: d.registration_bdt, popular: d.is_popular })));
+        }
+      });
+  }, []);
 
   const handleSearch = async (e?: React.FormEvent) => {
     e?.preventDefault();

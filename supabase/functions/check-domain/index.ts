@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,9 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co"];
-
-const PRICES: Record<string, { bdt: string; usd: string }> = {
+// Static fallback prices
+const FALLBACK_PRICES: Record<string, { bdt: string; usd: string }> = {
   ".com": { bdt: "৯৯০", usd: "9.90" },
   ".net": { bdt: "১,০৯০", usd: "10.90" },
   ".org": { bdt: "১,১৯০", usd: "11.90" },
@@ -21,6 +21,8 @@ const PRICES: Record<string, { bdt: string; usd: string }> = {
   ".co": { bdt: "২,৪৯০", usd: "24.90" },
 };
 
+const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co"];
+
 interface WhoisInfo {
   registrar?: string;
   creation_date?: string;
@@ -28,6 +30,25 @@ interface WhoisInfo {
   updated_date?: string;
   status?: string[];
   nameservers?: string[];
+}
+
+async function loadPricesFromDb(): Promise<Record<string, { bdt: string; usd: string }>> {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const client = createClient(supabaseUrl, supabaseKey);
+    const { data } = await client.from("domain_pricing").select("ext, registration_bdt").eq("is_active", true);
+    if (data && data.length > 0) {
+      const prices: Record<string, { bdt: string; usd: string }> = {};
+      for (const row of data) {
+        prices[row.ext] = { bdt: row.registration_bdt, usd: "N/A" };
+      }
+      return prices;
+    }
+  } catch (e) {
+    console.error("Failed to load prices from DB:", e);
+  }
+  return FALLBACK_PRICES;
 }
 
 async function checkDomainAvailability(domain: string): Promise<boolean> {
@@ -56,14 +77,10 @@ async function fetchWhoisInfo(domain: string): Promise<WhoisInfo | null> {
     }
 
     const data = await response.json();
-
     const whois: WhoisInfo = {};
 
-    // Extract registrar
     if (data.entities) {
-      const registrarEntity = data.entities.find((e: any) =>
-        e.roles?.includes("registrar")
-      );
+      const registrarEntity = data.entities.find((e: any) => e.roles?.includes("registrar"));
       if (registrarEntity?.vcardArray?.[1]) {
         const fnEntry = registrarEntity.vcardArray[1].find((v: any) => v[0] === "fn");
         if (fnEntry) whois.registrar = fnEntry[3];
@@ -73,30 +90,17 @@ async function fetchWhoisInfo(domain: string): Promise<WhoisInfo | null> {
       }
     }
 
-    // Extract dates from events
     if (data.events) {
       for (const event of data.events) {
-        if (event.eventAction === "registration") {
-          whois.creation_date = event.eventDate;
-        } else if (event.eventAction === "expiration") {
-          whois.expiry_date = event.eventDate;
-        } else if (event.eventAction === "last changed") {
-          whois.updated_date = event.eventDate;
-        }
+        if (event.eventAction === "registration") whois.creation_date = event.eventDate;
+        else if (event.eventAction === "expiration") whois.expiry_date = event.eventDate;
+        else if (event.eventAction === "last changed") whois.updated_date = event.eventDate;
       }
     }
 
-    // Extract status
-    if (data.status) {
-      whois.status = data.status.slice(0, 3);
-    }
-
-    // Extract nameservers
+    if (data.status) whois.status = data.status.slice(0, 3);
     if (data.nameservers) {
-      whois.nameservers = data.nameservers
-        .map((ns: any) => ns.ldhName || ns.unicodeName)
-        .filter(Boolean)
-        .slice(0, 4);
+      whois.nameservers = data.nameservers.map((ns: any) => ns.ldhName || ns.unicodeName).filter(Boolean).slice(0, 4);
     }
 
     return whois;
@@ -144,11 +148,15 @@ serve(async (req) => {
       );
     }
 
-    // Normal availability check
-    let extensionsToCheck = EXTENSIONS;
+    // Load prices from DB
+    const PRICES = await loadPricesFromDb();
+
+    // Determine extensions to check
+    const knownExts = Object.keys(PRICES);
+    let extensionsToCheck = knownExts.length > 0 ? knownExts : EXTENSIONS;
     const userExt = parts.length > 1 ? `.${parts.slice(1).join(".")}` : null;
-    if (userExt && EXTENSIONS.includes(userExt)) {
-      extensionsToCheck = [userExt, ...EXTENSIONS.filter(e => e !== userExt)];
+    if (userExt && extensionsToCheck.includes(userExt)) {
+      extensionsToCheck = [userExt, ...extensionsToCheck.filter(e => e !== userExt)];
     }
 
     const checkList = extensionsToCheck.slice(0, 6);
