@@ -44,6 +44,7 @@ const staticPlans: Record<string, Plan[]> = {
 
 const PricingSection = () => {
   const [activeTab, setActiveTab] = useState("web");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const { tr, lang } = useLanguage();
   const isBn = lang === "bn";
   const { addItem, isInCart } = useCart();
