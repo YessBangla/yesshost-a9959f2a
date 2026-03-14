@@ -1,6 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Building2 } from "lucide-react";
-import placeholder from "@/assets/placeholder.svg";
+
+const placeholder = "/placeholder.svg";
 
 const partners = [
   { name: "bKash", logo: placeholder },
