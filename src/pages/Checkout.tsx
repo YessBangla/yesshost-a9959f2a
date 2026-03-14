@@ -444,8 +444,64 @@ const Checkout = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Coupon Code */}
               <div className="border-t border-border pt-3 mb-4">
-                <div className="flex justify-between">
+                <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-primary" />
+                  {bn ? "কুপন কোড" : "Coupon Code"}
+                </p>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-primary/5 border border-primary/20">
+                    <div>
+                      <span className="text-xs font-bold text-primary">{appliedCoupon.code}</span>
+                      <p className="text-[10px] text-muted-foreground">
+                        {appliedCoupon.discount_type === "percentage"
+                          ? `${appliedCoupon.discount_value}% ${bn ? "ছাড়" : "off"}`
+                          : `৳${appliedCoupon.discount_value} ${bn ? "ছাড়" : "off"}`}
+                      </p>
+                    </div>
+                    <button onClick={removeCoupon} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                      placeholder={bn ? "কোড লিখুন" : "Enter code"}
+                      maxLength={30}
+                      className="flex-1 px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                      className="px-3 py-2 rounded-lg gradient-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
+                    >
+                      {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (bn ? "প্রয়োগ" : "Apply")}
+                    </button>
+                  </div>
+                )}
+                {couponError && (
+                  <p className="text-[11px] text-destructive mt-1.5">{couponError}</p>
+                )}
+              </div>
+
+              {/* Totals */}
+              <div className="border-t border-border pt-3 mb-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{bn ? "সাবটোটাল" : "Subtotal"}</span>
+                  <span className="text-foreground font-medium">৳{subtotalBdt.toLocaleString("bn-BD")}</span>
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-primary font-medium">{bn ? "ডিসকাউন্ট" : "Discount"}</span>
+                    <span className="text-primary font-semibold">-৳{discountAmount.toLocaleString("bn-BD")}</span>
+                  </div>
+                )}
+                <div className="flex justify-between pt-2 border-t border-border">
                   <span className="text-sm font-semibold text-foreground">{bn ? "সর্বমোট" : "Total"}</span>
                   <span className="text-xl font-bold text-foreground">৳{totalBdt.toLocaleString("bn-BD")}</span>
                 </div>
