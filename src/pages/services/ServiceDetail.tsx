@@ -168,8 +168,7 @@ const ServiceDetail = () => {
           </div>
         </section>
       </div>
-      <FooterSection />
-    </div>
+    </PublicLayout>
   );
 };
 
