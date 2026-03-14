@@ -44,7 +44,9 @@ const staticPlans: Record<string, Plan[]> = {
 
 const PricingSection = () => {
   const [activeTab, setActiveTab] = useState("web");
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const isBn = lang === "bn";
+  const { addItem, isInCart } = useCart();
   const [dbPlans, setDbPlans] = useState<any[]>([]);
 
   useEffect(() => {
