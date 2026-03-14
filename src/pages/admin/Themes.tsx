@@ -260,7 +260,7 @@ const AdminThemes = () => {
                         {categoryLabels[theme.category]?.[lang] || theme.category}
                       </span>
                       {theme.is_featured && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 flex items-center gap-0.5">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-accent/50 text-accent-foreground flex items-center gap-0.5">
                           <Star className="w-3 h-3" /> ফিচার্ড
                         </span>
                       )}
