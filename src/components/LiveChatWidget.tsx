@@ -23,6 +23,8 @@ const LiveChatWidget = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [started, setStarted] = useState(false);
+  const [adminTyping, setAdminTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { lang } = useLanguage();
   const bn = lang === "bn";
