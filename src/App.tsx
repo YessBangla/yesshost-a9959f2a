@@ -6,7 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import DashboardLayout from "@/components/DashboardLayout";
+import AdminLayout from "@/components/AdminLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -18,6 +20,11 @@ import DashboardBilling from "./pages/dashboard/Billing";
 import DashboardSupport from "./pages/dashboard/Support";
 import DashboardDomains from "./pages/dashboard/Domains";
 import DashboardProfile from "./pages/dashboard/Profile";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminUsers from "./pages/admin/Users";
+import AdminServices from "./pages/admin/Services";
+import AdminBilling from "./pages/admin/Billing";
+import AdminTickets from "./pages/admin/Tickets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +57,20 @@ const App = () => (
               <Route path="support" element={<DashboardSupport />} />
               <Route path="domains" element={<DashboardDomains />} />
               <Route path="profile" element={<DashboardProfile />} />
+            </Route>
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="services" element={<AdminServices />} />
+              <Route path="billing" element={<AdminBilling />} />
+              <Route path="tickets" element={<AdminTickets />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

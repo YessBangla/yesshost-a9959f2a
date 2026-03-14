@@ -1,36 +1,27 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
-  UserCircle, LogOut, ChevronLeft, Menu, Shield
+  LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
+  LogOut, ChevronLeft, Menu, Globe, Shield
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
-import { supabase } from "@/integrations/supabase/client";
 import logoWhite from "@/assets/logo-white.png";
 
-const DashboardLayout = () => {
+const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
-    }
-  }, [user]);
 
   const sidebarItems = [
-    { title: tr("dash.overview"), url: "/dashboard", icon: LayoutDashboard },
-    { title: tr("dash.services"), url: "/dashboard/services", icon: Server },
-    { title: tr("dash.billing"), url: "/dashboard/billing", icon: FileText },
-    { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
-    { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
-    { title: tr("dash.profile"), url: "/dashboard/profile", icon: UserCircle },
+    { title: tr("admin.dashboard"), url: "/admin", icon: LayoutDashboard },
+    { title: tr("admin.users"), url: "/admin/users", icon: Users },
+    { title: tr("admin.services"), url: "/admin/services", icon: Server },
+    { title: tr("admin.billing"), url: "/admin/billing", icon: FileText },
+    { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
   ];
 
   const handleSignOut = async () => {
@@ -40,8 +31,14 @@ const DashboardLayout = () => {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        {!collapsed && <img src={logoWhite} alt="YessHost" className="h-8" />}
+      <div className="p-4 border-b border-border flex items-center justify-between gap-2">
+        {!collapsed && (
+          <div className="flex items-center gap-2">
+            <img src={logoWhite} alt="YessHost" className="h-7" />
+            <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-destructive/10 text-destructive">ADMIN</span>
+          </div>
+        )}
+        {collapsed && <Shield className="w-5 h-5 text-destructive" />}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground"
@@ -55,9 +52,9 @@ const DashboardLayout = () => {
           <NavLink
             key={item.url}
             to={item.url}
-            end={item.url === "/dashboard"}
+            end={item.url === "/admin"}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
-            activeClassName="bg-primary/10 text-primary"
+            activeClassName="bg-destructive/10 text-destructive"
             onClick={() => setMobileOpen(false)}
           >
             <item.icon className="w-5 h-5 shrink-0" />
@@ -66,30 +63,28 @@ const DashboardLayout = () => {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border space-y-1">
         {!collapsed && (
           <>
-            <div className="px-3 py-2 mb-2">
-              <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || "User"}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-            </div>
+            <NavLink
+              to="/dashboard"
+              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/60 w-full transition-all"
+              activeClassName=""
+            >
+              <LayoutDashboard className="w-5 h-5 shrink-0" />
+              {tr("admin.clientDashboard")}
+            </NavLink>
             <button
               onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/60 w-full transition-all mb-1"
+              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/60 w-full transition-all"
             >
               <Globe className="w-5 h-5 shrink-0" />
               {lang === "bn" ? "English" : "বাংলা"}
             </button>
-            {isAdmin && (
-              <NavLink
-                to="/admin"
-                className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 w-full transition-all mb-1"
-                activeClassName=""
-              >
-                <Shield className="w-5 h-5 shrink-0" />
-                {tr("admin.panel")}
-              </NavLink>
-            )}
+            <div className="px-3 py-2">
+              <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || "Admin"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
           </>
         )}
         <button
@@ -123,10 +118,14 @@ const DashboardLayout = () => {
           <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground">
             <Menu className="w-5 h-5" />
           </button>
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-destructive" />
+            <span className="text-sm font-semibold text-destructive">{tr("admin.panel")}</span>
+          </div>
           <div className="flex-1" />
           <span className="text-sm text-muted-foreground hidden sm:block">{profile?.full_name || user?.email}</span>
-          <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
-            {(profile?.full_name || "U").charAt(0).toUpperCase()}
+          <div className="w-8 h-8 rounded-full bg-destructive/20 flex items-center justify-center text-destructive text-xs font-bold">
+            {(profile?.full_name || "A").charAt(0).toUpperCase()}
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6 overflow-auto"><Outlet /></main>
@@ -135,4 +134,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default AdminLayout;
