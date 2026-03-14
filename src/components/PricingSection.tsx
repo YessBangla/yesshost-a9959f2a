@@ -44,6 +44,7 @@ const staticPlans: Record<string, Plan[]> = {
 
 const PricingSection = () => {
   const [activeTab, setActiveTab] = useState("web");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const { tr, lang } = useLanguage();
   const isBn = lang === "bn";
   const { addItem, isInCart } = useCart();
@@ -102,7 +103,7 @@ const PricingSection = () => {
             {tr("pricing.subtitle")}
           </p>
 
-          <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl glass-card">
+          <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl glass-card mb-4">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -116,6 +117,31 @@ const PricingSection = () => {
                 {tab.label}
               </button>
             ))}
+          </div>
+
+          {/* Billing cycle toggle */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl glass-card">
+            <button
+              onClick={() => setBillingCycle("monthly")}
+              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                billingCycle === "monthly"
+                  ? "gradient-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {isBn ? "মাসিক" : "Monthly"}
+            </button>
+            <button
+              onClick={() => setBillingCycle("yearly")}
+              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                billingCycle === "yearly"
+                  ? "gradient-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {isBn ? "বাৎসরিক" : "Yearly"}
+              <span className="ml-1.5 text-xs opacity-80">{isBn ? "সেভ করুন" : "Save"}</span>
+            </button>
           </div>
         </motion.div>
 
@@ -143,12 +169,18 @@ const PricingSection = () => {
                 {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
 
                 <div className="flex items-baseline gap-1 my-4">
-                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{tr("pricing.mo")}</span>
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">
+                    ৳{billingCycle === "yearly" && plan.annual ? plan.annual : plan.price}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {billingCycle === "yearly" ? (isBn ? "/বছর" : "/yr") : tr("pricing.mo")}
+                  </span>
                 </div>
 
-                {plan.annual && (
-                  <p className="text-xs text-muted-foreground mb-4">৳{plan.annual} {tr("pricing.billedAnnually")}</p>
+                {billingCycle === "monthly" && plan.annual && (
+                  <p className="text-xs text-primary font-medium mb-4">
+                    💰 {isBn ? `বাৎসরিকে ৳${plan.annual}` : `৳${plan.annual} if billed yearly`}
+                  </p>
                 )}
 
                 <ul className="space-y-3 mb-8">
@@ -163,7 +195,7 @@ const PricingSection = () => {
                 </ul>
 
                 {(() => {
-                  const cartId = plan.id ? `hosting-${plan.id}-monthly` : "";
+                  const cartId = plan.id ? `hosting-${plan.id}-${billingCycle}` : "";
                   const inCart = cartId ? isInCart(cartId) : false;
                   
                   if (inCart) {
@@ -179,14 +211,15 @@ const PricingSection = () => {
                     <button
                       onClick={() => {
                         if (plan.id) {
+                          const price = billingCycle === "yearly" && plan.annual ? plan.annual : plan.price;
                           addItem({
                             id: cartId,
                             type: "hosting",
                             name: plan.name,
-                            description: `${plan.subtitle || plan.name} • ${isBn ? "মাসিক" : "Monthly"}`,
-                            price_bdt: plan.price,
+                            description: `${plan.subtitle || plan.name} • ${billingCycle === "yearly" ? (isBn ? "বাৎসরিক" : "Yearly") : (isBn ? "মাসিক" : "Monthly")}`,
+                            price_bdt: price,
                             plan_id: plan.id,
-                            billing_cycle: "monthly",
+                            billing_cycle: billingCycle,
                             category: plan.category || activeTab,
                           });
                         }
