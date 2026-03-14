@@ -51,11 +51,12 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [profiles, services, invoices, tickets] = await Promise.all([
+      const [profiles, services, invoices, tickets, coupons] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase.from("services").select("*"),
         supabase.from("invoices").select("*"),
         supabase.from("support_tickets").select("*"),
+        supabase.from("coupons").select("*"),
       ]);
 
       const profilesData = profiles.data || [];
