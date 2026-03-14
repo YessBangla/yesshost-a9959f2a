@@ -6,20 +6,49 @@ import { useAuth } from "@/contexts/AuthContext";
 import logoWhite from "@/assets/logo-white.png";
 
 const navLinks = [
-  { label: "Home", href: "#" },
   {
-    label: "Hosting",
+    label: "Domain",
+    href: "#domain",
+  },
+  {
+    label: "Web Hosting",
     href: "#pricing",
     children: [
-      { label: "Shared Hosting", href: "#pricing" },
-      { label: "Cloud Hosting", href: "#pricing" },
-      { label: "VPS Hosting", href: "#pricing" },
-      { label: "WordPress Hosting", href: "#pricing" },
-      { label: "Reseller Hosting", href: "#pricing" },
+      { label: "Basic Web Hosting", href: "#pricing" },
+      { label: "Pro Web Hosting", href: "#pricing" },
+      { label: "Premium Hosting", href: "#pricing" },
+      { label: "BDIX Hosting", href: "#pricing" },
     ],
   },
-  { label: "Domain", href: "#domain" },
-  { label: "Features", href: "#features" },
+  {
+    label: "Reseller",
+    href: "#pricing",
+    children: [
+      { label: "Linux Reseller", href: "#pricing" },
+      { label: "BDIX Reseller", href: "#pricing" },
+    ],
+  },
+  {
+    label: "VPS",
+    href: "#pricing",
+    children: [
+      { label: "USA VPS", href: "#pricing" },
+      { label: "BDIX VPS", href: "#pricing" },
+    ],
+  },
+  {
+    label: "Dedicated",
+    href: "#pricing",
+  },
+  {
+    label: "Services",
+    href: "#",
+    children: [
+      { label: "Email Hosting", href: "#pricing" },
+      { label: "Radio Hosting", href: "#" },
+      { label: "Graphics Design", href: "#" },
+    ],
+  },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ];
@@ -33,7 +62,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 glass-surface">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <a href="/" className="flex items-center">
-          <img src={logoWhite} alt="YessHost" className="h-9" />
+          <img src={logoWhite} alt="PutulHost" className="h-9" />
         </a>
 
         {/* Desktop */}
@@ -47,7 +76,7 @@ const Navbar = () => {
             >
               <a
                 href={link.href}
-                className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
               >
                 {link.label}
                 {link.children && <ChevronDown className="w-3.5 h-3.5" />}
@@ -81,10 +110,10 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-3">
-          <a href="tel:+8801234567890"
+          <a href="tel:+8809638205205"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2">
             <Phone className="w-4 h-4" />
-            <span className="hidden xl:inline">+880 1234-567890</span>
+            <span className="hidden xl:inline">+88 096 38 205 205</span>
           </a>
           {user ? (
             <Link to="/dashboard"

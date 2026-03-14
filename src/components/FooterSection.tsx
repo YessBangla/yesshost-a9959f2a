@@ -2,13 +2,13 @@ import logoWhite from "@/assets/logo-white.png";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 const footerLinks = {
-  Hosting: ["Shared Hosting", "Cloud Hosting", "VPS Hosting", "WordPress Hosting", "Reseller Hosting"],
-  Services: ["Domain Registration", "SSL Certificates", "Web Development", "Email Hosting"],
-  Support: ["Knowledge Base", "Status Page", "Contact Us", "Community"],
-  Company: ["About Us", "Blog", "Affiliates", "Terms & Conditions", "Privacy Policy"],
+  Hosting: ["Basic Web Hosting", "Pro Web Hosting", "Premium Hosting", "BDIX Hosting", "Reseller Hosting"],
+  Services: ["Domain Registration", "VPS Server", "Dedicated Server", "Email Hosting", "Radio Hosting", "Graphics Design"],
+  Support: ["Knowledge Base", "Contact Us", "Support Ticket", "Live Chat"],
+  Company: ["About Us", "Affiliate", "Terms of Service", "Refund Policy", "Privacy Policy"],
 };
 
-const payments = ["bKash", "Nagad", "Rocket", "Visa", "Mastercard", "PayPal"];
+const payments = ["bKash", "Nagad", "Rocket", "Visa", "Mastercard"];
 
 const FooterSection = () => {
   return (
@@ -17,16 +17,16 @@ const FooterSection = () => {
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2">
-            <img src={logoWhite} alt="YessHost" className="h-10 mb-4" />
+            <img src={logoWhite} alt="PutulHost" className="h-10 mb-4" />
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              বাংলাদেশের সবচেয়ে নির্ভরযোগ্য ওয়েব হোস্টিং সেবা। ২৪/৭ সাপোর্ট, ৯৯.৯৯% আপটাইম গ্যারান্টি।
+              Premium Quality Domain & Web Hosting Service। ২৪/৭ সাপোর্ট, ৯৯.৯% আপটাইম গ্যারান্টি।
             </p>
             <div className="space-y-2">
-              <a href="tel:+8801234567890" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Phone className="w-4 h-4" /> +880 1234-567890
+              <a href="tel:+8809638205205" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Phone className="w-4 h-4" /> +88 096 38 205 205 (10AM-8PM)
               </a>
-              <a href="mailto:support@yesshost.com" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Mail className="w-4 h-4" /> support@yesshost.com
+              <a href="mailto:support@putulhost.com" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Mail className="w-4 h-4" /> support@putulhost.com
               </a>
             </div>
           </div>
@@ -61,7 +61,7 @@ const FooterSection = () => {
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} YessHost.com — All rights reserved.
+            © {new Date().getFullYear()} PutulHost.com — All rights reserved.
           </p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
