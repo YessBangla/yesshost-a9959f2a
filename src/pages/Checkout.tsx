@@ -86,7 +86,7 @@ const Checkout = () => {
         const { error } = await supabase.from("services").insert({
           user_id: user.id,
           name: item.name,
-          service_type: (item.category === "vps" ? "vps" : item.category === "reseller" ? "reseller" : "shared_hosting") as const,
+          service_type: item.category === "vps" ? "vps" : item.category === "reseller" ? "reseller" : "shared_hosting",
           price_bdt: parseBdtPrice(item.price_bdt),
           billing_cycle: item.billing_cycle || "monthly",
           plan: item.plan_id,
