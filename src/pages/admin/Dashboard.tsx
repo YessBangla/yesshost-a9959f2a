@@ -238,11 +238,66 @@ const AdminDashboard = () => {
     );
   };
 
+  const downloadCSV = (filename: string, headers: string[], rows: string[][]) => {
+    const bom = "\uFEFF";
+    const csv = bom + [headers.join(","), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportInvoices = () => {
+    downloadCSV("invoices",
+      ["Invoice#", "Amount (BDT)", "Status", "Payment Method", "Description", "Created", "Paid At", "Due Date"],
+      allInvoices.map(i => [i.invoice_number, i.amount_bdt, i.status, i.payment_method || "", i.description || "", i.created_at?.slice(0, 10) || "", i.paid_at?.slice(0, 10) || "", i.due_date?.slice(0, 10) || ""])
+    );
+  };
+
+  const exportUsers = () => {
+    downloadCSV("users",
+      ["Name", "Phone", "Company", "City", "Country", "Joined"],
+      allProfiles.map(p => [p.full_name || "", p.phone || "", p.company_name || "", p.city || "", p.country || "", p.created_at?.slice(0, 10) || ""])
+    );
+  };
+
+  const exportServices = () => {
+    downloadCSV("services",
+      ["Name", "Type", "Status", "Domain", "Price (BDT)", "Billing Cycle", "Start", "Expiry"],
+      allServices.map(s => [s.name, s.service_type, s.status, s.domain || "", s.price_bdt, s.billing_cycle || "", s.start_date?.slice(0, 10) || "", s.expiry_date?.slice(0, 10) || ""])
+    );
+  };
+
+  const exportTickets = () => {
+    downloadCSV("tickets",
+      ["Ticket#", "Subject", "Status", "Priority", "Department", "Created"],
+      allTickets.map(t => [t.ticket_number, t.subject, t.status, t.priority, t.department, t.created_at?.slice(0, 10) || ""])
+    );
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{tr("admin.dashboardTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{tr("admin.dashboardSubtitle")}</p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{tr("admin.dashboardTitle")}</h1>
+          <p className="text-sm text-muted-foreground">{tr("admin.dashboardSubtitle")}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { label: "ইনভয়েস", fn: exportInvoices },
+            { label: "ইউজার", fn: exportUsers },
+            { label: "সার্ভিস", fn: exportServices },
+            { label: "টিকেট", fn: exportTickets },
+          ].map(e => (
+            <button key={e.label} onClick={e.fn} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary/60 hover:bg-secondary border border-border text-xs font-medium text-foreground transition-colors">
+              <Download className="w-3.5 h-3.5" />
+              {e.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Stat Cards */}
