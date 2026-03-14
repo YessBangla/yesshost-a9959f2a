@@ -21,6 +21,7 @@ const categoryLabels: Record<string, { bn: string; en: string }> = {
 const ThemeStore = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const { addItem, isInCart } = useCart();
   const [themes, setThemes] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
