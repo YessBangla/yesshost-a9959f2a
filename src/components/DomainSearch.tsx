@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Search, ArrowRight, Globe, CheckCircle2, XCircle, Loader2, ShoppingCart } from "lucide-react";
+import { Search, ArrowRight, Globe, CheckCircle2, XCircle, Loader2, ShoppingCart, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "@/contexts/CartContext";
 
 interface DomainResult {
   domain: string;
