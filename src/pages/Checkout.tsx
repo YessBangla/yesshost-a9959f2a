@@ -58,6 +58,7 @@ const Checkout = () => {
     max_discount_amount: number | null;
   } | null>(null);
   const [couponError, setCouponError] = useState("");
+  const [orderNote, setOrderNote] = useState("");
 
   const parseBdtPrice = (price: string): number => parseInt(price.replace(/[^\d]/g, ""), 10) || 0;
   const subtotalBdt = items.reduce((sum, item) => sum + parseBdtPrice(item.price_bdt), 0);
