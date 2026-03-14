@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
-  LogOut, ChevronLeft, Menu, Globe, Shield, Layers, Palette, Tag
+  LogOut, ChevronLeft, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
