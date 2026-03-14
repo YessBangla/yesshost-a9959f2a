@@ -208,6 +208,7 @@ const Checkout = () => {
       if (hostingItems.length) descParts.push(`Hosting: ${hostingItems.map(i => i.name).join(", ")}`);
       if (themeItems.length) descParts.push(`Theme: ${themeItems.map(i => i.name).join(", ")}`);
       if (appliedCoupon) descParts.push(`Coupon: ${appliedCoupon.code} (-৳${discountAmount})`);
+      if (orderNote.trim()) descParts.push(`Note: ${orderNote.trim().slice(0, 500)}`);
 
       // Increment coupon used_count
       if (appliedCoupon) {
