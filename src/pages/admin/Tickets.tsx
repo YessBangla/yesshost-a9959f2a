@@ -1,22 +1,44 @@
 import { useEffect, useState } from "react";
-import { HeadphonesIcon, Search, Send, ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  HeadphonesIcon, Search, Send, ArrowLeft, MessageSquare,
+  Clock, CheckCircle2, AlertTriangle, Inbox, Filter, User
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 import type { Tables } from "@/integrations/supabase/types";
 
 type TicketWithUser = Tables<"support_tickets"> & { profiles?: Tables<"profiles"> | null };
 
 const ticketStatuses = ["open", "in_progress", "waiting", "resolved", "closed"] as const;
 
+const statusConfig: Record<string, { label_bn: string; label_en: string; variant: "default" | "secondary" | "destructive" | "outline"; color: string; bg: string }> = {
+  open: { label_bn: "ওপেন", label_en: "Open", variant: "secondary", color: "text-warning", bg: "bg-warning/10" },
+  in_progress: { label_bn: "চলমান", label_en: "In Progress", variant: "default", color: "text-primary", bg: "bg-primary/10" },
+  waiting: { label_bn: "অপেক্ষমাণ", label_en: "Waiting", variant: "outline", color: "text-muted-foreground", bg: "bg-muted" },
+  resolved: { label_bn: "সমাধান", label_en: "Resolved", variant: "default", color: "text-success", bg: "bg-success/10" },
+  closed: { label_bn: "বন্ধ", label_en: "Closed", variant: "outline", color: "text-muted-foreground", bg: "bg-muted" },
+};
+
+const priorityConfig: Record<string, { label_bn: string; label_en: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  low: { label_bn: "কম", label_en: "Low", variant: "outline" },
+  medium: { label_bn: "মাঝারি", label_en: "Medium", variant: "secondary" },
+  high: { label_bn: "উচ্চ", label_en: "High", variant: "default" },
+  urgent: { label_bn: "জরুরি", label_en: "Urgent", variant: "destructive" },
+};
+
 const AdminTickets = () => {
-  const { tr } = useLanguage();
+  const { lang } = useLanguage();
+  const isBn = lang === "bn";
   const { toast } = useToast();
   const { user } = useAuth();
   const [tickets, setTickets] = useState<TicketWithUser[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<TicketWithUser | null>(null);
   const [replies, setReplies] = useState<Tables<"ticket_replies">[]>([]);
@@ -46,7 +68,7 @@ const AdminTickets = () => {
 
   const updateStatus = async (id: string, status: string) => {
     await supabase.from("support_tickets").update({ status: status as any }).eq("id", id);
-    toast({ title: tr("admin.statusUpdated") });
+    toast({ title: isBn ? "স্ট্যাটাস আপডেট হয়েছে" : "Status updated" });
     fetchData();
     if (selectedTicket?.id === id) setSelectedTicket({ ...selectedTicket, status: status as any });
   };
@@ -66,86 +88,116 @@ const AdminTickets = () => {
     setSending(false);
   };
 
-  const statusColors: Record<string, string> = {
-    open: "bg-warning/10 text-warning",
-    in_progress: "bg-primary/10 text-primary",
-    waiting: "bg-muted text-muted-foreground",
-    resolved: "bg-success/10 text-success",
-    closed: "bg-muted text-muted-foreground",
-  };
-
-  const priorityColors: Record<string, string> = {
-    low: "bg-muted text-muted-foreground",
-    medium: "bg-primary/10 text-primary",
-    high: "bg-warning/10 text-warning",
-    urgent: "bg-destructive/10 text-destructive",
+  const stats = {
+    total: tickets.length,
+    open: tickets.filter(t => t.status === "open").length,
+    inProgress: tickets.filter(t => t.status === "in_progress").length,
+    urgent: tickets.filter(t => t.priority === "urgent" && t.status !== "closed" && t.status !== "resolved").length,
   };
 
   const filtered = tickets.filter(t => {
-    const matchSearch = t.subject.toLowerCase().includes(search.toLowerCase()) ||
+    const matchSearch = !search || t.subject.toLowerCase().includes(search.toLowerCase()) ||
       t.ticket_number.includes(search) ||
       (t.profiles?.full_name || "").toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || t.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchPriority = priorityFilter === "all" || t.priority === priorityFilter;
+    return matchSearch && matchStatus && matchPriority;
   });
+
+  const formatDate = (d: string) => new Date(d).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" });
+  const formatTime = (d: string) => new Date(d).toLocaleTimeString(isBn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" });
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
+  // Ticket Detail View
   if (selectedTicket) {
+    const sc = statusConfig[selectedTicket.status] || statusConfig.open;
+    const pc = priorityConfig[selectedTicket.priority] || priorityConfig.medium;
     return (
       <div className="space-y-4">
-        <button onClick={() => setSelectedTicket(null)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="w-4 h-4" /> {tr("dash.backToTickets")}
+        <button onClick={() => setSelectedTicket(null)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" /> {isBn ? "সকল টিকেট" : "All Tickets"}
         </button>
 
-        <div className="glass-card p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        {/* Ticket header */}
+        <div className="glass-card rounded-xl p-5">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
             <div>
-              <h2 className="text-lg font-bold text-foreground">{selectedTicket.subject}</h2>
-              <p className="text-xs text-muted-foreground">
-                #{selectedTicket.ticket_number} • {selectedTicket.profiles?.full_name || "Unknown"} • {selectedTicket.department}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${priorityColors[selectedTicket.priority]}`}>
-                {selectedTicket.priority}
-              </span>
-              <select
-                value={selectedTicket.status}
-                onChange={e => updateStatus(selectedTicket.id, e.target.value)}
-                className="text-xs px-3 py-1.5 rounded-lg bg-secondary/50 border border-border text-foreground outline-none"
-              >
-                {ticketStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
-            {replies.map((r) => (
-              <div key={r.id} className={`p-3 rounded-xl text-sm ${r.is_staff ? "bg-destructive/5 border border-destructive/10 ml-8" : "bg-secondary/30 mr-8"}`}>
-                <p className="text-xs font-semibold mb-1 text-muted-foreground">
-                  {r.is_staff ? `🛡️ ${tr("dash.supportTeam")}` : tr("admin.client")} • {new Date(r.created_at).toLocaleString()}
-                </p>
-                <p className="text-foreground whitespace-pre-wrap">{r.message}</p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-mono text-xs text-muted-foreground">#{selectedTicket.ticket_number}</span>
+                <Badge variant={sc.variant} className="text-[10px]">{isBn ? sc.label_bn : sc.label_en}</Badge>
+                <Badge variant={pc.variant} className="text-[10px]">{isBn ? pc.label_bn : pc.label_en}</Badge>
               </div>
-            ))}
-            {replies.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">{tr("dash.noMessages")}</p>}
+              <h2 className="text-xl font-bold text-foreground">{selectedTicket.subject}</h2>
+              <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {selectedTicket.profiles?.full_name || "—"}</span>
+                <span>•</span>
+                <span>{selectedTicket.department}</span>
+                <span>•</span>
+                <span>{formatDate(selectedTicket.created_at)}</span>
+              </div>
+            </div>
+            <select
+              value={selectedTicket.status}
+              onChange={e => updateStatus(selectedTicket.id, e.target.value)}
+              className="text-sm px-4 py-2 rounded-xl bg-secondary/40 border border-border/50 text-foreground outline-none"
+            >
+              {ticketStatuses.map(s => {
+                const cfg = statusConfig[s];
+                return <option key={s} value={s}>{isBn ? cfg?.label_bn : cfg?.label_en}</option>;
+              })}
+            </select>
           </div>
 
+          {/* Messages */}
+          <div className="space-y-3 max-h-[400px] overflow-y-auto mb-5 pr-1">
+            {replies.length === 0 && (
+              <div className="text-center py-8">
+                <MessageSquare className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">{isBn ? "এখনো কোনো মেসেজ নেই" : "No messages yet"}</p>
+              </div>
+            )}
+            {replies.map((r) => (
+              <motion.div
+                key={r.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`rounded-xl p-4 text-sm ${r.is_staff
+                  ? "bg-primary/5 border border-primary/10 ml-6 sm:ml-12"
+                  : "bg-secondary/30 border border-border/30 mr-6 sm:mr-12"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    {r.is_staff ? (
+                      <><span className="w-5 h-5 rounded bg-destructive/15 text-destructive flex items-center justify-center text-[10px]">🛡️</span> {isBn ? "সাপোর্ট টিম" : "Support Team"}</>
+                    ) : (
+                      <><span className="w-5 h-5 rounded bg-primary/10 text-primary flex items-center justify-center text-[10px]">👤</span> {selectedTicket.profiles?.full_name || (isBn ? "ক্লায়েন্ট" : "Client")}</>
+                    )}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">{formatDate(r.created_at)} {formatTime(r.created_at)}</span>
+                </div>
+                <p className="text-foreground whitespace-pre-wrap leading-relaxed">{r.message}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Reply input */}
           <div className="flex gap-2">
             <input
               value={replyMsg}
               onChange={e => setReplyMsg(e.target.value)}
-              placeholder={tr("admin.staffReplyPlaceholder")}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
-              onKeyDown={e => e.key === "Enter" && sendReply()}
+              placeholder={isBn ? "স্টাফ রিপ্লাই লিখুন..." : "Write staff reply..."}
+              className="flex-1 px-4 py-3 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+              onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendReply()}
             />
             <button
               onClick={sendReply}
               disabled={sending || !replyMsg.trim()}
-              className="px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm disabled:opacity-50"
+              className="px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50 hover:bg-primary/90 transition-colors flex items-center gap-2"
             >
               <Send className="w-4 h-4" />
+              {isBn ? "পাঠান" : "Send"}
             </button>
           </div>
         </div>
@@ -153,79 +205,137 @@ const AdminTickets = () => {
     );
   }
 
+  // Tickets List View
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-        <HeadphonesIcon className="w-6 h-6" /> {tr("admin.ticketManagement")}
-      </h1>
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">{isBn ? "টিকেট ম্যানেজমেন্ট" : "Ticket Management"}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল সাপোর্ট টিকেট পরিচালনা ও রিপ্লাই করুন" : "Manage and reply to all support tickets"}</p>
+      </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: isBn ? "মোট টিকেট" : "Total", value: stats.total, icon: Inbox, color: "text-primary", bg: "bg-primary/10" },
+          { label: isBn ? "ওপেন" : "Open", value: stats.open, icon: Clock, color: "text-warning", bg: "bg-warning/10" },
+          { label: isBn ? "চলমান" : "In Progress", value: stats.inProgress, icon: HeadphonesIcon, color: "text-primary", bg: "bg-primary/10" },
+          { label: isBn ? "জরুরি" : "Urgent", value: stats.urgent, icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
+        ].map((s, i) => (
+          <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-card rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <div className={`p-1.5 rounded-lg ${s.bg}`}><s.icon className={`w-4 h-4 ${s.color}`} /></div>
+              <span className="text-xs text-muted-foreground">{s.label}</span>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{s.value}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder={tr("admin.searchTickets")}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+            placeholder={isBn ? "টিকেট নম্বর, বিষয় বা ক্লায়েন্ট দিয়ে সার্চ..." : "Search by ticket#, subject or client..."}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none"
+          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none"
         >
-          <option value="all">{tr("admin.allStatus")}</option>
-          {ticketStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+          <option value="all">{isBn ? "সকল স্ট্যাটাস" : "All Status"}</option>
+          {ticketStatuses.map(s => {
+            const cfg = statusConfig[s];
+            return <option key={s} value={s}>{isBn ? cfg?.label_bn : cfg?.label_en}</option>;
+          })}
+        </select>
+        <select
+          value={priorityFilter}
+          onChange={e => setPriorityFilter(e.target.value)}
+          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none"
+        >
+          <option value="all">{isBn ? "সকল প্রায়োরিটি" : "All Priority"}</option>
+          {(["low", "medium", "high", "urgent"] as const).map(p => {
+            const cfg = priorityConfig[p];
+            return <option key={p} value={p}>{isBn ? cfg?.label_bn : cfg?.label_en}</option>;
+          })}
         </select>
       </div>
 
-      <div className="glass-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-secondary/30">
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">#</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{tr("dash.subject")}</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{tr("admin.client")}</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{tr("dash.department")}</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{tr("dash.priority")}</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{tr("dash.status")}</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{tr("admin.date")}</th>
-                <th className="text-right px-4 py-3 font-semibold text-muted-foreground">{tr("admin.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((t) => (
-                <tr key={t.id} className="border-b border-border/50 hover:bg-secondary/20 transition-colors cursor-pointer" onClick={() => openTicket(t)}>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">#{t.ticket_number}</td>
-                  <td className="px-4 py-3 font-medium text-foreground">{t.subject}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{t.profiles?.full_name || t.user_id.slice(0, 8)}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{t.department}</td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${priorityColors[t.priority]}`}>{t.priority}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusColors[t.status]}`}>{t.status}</span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(t.created_at).toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
-                    <select
-                      value={t.status}
-                      onChange={e => updateStatus(t.id, e.target.value)}
-                      className="text-xs px-2 py-1.5 rounded-lg bg-secondary/50 border border-border text-foreground outline-none"
-                    >
-                      {ticketStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{tr("admin.noData")}</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Tickets - Card based for better mobile */}
+      <div className="space-y-3">
+        {filtered.length === 0 && (
+          <div className="glass-card rounded-xl p-12 text-center">
+            <Inbox className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-muted-foreground">{isBn ? "কোনো টিকেট পাওয়া যায়নি" : "No tickets found"}</p>
+          </div>
+        )}
+        {filtered.map((t, i) => {
+          const sc = statusConfig[t.status] || statusConfig.open;
+          const pc = priorityConfig[t.priority] || priorityConfig.medium;
+          const timeSince = Math.floor((Date.now() - new Date(t.created_at).getTime()) / 3600000);
+          const timeLabel = timeSince < 1 ? (isBn ? "কিছুক্ষণ আগে" : "Just now")
+            : timeSince < 24 ? `${timeSince}${isBn ? " ঘণ্টা আগে" : "h ago"}`
+            : `${Math.floor(timeSince / 24)}${isBn ? " দিন আগে" : "d ago"}`;
+
+          return (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.02 }}
+              onClick={() => openTicket(t)}
+              className="glass-card rounded-xl p-4 cursor-pointer hover:shadow-md hover:bg-secondary/10 transition-all group"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className={`p-2 rounded-xl ${sc.bg} shrink-0 mt-0.5`}>
+                    <HeadphonesIcon className={`w-4 h-4 ${sc.color}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="font-mono text-[10px] text-muted-foreground">#{t.ticket_number}</span>
+                      <Badge variant={sc.variant} className="text-[10px]">{isBn ? sc.label_bn : sc.label_en}</Badge>
+                      <Badge variant={pc.variant} className="text-[10px]">{isBn ? pc.label_bn : pc.label_en}</Badge>
+                      <Badge variant="outline" className="text-[10px]">{t.department}</Badge>
+                    </div>
+                    <h3 className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{t.subject}</h3>
+                    <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><User className="w-3 h-3" /> {t.profiles?.full_name || t.user_id.slice(0, 8)}</span>
+                      <span>•</span>
+                      <span>{timeLabel}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="shrink-0" onClick={e => e.stopPropagation()}>
+                  <select
+                    value={t.status}
+                    onChange={e => updateStatus(t.id, e.target.value)}
+                    className="text-xs px-2.5 py-1.5 rounded-lg bg-secondary/40 border border-border/50 text-foreground outline-none"
+                  >
+                    {ticketStatuses.map(s => {
+                      const cfg = statusConfig[s];
+                      return <option key={s} value={s}>{isBn ? cfg?.label_bn : cfg?.label_en}</option>;
+                    })}
+                  </select>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
+
+      {/* Footer count */}
+      {filtered.length > 0 && (
+        <div className="text-xs text-muted-foreground text-center">
+          {isBn ? `${filtered.length} টি টিকেট দেখাচ্ছে` : `Showing ${filtered.length} tickets`}
+        </div>
+      )}
     </div>
   );
 };
