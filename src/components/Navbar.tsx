@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import logoWhite from "@/assets/logo-white.png";
 
 const navLinks = [
-  { label: "Hosting", href: "#pricing" },
+  { label: "Home", href: "#" },
+  { label: "Web Hosting", href: "#pricing" },
+  { label: "Domain", href: "#domain" },
   { label: "Features", href: "#features" },
-  { label: "Status", href: "#status" },
-  { label: "Support", href: "#" },
+  { label: "About Us", href: "#about" },
+  { label: "Contact Us", href: "#contact" },
 ];
 
 const Navbar = () => {
@@ -15,11 +18,8 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-surface">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <a href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">H</span>
-          </div>
-          <span className="text-foreground font-display font-semibold text-lg tracking-tight">HostForge</span>
+        <a href="/" className="flex items-center">
+          <img src={logoWhite} alt="YessHost" className="h-10" />
         </a>
 
         {/* Desktop */}
@@ -36,14 +36,11 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Login
-          </a>
           <a
-            href="#pricing"
-            className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:brightness-110 transition-all"
+            href="#"
+            className="text-sm bg-primary text-primary-foreground px-5 py-2 rounded-lg font-semibold hover:brightness-110 transition-all"
           >
-            Get Started
+            Client Area
           </a>
         </div>
 
@@ -74,10 +71,10 @@ const Navbar = () => {
             </a>
           ))}
           <a
-            href="#pricing"
+            href="#"
             className="block mt-2 text-center text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold"
           >
-            Get Started
+            Client Area
           </a>
         </motion.div>
       )}

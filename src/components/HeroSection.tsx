@@ -5,6 +5,14 @@ import heroImage from "@/assets/hero-datacenter.jpg";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
+const domainPrices = [
+  { ext: ".com", price: "১১৫০" },
+  { ext: ".online", price: "২৫০" },
+  { ext: ".net", price: "১৫৪০" },
+  { ext: ".org", price: "১৬৫০" },
+  { ext: ".store", price: "২০০" },
+];
+
 const HeroSection = () => {
   const [domain, setDomain] = useState("");
 
@@ -16,7 +24,7 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 text-center">
+      <div className="relative z-10 container mx-auto px-4 text-center pt-20">
         {/* Status badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -33,11 +41,11 @@ const HeroSection = () => {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: brandCurve, delay: 0.1 }}
-          className="text-5xl md:text-7xl lg:text-8xl font-display font-bold tracking-tighter leading-[0.9] mb-6"
+          className="text-4xl md:text-6xl lg:text-7xl font-display font-bold tracking-tighter leading-[0.95] mb-6"
         >
-          Deploy at the
+          Expert Cloud Strategy
           <br />
-          <span className="text-gradient-primary">speed of thought.</span>
+          <span className="text-gradient-primary">& Consulting</span>
         </motion.h1>
 
         {/* Sub-headline */}
@@ -45,20 +53,21 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: brandCurve, delay: 0.2 }}
-          className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12"
+          className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10"
         >
-          Enterprise-grade NVMe infrastructure with 99.99% uptime guaranteed by SLA.
-          <br className="hidden md:block" />
-          40ms global latency. 10Gbps uplink.
+          Expert cloud consulting to support you as you grow. Improving your existing 
+          solution and planning next steps, we work closely with you to help.
         </motion.p>
 
         {/* Domain Search */}
         <motion.div
+          id="domain"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: brandCurve, delay: 0.3 }}
           className="max-w-2xl mx-auto"
         >
+          <h3 className="text-lg font-semibold text-foreground mb-4">Find Your Domain Name!</h3>
           <div className="flex items-center gap-2 p-2 rounded-2xl bg-card/40 backdrop-blur-md border border-border glow-border">
             <div className="flex items-center gap-3 flex-1 px-4">
               <Search className="w-5 h-5 text-muted-foreground shrink-0" />
@@ -66,8 +75,8 @@ const HeroSection = () => {
                 type="text"
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
-                placeholder="Search your perfect domain..."
-                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-lg py-3"
+                placeholder="Example: YourDomainName.com"
+                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base py-3"
               />
             </div>
             <button className="shrink-0 flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold hover:brightness-110 transition-all">
@@ -75,9 +84,16 @@ const HeroSection = () => {
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-xs text-muted-foreground mt-3">
-            .com .net .org .io .dev — starting from $9.99/year
-          </p>
+
+          {/* Domain prices */}
+          <div className="flex flex-wrap justify-center gap-4 mt-6">
+            {domainPrices.map((d) => (
+              <div key={d.ext} className="flex flex-col items-center px-4 py-2 rounded-xl bg-secondary/50 border border-border">
+                <span className="text-sm font-bold text-primary">{d.ext}</span>
+                <span className="text-xs text-muted-foreground">{d.price}৳</span>
+              </div>
+            ))}
+          </div>
         </motion.div>
 
         {/* Stats */}
@@ -85,7 +101,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: brandCurve, delay: 0.5 }}
-          className="flex flex-wrap justify-center gap-8 md:gap-16 mt-20"
+          className="flex flex-wrap justify-center gap-8 md:gap-16 mt-16"
         >
           {[
             { value: "50K+", label: "Active Websites" },
@@ -94,8 +110,8 @@ const HeroSection = () => {
             { value: "10Gbps", label: "Network Uplink" },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="text-3xl md:text-4xl font-bold tabular-nums text-foreground">{stat.value}</p>
-              <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+              <p className="text-2xl md:text-3xl font-bold tabular-nums text-foreground">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
             </div>
           ))}
         </motion.div>

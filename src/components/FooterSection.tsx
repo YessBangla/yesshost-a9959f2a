@@ -1,8 +1,10 @@
+import logoWhite from "@/assets/logo-white.png";
+
 const footerLinks = {
   Product: ["Shared Hosting", "VPS Hosting", "Dedicated Servers", "Domain Names", "SSL Certificates"],
-  Company: ["About Us", "Blog", "Careers", "Contact"],
-  Support: ["Knowledge Base", "API Docs", "Status Page", "Community"],
-  Legal: ["Privacy Policy", "Terms of Service", "SLA", "GDPR"],
+  Company: ["About Us", "Blog", "Affiliates", "Contact Us"],
+  Support: ["Knowledge Base", "Web Development Services", "Status Page", "Community"],
+  Legal: ["Terms & Condition", "Privacy Policy", "SLA", "GDPR"],
 };
 
 const FooterSection = () => {
@@ -12,14 +14,9 @@ const FooterSection = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">H</span>
-              </div>
-              <span className="text-foreground font-display font-semibold text-lg tracking-tight">HostForge</span>
-            </div>
+            <img src={logoWhite} alt="YessHost" className="h-10 mb-4" />
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Enterprise-grade hosting infrastructure for the modern web.
+              Yes, It's a Super Hosting Solution! Enterprise-grade hosting for the modern web.
             </p>
           </div>
 
@@ -41,7 +38,7 @@ const FooterSection = () => {
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2026 HostForge. All rights reserved.
+            © {new Date().getFullYear()} YessHost.com, All rights reserved.
           </p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
