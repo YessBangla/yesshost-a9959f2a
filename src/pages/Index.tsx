@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import HeroSection from "@/components/HeroSection";
 import CorporateSlider from "@/components/CorporateSlider";
 import CategoryScroller from "@/components/CategoryScroller";
@@ -13,7 +14,7 @@ import FooterSection from "@/components/FooterSection";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Navbar />
       <CorporateSlider />
       <HeroSection />
@@ -26,6 +27,7 @@ const Index = () => {
       <FAQSection />
       <CTASection />
       <FooterSection />
+      <MobileBottomNav />
     </div>
   );
 };
