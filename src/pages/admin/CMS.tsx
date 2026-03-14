@@ -454,6 +454,7 @@ const AdminCMS = () => {
       {/* Tab Content */}
       {tab === "content" && renderContent()}
       {tab === "plans" && renderPlans()}
+      {tab === "domains" && renderDomains()}
       {tab === "testimonials" && renderTestimonials()}
       {tab === "faqs" && renderFaqs()}
     </div>
