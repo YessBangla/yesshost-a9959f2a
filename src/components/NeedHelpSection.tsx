@@ -16,7 +16,7 @@ const NeedHelpSection = () => {
       titleEn: "Call Us",
       descBn: "১০AM - ৮PM (প্রতিদিন)",
       descEn: "10AM - 8PM (Everyday)",
-      href: "tel:+8801234567890",
+      href: "tel:+8809638205205",
       external: true,
       color: "from-emerald-500 to-green-600",
     },
