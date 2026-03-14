@@ -21,6 +21,7 @@ const PublicLayout = ({ children, hideFooter, showOfferBanner }: PublicLayoutPro
       {!hideFooter && <FooterSection />}
       <MobileBottomNav />
       <LiveChatWidget />
+      <ScrollArrows />
     </div>
   );
 };
