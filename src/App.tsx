@@ -95,6 +95,7 @@ const App = () => (
               <Route path="services" element={<AdminServices />} />
               <Route path="billing" element={<AdminBilling />} />
               <Route path="tickets" element={<AdminTickets />} />
+              <Route path="cms" element={<AdminCMS />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
