@@ -198,33 +198,37 @@ const CorporateSlider = () => {
         {String(current + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
       </div>
 
-      {/* Domain Search Bar */}
-      <div className="absolute bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl z-20">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
-          <div className="flex items-center gap-3 flex-1 px-4">
-            <Search className="w-5 h-5 text-white/60 shrink-0" />
-            <input
-              type="text"
-              placeholder={lang === "bn" ? "আপনার ডোমেইন নাম খুঁজুন..." : "Search your domain name..."}
-              className="w-full bg-transparent text-white placeholder:text-white/50 outline-none text-sm py-3"
-            />
+      {/* Domain Search Bar - pinned at bottom edge */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-1/2">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-2xl bg-background border border-border shadow-xl">
+              <div className="flex items-center gap-3 flex-1 px-4">
+                <Search className="w-5 h-5 text-muted-foreground shrink-0" />
+                <input
+                  type="text"
+                  placeholder={lang === "bn" ? "আপনার ডোমেইন নাম খুঁজুন..." : "Search your domain name..."}
+                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm py-3"
+                />
+              </div>
+              <button className="shrink-0 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all">
+                {lang === "bn" ? "খুঁজুন" : "Search"}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 mt-3">
+              {[
+                { ext: ".com", price: "৯৯০" },
+                { ext: ".top", price: "১৮০" },
+                { ext: ".xyz", price: "২৯৫" },
+                { ext: ".shop", price: "৩৯০" },
+              ].map((d) => (
+                <span key={d.ext} className="text-xs text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full border border-border">
+                  <span className="font-bold text-foreground">{d.ext}</span> ৳{d.price}
+                </span>
+              ))}
+            </div>
           </div>
-          <button className="shrink-0 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all">
-            {lang === "bn" ? "খুঁজুন" : "Search"}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="flex flex-wrap justify-center gap-2 mt-3">
-          {[
-            { ext: ".com", price: "৯৯০" },
-            { ext: ".top", price: "১৮০" },
-            { ext: ".xyz", price: "২৯৫" },
-            { ext: ".shop", price: "৩৯০" },
-          ].map((d) => (
-            <span key={d.ext} className="text-xs text-white/70 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
-              <span className="font-bold text-white">{d.ext}</span> ৳{d.price}
-            </span>
-          ))}
         </div>
       </div>
     </section>
