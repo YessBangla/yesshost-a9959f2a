@@ -60,9 +60,9 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-surface">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
+      <div className="container mx-auto flex items-center justify-between h-14 lg:h-16 px-4">
         <Link to="/" className="flex items-center">
-          <img src={logoWhite} alt="YessHost" className="h-9" />
+          <img src={logoWhite} alt="YessHost" className="h-7 lg:h-9" />
         </Link>
 
         {/* Desktop */}
