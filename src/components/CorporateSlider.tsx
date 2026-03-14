@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChevronLeft, ChevronRight, ArrowRight, Search, Globe } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import DomainSearch from "./DomainSearch";
 
 import slideDatacenter from "@/assets/slides/slide-datacenter.jpg";
 import slideTeam from "@/assets/slides/slide-team.jpg";
