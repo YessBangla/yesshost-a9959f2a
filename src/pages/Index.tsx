@@ -12,7 +12,7 @@ import CTASection from "@/components/CTASection";
 
 const Index = () => {
   return (
-    <PublicLayout>
+    <PublicLayout showOfferBanner>
       <CorporateSlider />
       <HeroSection />
       <TrustedBySection />
