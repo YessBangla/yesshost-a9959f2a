@@ -47,20 +47,14 @@ const TrustedBySection = () => {
           {doubled.map((p, i) => (
             <div
               key={i}
-              className="flex-shrink-0 flex flex-col items-center justify-center w-28 sm:w-36 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+              className="flex-shrink-0 flex items-center justify-center w-28 h-14 sm:w-36 sm:h-16 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
             >
-              <div className="w-20 h-20 rounded-xl bg-white flex items-center justify-center shadow-sm mb-2 overflow-hidden">
-                <img
-                  src={p.logo}
-                  alt={p.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-              <div className="flex items-center gap-1">
-                <Building2 className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground">{p.name}</span>
-              </div>
+              <img
+                src={p.logo}
+                alt={p.name}
+                className="max-w-full max-h-full object-contain"
+                loading="lazy"
+              />
             </div>
           ))}
         </div>
