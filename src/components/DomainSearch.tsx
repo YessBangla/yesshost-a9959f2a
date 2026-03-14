@@ -22,7 +22,7 @@ interface DomainResult {
   price_usd: string;
 }
 
-const domainPrices = [
+const staticDomainPrices = [
   { ext: ".com", price: "৯৯০", popular: true },
   { ext: ".top", price: "১৮০", popular: false },
   { ext: ".xyz", price: "২৯৫", popular: false },
