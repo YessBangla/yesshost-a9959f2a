@@ -4,6 +4,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import FooterSection from "@/components/FooterSection";
 import LiveChatWidget from "@/components/LiveChatWidget";
 import OfferBanner from "@/components/OfferBanner";
+import ScrollArrows from "@/components/ScrollArrows";
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -20,6 +21,7 @@ const PublicLayout = ({ children, hideFooter, showOfferBanner }: PublicLayoutPro
       {!hideFooter && <FooterSection />}
       <MobileBottomNav />
       <LiveChatWidget />
+      <ScrollArrows />
     </div>
   );
 };
