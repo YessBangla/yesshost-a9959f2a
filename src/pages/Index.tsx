@@ -9,6 +9,7 @@ import ServerStatus from "@/components/ServerStatus";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import FAQSection from "@/components/FAQSection";
 import CTASection from "@/components/CTASection";
+import NeedHelpSection from "@/components/NeedHelpSection";
 
 const Index = () => {
   return (
@@ -19,6 +20,7 @@ const Index = () => {
       <WhyChooseUs />
       <FeaturesSection />
       <PricingSection />
+      <NeedHelpSection />
       <ServerStatus />
       <TestimonialsSection />
       <FAQSection />
