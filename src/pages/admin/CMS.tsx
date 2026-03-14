@@ -33,16 +33,18 @@ const AdminCMS = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [c, p, t, f] = await Promise.all([
+    const [c, p, t, f, d] = await Promise.all([
       supabase.from("site_content").select("*").order("page").order("sort_order"),
       supabase.from("pricing_plans").select("*").order("category").order("sort_order"),
       supabase.from("testimonials").select("*").order("sort_order"),
       supabase.from("faqs").select("*").order("sort_order"),
+      (supabase.from("domain_pricing" as any) as any).select("*").order("sort_order"),
     ]);
     setContents(c.data || []);
     setPlans(p.data || []);
     setTestimonials(t.data || []);
     setFaqs(f.data || []);
+    setDomainPrices(d.data || []);
     setLoading(false);
   };
 
