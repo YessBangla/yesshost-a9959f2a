@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
+import { formatAmount } from "@/lib/formatPrice";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
@@ -78,7 +79,7 @@ const DashboardOverview = () => {
     { title: bn ? "সক্রিয় সার্ভিস" : "Active Services", value: stats.activeServices, total: stats.services, icon: Server, color: "from-blue-500 to-indigo-600", link: "/dashboard/services" },
     { title: bn ? "ডোমেইন" : "Domains", value: stats.domains, icon: Globe, color: "from-emerald-500 to-green-600", link: "/dashboard/domains" },
     { title: bn ? "ওপেন টিকেট" : "Open Tickets", value: stats.openTickets, total: stats.tickets, icon: HeadphonesIcon, color: "from-amber-500 to-orange-600", link: "/dashboard/support" },
-    { title: bn ? "মোট ব্যয়" : "Total Spent", value: `৳${stats.totalSpent.toLocaleString()}`, icon: CreditCard, color: "from-purple-500 to-violet-600", link: "/dashboard/billing" },
+    { title: bn ? "মোট ব্যয়" : "Total Spent", value: `৳${formatAmount(stats.totalSpent, lang)}`, icon: CreditCard, color: "from-purple-500 to-violet-600", link: "/dashboard/billing" },
   ];
 
   const ago = (date: string) => {
@@ -224,7 +225,7 @@ const DashboardOverview = () => {
                     <p className="text-[11px] text-muted-foreground truncate">{inv.description || "—"}</p>
                   </div>
                   <div className="text-right shrink-0 ml-3">
-                    <p className="text-sm font-bold text-foreground tabular-nums">৳{Number(inv.amount_bdt).toLocaleString()}</p>
+                    <p className="text-sm font-bold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</p>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
                       inv.status === "paid" ? "bg-success/10 text-success" :
                       inv.status === "unpaid" ? "bg-warning/10 text-warning" :

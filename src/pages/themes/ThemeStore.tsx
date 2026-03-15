@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
+import { formatAmount } from "@/lib/formatPrice";
 
 const categoryLabels: Record<string, { bn: string; en: string }> = {
   all: { bn: "সকল", en: "All" },
@@ -189,11 +190,11 @@ const ThemeStore = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-baseline gap-2">
                         <span className="text-xl font-extrabold text-primary">
-                          ৳{theme.discount_price_bdt || theme.price_bdt}
+                          ৳{formatAmount(theme.discount_price_bdt || theme.price_bdt, lang)}
                         </span>
                         {theme.discount_price_bdt && (
                           <span className="text-sm text-muted-foreground line-through">
-                            ৳{theme.price_bdt}
+                            ৳{formatAmount(theme.price_bdt, lang)}
                           </span>
                         )}
                       </div>
@@ -209,8 +210,8 @@ const ThemeStore = () => {
                         <p className="text-xs font-semibold text-primary flex items-center gap-1">
                           <Star className="w-3 h-3" />
                           {bn
-                            ? `হোস্টিং বান্ডেল: ৳${theme.hosting_bundle_price_bdt}`
-                            : `Hosting Bundle: ৳${theme.hosting_bundle_price_bdt}`}
+                            ? `হোস্টিং বান্ডেল: ৳${formatAmount(theme.hosting_bundle_price_bdt, lang)}`
+                            : `Hosting Bundle: ৳${formatAmount(theme.hosting_bundle_price_bdt, lang)}`}
                         </p>
                       </div>
                     )}

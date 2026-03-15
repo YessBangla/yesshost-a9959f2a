@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/contexts/CartContext";
+import { formatPrice } from "@/lib/formatPrice";
 
 interface WhoisInfo {
   registrar?: string;
@@ -54,7 +55,7 @@ const formatDate = (dateStr?: string) => {
 
 /* ─── Sub-components ─── */
 
-const TldPill = ({ d, onClick }: { d: DomainPrice; onClick: () => void }) => (
+const TldPill = ({ d, onClick, lang }: { d: DomainPrice; onClick: () => void; lang: string }) => (
   <button
     onClick={onClick}
     className={`group relative flex flex-col items-center gap-0.5 px-4 py-2.5 rounded-xl border transition-all duration-200 hover:scale-[1.04] hover:shadow-md ${
@@ -69,7 +70,7 @@ const TldPill = ({ d, onClick }: { d: DomainPrice; onClick: () => void }) => (
       </span>
     )}
     <span className="text-sm font-bold">{d.ext}</span>
-    <span className="text-xs font-semibold opacity-80">৳{d.price}</span>
+    <span className="text-xs font-semibold opacity-80">৳{formatPrice(d.price, lang)}</span>
   </button>
 );
 
@@ -202,12 +203,12 @@ const DomainResultRow = ({ result, idx, lang, isInCart, addDomainToCart, expande
       <div className="flex items-center gap-3 shrink-0">
         <div className="text-right">
           <span className="text-sm font-extrabold text-foreground tabular-nums">
-            ৳{result.price_bdt}
+            ৳{formatPrice(result.price_bdt, lang)}
             <span className="text-[10px] text-muted-foreground font-normal ml-0.5">/{lang === "bn" ? "বছর" : "yr"}</span>
           </span>
           {result.renewal_bdt && (
             <p className="text-[10px] text-muted-foreground">
-              {lang === "bn" ? "রিনিউ:" : "Renew:"} ৳{result.renewal_bdt}/{lang === "bn" ? "বছর" : "yr"}
+              {lang === "bn" ? "রিনিউ:" : "Renew:"} ৳{formatPrice(result.renewal_bdt, lang)}/{lang === "bn" ? "বছর" : "yr"}
             </p>
           )}
         </div>
@@ -569,6 +570,7 @@ const DomainSearch = () => {
                   <TldPill
                     key={d.ext}
                     d={d}
+                    lang={lang}
                     onClick={() => setQuery((q) => {
                       const base = q.replace(/\.\w+(\.\w+)?$/, "");
                       return (base || "example") + d.ext;

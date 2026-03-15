@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import InvoiceReport from "@/components/InvoiceReport";
+import { formatAmount } from "@/lib/formatPrice";
 
 type Invoice = {
   id: string;
@@ -87,7 +88,7 @@ const OrdersPage = () => {
           { label: isBn ? "মোট অর্ডার" : "Total Orders", value: stats.total, icon: ShoppingBag },
           { label: isBn ? "পরিশোধিত" : "Paid", value: stats.paid, icon: CreditCard },
           { label: isBn ? "বকেয়া" : "Due", value: stats.unpaid, icon: FileText },
-          { label: isBn ? "মোট ব্যয়" : "Total Spent", value: `৳${stats.totalSpent.toLocaleString()}`, icon: CreditCard },
+          { label: isBn ? "মোট ব্যয়" : "Total Spent", value: `৳${formatAmount(stats.totalSpent, lang)}`, icon: CreditCard },
         ].map((s, i) => (
           <motion.div
             key={i}
@@ -133,7 +134,7 @@ const OrdersPage = () => {
                     <tr key={inv.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-primary">{inv.invoice_number}</td>
                       <td className="px-4 py-3 text-foreground max-w-[200px] truncate">{inv.description || "—"}</td>
-                      <td className="px-4 py-3 font-semibold text-foreground tabular-nums">৳{Number(inv.amount_bdt).toLocaleString()}</td>
+                      <td className="px-4 py-3 font-semibold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</td>
                       <td className="px-4 py-3">
                         <Badge variant={sc.variant}>{isBn ? sc.label_bn : sc.label_en}</Badge>
                       </td>
@@ -166,7 +167,7 @@ const OrdersPage = () => {
                   </div>
                   <p className="text-sm text-foreground truncate">{inv.description || "—"}</p>
                   <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground">৳{Number(inv.amount_bdt).toLocaleString()}</span>
+                    <span className="font-semibold text-foreground">৳{formatAmount(Number(inv.amount_bdt), lang)}</span>
                     <span>{formatDate(inv.created_at)}</span>
                   </div>
                 </button>

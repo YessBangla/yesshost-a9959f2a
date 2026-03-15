@@ -11,6 +11,7 @@ import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
+import { formatPrice } from "@/lib/formatPrice";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
@@ -89,7 +90,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart, totalPlan
         )}
 
         <div className="flex items-baseline gap-1 my-5">
-          <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{price}</span>
+          <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{formatPrice(price, isBn ? "bn" : "en")}</span>
           <span className="text-sm text-muted-foreground">
             {cycle === "yearly" ? (isBn ? "/বছর" : "/yr") : (isBn ? "/মাস" : "/mo")}
           </span>
@@ -97,7 +98,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart, totalPlan
 
         {cycle === "monthly" && plan.annual_price_bdt && (
           <p className="text-xs text-primary font-medium mb-4 px-3 py-1.5 rounded-lg bg-primary/5 inline-block">
-            💰 {isBn ? `বাৎসরিকে মাত্র ৳${plan.annual_price_bdt}` : `Only ৳${plan.annual_price_bdt} yearly`}
+            💰 {isBn ? `বাৎসরিকে মাত্র ৳${formatPrice(plan.annual_price_bdt, "bn")}` : `Only ৳${formatPrice(plan.annual_price_bdt, "en")} yearly`}
           </p>
         )}
 

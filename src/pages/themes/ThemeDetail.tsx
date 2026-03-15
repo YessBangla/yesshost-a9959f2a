@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
+import { formatAmount } from "@/lib/formatPrice";
 
 const categoryLabels: Record<string, { bn: string; en: string }> = {
   business: { bn: "ব্যবসা/কর্পোরেট", en: "Business" },
@@ -152,9 +153,9 @@ const ThemeDetail = () => {
                   <h1 className="text-2xl font-extrabold text-foreground">{theme.name}</h1>
                 </div>
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl font-extrabold text-primary">৳{currentPrice}</span>
+                  <span className="text-3xl font-extrabold text-primary">৳{formatAmount(currentPrice, lang)}</span>
                   {theme.discount_price_bdt && (
-                    <span className="text-lg text-muted-foreground line-through">৳{theme.price_bdt}</span>
+                    <span className="text-lg text-muted-foreground line-through">৳{formatAmount(theme.price_bdt, lang)}</span>
                   )}
                 </div>
 
@@ -169,7 +170,7 @@ const ThemeDetail = () => {
                         <Package className="w-5 h-5 text-primary" />
                         <span className="font-bold text-foreground text-sm">{bn ? "হোস্টিং বান্ডেল" : "Hosting Bundle"}</span>
                       </div>
-                      <span className="text-lg font-extrabold text-primary">৳{theme.hosting_bundle_price_bdt}</span>
+                      <span className="text-lg font-extrabold text-primary">৳{formatAmount(theme.hosting_bundle_price_bdt, lang)}</span>
                     </div>
                     <div className="space-y-1.5 mt-3">
                       {bundleFeatures.map((f: string, i: number) => (
@@ -191,7 +192,7 @@ const ThemeDetail = () => {
                 {/* Total */}
                 <div className="flex items-center justify-between py-3 border-t border-border">
                   <span className="font-semibold text-foreground">{bn ? "মোট" : "Total"}</span>
-                  <span className="text-2xl font-extrabold text-foreground">৳{totalPrice}</span>
+                  <span className="text-2xl font-extrabold text-foreground">৳{formatAmount(totalPrice, lang)}</span>
                 </div>
 
                 {/* Add to Cart Button */}

@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import InvoiceReport from "@/components/InvoiceReport";
+import { formatAmount } from "@/lib/formatPrice";
 
 const statusColors: Record<string, string> = {
   paid: "bg-success/10 text-success",
@@ -45,11 +46,11 @@ const DashboardBilling = () => {
         </div>
         <div className="glass-card p-5">
           <p className="text-xs text-muted-foreground mb-1">{tr("dash.totalDue")}</p>
-          <p className="text-2xl font-bold text-warning">৳{totalDue.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-warning">৳{formatAmount(totalDue, lang)}</p>
         </div>
         <div className="glass-card p-5">
           <p className="text-xs text-muted-foreground mb-1">{tr("dash.totalPaid")}</p>
-          <p className="text-2xl font-bold text-success">৳{invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0).toFixed(2)}</p>
+          <p className="text-2xl font-bold text-success">৳{formatAmount(invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0), lang)}</p>
         </div>
       </div>
 
@@ -78,7 +79,7 @@ const DashboardBilling = () => {
                   <tr key={inv.id} className="border-b border-border/50 hover:bg-secondary/10 transition-colors">
                     <td className="p-4 font-medium text-foreground">{inv.invoice_number}</td>
                     <td className="p-4 text-muted-foreground">{inv.description || "-"}</td>
-                    <td className="p-4 font-bold text-foreground">৳{inv.amount_bdt}</td>
+                    <td className="p-4 font-bold text-foreground">৳{formatAmount(Number(inv.amount_bdt), lang)}</td>
                     <td className="p-4"><span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[inv.status]}`}>{inv.status}</span></td>
                     <td className="p-4 text-muted-foreground">{inv.due_date ? new Date(inv.due_date).toLocaleDateString("bn-BD") : "-"}</td>
                     <td className="p-4">

@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import { formatPrice } from "@/lib/formatPrice";
 import SEOHead from "@/components/SEOHead";
 
 interface TLDPrice {
@@ -186,15 +187,15 @@ const DomainPricing = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="text-lg font-extrabold text-primary tabular-nums">৳{tld.registration_bdt}</span>
+                            <span className="text-lg font-extrabold text-primary tabular-nums">৳{formatPrice(tld.registration_bdt, lang)}</span>
                             <span className="text-[10px] text-muted-foreground">/{bn ? "বছর" : "yr"}</span>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="text-sm font-bold text-foreground tabular-nums">৳{tld.renewal_bdt}</span>
+                            <span className="text-sm font-bold text-foreground tabular-nums">৳{formatPrice(tld.renewal_bdt, lang)}</span>
                             <span className="text-[10px] text-muted-foreground">/{bn ? "বছর" : "yr"}</span>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="text-sm font-semibold text-muted-foreground tabular-nums">৳{tld.transfer_bdt}</span>
+                            <span className="text-sm font-semibold text-muted-foreground tabular-nums">৳{formatPrice(tld.transfer_bdt, lang)}</span>
                           </td>
                           <td className="px-6 py-4 text-center">
                             {inCart ? (
@@ -249,15 +250,15 @@ const DomainPricing = () => {
                       <div className="grid grid-cols-3 gap-2">
                         <div className="text-center p-2 rounded-lg bg-primary/5 border border-primary/10">
                           <p className="text-[10px] text-muted-foreground mb-0.5">{bn ? "রেজিস্ট্রেশন" : "Register"}</p>
-                          <p className="text-sm font-bold text-primary tabular-nums">৳{tld.registration_bdt}</p>
+                          <p className="text-sm font-bold text-primary tabular-nums">৳{formatPrice(tld.registration_bdt, lang)}</p>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-secondary/50 border border-border">
                           <p className="text-[10px] text-muted-foreground mb-0.5">{bn ? "রিনিউয়াল" : "Renewal"}</p>
-                          <p className="text-sm font-bold text-foreground tabular-nums">৳{tld.renewal_bdt}</p>
+                          <p className="text-sm font-bold text-foreground tabular-nums">৳{formatPrice(tld.renewal_bdt, lang)}</p>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-secondary/50 border border-border">
                           <p className="text-[10px] text-muted-foreground mb-0.5">{bn ? "ট্রান্সফার" : "Transfer"}</p>
-                          <p className="text-sm font-bold text-muted-foreground tabular-nums">৳{tld.transfer_bdt}</p>
+                          <p className="text-sm font-bold text-muted-foreground tabular-nums">৳{formatPrice(tld.transfer_bdt, lang)}</p>
                         </div>
                       </div>
                     </motion.div>

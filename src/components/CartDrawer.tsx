@@ -3,6 +3,7 @@ import { X, ShoppingCart, Trash2, ArrowRight, Globe, Server, Palette } from "luc
 import { useCart, CartItem } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import { formatPrice, formatAmount } from "@/lib/formatPrice";
 
 const itemIcon = (type: CartItem["type"]) => {
   switch (type) {
@@ -111,7 +112,7 @@ const CartDrawer = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-sm font-bold text-foreground">৳{item.price_bdt}</span>
+                          <span className="text-sm font-bold text-foreground">৳{formatPrice(item.price_bdt, lang)}</span>
                           <button
                             onClick={() => removeItem(item.id)}
                             className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
@@ -131,7 +132,7 @@ const CartDrawer = () => {
               <div className="p-4 border-t border-border space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{bn ? "মোট" : "Total"}</span>
-                  <span className="text-xl font-bold text-foreground">৳{totalBdt.toLocaleString("bn-BD")}</span>
+                  <span className="text-xl font-bold text-foreground">৳{formatAmount(totalBdt, lang)}</span>
                 </div>
                 <button
                   onClick={handleCheckout}

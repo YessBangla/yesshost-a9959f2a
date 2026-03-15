@@ -8,6 +8,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PublicLayout from "@/components/PublicLayout";
+import { formatPrice, formatAmount } from "@/lib/formatPrice";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
@@ -384,7 +385,7 @@ const Checkout = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-sm font-bold text-foreground">৳{item.price_bdt}</span>
+                        <span className="text-sm font-bold text-foreground">৳{formatPrice(item.price_bdt, lang)}</span>
                         <button onClick={() => removeItem(item.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -469,7 +470,7 @@ const Checkout = () => {
                 {items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span className="text-muted-foreground truncate mr-2">{item.name}</span>
-                    <span className="text-foreground font-medium shrink-0">৳{item.price_bdt}</span>
+                    <span className="text-foreground font-medium shrink-0">৳{formatPrice(item.price_bdt, lang)}</span>
                   </div>
                 ))}
               </div>
@@ -487,7 +488,7 @@ const Checkout = () => {
                       <p className="text-[10px] text-muted-foreground">
                         {appliedCoupon.discount_type === "percentage"
                           ? `${appliedCoupon.discount_value}% ${bn ? "ছাড়" : "off"}`
-                          : `৳${appliedCoupon.discount_value} ${bn ? "ছাড়" : "off"}`}
+                          : `৳${formatAmount(appliedCoupon.discount_value, lang)} ${bn ? "ছাড়" : "off"}`}
                       </p>
                     </div>
                     <button onClick={removeCoupon} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
@@ -522,17 +523,17 @@ const Checkout = () => {
               <div className="border-t border-border pt-3 mb-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{bn ? "সাবটোটাল" : "Subtotal"}</span>
-                  <span className="text-foreground font-medium">৳{subtotalBdt.toLocaleString("bn-BD")}</span>
+                  <span className="text-foreground font-medium">৳{formatAmount(subtotalBdt, lang)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-primary font-medium">{bn ? "ডিসকাউন্ট" : "Discount"}</span>
-                    <span className="text-primary font-semibold">-৳{discountAmount.toLocaleString("bn-BD")}</span>
+                    <span className="text-primary font-semibold">-৳{formatAmount(discountAmount, lang)}</span>
                   </div>
                 )}
                 <div className="flex justify-between pt-2 border-t border-border">
                   <span className="text-sm font-semibold text-foreground">{bn ? "সর্বমোট" : "Total"}</span>
-                  <span className="text-xl font-bold text-foreground">৳{totalBdt.toLocaleString("bn-BD")}</span>
+                  <span className="text-xl font-bold text-foreground">৳{formatAmount(totalBdt, lang)}</span>
                 </div>
               </div>
 
