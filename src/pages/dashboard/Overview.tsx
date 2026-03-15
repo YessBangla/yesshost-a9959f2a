@@ -79,7 +79,7 @@ const DashboardOverview = () => {
     { title: bn ? "সক্রিয় সার্ভিস" : "Active Services", value: stats.activeServices, total: stats.services, icon: Server, color: "from-blue-500 to-indigo-600", link: "/dashboard/services" },
     { title: bn ? "ডোমেইন" : "Domains", value: stats.domains, icon: Globe, color: "from-emerald-500 to-green-600", link: "/dashboard/domains" },
     { title: bn ? "ওপেন টিকেট" : "Open Tickets", value: stats.openTickets, total: stats.tickets, icon: HeadphonesIcon, color: "from-amber-500 to-orange-600", link: "/dashboard/support" },
-    { title: bn ? "মোট ব্যয়" : "Total Spent", value: `৳${stats.totalSpent.toLocaleString()}`, icon: CreditCard, color: "from-purple-500 to-violet-600", link: "/dashboard/billing" },
+    { title: bn ? "মোট ব্যয়" : "Total Spent", value: `৳${formatAmount(stats.totalSpent, lang)}`, icon: CreditCard, color: "from-purple-500 to-violet-600", link: "/dashboard/billing" },
   ];
 
   const ago = (date: string) => {
