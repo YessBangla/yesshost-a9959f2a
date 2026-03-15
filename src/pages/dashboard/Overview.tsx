@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
+import { formatAmount } from "@/lib/formatPrice";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
