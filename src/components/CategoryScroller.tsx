@@ -57,7 +57,7 @@ const CategoryScroller = () => {
           </span>
           <div className="h-px w-8 bg-primary/40" />
         </div>
-        <h2 className="text-xl md:text-3xl font-bold text-foreground text-center">
+        <h2 className="text-lg md:text-3xl font-bold text-foreground text-center">
           {lang === "bn" ? "আমাদের সার্ভিস ক্যাটাগরি" : "Our Service Categories"}
         </h2>
         <p className="text-xs md:text-sm text-muted-foreground text-center mt-1.5 max-w-md mx-auto">
