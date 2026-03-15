@@ -491,6 +491,64 @@ const DomainSearch = () => {
             )}
           </AnimatePresence>
 
+          {/* AI Suggestions */}
+          {searched && !loading && (suggestions.length > 0 || suggestionsLoading) && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mt-4"
+            >
+              <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-border/60">
+                  <div className="flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-bold text-foreground uppercase tracking-wider">
+                      {lang === "bn" ? "সমসাময়িক নাম সাজেশন" : "Name Suggestions"}
+                    </span>
+                  </div>
+                  {!suggestionsLoading && (
+                    <button
+                      onClick={() => fetchSuggestions(searchedName)}
+                      className="flex items-center gap-1 text-[10px] font-semibold text-primary hover:text-primary/80 transition-colors px-2 py-1 rounded-md hover:bg-primary/5"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      {lang === "bn" ? "আরও দেখুন" : "More"}
+                    </button>
+                  )}
+                </div>
+
+                {suggestionsLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-6">
+                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                    <span className="text-xs text-muted-foreground">{lang === "bn" ? "সাজেশন তৈরি হচ্ছে..." : "Generating suggestions..."}</span>
+                  </div>
+                ) : (
+                  <div className="p-3 sm:p-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {suggestions.map((name) => (
+                        <button
+                          key={name}
+                          onClick={() => searchSuggestion(name)}
+                          className="group flex items-center justify-between gap-1 px-3 py-2.5 rounded-xl border border-border/60 bg-muted/20 hover:bg-primary/5 hover:border-primary/30 transition-all text-left"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-foreground truncate">{name}</p>
+                            <p className="text-[10px] text-muted-foreground">.com</p>
+                          </div>
+                          <Search className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground text-center mt-3">
+                      {lang === "bn" ? "ক্লিক করে এই নামে ডোমেইন খুঁজুন" : "Click any name to search for available domains"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
           {/* Popular TLDs */}
           {!searched && (
             <motion.div
