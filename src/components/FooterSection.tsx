@@ -40,7 +40,13 @@ const FooterSection = () => {
     ],
   };
 
-  const payments = ["bKash", "Nagad", "Rocket", "Visa", "Mastercard"];
+  const payments = [
+    { name: "bKash", logo: bkashLogo, type: "logo" },
+    { name: "Nagad", logo: nagadLogo, type: "logo" },
+    { name: "Rocket", icon: Wallet, type: "icon" },
+    { name: "Visa", icon: CreditCard, type: "icon" },
+    { name: "Mastercard", icon: CreditCard, type: "icon" },
+  ];
 
   return (
     <footer className="border-t border-border py-10 sm:py-16 bg-secondary/30">
