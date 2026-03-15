@@ -92,7 +92,7 @@ const NeedHelpSection = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.1 }}
                 whileHover={{ y: -6 }}
-                className="glass-card rounded-2xl p-6 text-center cursor-pointer hover:shadow-xl hover:shadow-primary/5 transition-shadow group"
+                className="glass-card rounded-2xl p-4 md:p-6 text-center cursor-pointer hover:shadow-xl hover:shadow-primary/5 transition-shadow group"
               >
                 <div
                   className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${opt.color} flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform`}
