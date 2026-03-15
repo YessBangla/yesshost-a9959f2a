@@ -169,7 +169,7 @@ const AdminServices = () => {
                       <Badge variant="outline" className="text-[10px] font-mono">{s.service_type.replace(/_/g, " ")}</Badge>
                     </td>
                     <td className="px-4 py-3.5">
-                      <p className="font-semibold text-foreground tabular-nums">৳{Number(s.price_bdt).toLocaleString()}</p>
+                      <p className="font-semibold text-foreground tabular-nums">৳{formatAmount(Number(s.price_bdt), lang)}</p>
                       <p className="text-[10px] text-muted-foreground">/{s.billing_cycle || "monthly"}</p>
                     </td>
                     <td className="px-4 py-3.5">
