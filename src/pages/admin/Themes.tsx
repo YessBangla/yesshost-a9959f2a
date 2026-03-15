@@ -273,10 +273,10 @@ const AdminThemes = () => {
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                       <span>
-                        ৳{theme.discount_price_bdt || theme.price_bdt}
-                        {theme.discount_price_bdt && <span className="line-through ml-1">৳{theme.price_bdt}</span>}
+                        ৳{formatPrice(theme.discount_price_bdt || theme.price_bdt, lang)}
+                        {theme.discount_price_bdt && <span className="line-through ml-1">৳{formatPrice(theme.price_bdt, lang)}</span>}
                       </span>
-                      {theme.hosting_bundle_price_bdt && <span>• বান্ডেল: ৳{theme.hosting_bundle_price_bdt}</span>}
+                      {theme.hosting_bundle_price_bdt && <span>• {lang === "bn" ? "বান্ডেল" : "Bundle"}: ৳{formatPrice(theme.hosting_bundle_price_bdt, lang)}</span>}
                       <span>• /{theme.slug}</span>
                     </div>
                   </div>

@@ -224,7 +224,7 @@ const AdminServices = () => {
                   {[
                     { icon: Globe, label: isBn ? "ডোমেইন" : "Domain", value: selected.domain },
                     { icon: Server, label: isBn ? "আইপি" : "IP", value: selected.ip_address },
-                    { icon: CreditCard, label: isBn ? "মূল্য" : "Price", value: `৳${Number(selected.price_bdt).toLocaleString()}/${selected.billing_cycle || "mo"}` },
+                    { icon: CreditCard, label: isBn ? "মূল্য" : "Price", value: `৳${formatAmount(Number(selected.price_bdt), lang)}/${selected.billing_cycle || "mo"}` },
                     { icon: Calendar, label: isBn ? "মেয়াদ" : "Expiry", value: selected.expiry_date ? new Date(selected.expiry_date).toLocaleDateString() : "—" },
                   ].map((item, i) => (
                     <div key={i} className="rounded-xl bg-secondary/30 p-3">

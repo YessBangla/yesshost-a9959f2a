@@ -239,7 +239,7 @@ const AdminUsers = () => {
                   <p className="text-[10px] text-muted-foreground">{isBn ? "সার্ভিস" : "Services"}</p>
                 </div>
                 <div className="rounded-xl bg-secondary/30 p-3 text-center">
-                  <p className="text-xl font-bold text-foreground">৳{(selectedUser.invoices_total || 0).toLocaleString()}</p>
+                  <p className="text-xl font-bold text-foreground">৳{formatAmount(selectedUser.invoices_total || 0, lang)}</p>
                   <p className="text-[10px] text-muted-foreground">{isBn ? "মোট পেইড" : "Total Paid"}</p>
                 </div>
                 <div className="rounded-xl bg-secondary/30 p-3 text-center">

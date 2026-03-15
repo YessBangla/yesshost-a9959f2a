@@ -365,10 +365,10 @@ const AdminCMS = () => {
                 <div className="flex items-center gap-4 min-w-0 flex-1">
                   <span className="text-sm font-bold text-foreground w-12">{dp.ext}</span>
                   {dp.is_popular && <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">{isBn ? "জনপ্রিয়" : "Popular"}</Badge>}
-                  <div className="flex gap-4 text-xs text-muted-foreground">
-                    <span>৳{dp.registration_bdt}</span>
-                    <span>৳{dp.renewal_bdt}</span>
-                    <span>৳{dp.transfer_bdt}</span>
+                   <div className="flex gap-4 text-xs text-muted-foreground">
+                    <span>৳{formatPrice(dp.registration_bdt, lang)}</span>
+                    <span>৳{formatPrice(dp.renewal_bdt, lang)}</span>
+                    <span>৳{formatPrice(dp.transfer_bdt, lang)}</span>
                   </div>
                   {!dp.is_active && <Badge variant="outline" className="text-[10px] text-destructive">{isBn ? "নিষ্ক্রিয়" : "Inactive"}</Badge>}
                 </div>

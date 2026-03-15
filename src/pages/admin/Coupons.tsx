@@ -256,7 +256,7 @@ const AdminCoupons = () => {
 
                 {/* Extra info row */}
                 <div className="flex flex-wrap gap-3 mt-3 pt-3 border-t border-border text-[11px] text-muted-foreground">
-                  {c.min_order_amount ? <span>{bn ? "সর্বনিম্ন:" : "Min:"} ৳{c.min_order_amount}</span> : null}
+                  {c.min_order_amount ? <span>{bn ? "সর্বনিম্ন:" : "Min:"} ৳{formatPrice(c.min_order_amount, lang)}</span> : null}
                   {c.expires_at && (
                     <span className={new Date(c.expires_at) < new Date() ? "text-destructive" : ""}>
                       {bn ? "মেয়াদ:" : "Expires:"} {new Date(c.expires_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}

@@ -165,7 +165,7 @@ const AdminBilling = () => {
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell text-muted-foreground text-sm max-w-[200px] truncate">{inv.description || "—"}</td>
                     <td className="px-4 py-3.5">
-                      <p className="font-bold text-foreground tabular-nums">৳{Number(inv.amount_bdt).toLocaleString()}</p>
+                      <p className="font-bold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</p>
                     </td>
                     <td className="px-4 py-3.5">
                       <Badge variant={sc.variant} className="text-[10px]">{inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}</Badge>
