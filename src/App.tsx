@@ -44,6 +44,7 @@ import Refund from "./pages/legal/Refund";
 import ThemeStore from "./pages/themes/ThemeStore";
 import ThemeDetail from "./pages/themes/ThemeDetail";
 import NotFound from "./pages/NotFound";
+import ChatRooms from "./pages/ChatRooms";
 import DomainPricing from "./pages/DomainPricing";
 import Checkout from "./pages/Checkout";
 import PaymentMethods from "./pages/PaymentMethods";
