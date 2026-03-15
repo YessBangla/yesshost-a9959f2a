@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Check, X, ArrowLeft, Star, Server, Globe, Shield, Zap, Clock,
   Headphones, ShoppingCart, ChevronDown, Sparkles, ArrowRight,
-  Phone, MessageCircle
+  Phone, MessageCircle, Plus, Minus
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
