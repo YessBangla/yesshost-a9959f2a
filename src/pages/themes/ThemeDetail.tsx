@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
+import { formatAmount } from "@/lib/formatPrice";
 
 const categoryLabels: Record<string, { bn: string; en: string }> = {
   business: { bn: "ব্যবসা/কর্পোরেট", en: "Business" },
