@@ -37,28 +37,29 @@ const ServerStatus = () => {
   }, [content]);
 
   return (
-    <section id="status" className="py-24 relative">
+    <section id="status" className="py-12 md:py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
             Global Network
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
             {text("server_title", "server.title")}
           </h2>
-          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
             {text("server_subtitle", "server.subtitle")}
           </p>
         </motion.div>
 
         <div className="max-w-3xl mx-auto glass-card-elevated overflow-hidden">
-          <div className="grid grid-cols-4 gap-4 px-6 py-3.5 text-xs text-muted-foreground font-semibold uppercase tracking-wider border-b border-border bg-secondary/30">
+          {/* Desktop header */}
+          <div className="hidden sm:grid grid-cols-4 gap-4 px-6 py-3.5 text-xs text-muted-foreground font-semibold uppercase tracking-wider border-b border-border bg-secondary/30">
             <span>{tr("server.location")}</span>
             <span>{tr("server.status")}</span>
             <span>{tr("server.latency")}</span>
