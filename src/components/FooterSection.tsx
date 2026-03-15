@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
-import { Mail, Phone } from "lucide-react";
+import bkashLogo from "@/assets/partners/bkash.png";
+import nagadLogo from "@/assets/partners/nagad.png";
+import { Mail, Phone, CreditCard, Wallet } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const FooterSection = () => {
@@ -38,7 +40,13 @@ const FooterSection = () => {
     ],
   };
 
-  const payments = ["bKash", "Nagad", "Rocket", "Visa", "Mastercard"];
+  const payments = [
+    { name: "bKash", logo: bkashLogo, type: "logo" },
+    { name: "Nagad", logo: nagadLogo, type: "logo" },
+    { name: "Rocket", icon: Wallet, type: "icon" },
+    { name: "Visa", icon: CreditCard, type: "icon" },
+    { name: "Mastercard", icon: CreditCard, type: "icon" },
+  ];
 
   return (
     <footer className="border-t border-border py-10 sm:py-16 bg-secondary/30">
@@ -77,11 +85,20 @@ const FooterSection = () => {
 
         <div className="border-t border-border pt-8 mb-8">
           <p className="text-xs text-muted-foreground mb-3 font-semibold uppercase tracking-wider">{tr("footer.paymentMethods")}</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {payments.map((p) => (
-              <span key={p} className="px-3 py-1.5 rounded-lg bg-secondary text-xs font-medium text-muted-foreground border border-border">
-                {p}
-              </span>
+              <Link
+                key={p.name}
+                to="/payment"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors border border-border group"
+              >
+                {p.type === "logo" ? (
+                  <img src={p.logo} alt={p.name} className="h-5 w-auto object-contain grayscale group-hover:grayscale-0 transition-all" />
+                ) : (
+                  <p.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                )}
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{p.name}</span>
+              </Link>
             ))}
           </div>
         </div>
