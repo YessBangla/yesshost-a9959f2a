@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
+import { formatAmount } from "@/lib/formatPrice";
 
 const statusConfig: Record<string, { label_en: string; label_bn: string; color: string; dot: string }> = {
   active: { label_en: "Active", label_bn: "সক্রিয়", color: "bg-success/10 text-success", dot: "bg-success" },
