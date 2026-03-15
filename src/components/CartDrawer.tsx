@@ -112,7 +112,7 @@ const CartDrawer = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-sm font-bold text-foreground">৳{item.price_bdt}</span>
+                          <span className="text-sm font-bold text-foreground">৳{formatPrice(item.price_bdt, lang)}</span>
                           <button
                             onClick={() => removeItem(item.id)}
                             className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
