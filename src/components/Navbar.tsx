@@ -104,22 +104,28 @@ const Navbar = () => {
               <AnimatePresence>
                 {link.children && activeDropdown === link.label && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute top-full left-0 pt-2 min-w-[220px]"
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute top-full left-1/2 -translate-x-1/2 pt-3 min-w-[240px]"
                   >
-                    <div className="glass-card-elevated p-2">
-                      {link.children.map((child) => (
-                        <Link
-                          key={child.label}
-                          to={child.href}
-                          className="block px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap"
-                        >
-                          {child.label}
-                        </Link>
-                      ))}
+                    <div className="glass-card-elevated rounded-xl p-1.5 shadow-xl shadow-black/20 border border-border/60">
+                      <div className="px-3 pt-2 pb-1.5">
+                        <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest">{link.label}</p>
+                      </div>
+                      <div className="space-y-0.5">
+                        {link.children.map((child) => (
+                          <Link
+                            key={child.label}
+                            to={child.href}
+                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-all whitespace-nowrap group"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors shrink-0" />
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   </motion.div>
                 )}
