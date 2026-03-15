@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,6 +30,10 @@ const Login = () => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/"><img src={logoWhite} alt="YessHost" className="h-10 mx-auto mb-6" /></Link>
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            হোমে ফিরে যান
+          </Link>
           <h1 className="text-2xl font-bold text-foreground">{tr("auth.welcomeBack")}</h1>
           <p className="text-sm text-muted-foreground mt-1">{tr("auth.loginSubtitle")}</p>
         </div>
