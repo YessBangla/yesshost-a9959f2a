@@ -257,6 +257,9 @@ const DomainSearch = () => {
   const [whoisLoading, setWhoisLoading] = useState<Record<string, boolean>>({});
   const [domainPrices, setDomainPrices] = useState<DomainPrice[]>(staticDomainPrices);
   const [inputFocused, setInputFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [searchedName, setSearchedName] = useState("");
 
   useEffect(() => {
     (supabase.from("domain_pricing" as any) as any)
