@@ -54,9 +54,7 @@ const NeedHelpSection = () => {
 
   const handleClick = (opt: (typeof options)[0]) => {
     if (opt.action === "livechat") {
-      // Trigger live chat widget open
-      const chatBtn = document.querySelector<HTMLButtonElement>("[data-livechat-trigger]");
-      chatBtn?.click();
+      navigate("/chat-rooms");
     }
   };
 
