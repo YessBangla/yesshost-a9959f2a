@@ -46,7 +46,7 @@ const DashboardBilling = () => {
         </div>
         <div className="glass-card p-5">
           <p className="text-xs text-muted-foreground mb-1">{tr("dash.totalDue")}</p>
-          <p className="text-2xl font-bold text-warning">৳{totalDue.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-warning">৳{formatAmount(totalDue, lang)}</p>
         </div>
         <div className="glass-card p-5">
           <p className="text-xs text-muted-foreground mb-1">{tr("dash.totalPaid")}</p>
