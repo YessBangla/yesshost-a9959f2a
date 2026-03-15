@@ -219,9 +219,9 @@ const AdminCMS = () => {
                   </div>
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold text-primary">৳{plan.price_bdt}</span>
+                  <span className="text-2xl font-bold text-primary">৳{formatPrice(plan.price_bdt, lang)}</span>
                   <span className="text-xs text-muted-foreground">/{isBn ? "মাস" : "mo"}</span>
-                  {plan.annual_price_bdt && <span className="text-xs text-muted-foreground ml-2">• ৳{plan.annual_price_bdt}/{isBn ? "বছর" : "yr"}</span>}
+                  {plan.annual_price_bdt && <span className="text-xs text-muted-foreground ml-2">• ৳{formatPrice(plan.annual_price_bdt, lang)}/{isBn ? "বছর" : "yr"}</span>}
                 </div>
               </div>
             )}
