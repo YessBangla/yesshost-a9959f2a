@@ -26,7 +26,10 @@ const CartDrawer = () => {
   const bn = lang === "bn";
   const navigate = useNavigate();
 
-  const parseBdtPrice = (price: string): number => parseInt(price.replace(/[^\d]/g, ""), 10) || 0;
+  const parseBdtPrice = (price: string): number => {
+    const ascii = price.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
+    return parseInt(ascii.replace(/[^\d]/g, ""), 10) || 0;
+  };
   const totalBdt = items.reduce((sum, item) => sum + parseBdtPrice(item.price_bdt), 0);
 
   const handleCheckout = () => {
