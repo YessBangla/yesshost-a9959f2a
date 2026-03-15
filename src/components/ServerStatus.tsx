@@ -6,12 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const defaultServers = [
+  { location: "🇧🇩 Bangladesh", city: "Dhaka (BDIX)", latency: "5ms", load: 63 },
   { location: "🇨🇦 Canada", city: "Toronto", latency: "12ms", load: 34 },
   { location: "🇺🇸 United States", city: "New York", latency: "18ms", load: 52 },
   { location: "🇫🇮 Finland", city: "Helsinki", latency: "28ms", load: 41 },
   { location: "🇮🇳 India", city: "Mumbai", latency: "35ms", load: 27 },
   { location: "🇦🇺 Australia", city: "Sydney", latency: "42ms", load: 19 },
-  { location: "🇧🇩 Bangladesh", city: "Dhaka (BDIX)", latency: "5ms", load: 63 },
 ];
 
 const ServerStatus = () => {
