@@ -90,7 +90,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart, totalPlan
         )}
 
         <div className="flex items-baseline gap-1 my-5">
-          <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{price}</span>
+          <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{formatPrice(price, lang)}</span>
           <span className="text-sm text-muted-foreground">
             {cycle === "yearly" ? (isBn ? "/বছর" : "/yr") : (isBn ? "/মাস" : "/mo")}
           </span>
