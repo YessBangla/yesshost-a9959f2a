@@ -160,7 +160,7 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell">
                       <p className="text-foreground font-medium">{u.services_count || 0}</p>
-                      <p className="text-[11px] text-muted-foreground">৳{(u.invoices_total || 0).toLocaleString()} {isBn ? "পেইড" : "paid"}</p>
+                      <p className="text-[11px] text-muted-foreground">৳{formatAmount(u.invoices_total || 0, lang)} {isBn ? "পেইড" : "paid"}</p>
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex gap-1 flex-wrap">
