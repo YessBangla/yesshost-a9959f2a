@@ -170,7 +170,7 @@ const ThemeDetail = () => {
                         <Package className="w-5 h-5 text-primary" />
                         <span className="font-bold text-foreground text-sm">{bn ? "হোস্টিং বান্ডেল" : "Hosting Bundle"}</span>
                       </div>
-                      <span className="text-lg font-extrabold text-primary">৳{theme.hosting_bundle_price_bdt}</span>
+                      <span className="text-lg font-extrabold text-primary">৳{formatAmount(theme.hosting_bundle_price_bdt, lang)}</span>
                     </div>
                     <div className="space-y-1.5 mt-3">
                       {bundleFeatures.map((f: string, i: number) => (
