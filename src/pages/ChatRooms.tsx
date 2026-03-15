@@ -150,7 +150,7 @@ const ChatRooms = () => {
     new Date(d).toLocaleTimeString(bn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" });
 
   const getStatusBadge = (status: MemberStatus) => {
-    if (status === "approved") return <Badge className="bg-emerald-500/15 text-emerald-500 text-[10px]"><CheckCircle className="w-3 h-3 mr-1" />{bn ? "অনুমোদিত" : "Approved"}</Badge>;
+    if (status === "approved") return <Badge className="bg-primary/15 text-primary text-[10px]"><CheckCircle className="w-3 h-3 mr-1" />{bn ? "অনুমোদিত" : "Approved"}</Badge>;
     if (status === "pending") return <Badge variant="secondary" className="text-[10px]"><Clock className="w-3 h-3 mr-1" />{bn ? "অপেক্ষমাণ" : "Pending"}</Badge>;
     if (status === "rejected") return <Badge variant="destructive" className="text-[10px]">{bn ? "বাতিল" : "Rejected"}</Badge>;
     return null;

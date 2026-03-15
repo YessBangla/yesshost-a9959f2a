@@ -243,7 +243,7 @@ const AdminChatRooms = () => {
                             <>
                               <button
                                 onClick={() => updateMemberStatus(m.id, "approved")}
-                                className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors"
+                                className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                                 title={bn ? "অনুমোদন" : "Approve"}
                               >
                                 <CheckCircle className="w-4 h-4" />
