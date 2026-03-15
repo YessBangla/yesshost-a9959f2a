@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Search, ArrowRight, Globe, CheckCircle2, XCircle, Loader2,
   ShoppingCart, Check, Info, Calendar, Server, Shield,
-  ChevronDown, ChevronUp, Sparkles, TrendingUp
+  ChevronDown, ChevronUp, Sparkles, TrendingUp, Lightbulb, RefreshCw
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -257,6 +257,9 @@ const DomainSearch = () => {
   const [whoisLoading, setWhoisLoading] = useState<Record<string, boolean>>({});
   const [domainPrices, setDomainPrices] = useState<DomainPrice[]>(staticDomainPrices);
   const [inputFocused, setInputFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [searchedName, setSearchedName] = useState("");
 
   useEffect(() => {
     (supabase.from("domain_pricing" as any) as any)
@@ -273,14 +276,18 @@ const DomainSearch = () => {
 
   const handleSearch = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!query.trim()) return;
+    const searchTerm = query.trim();
+    if (!searchTerm) return;
     setLoading(true);
     setSearched(true);
     setResults([]);
     setExpandedDomain(null);
     setWhoisData({});
+    setSuggestions([]);
+    const name = searchTerm.toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, "").replace(/\.\w+(\.\w+)?$/, "").replace(/\/.*$/, "");
+    setSearchedName(name);
     try {
-      const { data, error } = await supabase.functions.invoke("check-domain", { body: { domain: query.trim() } });
+      const { data, error } = await supabase.functions.invoke("check-domain", { body: { domain: searchTerm } });
       if (error) throw error;
       if (data?.results) setResults(data.results);
     } catch (err) {
@@ -288,7 +295,40 @@ const DomainSearch = () => {
     } finally {
       setLoading(false);
     }
+    // Fetch suggestions in background
+    fetchSuggestions(name);
   }, [query]);
+
+  const fetchSuggestions = useCallback(async (name: string) => {
+    setSuggestionsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("domain-suggest", { body: { domain: name, lang } });
+      if (error) throw error;
+      if (data?.suggestions) setSuggestions(data.suggestions);
+    } catch (err) {
+      console.error("Suggestions failed:", err);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, [lang]);
+
+  const searchSuggestion = useCallback((name: string) => {
+    setQuery(name + ".com");
+    setSearched(true);
+    setLoading(true);
+    setResults([]);
+    setExpandedDomain(null);
+    setWhoisData({});
+    setSuggestions([]);
+    setSearchedName(name);
+    supabase.functions.invoke("check-domain", { body: { domain: name + ".com" } })
+      .then(({ data, error }) => {
+        if (!error && data?.results) setResults(data.results);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+    fetchSuggestions(name);
+  }, [fetchSuggestions]);
 
   const fetchWhois = useCallback(async (domain: string) => {
     if (expandedDomain === domain) { setExpandedDomain(null); return; }
@@ -450,6 +490,64 @@ const DomainSearch = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* AI Suggestions */}
+          {searched && !loading && (suggestions.length > 0 || suggestionsLoading) && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mt-4"
+            >
+              <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-border/60">
+                  <div className="flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-bold text-foreground uppercase tracking-wider">
+                      {lang === "bn" ? "সমসাময়িক নাম সাজেশন" : "Name Suggestions"}
+                    </span>
+                  </div>
+                  {!suggestionsLoading && (
+                    <button
+                      onClick={() => fetchSuggestions(searchedName)}
+                      className="flex items-center gap-1 text-[10px] font-semibold text-primary hover:text-primary/80 transition-colors px-2 py-1 rounded-md hover:bg-primary/5"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      {lang === "bn" ? "আরও দেখুন" : "More"}
+                    </button>
+                  )}
+                </div>
+
+                {suggestionsLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-6">
+                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                    <span className="text-xs text-muted-foreground">{lang === "bn" ? "সাজেশন তৈরি হচ্ছে..." : "Generating suggestions..."}</span>
+                  </div>
+                ) : (
+                  <div className="p-3 sm:p-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {suggestions.map((name) => (
+                        <button
+                          key={name}
+                          onClick={() => searchSuggestion(name)}
+                          className="group flex items-center justify-between gap-1 px-3 py-2.5 rounded-xl border border-border/60 bg-muted/20 hover:bg-primary/5 hover:border-primary/30 transition-all text-left"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-foreground truncate">{name}</p>
+                            <p className="text-[10px] text-muted-foreground">.com</p>
+                          </div>
+                          <Search className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground text-center mt-3">
+                      {lang === "bn" ? "ক্লিক করে এই নামে ডোমেইন খুঁজুন" : "Click any name to search for available domains"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
 
           {/* Popular TLDs */}
           {!searched && (
