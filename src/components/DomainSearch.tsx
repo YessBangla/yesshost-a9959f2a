@@ -229,14 +229,6 @@ const DomainResultRow = ({ result, idx, lang, isInCart, addDomainToCart, expande
       </div>
     </div>
 
-    {/* Mobile price (visible on xs) */}
-    {result.available && (
-      <div className="block xs:hidden px-4 pb-2 -mt-1">
-        <span className="text-xs font-bold text-foreground tabular-nums">
-          ৳{result.price_bdt}<span className="text-muted-foreground font-normal">/{lang === "bn" ? "বছর" : "yr"}</span>
-        </span>
-      </div>
-    )}
 
     {/* WHOIS panel */}
     <AnimatePresence>
