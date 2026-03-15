@@ -88,9 +88,9 @@ const AdminBilling = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: isBn ? "মোট আয়" : "Total Revenue", value: `৳${totalPaid.toLocaleString()}`, icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
-          { label: isBn ? "এই মাসের আয়" : "This Month", value: `৳${thisMonthRevenue.toLocaleString()}`, icon: CreditCard, color: "text-primary", bg: "bg-primary/10" },
-          { label: isBn ? "মোট বকেয়া" : "Total Due", value: `৳${totalDue.toLocaleString()}`, icon: DollarSign, color: "text-warning", bg: "bg-warning/10" },
+          { label: isBn ? "মোট আয়" : "Total Revenue", value: `৳${formatAmount(totalPaid, lang)}`, icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
+          { label: isBn ? "এই মাসের আয়" : "This Month", value: `৳${formatAmount(thisMonthRevenue, lang)}`, icon: CreditCard, color: "text-primary", bg: "bg-primary/10" },
+          { label: isBn ? "মোট বকেয়া" : "Total Due", value: `৳${formatAmount(totalDue, lang)}`, icon: DollarSign, color: "text-warning", bg: "bg-warning/10" },
           { label: isBn ? "মেয়াদোত্তীর্ণ" : "Overdue", value: totalOverdue, icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-card rounded-xl p-4">
