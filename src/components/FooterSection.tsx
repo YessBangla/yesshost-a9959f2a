@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
-import { Mail, Phone } from "lucide-react";
+import bkashLogo from "@/assets/partners/bkash.png";
+import nagadLogo from "@/assets/partners/nagad.png";
+import { Mail, Phone, CreditCard, Wallet } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const FooterSection = () => {
