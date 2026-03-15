@@ -137,8 +137,6 @@ const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart, totalPlan
 
 /* ─── Feature Comparison Table ─── */
 const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
-  if (plans.length === 0) return null;
-
   // Collect all unique features across plans
   const allFeatures = useMemo(() => {
     const featureSet = new Set<string>();
@@ -149,7 +147,7 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
     return Array.from(featureSet);
   }, [plans]);
 
-  if (allFeatures.length === 0) return null;
+  if (plans.length === 0 || allFeatures.length === 0) return null;
 
   return (
     <motion.div
