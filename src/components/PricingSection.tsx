@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPrice } from "@/lib/formatPrice";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
