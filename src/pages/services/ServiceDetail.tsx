@@ -98,7 +98,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart, totalPlan
 
         {cycle === "monthly" && plan.annual_price_bdt && (
           <p className="text-xs text-primary font-medium mb-4 px-3 py-1.5 rounded-lg bg-primary/5 inline-block">
-            💰 {isBn ? `বাৎসরিকে মাত্র ৳${plan.annual_price_bdt}` : `Only ৳${plan.annual_price_bdt} yearly`}
+            💰 {isBn ? `বাৎসরিকে মাত্র ৳${formatPrice(plan.annual_price_bdt, lang)}` : `Only ৳${formatPrice(plan.annual_price_bdt, lang)} yearly`}
           </p>
         )}
 

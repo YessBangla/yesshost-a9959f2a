@@ -225,7 +225,7 @@ const DashboardOverview = () => {
                     <p className="text-[11px] text-muted-foreground truncate">{inv.description || "—"}</p>
                   </div>
                   <div className="text-right shrink-0 ml-3">
-                    <p className="text-sm font-bold text-foreground tabular-nums">৳{Number(inv.amount_bdt).toLocaleString()}</p>
+                    <p className="text-sm font-bold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</p>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
                       inv.status === "paid" ? "bg-success/10 text-success" :
                       inv.status === "unpaid" ? "bg-warning/10 text-warning" :

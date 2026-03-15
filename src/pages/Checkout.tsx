@@ -523,17 +523,17 @@ const Checkout = () => {
               <div className="border-t border-border pt-3 mb-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{bn ? "সাবটোটাল" : "Subtotal"}</span>
-                  <span className="text-foreground font-medium">৳{subtotalBdt.toLocaleString("bn-BD")}</span>
+                  <span className="text-foreground font-medium">৳{formatAmount(subtotalBdt, lang)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-primary font-medium">{bn ? "ডিসকাউন্ট" : "Discount"}</span>
-                    <span className="text-primary font-semibold">-৳{discountAmount.toLocaleString("bn-BD")}</span>
+                    <span className="text-primary font-semibold">-৳{formatAmount(discountAmount, lang)}</span>
                   </div>
                 )}
                 <div className="flex justify-between pt-2 border-t border-border">
                   <span className="text-sm font-semibold text-foreground">{bn ? "সর্বমোট" : "Total"}</span>
-                  <span className="text-xl font-bold text-foreground">৳{totalBdt.toLocaleString("bn-BD")}</span>
+                  <span className="text-xl font-bold text-foreground">৳{formatAmount(totalBdt, lang)}</span>
                 </div>
               </div>
 

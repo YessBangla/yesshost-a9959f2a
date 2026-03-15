@@ -167,7 +167,7 @@ const OrdersPage = () => {
                   </div>
                   <p className="text-sm text-foreground truncate">{inv.description || "—"}</p>
                   <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground">৳{Number(inv.amount_bdt).toLocaleString()}</span>
+                    <span className="font-semibold text-foreground">৳{formatAmount(Number(inv.amount_bdt), lang)}</span>
                     <span>{formatDate(inv.created_at)}</span>
                   </div>
                 </button>

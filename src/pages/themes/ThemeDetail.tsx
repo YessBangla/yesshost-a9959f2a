@@ -192,7 +192,7 @@ const ThemeDetail = () => {
                 {/* Total */}
                 <div className="flex items-center justify-between py-3 border-t border-border">
                   <span className="font-semibold text-foreground">{bn ? "মোট" : "Total"}</span>
-                  <span className="text-2xl font-extrabold text-foreground">৳{totalPrice}</span>
+                  <span className="text-2xl font-extrabold text-foreground">৳{formatAmount(totalPrice, lang)}</span>
                 </div>
 
                 {/* Add to Cart Button */}

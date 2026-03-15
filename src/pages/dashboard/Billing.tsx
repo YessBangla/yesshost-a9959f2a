@@ -79,7 +79,7 @@ const DashboardBilling = () => {
                   <tr key={inv.id} className="border-b border-border/50 hover:bg-secondary/10 transition-colors">
                     <td className="p-4 font-medium text-foreground">{inv.invoice_number}</td>
                     <td className="p-4 text-muted-foreground">{inv.description || "-"}</td>
-                    <td className="p-4 font-bold text-foreground">৳{inv.amount_bdt}</td>
+                    <td className="p-4 font-bold text-foreground">৳{formatAmount(Number(inv.amount_bdt), lang)}</td>
                     <td className="p-4"><span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[inv.status]}`}>{inv.status}</span></td>
                     <td className="p-4 text-muted-foreground">{inv.due_date ? new Date(inv.due_date).toLocaleDateString("bn-BD") : "-"}</td>
                     <td className="p-4">

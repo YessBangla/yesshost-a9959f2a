@@ -165,7 +165,7 @@ const DashboardServices = () => {
                         <span className={`w-1.5 h-1.5 rounded-full ${sc.dot} ${service.status === "active" ? "animate-pulse" : ""}`} />
                         {bn ? sc.label_bn : sc.label_en}
                       </span>
-                      <span className="text-sm font-bold text-foreground tabular-nums">৳{Number(service.price_bdt).toLocaleString()}</span>
+                      <span className="text-sm font-bold text-foreground tabular-nums">৳{formatAmount(Number(service.price_bdt), lang)}</span>
                       <span className="text-[10px] text-muted-foreground">/{service.billing_cycle === "yearly" ? (bn ? "বছর" : "yr") : (bn ? "মাস" : "mo")}</span>
                       {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                     </div>
