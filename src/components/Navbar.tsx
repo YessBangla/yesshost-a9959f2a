@@ -187,7 +187,9 @@ const Navbar = () => {
               {isInternal(link.href) ? (
                 <Link
                   to={link.href}
-                  className="flex items-center gap-1 px-2 xl:px-2.5 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap"
+                  className={`flex items-center gap-1 px-2 xl:px-2.5 py-2 rounded-lg text-[13px] font-medium hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
+                    link.blink ? "text-primary animate-pulse" : "text-muted-foreground"
+                  }`}
                 >
                   {link.label}
                   {link.children && <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />}
@@ -195,7 +197,9 @@ const Navbar = () => {
               ) : (
                 <a
                   href={link.href}
-                  className="flex items-center gap-1 px-2 xl:px-2.5 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap"
+                  className={`flex items-center gap-1 px-2 xl:px-2.5 py-2 rounded-lg text-[13px] font-medium hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
+                    link.blink ? "text-primary animate-pulse" : "text-muted-foreground"
+                  }`}
                 >
                   {link.label}
                   {link.children && <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />}
