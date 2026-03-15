@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, ChevronDown, Phone, LogIn, Globe, ShoppingCart,
@@ -32,10 +32,19 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const { user } = useAuth();
   const { lang, setLang, tr } = useLanguage();
   const { itemCount, setCartOpen } = useCart();
   const isBn = lang === "bn";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks: NavLink[] = [
     {
