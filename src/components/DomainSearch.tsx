@@ -38,6 +38,7 @@ const staticDomainPrices: DomainPrice[] = [
   { ext: ".com.bd", price: "১,৫০০", popular: false },
   { ext: ".net", price: "১,১৫০", popular: false },
   { ext: ".net.bd", price: "১,২০০", popular: false },
+  { ext: ".বাংলা", price: "১,৫০০", popular: false },
   { ext: ".xyz", price: "২৯৫", popular: false },
   { ext: ".top", price: "১৮০", popular: false },
 ];
