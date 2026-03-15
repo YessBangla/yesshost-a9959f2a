@@ -38,18 +38,20 @@ interface WhoisInfo {
   nameservers?: string[];
 }
 
-async function loadPricesFromDb(): Promise<Record<string, { bdt: string; usd: string; renewal_bdt: string }>> {
+async function loadPricesFromDb(): Promise<{ prices: Record<string, { bdt: string; usd: string; renewal_bdt: string }>; sortedExts: string[] }> {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const client = createClient(supabaseUrl, supabaseKey);
-    const { data } = await client.from("domain_pricing").select("ext, registration_bdt, renewal_bdt").eq("is_active", true);
+    const { data } = await client.from("domain_pricing").select("ext, registration_bdt, renewal_bdt, sort_order").eq("is_active", true).order("sort_order");
     if (data && data.length > 0) {
       const prices: Record<string, { bdt: string; usd: string; renewal_bdt: string }> = {};
+      const sortedExts: string[] = [];
       for (const row of data) {
         prices[row.ext] = { bdt: row.registration_bdt, usd: "N/A", renewal_bdt: row.renewal_bdt };
+        sortedExts.push(row.ext);
       }
-      return prices;
+      return { prices, sortedExts };
     }
   } catch (e) {
     console.error("Failed to load prices from DB:", e);
