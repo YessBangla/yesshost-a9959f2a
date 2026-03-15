@@ -97,9 +97,7 @@ const Navbar = () => {
         { label: tr("nav.graphicsDesign"), href: "/services/graphics-design", icon: Palette, desc: isBn ? "লোগো, ব্যানার ও গ্রাফিক্স" : "Logo, banner & graphics" },
       ],
     },
-    { label: tr("nav.about"), href: "/about" },
     { label: tr("nav.themes"), href: "/themes" },
-    { label: tr("nav.contact"), href: "/contact" },
   ];
 
   const isInternal = (href: string) => href.startsWith("/");
