@@ -26,6 +26,7 @@ const fallbackPrices: Omit<TLDPrice, "id">[] = [
   { ext: ".org.bd", registration_bdt: "১,০০০", renewal_bdt: "১,০০০", transfer_bdt: "১,০০০", is_popular: false },
   { ext: ".top", registration_bdt: "১৮০", renewal_bdt: "৯৯০", transfer_bdt: "৯৯০", is_popular: true },
   { ext: ".xyz", registration_bdt: "২৯৫", renewal_bdt: "১,১৯০", transfer_bdt: "১,১৯০", is_popular: false },
+  { ext: ".বাংলা", registration_bdt: "১,৫০০", renewal_bdt: "১,৫০০", transfer_bdt: "১,৫০০", is_popular: false },
 ];
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
