@@ -25,7 +25,7 @@ const fallbackTestimonials = [
 ];
 
 const TestimonialCard = ({ item }: { item: { name: string; company: string; text: string; rating: number; avatarSrc: string } }) => (
-  <div className="glass-card p-6 relative flex-shrink-0 w-[300px] sm:w-[340px]">
+  <div className="glass-card p-4 sm:p-6 relative flex-shrink-0 w-[260px] sm:w-[340px]">
     <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
     <div className="flex gap-1 mb-4">
       {[...Array(item.rating)].map((_, j) => (

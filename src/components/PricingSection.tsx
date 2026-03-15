@@ -176,7 +176,7 @@ const PricingSection = () => {
                 {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
 
                 <div className="flex items-baseline gap-1 my-4">
-                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">
+                  <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">
                     ৳{formatPrice(billingCycle === "yearly" && plan.annual ? plan.annual : plan.price, lang)}
                   </span>
                   <span className="text-sm text-muted-foreground">

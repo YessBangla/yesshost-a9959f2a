@@ -145,13 +145,13 @@ const FeaturesSection = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.4, ease: brandCurve, delay: i * 0.06 }}
               whileHover={{ y: -4 }}
-              className="glass-card p-6 group"
+              className="glass-card p-4 md:p-6 group"
             >
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <feature.icon className="w-5 h-5 text-primary" />
+              <div className="w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-primary/20 transition-colors">
+                <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-primary" />
               </div>
-              <h3 className="text-base font-bold text-foreground mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+              <h3 className="text-sm md:text-base font-bold text-foreground mb-1 md:mb-2">{feature.title}</h3>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed line-clamp-3">{feature.description}</p>
             </motion.div>
           ))}
         </div>

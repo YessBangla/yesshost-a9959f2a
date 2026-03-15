@@ -95,7 +95,7 @@ const NeedHelpSection = () => {
                 className="glass-card rounded-2xl p-4 md:p-6 text-center cursor-pointer hover:shadow-xl hover:shadow-primary/5 transition-shadow group"
               >
                 <div
-                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${opt.color} flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform`}
+                  className={`w-11 h-11 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br ${opt.color} flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg group-hover:scale-110 transition-transform`}
                 >
                   <Icon className="w-6 h-6 text-white" />
                 </div>

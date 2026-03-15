@@ -73,28 +73,59 @@ const ServerStatus = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, ease: brandCurve, delay: i * 0.06 }}
-              className="grid grid-cols-4 gap-4 px-6 py-4 border-b border-border/50 last:border-0 hover:bg-secondary/20 transition-colors"
+              className="border-b border-border/50 last:border-0 hover:bg-secondary/20 transition-colors"
             >
-              <div>
-                <span className="text-sm font-semibold text-foreground">{server.location}</span>
-                <span className="block text-xs text-muted-foreground">{server.city}</span>
-              </div>
-              <span className="flex items-center gap-2 text-sm">
-                <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
-                <span className="text-success text-xs font-medium">{tr("server.operational")}</span>
-              </span>
-              <span className="text-sm text-foreground tabular-nums font-medium">{server.latency}</span>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${server.load}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1, ease: "easeOut", delay: i * 0.1 }}
-                    className="h-full rounded-full gradient-primary"
-                  />
+              {/* Mobile layout */}
+              <div className="sm:hidden px-4 py-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="text-sm font-semibold text-foreground">{server.location}</span>
+                    <span className="block text-[11px] text-muted-foreground">{server.city}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-glow" />
+                      <span className="text-success text-[10px] font-medium">{tr("server.operational")}</span>
+                    </span>
+                    <span className="text-xs text-foreground tabular-nums font-bold">{server.latency}</span>
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground tabular-nums w-8">{server.load}%</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${server.load}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, ease: "easeOut", delay: i * 0.1 }}
+                      className="h-full rounded-full gradient-primary"
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground tabular-nums w-7">{server.load}%</span>
+                </div>
+              </div>
+              {/* Desktop layout */}
+              <div className="hidden sm:grid grid-cols-4 gap-4 px-6 py-4">
+                <div>
+                  <span className="text-sm font-semibold text-foreground">{server.location}</span>
+                  <span className="block text-xs text-muted-foreground">{server.city}</span>
+                </div>
+                <span className="flex items-center gap-2 text-sm">
+                  <span className="w-2 h-2 rounded-full bg-success animate-pulse-glow" />
+                  <span className="text-success text-xs font-medium">{tr("server.operational")}</span>
+                </span>
+                <span className="text-sm text-foreground tabular-nums font-medium">{server.latency}</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${server.load}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, ease: "easeOut", delay: i * 0.1 }}
+                      className="h-full rounded-full gradient-primary"
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground tabular-nums w-8">{server.load}%</span>
+                </div>
               </div>
             </motion.div>
           ))}

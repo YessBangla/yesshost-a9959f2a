@@ -161,7 +161,7 @@ const WhyChooseUs = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               whileHover={{ y: -6 }}
-              className="glass-card-elevated p-6 md:p-8 group relative overflow-hidden"
+              className="glass-card-elevated p-5 md:p-8 group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary/5 blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors" />
               <div className="relative z-10">

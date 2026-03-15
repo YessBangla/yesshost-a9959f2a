@@ -80,7 +80,7 @@ const CategoryScroller = () => {
             key={i}
             className="group relative flex-shrink-0 w-[180px] sm:w-[280px] rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
           >
-            <div className="aspect-square overflow-hidden">
+            <div className="aspect-[4/3] sm:aspect-square overflow-hidden">
               <img
                 src={cat.img}
                 alt={lang === "bn" ? cat.titleBn : cat.titleEn}
