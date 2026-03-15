@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Check, X, ArrowLeft, Star, Server, Globe, Shield, Zap, Clock,
   Headphones, ShoppingCart, ChevronDown, Sparkles, ArrowRight,
-  Phone, MessageCircle
+  Phone, MessageCircle, Plus, Minus
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
@@ -211,8 +211,10 @@ const ServiceDetail = () => {
 
   const [plans, setPlans] = useState<any[]>([]);
   const [serviceInfo, setServiceInfo] = useState<any>(null);
+  const [serviceFaqs, setServiceFaqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showComparison, setShowComparison] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
     if (!slug) return;
@@ -220,9 +222,11 @@ const ServiceDetail = () => {
     Promise.all([
       supabase.from("pricing_plans").select("*").eq("slug", slug).eq("is_active", true).order("sort_order"),
       supabase.from("site_content").select("*").eq("page", "services").eq("section_key", slug).eq("is_active", true).maybeSingle(),
-    ]).then(([plansRes, infoRes]) => {
+      supabase.from("faqs").select("*").eq("category", slug).eq("is_active", true).order("sort_order"),
+    ]).then(([plansRes, infoRes, faqsRes]) => {
       setPlans(plansRes.data || []);
       setServiceInfo(infoRes.data);
+      setServiceFaqs(faqsRes.data || []);
       setLoading(false);
     });
   }, [slug]);
@@ -505,6 +509,68 @@ const ServiceDetail = () => {
           </div>
         </div>
       </section>
+
+      {/* ─── Service FAQ ─── */}
+      {serviceFaqs.length > 0 && (
+        <section className="py-16 relative">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: brandCurve }}
+              className="text-center mb-12"
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+                FAQ
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-display font-extrabold tracking-tight mb-3">
+                {isBn ? "সচরাচর জিজ্ঞাসা" : "Frequently Asked Questions"}
+              </h2>
+              <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                {isBn ? `${title} সম্পর্কে সাধারণ প্রশ্নোত্তর` : `Common questions about ${title}`}
+              </p>
+            </motion.div>
+
+            <div className="max-w-2xl mx-auto space-y-3">
+              {serviceFaqs.map((faq, i) => (
+                <motion.div
+                  key={faq.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, ease: brandCurve, delay: i * 0.06 }}
+                  className="glass-card overflow-hidden"
+                >
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between p-5 text-left"
+                  >
+                    <span className="text-sm font-semibold text-foreground pr-4">
+                      {isBn ? faq.question_bn : faq.question_en}
+                    </span>
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                      openFaq === i ? "gradient-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                    }`}>
+                      {openFaq === i ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    </div>
+                  </button>
+                  <motion.div
+                    initial={false}
+                    animate={{ height: openFaq === i ? "auto" : 0, opacity: openFaq === i ? 1 : 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                      {isBn ? faq.answer_bn : faq.answer_en}
+                    </p>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ─── CTA Banner ─── */}
       <section className="pb-16 container mx-auto px-4">
