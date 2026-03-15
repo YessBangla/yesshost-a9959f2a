@@ -4,7 +4,7 @@ import {
   Menu, X, ChevronDown, Phone, LogIn, Globe, ShoppingCart,
   Globe2, ListOrdered, Server, Zap, Crown, Wifi,
   Users, WifiHigh, MonitorSmartphone, HardDrive,
-  Mail, Radio, Palette, Building2, ShoppingBag, MessageSquare,
+  Mail, Radio, Palette, ArrowRight,
   type LucideIcon
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -25,6 +25,7 @@ interface NavLink {
   href: string;
   children?: NavChild[];
   mega?: boolean;
+  cta?: { label: string; href: string };
 }
 
 const Navbar = () => {
@@ -40,6 +41,7 @@ const Navbar = () => {
     {
       label: tr("nav.domain"),
       href: "/services/domain",
+      cta: { label: isBn ? "সকল ডোমেইন দেখুন" : "View All Domains", href: "/domain-pricing" },
       children: [
         { label: isBn ? "ডোমেইন রেজিস্ট্রেশন" : "Domain Registration", href: "/services/domain", icon: Globe2, desc: isBn ? ".com .net .org .info রেজিস্টার করুন" : "Register .com .net .org .info" },
         { label: isBn ? "ডোমেইন মূল্য তালিকা" : "Domain Pricing", href: "/domain-pricing", icon: ListOrdered, desc: isBn ? "সকল ডোমেইনের মূল্য দেখুন" : "View all domain prices" },
@@ -49,6 +51,7 @@ const Navbar = () => {
       label: tr("nav.webHosting"),
       href: "/services/basic-hosting",
       mega: true,
+      cta: { label: isBn ? "সকল প্ল্যান তুলনা করুন" : "Compare All Plans", href: "/services/basic-hosting" },
       children: [
         { label: tr("nav.basicHosting"), href: "/services/basic-hosting", icon: Server, desc: isBn ? "নতুনদের জন্য সাশ্রয়ী হোস্টিং" : "Affordable hosting for beginners" },
         { label: tr("nav.proHosting"), href: "/services/pro-hosting", icon: Zap, desc: isBn ? "দ্রুত গতির প্রফেশনাল হোস্টিং" : "Fast professional hosting" },
@@ -59,6 +62,7 @@ const Navbar = () => {
     {
       label: tr("nav.reseller"),
       href: "/services/linux-reseller",
+      cta: { label: isBn ? "রিসেলার প্ল্যান দেখুন" : "View Reseller Plans", href: "/services/linux-reseller" },
       children: [
         { label: tr("nav.linuxReseller"), href: "/services/linux-reseller", icon: Users, desc: isBn ? "নিজের হোস্টিং ব্যবসা শুরু করুন" : "Start your hosting business" },
         { label: tr("nav.bdixReseller"), href: "/services/bdix-reseller", icon: WifiHigh, desc: isBn ? "বিডিআইএক্স রিসেলার প্যাকেজ" : "BDIX reseller packages" },
@@ -67,6 +71,7 @@ const Navbar = () => {
     {
       label: tr("nav.vps"),
       href: "/services/usa-vps",
+      cta: { label: isBn ? "সকল VPS দেখুন" : "View All VPS", href: "/services/usa-vps" },
       children: [
         { label: tr("nav.usaVps"), href: "/services/usa-vps", icon: MonitorSmartphone, desc: isBn ? "USA ডাটাসেন্টার VPS সার্ভার" : "USA datacenter VPS server" },
         { label: tr("nav.bdixVps"), href: "/services/bdix-vps", icon: HardDrive, desc: isBn ? "বাংলাদেশ BDIX VPS সার্ভার" : "Bangladesh BDIX VPS server" },
@@ -76,6 +81,7 @@ const Navbar = () => {
     {
       label: tr("nav.services"),
       href: "#",
+      cta: { label: isBn ? "সকল সার্ভিস দেখুন" : "View All Services", href: "/services/email-hosting" },
       children: [
         { label: tr("nav.emailHosting"), href: "/services/email-hosting", icon: Mail, desc: isBn ? "প্রফেশনাল ইমেইল সার্ভিস" : "Professional email service" },
         { label: tr("nav.radioHosting"), href: "/services/radio-hosting", icon: Radio, desc: isBn ? "অনলাইন রেডিও স্ট্রিমিং" : "Online radio streaming" },
@@ -132,6 +138,19 @@ const Navbar = () => {
               );
             })}
           </div>
+
+          {/* CTA */}
+          {link.cta && (
+            <div className="px-2 pt-1.5 pb-1 mt-1 border-t border-border/40">
+              <Link
+                to={link.cta.href}
+                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-[12px] font-semibold text-primary hover:bg-primary/10 transition-all group"
+              >
+                {link.cta.label}
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+          )}
         </div>
       </motion.div>
     );
