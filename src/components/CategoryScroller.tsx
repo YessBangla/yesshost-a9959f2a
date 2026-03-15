@@ -97,7 +97,7 @@ const CategoryScroller = () => {
                 {lang === "bn" ? cat.desc_bn : cat.desc_en}
               </p>
               <div className="flex items-center gap-1 mt-2 text-[11px] text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                {lang === "bn" ? "বিস্তারিত" : "Learn More"} <ArrowRight className="w-3 h-3" />
+                {lang === "bn" ? "প্ল্যান দেখুন" : "View Plans"} <ArrowRight className="w-3 h-3" />
               </div>
             </div>
           </Link>
