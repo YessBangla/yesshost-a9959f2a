@@ -3,6 +3,7 @@ import { X, ShoppingCart, Trash2, ArrowRight, Globe, Server, Palette } from "luc
 import { useCart, CartItem } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import { formatPrice, formatAmount } from "@/lib/formatPrice";
 
 const itemIcon = (type: CartItem["type"]) => {
   switch (type) {
