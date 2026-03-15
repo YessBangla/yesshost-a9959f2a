@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Search, ArrowRight, Globe, CheckCircle2, XCircle, Loader2,
   ShoppingCart, Check, Info, Calendar, Server, Shield,
-  ChevronDown, ChevronUp, Sparkles, TrendingUp
+  ChevronDown, ChevronUp, Sparkles, TrendingUp, Lightbulb, RefreshCw
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
