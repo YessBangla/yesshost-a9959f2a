@@ -470,7 +470,7 @@ const Checkout = () => {
                 {items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span className="text-muted-foreground truncate mr-2">{item.name}</span>
-                    <span className="text-foreground font-medium shrink-0">৳{item.price_bdt}</span>
+                    <span className="text-foreground font-medium shrink-0">৳{formatPrice(item.price_bdt, lang)}</span>
                   </div>
                 ))}
               </div>
