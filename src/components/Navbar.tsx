@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, X, ChevronDown, Phone, LogIn, Globe, ShoppingCart,
+  Menu, X, ChevronDown, LogIn, Globe, ShoppingCart,
   Globe2, ListOrdered, Server, Zap, Crown, Wifi,
   Users, WifiHigh, MonitorSmartphone, HardDrive,
   Mail, Radio, Palette, ArrowRight,
@@ -232,11 +232,6 @@ const Navbar = () => {
               </span>
             )}
           </button>
-          <a href="tel:+8809638205205"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-2.5 py-2">
-            <Phone className="w-4 h-4" />
-            <span className="hidden xl:inline">+88 096 38 205 205</span>
-          </a>
           {user ? (
             <Link to="/dashboard"
               className="text-sm px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">

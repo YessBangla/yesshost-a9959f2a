@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2, Smile } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Smile, Phone, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { supabase } from "@/integrations/supabase/client";
@@ -142,19 +143,37 @@ const LiveChatWidget = () => {
 
   return (
     <>
-      {/* Floating button */}
+      {/* Contact popup button - above chat button */}
       <AnimatePresence>
         {!open && (
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            onClick={() => setOpen(true)}
-            data-livechat-trigger
-            className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:opacity-90 transition-opacity"
-          >
-            <MessageCircle className="w-6 h-6" />
-          </motion.button>
+          <>
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ delay: 0.05 }}
+              className="fixed bottom-[7.5rem] right-4 md:bottom-[5.5rem] md:right-6 z-50"
+            >
+              <Link
+                to="/contact"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-secondary border border-border text-foreground text-xs font-semibold shadow-lg hover:border-primary/40 hover:bg-secondary/80 transition-all"
+              >
+                <Phone className="w-3.5 h-3.5 text-primary" />
+                {bn ? "যোগাযোগ" : "Contact"}
+              </Link>
+            </motion.div>
+
+            <motion.button
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              onClick={() => setOpen(true)}
+              data-livechat-trigger
+              className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:opacity-90 transition-opacity"
+            >
+              <MessageCircle className="w-6 h-6" />
+            </motion.button>
+          </>
         )}
       </AnimatePresence>
 
