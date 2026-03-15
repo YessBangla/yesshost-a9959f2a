@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, ChevronDown, LogIn, Globe, ShoppingCart,
   Globe2, ListOrdered, Server, Zap, Crown, Wifi,
-  Users, WifiHigh, MonitorSmartphone, HardDrive,
+  Users, WifiHigh, MonitorSmartphone, HardDrive, MapPin, Globe as GlobeIcon,
   Mail, Radio, Palette, ArrowRight,
   type LucideIcon
 } from "lucide-react";
