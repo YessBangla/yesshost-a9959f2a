@@ -4,7 +4,7 @@ import {
   Menu, X, ChevronDown, Phone, LogIn, Globe, ShoppingCart,
   Globe2, ListOrdered, Server, Zap, Crown, Wifi,
   Users, WifiHigh, MonitorSmartphone, HardDrive,
-  Mail, Radio, Palette, Building2, ShoppingBag, MessageSquare,
+  Mail, Radio, Palette, ArrowRight,
   type LucideIcon
 } from "lucide-react";
 import { Link } from "react-router-dom";
