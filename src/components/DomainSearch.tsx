@@ -570,6 +570,7 @@ const DomainSearch = () => {
                   <TldPill
                     key={d.ext}
                     d={d}
+                    lang={lang}
                     onClick={() => setQuery((q) => {
                       const base = q.replace(/\.\w+(\.\w+)?$/, "");
                       return (base || "example") + d.ext;

@@ -177,7 +177,7 @@ const PricingSection = () => {
 
                 <div className="flex items-baseline gap-1 my-4">
                   <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">
-                    ৳{billingCycle === "yearly" && plan.annual ? plan.annual : plan.price}
+                    ৳{formatPrice(billingCycle === "yearly" && plan.annual ? plan.annual : plan.price, lang)}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     {billingCycle === "yearly" ? (isBn ? "/বছর" : "/yr") : tr("pricing.mo")}
@@ -186,7 +186,7 @@ const PricingSection = () => {
 
                 {billingCycle === "monthly" && plan.annual && (
                   <p className="text-xs text-primary font-medium mb-4">
-                    💰 {isBn ? `বাৎসরিকে ৳${plan.annual}` : `৳${plan.annual} if billed yearly`}
+                    💰 {isBn ? `বাৎসরিকে ৳${formatPrice(plan.annual, lang)}` : `৳${formatPrice(plan.annual, lang)} if billed yearly`}
                   </p>
                 )}
 

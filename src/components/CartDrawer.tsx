@@ -132,7 +132,7 @@ const CartDrawer = () => {
               <div className="p-4 border-t border-border space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{bn ? "মোট" : "Total"}</span>
-                  <span className="text-xl font-bold text-foreground">৳{totalBdt.toLocaleString("bn-BD")}</span>
+                  <span className="text-xl font-bold text-foreground">৳{formatAmount(totalBdt, lang)}</span>
                 </div>
                 <button
                   onClick={handleCheckout}
