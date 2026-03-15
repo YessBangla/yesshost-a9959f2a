@@ -488,7 +488,7 @@ const Checkout = () => {
                       <p className="text-[10px] text-muted-foreground">
                         {appliedCoupon.discount_type === "percentage"
                           ? `${appliedCoupon.discount_value}% ${bn ? "ছাড়" : "off"}`
-                          : `৳${appliedCoupon.discount_value} ${bn ? "ছাড়" : "off"}`}
+                          : `৳${formatAmount(appliedCoupon.discount_value, lang)} ${bn ? "ছাড়" : "off"}`}
                       </p>
                     </div>
                     <button onClick={removeCoupon} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
