@@ -88,7 +88,7 @@ const OrdersPage = () => {
           { label: isBn ? "মোট অর্ডার" : "Total Orders", value: stats.total, icon: ShoppingBag },
           { label: isBn ? "পরিশোধিত" : "Paid", value: stats.paid, icon: CreditCard },
           { label: isBn ? "বকেয়া" : "Due", value: stats.unpaid, icon: FileText },
-          { label: isBn ? "মোট ব্যয়" : "Total Spent", value: `৳${stats.totalSpent.toLocaleString()}`, icon: CreditCard },
+          { label: isBn ? "মোট ব্যয়" : "Total Spent", value: `৳${formatAmount(stats.totalSpent, lang)}`, icon: CreditCard },
         ].map((s, i) => (
           <motion.div
             key={i}
