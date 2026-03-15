@@ -32,6 +32,7 @@ import AdminCMS from "./pages/admin/CMS";
 import AdminThemes from "./pages/admin/Themes";
 import AdminCoupons from "./pages/admin/Coupons";
 import AdminLiveChat from "./pages/admin/LiveChat";
+import AdminChatRooms from "./pages/admin/ChatRooms";
 import ServiceDetail from "./pages/services/ServiceDetail";
 import About from "./pages/company/About";
 import Contact from "./pages/company/Contact";
@@ -43,6 +44,7 @@ import Refund from "./pages/legal/Refund";
 import ThemeStore from "./pages/themes/ThemeStore";
 import ThemeDetail from "./pages/themes/ThemeDetail";
 import NotFound from "./pages/NotFound";
+import ChatRooms from "./pages/ChatRooms";
 import DomainPricing from "./pages/DomainPricing";
 import Checkout from "./pages/Checkout";
 import PaymentMethods from "./pages/PaymentMethods";
@@ -92,6 +94,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/refund" element={<Refund />} />
+            <Route path="/chat-rooms" element={<ChatRooms />} />
 
             <Route
               path="/dashboard"
@@ -126,6 +129,7 @@ const App = () => (
               <Route path="themes" element={<AdminThemes />} />
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="live-chat" element={<AdminLiveChat />} />
+              <Route path="chat-rooms" element={<AdminChatRooms />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

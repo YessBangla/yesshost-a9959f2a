@@ -14,6 +14,97 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_room_members: {
+        Row: {
+          created_at: string
+          id: string
+          room_id: string
+          status: Database["public"]["Enums"]["room_member_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room_id: string
+          status?: Database["public"]["Enums"]["room_member_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room_id?: string
+          status?: Database["public"]["Enums"]["room_member_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_room_members_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_room_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_room_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_rooms: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coupons: {
         Row: {
           code: string
@@ -759,6 +850,7 @@ export type Database = {
       app_role: "admin" | "moderator" | "user"
       discount_type: "percentage" | "fixed"
       invoice_status: "paid" | "unpaid" | "overdue" | "cancelled" | "refunded"
+      room_member_status: "pending" | "approved" | "rejected"
       service_status:
         | "active"
         | "pending"
@@ -914,6 +1006,7 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       discount_type: ["percentage", "fixed"],
       invoice_status: ["paid", "unpaid", "overdue", "cancelled", "refunded"],
+      room_member_status: ["pending", "approved", "rejected"],
       service_status: [
         "active",
         "pending",

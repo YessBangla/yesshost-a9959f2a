@@ -29,6 +29,7 @@ const AdminLayout = () => {
     { title: isBn ? "থিম স্টোর" : "Theme Store", url: "/admin/themes", icon: Palette },
     { title: isBn ? "কুপন" : "Coupons", url: "/admin/coupons", icon: Tag },
     { title: isBn ? "লাইভ চ্যাট" : "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
+    { title: isBn ? "চ্যাট রুম" : "Chat Rooms", url: "/admin/chat-rooms", icon: Users },
     { title: "CMS", url: "/admin/cms", icon: Layers },
   ];
 
