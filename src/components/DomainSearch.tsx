@@ -276,14 +276,18 @@ const DomainSearch = () => {
 
   const handleSearch = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!query.trim()) return;
+    const searchTerm = query.trim();
+    if (!searchTerm) return;
     setLoading(true);
     setSearched(true);
     setResults([]);
     setExpandedDomain(null);
     setWhoisData({});
+    setSuggestions([]);
+    const name = searchTerm.toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, "").replace(/\.\w+(\.\w+)?$/, "").replace(/\/.*$/, "");
+    setSearchedName(name);
     try {
-      const { data, error } = await supabase.functions.invoke("check-domain", { body: { domain: query.trim() } });
+      const { data, error } = await supabase.functions.invoke("check-domain", { body: { domain: searchTerm } });
       if (error) throw error;
       if (data?.results) setResults(data.results);
     } catch (err) {
@@ -291,7 +295,40 @@ const DomainSearch = () => {
     } finally {
       setLoading(false);
     }
+    // Fetch suggestions in background
+    fetchSuggestions(name);
   }, [query]);
+
+  const fetchSuggestions = useCallback(async (name: string) => {
+    setSuggestionsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("domain-suggest", { body: { domain: name, lang } });
+      if (error) throw error;
+      if (data?.suggestions) setSuggestions(data.suggestions);
+    } catch (err) {
+      console.error("Suggestions failed:", err);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, [lang]);
+
+  const searchSuggestion = useCallback((name: string) => {
+    setQuery(name + ".com");
+    setSearched(true);
+    setLoading(true);
+    setResults([]);
+    setExpandedDomain(null);
+    setWhoisData({});
+    setSuggestions([]);
+    setSearchedName(name);
+    supabase.functions.invoke("check-domain", { body: { domain: name + ".com" } })
+      .then(({ data, error }) => {
+        if (!error && data?.results) setResults(data.results);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+    fetchSuggestions(name);
+  }, [fetchSuggestions]);
 
   const fetchWhois = useCallback(async (domain: string) => {
     if (expandedDomain === domain) { setExpandedDomain(null); return; }
