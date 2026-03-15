@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Tag, Plus, Pencil, Trash2, Loader2, Search, ToggleLeft, ToggleRight, Copy, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatPrice } from "@/lib/formatPrice";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
