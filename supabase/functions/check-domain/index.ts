@@ -27,7 +27,7 @@ const FALLBACK_PRICES: Record<string, { bdt: string; usd: string }> = {
   ".বাংলা": { bdt: "১,৫০০", usd: "15.00" },
 };
 
-const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co", ".com.bd", ".net.bd", ".org.bd", ".edu.bd", ".ac.bd", ".বাংলা"];
+const EXTENSIONS = [".com", ".com.bd", ".net", ".net.bd", ".org", ".org.bd", ".xyz", ".top", ".shop", ".fun", ".info", ".io", ".co", ".edu.bd", ".ac.bd", ".বাংলা"];
 
 interface WhoisInfo {
   registrar?: string;
@@ -38,28 +38,29 @@ interface WhoisInfo {
   nameservers?: string[];
 }
 
-async function loadPricesFromDb(): Promise<Record<string, { bdt: string; usd: string; renewal_bdt: string }>> {
+async function loadPricesFromDb(): Promise<{ prices: Record<string, { bdt: string; usd: string; renewal_bdt: string }>; sortedExts: string[] }> {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const client = createClient(supabaseUrl, supabaseKey);
-    const { data } = await client.from("domain_pricing").select("ext, registration_bdt, renewal_bdt").eq("is_active", true);
+    const { data } = await client.from("domain_pricing").select("ext, registration_bdt, renewal_bdt, sort_order").eq("is_active", true).order("sort_order");
     if (data && data.length > 0) {
       const prices: Record<string, { bdt: string; usd: string; renewal_bdt: string }> = {};
+      const sortedExts: string[] = [];
       for (const row of data) {
         prices[row.ext] = { bdt: row.registration_bdt, usd: "N/A", renewal_bdt: row.renewal_bdt };
+        sortedExts.push(row.ext);
       }
-      return prices;
+      return { prices, sortedExts };
     }
   } catch (e) {
     console.error("Failed to load prices from DB:", e);
   }
-  // Fallback with no renewal info
   const fallback: Record<string, { bdt: string; usd: string; renewal_bdt: string }> = {};
   for (const [ext, p] of Object.entries(FALLBACK_PRICES)) {
     fallback[ext] = { ...p, renewal_bdt: p.bdt };
   }
-  return fallback;
+  return { prices: fallback, sortedExts: EXTENSIONS };
 }
 
 async function checkDomainAvailability(domain: string): Promise<boolean> {
@@ -159,12 +160,10 @@ serve(async (req) => {
       );
     }
 
-    // Load prices from DB
-    const PRICES = await loadPricesFromDb();
+    const { prices: PRICES, sortedExts } = await loadPricesFromDb();
 
-    // Determine extensions to check
-    const knownExts = Object.keys(PRICES);
-    let extensionsToCheck = knownExts.length > 0 ? knownExts : EXTENSIONS;
+    // Determine extensions to check (use DB sort order)
+    let extensionsToCheck = sortedExts.length > 0 ? sortedExts : EXTENSIONS;
     const userExt = parts.length > 1 ? `.${parts.slice(1).join(".")}` : null;
     if (userExt && extensionsToCheck.includes(userExt)) {
       extensionsToCheck = [userExt, ...extensionsToCheck.filter(e => e !== userExt)];
