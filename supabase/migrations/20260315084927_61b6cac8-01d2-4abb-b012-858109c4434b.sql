@@ -1,0 +1,16 @@
+UPDATE public.domain_pricing SET sort_order = 1 WHERE ext = '.com';
+UPDATE public.domain_pricing SET sort_order = 2 WHERE ext = '.com.bd';
+UPDATE public.domain_pricing SET sort_order = 3 WHERE ext = '.net';
+UPDATE public.domain_pricing SET sort_order = 4 WHERE ext = '.net.bd';
+UPDATE public.domain_pricing SET sort_order = 5 WHERE ext = '.org';
+UPDATE public.domain_pricing SET sort_order = 6 WHERE ext = '.org.bd';
+UPDATE public.domain_pricing SET sort_order = 7 WHERE ext = '.xyz';
+UPDATE public.domain_pricing SET sort_order = 8 WHERE ext = '.top';
+UPDATE public.domain_pricing SET sort_order = 9 WHERE ext = '.shop';
+UPDATE public.domain_pricing SET sort_order = 10 WHERE ext = '.fun';
+UPDATE public.domain_pricing SET sort_order = 11 WHERE ext = '.info';
+UPDATE public.domain_pricing SET sort_order = 12 WHERE ext = '.io';
+UPDATE public.domain_pricing SET sort_order = 13 WHERE ext = '.co';
+UPDATE public.domain_pricing SET sort_order = 14 WHERE ext = '.edu.bd';
+UPDATE public.domain_pricing SET sort_order = 15 WHERE ext = '.ac.bd';
+UPDATE public.domain_pricing SET sort_order = 16 WHERE ext = '.বাংলা';
