@@ -203,12 +203,12 @@ const DomainResultRow = ({ result, idx, lang, isInCart, addDomainToCart, expande
       <div className="flex items-center gap-3 shrink-0">
         <div className="text-right">
           <span className="text-sm font-extrabold text-foreground tabular-nums">
-            ৳{result.price_bdt}
+            ৳{formatPrice(result.price_bdt, lang)}
             <span className="text-[10px] text-muted-foreground font-normal ml-0.5">/{lang === "bn" ? "বছর" : "yr"}</span>
           </span>
           {result.renewal_bdt && (
             <p className="text-[10px] text-muted-foreground">
-              {lang === "bn" ? "রিনিউ:" : "Renew:"} ৳{result.renewal_bdt}/{lang === "bn" ? "বছর" : "yr"}
+              {lang === "bn" ? "রিনিউ:" : "Renew:"} ৳{formatPrice(result.renewal_bdt, lang)}/{lang === "bn" ? "বছর" : "yr"}
             </p>
           )}
         </div>
