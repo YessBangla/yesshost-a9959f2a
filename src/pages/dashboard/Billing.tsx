@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import InvoiceReport from "@/components/InvoiceReport";
+import { formatAmount } from "@/lib/formatPrice";
 
 const statusColors: Record<string, string> = {
   paid: "bg-success/10 text-success",
