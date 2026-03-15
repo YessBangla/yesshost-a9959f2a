@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import InvoiceReport from "@/components/InvoiceReport";
+import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
 
 type InvoiceWithUser = Tables<"invoices"> & { profiles?: Tables<"profiles"> | null };
@@ -87,9 +88,9 @@ const AdminBilling = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: isBn ? "মোট আয়" : "Total Revenue", value: `৳${totalPaid.toLocaleString()}`, icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
-          { label: isBn ? "এই মাসের আয়" : "This Month", value: `৳${thisMonthRevenue.toLocaleString()}`, icon: CreditCard, color: "text-primary", bg: "bg-primary/10" },
-          { label: isBn ? "মোট বকেয়া" : "Total Due", value: `৳${totalDue.toLocaleString()}`, icon: DollarSign, color: "text-warning", bg: "bg-warning/10" },
+          { label: isBn ? "মোট আয়" : "Total Revenue", value: `৳${formatAmount(totalPaid, lang)}`, icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
+          { label: isBn ? "এই মাসের আয়" : "This Month", value: `৳${formatAmount(thisMonthRevenue, lang)}`, icon: CreditCard, color: "text-primary", bg: "bg-primary/10" },
+          { label: isBn ? "মোট বকেয়া" : "Total Due", value: `৳${formatAmount(totalDue, lang)}`, icon: DollarSign, color: "text-warning", bg: "bg-warning/10" },
           { label: isBn ? "মেয়াদোত্তীর্ণ" : "Overdue", value: totalOverdue, icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-card rounded-xl p-4">
@@ -164,7 +165,7 @@ const AdminBilling = () => {
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell text-muted-foreground text-sm max-w-[200px] truncate">{inv.description || "—"}</td>
                     <td className="px-4 py-3.5">
-                      <p className="font-bold text-foreground tabular-nums">৳{Number(inv.amount_bdt).toLocaleString()}</p>
+                      <p className="font-bold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</p>
                     </td>
                     <td className="px-4 py-3.5">
                       <Badge variant={sc.variant} className="text-[10px]">{inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}</Badge>

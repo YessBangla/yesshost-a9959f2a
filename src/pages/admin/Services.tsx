@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
 
 type ServiceWithUser = Tables<"services"> & { profiles?: Tables<"profiles"> | null };
@@ -168,7 +169,7 @@ const AdminServices = () => {
                       <Badge variant="outline" className="text-[10px] font-mono">{s.service_type.replace(/_/g, " ")}</Badge>
                     </td>
                     <td className="px-4 py-3.5">
-                      <p className="font-semibold text-foreground tabular-nums">৳{Number(s.price_bdt).toLocaleString()}</p>
+                      <p className="font-semibold text-foreground tabular-nums">৳{formatAmount(Number(s.price_bdt), lang)}</p>
                       <p className="text-[10px] text-muted-foreground">/{s.billing_cycle || "monthly"}</p>
                     </td>
                     <td className="px-4 py-3.5">
@@ -223,7 +224,7 @@ const AdminServices = () => {
                   {[
                     { icon: Globe, label: isBn ? "ডোমেইন" : "Domain", value: selected.domain },
                     { icon: Server, label: isBn ? "আইপি" : "IP", value: selected.ip_address },
-                    { icon: CreditCard, label: isBn ? "মূল্য" : "Price", value: `৳${Number(selected.price_bdt).toLocaleString()}/${selected.billing_cycle || "mo"}` },
+                    { icon: CreditCard, label: isBn ? "মূল্য" : "Price", value: `৳${formatAmount(Number(selected.price_bdt), lang)}/${selected.billing_cycle || "mo"}` },
                     { icon: Calendar, label: isBn ? "মেয়াদ" : "Expiry", value: selected.expiry_date ? new Date(selected.expiry_date).toLocaleDateString() : "—" },
                   ].map((item, i) => (
                     <div key={i} className="rounded-xl bg-secondary/30 p-3">

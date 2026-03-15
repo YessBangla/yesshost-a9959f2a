@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatAmount } from "@/lib/formatPrice";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -160,7 +161,7 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell">
                       <p className="text-foreground font-medium">{u.services_count || 0}</p>
-                      <p className="text-[11px] text-muted-foreground">৳{(u.invoices_total || 0).toLocaleString()} {isBn ? "পেইড" : "paid"}</p>
+                      <p className="text-[11px] text-muted-foreground">৳{formatAmount(u.invoices_total || 0, lang)} {isBn ? "পেইড" : "paid"}</p>
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex gap-1 flex-wrap">
@@ -239,7 +240,7 @@ const AdminUsers = () => {
                   <p className="text-[10px] text-muted-foreground">{isBn ? "সার্ভিস" : "Services"}</p>
                 </div>
                 <div className="rounded-xl bg-secondary/30 p-3 text-center">
-                  <p className="text-xl font-bold text-foreground">৳{(selectedUser.invoices_total || 0).toLocaleString()}</p>
+                  <p className="text-xl font-bold text-foreground">৳{formatAmount(selectedUser.invoices_total || 0, lang)}</p>
                   <p className="text-[10px] text-muted-foreground">{isBn ? "মোট পেইড" : "Total Paid"}</p>
                 </div>
                 <div className="rounded-xl bg-secondary/30 p-3 text-center">
