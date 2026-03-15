@@ -1,4 +1,5 @@
 import { Phone, MessageCircle, TicketCheck, Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
@@ -8,6 +9,7 @@ const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const NeedHelpSection = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const navigate = useNavigate();
 
   const options = [
     {
@@ -52,9 +54,7 @@ const NeedHelpSection = () => {
 
   const handleClick = (opt: (typeof options)[0]) => {
     if (opt.action === "livechat") {
-      // Trigger live chat widget open
-      const chatBtn = document.querySelector<HTMLButtonElement>("[data-livechat-trigger]");
-      chatBtn?.click();
+      navigate("/chat-rooms");
     }
   };
 
