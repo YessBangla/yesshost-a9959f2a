@@ -102,17 +102,17 @@ const FeaturesSection = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.06 }}
                 whileHover={{ y: -6, scale: 1.02 }}
-                className="glass-card-elevated p-6 group cursor-pointer relative overflow-hidden h-full"
+                className="glass-card-elevated p-4 md:p-6 group cursor-pointer relative overflow-hidden h-full"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <service.icon className="w-6 h-6 text-primary" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-primary/20 transition-colors">
+                    <service.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   </div>
-                  <h3 className="text-base font-bold text-foreground mb-2">{service.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-3">{service.description}</p>
-                  <p className="text-sm font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
-                  <span className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold mt-3 group-hover:gap-3 transition-all">
+                  <h3 className="text-sm md:text-base font-bold text-foreground mb-1 md:mb-2">{service.title}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed mb-2 md:mb-3 line-clamp-2">{service.description}</p>
+                  <p className="text-xs md:text-sm font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
+                  <span className="hidden md:inline-flex items-center gap-1.5 text-primary text-sm font-semibold mt-3 group-hover:gap-3 transition-all">
                     {tr("features.viewPlan")} <ArrowUpRight className="w-4 h-4" />
                   </span>
                 </div>
