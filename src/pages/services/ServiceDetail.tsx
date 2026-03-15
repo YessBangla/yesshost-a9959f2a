@@ -211,8 +211,10 @@ const ServiceDetail = () => {
 
   const [plans, setPlans] = useState<any[]>([]);
   const [serviceInfo, setServiceInfo] = useState<any>(null);
+  const [serviceFaqs, setServiceFaqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showComparison, setShowComparison] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
     if (!slug) return;
@@ -220,9 +222,11 @@ const ServiceDetail = () => {
     Promise.all([
       supabase.from("pricing_plans").select("*").eq("slug", slug).eq("is_active", true).order("sort_order"),
       supabase.from("site_content").select("*").eq("page", "services").eq("section_key", slug).eq("is_active", true).maybeSingle(),
-    ]).then(([plansRes, infoRes]) => {
+      supabase.from("faqs").select("*").eq("category", slug).eq("is_active", true).order("sort_order"),
+    ]).then(([plansRes, infoRes, faqsRes]) => {
       setPlans(plansRes.data || []);
       setServiceInfo(infoRes.data);
+      setServiceFaqs(faqsRes.data || []);
       setLoading(false);
     });
   }, [slug]);
