@@ -108,6 +108,7 @@ const Navbar = () => {
       ],
     },
     { label: tr("nav.themes"), href: "/themes", blink: true },
+    { label: isBn ? "চ্যাট রুম" : "Chat Rooms", href: "/chat-rooms" },
   ];
 
   const isInternal = (href: string) => href.startsWith("/");
