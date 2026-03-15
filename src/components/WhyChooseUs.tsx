@@ -137,22 +137,22 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
             {lang === "bn" ? "কেন আমরা" : "Why Us"}
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
             {lang === "bn" ? "কেন YessHost বেছে নেবেন?" : "Why Choose YessHost?"}
           </h2>
-          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
             {lang === "bn"
               ? "বাংলাদেশের সবচেয়ে নির্ভরযোগ্য ও দ্রুতগতির হোস্টিং সেবা"
               : "Bangladesh's most reliable and fastest hosting service"}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-5 max-w-5xl mx-auto">
           {reasons.map((reason, i) => (
             <motion.div
               key={i}
