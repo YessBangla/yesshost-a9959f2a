@@ -143,7 +143,7 @@ serve(async (req) => {
     const parts = cleaned.split(".");
     const name = parts[0];
 
-    if (!name || name.length < 1 || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(name)) {
+    if (!name || name.length < 1 || !/^[a-z0-9\u0980-\u09FF]([a-z0-9\u0980-\u09FF-]*[a-z0-9\u0980-\u09FF])?$/.test(name)) {
       return new Response(
         JSON.stringify({ error: "Invalid domain name" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
