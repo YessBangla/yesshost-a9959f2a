@@ -187,15 +187,15 @@ const DomainPricing = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="text-lg font-extrabold text-primary tabular-nums">৳{tld.registration_bdt}</span>
+                            <span className="text-lg font-extrabold text-primary tabular-nums">৳{formatPrice(tld.registration_bdt, lang)}</span>
                             <span className="text-[10px] text-muted-foreground">/{bn ? "বছর" : "yr"}</span>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="text-sm font-bold text-foreground tabular-nums">৳{tld.renewal_bdt}</span>
+                            <span className="text-sm font-bold text-foreground tabular-nums">৳{formatPrice(tld.renewal_bdt, lang)}</span>
                             <span className="text-[10px] text-muted-foreground">/{bn ? "বছর" : "yr"}</span>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="text-sm font-semibold text-muted-foreground tabular-nums">৳{tld.transfer_bdt}</span>
+                            <span className="text-sm font-semibold text-muted-foreground tabular-nums">৳{formatPrice(tld.transfer_bdt, lang)}</span>
                           </td>
                           <td className="px-6 py-4 text-center">
                             {inCart ? (
