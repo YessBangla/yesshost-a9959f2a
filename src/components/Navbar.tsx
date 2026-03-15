@@ -51,6 +51,7 @@ const Navbar = () => {
       label: tr("nav.webHosting"),
       href: "/services/basic-hosting",
       mega: true,
+      cta: { label: isBn ? "সকল প্ল্যান তুলনা করুন" : "Compare All Plans", href: "/services/basic-hosting" },
       children: [
         { label: tr("nav.basicHosting"), href: "/services/basic-hosting", icon: Server, desc: isBn ? "নতুনদের জন্য সাশ্রয়ী হোস্টিং" : "Affordable hosting for beginners" },
         { label: tr("nav.proHosting"), href: "/services/pro-hosting", icon: Zap, desc: isBn ? "দ্রুত গতির প্রফেশনাল হোস্টিং" : "Fast professional hosting" },
