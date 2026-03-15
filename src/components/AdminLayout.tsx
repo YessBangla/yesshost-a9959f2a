@@ -170,6 +170,15 @@ const AdminLayout = () => {
 
           <div className="flex-1" />
 
+          {/* Language Toggle */}
+          <button
+            onClick={() => setLang(lang === "bn" ? "en" : "bn")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50 hover:bg-secondary/80 transition-all text-sm font-medium text-foreground"
+          >
+            <Globe className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs">{lang === "bn" ? "EN" : "বাং"}</span>
+          </button>
+
           {/* Quick search placeholder */}
           <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/40 border border-border/50 text-muted-foreground text-sm w-56">
             <Search className="w-4 h-4" />
