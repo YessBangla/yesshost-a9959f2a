@@ -24,9 +24,10 @@ const FALLBACK_PRICES: Record<string, { bdt: string; usd: string }> = {
   ".org.bd": { bdt: "১,০০০", usd: "10.00" },
   ".edu.bd": { bdt: "১,০০০", usd: "10.00" },
   ".ac.bd": { bdt: "১,০০০", usd: "10.00" },
+  ".বাংলা": { bdt: "১,৫০০", usd: "15.00" },
 };
 
-const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co", ".com.bd", ".net.bd", ".org.bd", ".edu.bd", ".ac.bd"];
+const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co", ".com.bd", ".net.bd", ".org.bd", ".edu.bd", ".ac.bd", ".বাংলা"];
 
 interface WhoisInfo {
   registrar?: string;
@@ -142,7 +143,7 @@ serve(async (req) => {
     const parts = cleaned.split(".");
     const name = parts[0];
 
-    if (!name || name.length < 1 || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(name)) {
+    if (!name || name.length < 1 || !/^[a-z0-9\u0980-\u09FF]([a-z0-9\u0980-\u09FF-]*[a-z0-9\u0980-\u09FF])?$/.test(name)) {
       return new Response(
         JSON.stringify({ error: "Invalid domain name" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -169,7 +170,7 @@ serve(async (req) => {
       extensionsToCheck = [userExt, ...extensionsToCheck.filter(e => e !== userExt)];
     }
 
-    const checkList = extensionsToCheck.slice(0, 10);
+    const checkList = extensionsToCheck.slice(0, 16);
 
     const results = await Promise.all(
       checkList.map(async (ext) => {
