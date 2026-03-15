@@ -190,11 +190,11 @@ const ThemeStore = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-baseline gap-2">
                         <span className="text-xl font-extrabold text-primary">
-                          ৳{theme.discount_price_bdt || theme.price_bdt}
+                          ৳{formatAmount(theme.discount_price_bdt || theme.price_bdt, lang)}
                         </span>
                         {theme.discount_price_bdt && (
                           <span className="text-sm text-muted-foreground line-through">
-                            ৳{theme.price_bdt}
+                            ৳{formatAmount(theme.price_bdt, lang)}
                           </span>
                         )}
                       </div>
