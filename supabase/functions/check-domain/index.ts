@@ -160,12 +160,10 @@ serve(async (req) => {
       );
     }
 
-    // Load prices from DB
-    const PRICES = await loadPricesFromDb();
+    const { prices: PRICES, sortedExts } = await loadPricesFromDb();
 
-    // Determine extensions to check
-    const knownExts = Object.keys(PRICES);
-    let extensionsToCheck = knownExts.length > 0 ? knownExts : EXTENSIONS;
+    // Determine extensions to check (use DB sort order)
+    let extensionsToCheck = sortedExts.length > 0 ? sortedExts : EXTENSIONS;
     const userExt = parts.length > 1 ? `.${parts.slice(1).join(".")}` : null;
     if (userExt && extensionsToCheck.includes(userExt)) {
       extensionsToCheck = [userExt, ...extensionsToCheck.filter(e => e !== userExt)];
