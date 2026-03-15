@@ -228,8 +228,8 @@ const AdminCoupons = () => {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {c.discount_type === "percentage" ? `${c.discount_value}%` : `৳${c.discount_value}`}
-                        {c.max_discount_amount ? ` (max ৳${c.max_discount_amount})` : ""}
+                        {c.discount_type === "percentage" ? `${formatPrice(c.discount_value, lang)}%` : `৳${formatPrice(c.discount_value, lang)}`}
+                        {c.max_discount_amount ? ` (max ৳${formatPrice(c.max_discount_amount, lang)})` : ""}
                         {c.description ? ` — ${c.description}` : ""}
                       </p>
                     </div>
