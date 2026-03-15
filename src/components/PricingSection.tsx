@@ -90,7 +90,7 @@ const PricingSection = () => {
   const currentPlans = getPlans(activeTab);
 
   return (
-    <section id="pricing" className="py-24 relative">
+    <section id="pricing" className="py-12 md:py-24 relative">
       <div className="absolute inset-0 gradient-mesh opacity-50" />
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -98,24 +98,24 @@ const PricingSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
             Pricing
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
             {tr("pricing.title")}
           </h2>
-          <p className="text-muted-foreground text-base max-w-xl mx-auto mb-8">
+          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto mb-6 md:mb-8">
             {tr("pricing.subtitle")}
           </p>
 
-          <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl glass-card mb-4">
+          <div className="flex overflow-x-auto gap-1 p-1 rounded-xl glass-card mb-4 no-scrollbar">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                className={`px-3 md:px-5 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
                   activeTab === tab.key
                     ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
                     : "text-muted-foreground hover:text-foreground"
