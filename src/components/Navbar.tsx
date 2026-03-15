@@ -166,7 +166,11 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-surface">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled 
+        ? "bg-background/85 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-border/50" 
+        : "glass-surface"
+    }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
         <Link to="/" className="flex items-center shrink-0">
           <img src={logoWhite} alt="YessHost" className="h-7 lg:h-9" />
