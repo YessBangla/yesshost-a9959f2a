@@ -69,13 +69,13 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-surface">
-      <div className="container mx-auto flex items-center justify-between h-14 lg:h-16 px-4">
-        <Link to="/" className="flex items-center">
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
+        <Link to="/" className="flex items-center shrink-0">
           <img src={logoWhite} alt="YessHost" className="h-7 lg:h-9" />
         </Link>
 
         {/* Desktop */}
-        <div className="hidden lg:flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-1 xl:gap-2">
           {navLinks.map((link) => (
             <div
               key={link.label}
@@ -86,18 +86,18 @@ const Navbar = () => {
               {isInternal(link.href) ? (
                 <Link
                   to={link.href}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                  className="flex items-center gap-1 px-2 xl:px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap"
                 >
                   {link.label}
-                  {link.children && <ChevronDown className="w-3.5 h-3.5" />}
+                  {link.children && <ChevronDown className="w-3.5 h-3.5 shrink-0" />}
                 </Link>
               ) : (
                 <a
                   href={link.href}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                  className="flex items-center gap-1 px-2 xl:px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap"
                 >
                   {link.label}
-                  {link.children && <ChevronDown className="w-3.5 h-3.5" />}
+                  {link.children && <ChevronDown className="w-3.5 h-3.5 shrink-0" />}
                 </a>
               )}
 
@@ -108,14 +108,14 @@ const Navbar = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full left-0 pt-2 min-w-[200px]"
+                    className="absolute top-full left-0 pt-2 min-w-[220px]"
                   >
                     <div className="glass-card-elevated p-2">
                       {link.children.map((child) => (
                         <Link
                           key={child.label}
                           to={child.href}
-                          className="block px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                          className="block px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap"
                         >
                           {child.label}
                         </Link>
