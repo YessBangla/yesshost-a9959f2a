@@ -9,6 +9,7 @@ const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const NeedHelpSection = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const navigate = useNavigate();
 
   const options = [
     {
