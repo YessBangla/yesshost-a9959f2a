@@ -66,6 +66,11 @@ const Login = () => {
         <p className="text-center text-sm text-muted-foreground mt-6">
           {tr("auth.noAccount")}{" "}<Link to="/signup" className="text-primary font-semibold hover:underline">{tr("nav.signup")}</Link>
         </p>
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          <Link to="/" className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
+            <ArrowLeft className="w-4 h-4" />হোমে ফিরে যান
+          </Link>
+        </p>
       </motion.div>
     </div>
   );
