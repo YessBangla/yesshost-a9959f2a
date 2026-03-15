@@ -38,17 +38,18 @@ const FeaturesSection = () => {
         description: lang === "bn" ? s.desc_bn : s.desc_en,
         price: s.price,
         color: s.color,
+        link: s.link || "#pricing",
       }));
     }
     return [
-      { icon: Globe, title: tr("features.domain"), description: tr("features.domainDesc"), price: "199 BDT/Year", color: "from-blue-500/20 to-blue-600/5" },
-      { icon: HardDrive, title: tr("nav.webHosting"), description: tr("features.webHostingDesc"), price: "130 BDT/Month", color: "from-green-500/20 to-green-600/5" },
-      { icon: Cpu, title: tr("nav.proHosting"), description: tr("features.proHostingDesc"), price: "200 BDT/Month", color: "from-purple-500/20 to-purple-600/5" },
-      { icon: Rocket, title: tr("nav.premiumHosting"), description: tr("features.premiumHostingDesc"), price: "500 BDT/Month", color: "from-orange-500/20 to-orange-600/5" },
-      { icon: Server, title: tr("nav.reseller"), description: tr("features.resellerHostingDesc"), price: "1,499 BDT/Month", color: "from-pink-500/20 to-pink-600/5" },
-      { icon: Shield, title: tr("nav.vps"), description: tr("features.vpsServerDesc"), price: "750 BDT/Month", color: "from-cyan-500/20 to-cyan-600/5" },
-      { icon: Mail, title: tr("nav.emailHosting"), description: tr("features.emailHostingDesc"), price: "799 BDT/Month", color: "from-yellow-500/20 to-yellow-600/5" },
-      { icon: HardDrive, title: tr("nav.dedicated"), description: tr("features.dedicatedServerDesc"), price: "11,200 BDT/Month", color: "from-red-500/20 to-red-600/5" },
+      { icon: Globe, title: tr("features.domain"), description: tr("features.domainDesc"), price: "199 BDT/Year", color: "from-blue-500/20 to-blue-600/5", link: "/services/domain" },
+      { icon: HardDrive, title: tr("nav.webHosting"), description: tr("features.webHostingDesc"), price: "130 BDT/Month", color: "from-green-500/20 to-green-600/5", link: "/services/basic-hosting" },
+      { icon: Cpu, title: tr("nav.proHosting"), description: tr("features.proHostingDesc"), price: "200 BDT/Month", color: "from-purple-500/20 to-purple-600/5", link: "/services/pro-hosting" },
+      { icon: Rocket, title: tr("nav.premiumHosting"), description: tr("features.premiumHostingDesc"), price: "500 BDT/Month", color: "from-orange-500/20 to-orange-600/5", link: "/services/premium-hosting" },
+      { icon: Server, title: tr("nav.reseller"), description: tr("features.resellerHostingDesc"), price: "1,499 BDT/Month", color: "from-pink-500/20 to-pink-600/5", link: "/services/linux-reseller" },
+      { icon: Shield, title: tr("nav.vps"), description: tr("features.vpsServerDesc"), price: "750 BDT/Month", color: "from-cyan-500/20 to-cyan-600/5", link: "/services/usa-vps" },
+      { icon: Mail, title: tr("nav.emailHosting"), description: tr("features.emailHostingDesc"), price: "799 BDT/Month", color: "from-yellow-500/20 to-yellow-600/5", link: "/services/email-hosting" },
+      { icon: HardDrive, title: tr("nav.dedicated"), description: tr("features.dedicatedServerDesc"), price: "11,200 BDT/Month", color: "from-red-500/20 to-red-600/5", link: "/services/dedicated" },
     ];
   }, [siteContent, lang]);
 
