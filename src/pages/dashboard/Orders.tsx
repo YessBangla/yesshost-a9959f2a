@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import InvoiceReport from "@/components/InvoiceReport";
+import { formatAmount } from "@/lib/formatPrice";
 
 type Invoice = {
   id: string;
