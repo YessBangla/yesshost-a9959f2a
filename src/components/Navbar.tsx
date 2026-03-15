@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, ChevronDown, LogIn, Globe, ShoppingCart,
   Globe2, ListOrdered, Server, Zap, Crown, Wifi,
-  Users, WifiHigh, MonitorSmartphone, HardDrive,
+  Users, WifiHigh, MonitorSmartphone, HardDrive, MapPin, Globe as GlobeIcon,
   Mail, Radio, Palette, ArrowRight,
   type LucideIcon
 } from "lucide-react";
@@ -87,7 +87,16 @@ const Navbar = () => {
         { label: tr("nav.bdixVps"), href: "/services/bdix-vps", icon: HardDrive, desc: isBn ? "বাংলাদেশ BDIX VPS সার্ভার" : "Bangladesh BDIX VPS server" },
       ],
     },
-    { label: tr("nav.dedicated"), href: "/services/dedicated" },
+    {
+      label: tr("nav.dedicated"),
+      href: "/services/dedicated",
+      cta: { label: isBn ? "সকল ডেডিকেটেড সার্ভার দেখুন" : "View All Dedicated Servers", href: "/services/dedicated" },
+      children: [
+        { label: isBn ? "USA ডেডিকেটেড সার্ভার" : "USA Dedicated Server", href: "/services/usa-dedicated", icon: MonitorSmartphone, desc: isBn ? "আমেরিকা ডেটাসেন্টার সার্ভার" : "USA datacenter server" },
+        { label: isBn ? "সিঙ্গাপুর ডেডিকেটেড সার্ভার" : "Singapore Dedicated Server", href: "/services/singapore-dedicated", icon: GlobeIcon, desc: isBn ? "সিঙ্গাপুর ডেটাসেন্টার সার্ভার" : "Singapore datacenter server" },
+        { label: isBn ? "বাংলাদেশ ডেডিকেটেড সার্ভার" : "BD Dedicated Server", href: "/services/bd-dedicated", icon: MapPin, desc: isBn ? "বাংলাদেশ লোকাল সার্ভার" : "Bangladesh local server" },
+      ],
+    },
     {
       label: tr("nav.services"),
       href: "#",
