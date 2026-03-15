@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, X, ChevronDown, Phone, LogIn, Globe, ShoppingCart,
+  Menu, X, ChevronDown, LogIn, Globe, ShoppingCart,
   Globe2, ListOrdered, Server, Zap, Crown, Wifi,
   Users, WifiHigh, MonitorSmartphone, HardDrive,
   Mail, Radio, Palette, ArrowRight,
