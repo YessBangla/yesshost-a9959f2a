@@ -50,7 +50,7 @@ const DashboardBilling = () => {
         </div>
         <div className="glass-card p-5">
           <p className="text-xs text-muted-foreground mb-1">{tr("dash.totalPaid")}</p>
-          <p className="text-2xl font-bold text-success">৳{invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0).toFixed(2)}</p>
+          <p className="text-2xl font-bold text-success">৳{formatAmount(invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0), lang)}</p>
         </div>
       </div>
 
