@@ -70,7 +70,7 @@ const TldPill = ({ d, onClick }: { d: DomainPrice; onClick: () => void }) => (
       </span>
     )}
     <span className="text-sm font-bold">{d.ext}</span>
-    <span className="text-xs font-semibold opacity-80">৳{d.price}</span>
+    <span className="text-xs font-semibold opacity-80">৳{formatPrice(d.price, lang)}</span>
   </button>
 );
 
