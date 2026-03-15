@@ -48,7 +48,7 @@ const CategoryScroller = () => {
   const items = [...categories, ...categories];
 
   return (
-    <section className="py-10 md:py-14 overflow-hidden">
+    <section className="py-8 md:py-14 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8">
         <div className="flex items-center gap-3 justify-center mb-2">
           <div className="h-px w-8 bg-primary/40" />
