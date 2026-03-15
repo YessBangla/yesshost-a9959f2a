@@ -30,10 +30,6 @@ const Login = () => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/"><img src={logoWhite} alt="YessHost" className="h-10 mx-auto mb-6" /></Link>
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium mb-4 transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            হোমে ফিরে যান
-          </Link>
           <h1 className="text-2xl font-bold text-foreground">{tr("auth.welcomeBack")}</h1>
           <p className="text-sm text-muted-foreground mt-1">{tr("auth.loginSubtitle")}</p>
         </div>
@@ -69,6 +65,11 @@ const Login = () => {
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           {tr("auth.noAccount")}{" "}<Link to="/signup" className="text-primary font-semibold hover:underline">{tr("nav.signup")}</Link>
+        </p>
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          <Link to="/" className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
+            <ArrowLeft className="w-4 h-4" />হোমে ফিরে যান
+          </Link>
         </p>
       </motion.div>
     </div>
