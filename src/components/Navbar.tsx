@@ -26,6 +26,7 @@ interface NavLink {
   children?: NavChild[];
   mega?: boolean;
   cta?: { label: string; href: string };
+  blink?: boolean;
 }
 
 const Navbar = () => {
