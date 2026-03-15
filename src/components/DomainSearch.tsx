@@ -160,7 +160,7 @@ const DomainResultRow = ({ result, idx, lang, isInCart, addDomainToCart, expande
     className="border-b border-border/60 last:border-b-0"
   >
     <div className={`flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 transition-colors ${
-      result.available ? "hover:bg-primary/[0.03]" : "opacity-55"
+      result.available ? "hover:bg-primary/[0.03]" : "hover:bg-muted/30"
     }`}>
       {/* Left: status + domain */}
       <div className="flex items-center gap-3 min-w-0">
@@ -173,17 +173,34 @@ const DomainResultRow = ({ result, idx, lang, isInCart, addDomainToCart, expande
         </div>
         <div className="min-w-0">
           <p className="text-sm font-bold text-foreground truncate tracking-tight">{result.domain}</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {result.available
-              ? (lang === "bn" ? "✓ পাওয়া যাচ্ছে!" : "✓ Available!")
-              : (lang === "bn" ? "✗ নেওয়া হয়ে গেছে" : "✗ Already taken")}
-          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-[11px] text-muted-foreground">
+              {result.available
+                ? (lang === "bn" ? "✓ পাওয়া যাচ্ছে!" : "✓ Available!")
+                : (lang === "bn" ? "✗ নেওয়া হয়ে গেছে" : "✗ Already taken")}
+            </p>
+            {/* Inline WHOIS toggle for taken domains */}
+            {!result.available && (
+              <button
+                onClick={() => fetchWhois(result.domain)}
+                className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md transition-all ${
+                  expandedDomain === result.domain
+                    ? "bg-primary/15 text-primary border border-primary/20"
+                    : "bg-muted/60 text-muted-foreground hover:text-primary hover:bg-primary/10 border border-transparent"
+                }`}
+              >
+                <Info className="w-3 h-3" />
+                WHOIS
+                {expandedDomain === result.domain ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Right: price + action */}
       <div className="flex items-center gap-3 shrink-0">
-        <div className="text-right hidden xs:block">
+        <div className="text-right">
           <span className="text-sm font-extrabold text-foreground tabular-nums">
             ৳{result.price_bdt}
             <span className="text-[10px] text-muted-foreground font-normal ml-0.5">/{lang === "bn" ? "বছর" : "yr"}</span>
@@ -195,7 +212,7 @@ const DomainResultRow = ({ result, idx, lang, isInCart, addDomainToCart, expande
           )}
         </div>
 
-        {result.available ? (
+        {result.available && (
           isInCart(result.domain) ? (
             <span className="flex items-center gap-1.5 bg-success/10 text-success px-3.5 py-2 rounded-lg text-xs font-bold border border-success/20">
               <Check className="w-3.5 h-3.5" />{lang === "bn" ? "যোগ হয়েছে" : "Added"}
@@ -208,27 +225,10 @@ const DomainResultRow = ({ result, idx, lang, isInCart, addDomainToCart, expande
               <ShoppingCart className="w-3.5 h-3.5" />{lang === "bn" ? "নিন" : "Add"}
             </button>
           )
-        ) : (
-          <button
-            onClick={() => fetchWhois(result.domain)}
-            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-semibold transition-colors px-2.5 py-2 rounded-lg hover:bg-primary/5 border border-transparent hover:border-primary/10"
-          >
-            <Info className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{lang === "bn" ? "তথ্য" : "Info"}</span>
-            {expandedDomain === result.domain ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          </button>
         )}
       </div>
     </div>
 
-    {/* Mobile price (visible on xs) */}
-    {result.available && (
-      <div className="block xs:hidden px-4 pb-2 -mt-1">
-        <span className="text-xs font-bold text-foreground tabular-nums">
-          ৳{result.price_bdt}<span className="text-muted-foreground font-normal">/{lang === "bn" ? "বছর" : "yr"}</span>
-        </span>
-      </div>
-    )}
 
     {/* WHOIS panel */}
     <AnimatePresence>
