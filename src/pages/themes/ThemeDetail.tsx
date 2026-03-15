@@ -153,9 +153,9 @@ const ThemeDetail = () => {
                   <h1 className="text-2xl font-extrabold text-foreground">{theme.name}</h1>
                 </div>
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl font-extrabold text-primary">৳{currentPrice}</span>
+                  <span className="text-3xl font-extrabold text-primary">৳{formatAmount(currentPrice, lang)}</span>
                   {theme.discount_price_bdt && (
-                    <span className="text-lg text-muted-foreground line-through">৳{theme.price_bdt}</span>
+                    <span className="text-lg text-muted-foreground line-through">৳{formatAmount(theme.price_bdt, lang)}</span>
                   )}
                 </div>
 
