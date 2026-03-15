@@ -19,9 +19,14 @@ const FALLBACK_PRICES: Record<string, { bdt: string; usd: string }> = {
   ".info": { bdt: "৪৯০", usd: "4.90" },
   ".io": { bdt: "৩,৯৯০", usd: "39.90" },
   ".co": { bdt: "২,৪৯০", usd: "24.90" },
+  ".com.bd": { bdt: "১,৫০০", usd: "15.00" },
+  ".net.bd": { bdt: "১,২০০", usd: "12.00" },
+  ".org.bd": { bdt: "১,০০০", usd: "10.00" },
+  ".edu.bd": { bdt: "১,০০০", usd: "10.00" },
+  ".ac.bd": { bdt: "১,০০০", usd: "10.00" },
 };
 
-const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co"];
+const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co", ".com.bd", ".net.bd", ".org.bd", ".edu.bd", ".ac.bd"];
 
 interface WhoisInfo {
   registrar?: string;
@@ -164,7 +169,7 @@ serve(async (req) => {
       extensionsToCheck = [userExt, ...extensionsToCheck.filter(e => e !== userExt)];
     }
 
-    const checkList = extensionsToCheck.slice(0, 6);
+    const checkList = extensionsToCheck.slice(0, 10);
 
     const results = await Promise.all(
       checkList.map(async (ext) => {
