@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, ChevronDown, Phone, LogIn, Globe, ShoppingCart,
@@ -32,10 +32,19 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const { user } = useAuth();
   const { lang, setLang, tr } = useLanguage();
   const { itemCount, setCartOpen } = useCart();
   const isBn = lang === "bn";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks: NavLink[] = [
     {
@@ -157,7 +166,11 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-surface">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled 
+        ? "bg-background/85 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-border/50" 
+        : "glass-surface"
+    }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
         <Link to="/" className="flex items-center shrink-0">
           <img src={logoWhite} alt="YessHost" className="h-7 lg:h-9" />
