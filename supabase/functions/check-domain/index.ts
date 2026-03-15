@@ -56,12 +56,11 @@ async function loadPricesFromDb(): Promise<{ prices: Record<string, { bdt: strin
   } catch (e) {
     console.error("Failed to load prices from DB:", e);
   }
-  // Fallback with no renewal info
   const fallback: Record<string, { bdt: string; usd: string; renewal_bdt: string }> = {};
   for (const [ext, p] of Object.entries(FALLBACK_PRICES)) {
     fallback[ext] = { ...p, renewal_bdt: p.bdt };
   }
-  return fallback;
+  return { prices: fallback, sortedExts: EXTENSIONS };
 }
 
 async function checkDomainAvailability(domain: string): Promise<boolean> {
