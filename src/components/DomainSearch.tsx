@@ -55,7 +55,7 @@ const formatDate = (dateStr?: string) => {
 
 /* ─── Sub-components ─── */
 
-const TldPill = ({ d, onClick }: { d: DomainPrice; onClick: () => void }) => (
+const TldPill = ({ d, onClick, lang }: { d: DomainPrice; onClick: () => void; lang: string }) => (
   <button
     onClick={onClick}
     className={`group relative flex flex-col items-center gap-0.5 px-4 py-2.5 rounded-xl border transition-all duration-200 hover:scale-[1.04] hover:shadow-md ${
