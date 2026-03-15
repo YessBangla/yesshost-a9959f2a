@@ -62,6 +62,7 @@ const Navbar = () => {
     {
       label: tr("nav.reseller"),
       href: "/services/linux-reseller",
+      cta: { label: isBn ? "রিসেলার প্ল্যান দেখুন" : "View Reseller Plans", href: "/services/linux-reseller" },
       children: [
         { label: tr("nav.linuxReseller"), href: "/services/linux-reseller", icon: Users, desc: isBn ? "নিজের হোস্টিং ব্যবসা শুরু করুন" : "Start your hosting business" },
         { label: tr("nav.bdixReseller"), href: "/services/bdix-reseller", icon: WifiHigh, desc: isBn ? "বিডিআইএক্স রিসেলার প্যাকেজ" : "BDIX reseller packages" },
@@ -70,6 +71,7 @@ const Navbar = () => {
     {
       label: tr("nav.vps"),
       href: "/services/usa-vps",
+      cta: { label: isBn ? "সকল VPS দেখুন" : "View All VPS", href: "/services/usa-vps" },
       children: [
         { label: tr("nav.usaVps"), href: "/services/usa-vps", icon: MonitorSmartphone, desc: isBn ? "USA ডাটাসেন্টার VPS সার্ভার" : "USA datacenter VPS server" },
         { label: tr("nav.bdixVps"), href: "/services/bdix-vps", icon: HardDrive, desc: isBn ? "বাংলাদেশ BDIX VPS সার্ভার" : "Bangladesh BDIX VPS server" },
@@ -79,6 +81,7 @@ const Navbar = () => {
     {
       label: tr("nav.services"),
       href: "#",
+      cta: { label: isBn ? "সকল সার্ভিস দেখুন" : "View All Services", href: "/services/email-hosting" },
       children: [
         { label: tr("nav.emailHosting"), href: "/services/email-hosting", icon: Mail, desc: isBn ? "প্রফেশনাল ইমেইল সার্ভিস" : "Professional email service" },
         { label: tr("nav.radioHosting"), href: "/services/radio-hosting", icon: Radio, desc: isBn ? "অনলাইন রেডিও স্ট্রিমিং" : "Online radio streaming" },
