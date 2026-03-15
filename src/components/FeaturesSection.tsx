@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Globe, Server, HardDrive, Mail, Cpu, Lock, RefreshCw, Rocket, MousePointerClick, BarChart3, Shield, Headphones, ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
