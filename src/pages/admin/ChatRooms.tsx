@@ -112,7 +112,7 @@ const AdminChatRooms = () => {
     fetchRooms();
   };
 
-  const updateMemberStatus = async (memberId: string, status: string) => {
+  const updateMemberStatus = async (memberId: string, status: "approved" | "rejected") => {
     await supabase.from("chat_room_members").update({ status }).eq("id", memberId);
     setMembers(prev => prev.map(m => m.id === memberId ? { ...m, status } : m));
     toast.success(status === "approved" ? (bn ? "অনুমোদিত" : "Approved") : (bn ? "বাতিল করা হয়েছে" : "Rejected"));
