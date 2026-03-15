@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
+import { formatPrice } from "@/lib/formatPrice";
 import SEOHead from "@/components/SEOHead";
 
 interface TLDPrice {
