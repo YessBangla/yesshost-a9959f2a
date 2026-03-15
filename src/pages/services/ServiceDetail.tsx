@@ -11,6 +11,7 @@ import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
+import { formatPrice } from "@/lib/formatPrice";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
