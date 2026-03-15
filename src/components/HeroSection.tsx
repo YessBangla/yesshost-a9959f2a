@@ -65,7 +65,8 @@ const HeroSection = () => {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: brandCurve, delay: 0.1 }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-display font-extrabold tracking-tight leading-[1.15] mb-4"
+            className="font-display font-extrabold tracking-tight leading-[1.15] mb-4"
+            style={{ fontSize: "clamp(1.25rem, 5vw, 3.75rem)" }}
           >
             <span className="block mb-2">{getText("hero_title1", "hero.title1")}</span>
             <span className="block text-gradient-primary">{getText("hero_title2", "hero.title2")}</span>
