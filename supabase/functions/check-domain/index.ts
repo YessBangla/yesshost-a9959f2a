@@ -169,7 +169,7 @@ serve(async (req) => {
       extensionsToCheck = [userExt, ...extensionsToCheck.filter(e => e !== userExt)];
     }
 
-    const checkList = extensionsToCheck.slice(0, 6);
+    const checkList = extensionsToCheck.slice(0, 10);
 
     const results = await Promise.all(
       checkList.map(async (ext) => {
