@@ -24,9 +24,10 @@ const FALLBACK_PRICES: Record<string, { bdt: string; usd: string }> = {
   ".org.bd": { bdt: "১,০০০", usd: "10.00" },
   ".edu.bd": { bdt: "১,০০০", usd: "10.00" },
   ".ac.bd": { bdt: "১,০০০", usd: "10.00" },
+  ".বাংলা": { bdt: "১,৫০০", usd: "15.00" },
 };
 
-const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co", ".com.bd", ".net.bd", ".org.bd", ".edu.bd", ".ac.bd"];
+const EXTENSIONS = [".com", ".net", ".org", ".top", ".xyz", ".shop", ".fun", ".info", ".io", ".co", ".com.bd", ".net.bd", ".org.bd", ".edu.bd", ".ac.bd", ".বাংলা"];
 
 interface WhoisInfo {
   registrar?: string;
