@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Globe, Server, HardDrive, Mail, Cpu, Lock, RefreshCw, Rocket, MousePointerClick, BarChart3, Shield, Headphones, ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,17 +38,18 @@ const FeaturesSection = () => {
         description: lang === "bn" ? s.desc_bn : s.desc_en,
         price: s.price,
         color: s.color,
+        link: s.link || "#pricing",
       }));
     }
     return [
-      { icon: Globe, title: tr("features.domain"), description: tr("features.domainDesc"), price: "199 BDT/Year", color: "from-blue-500/20 to-blue-600/5" },
-      { icon: HardDrive, title: tr("nav.webHosting"), description: tr("features.webHostingDesc"), price: "130 BDT/Month", color: "from-green-500/20 to-green-600/5" },
-      { icon: Cpu, title: tr("nav.proHosting"), description: tr("features.proHostingDesc"), price: "200 BDT/Month", color: "from-purple-500/20 to-purple-600/5" },
-      { icon: Rocket, title: tr("nav.premiumHosting"), description: tr("features.premiumHostingDesc"), price: "500 BDT/Month", color: "from-orange-500/20 to-orange-600/5" },
-      { icon: Server, title: tr("nav.reseller"), description: tr("features.resellerHostingDesc"), price: "1,499 BDT/Month", color: "from-pink-500/20 to-pink-600/5" },
-      { icon: Shield, title: tr("nav.vps"), description: tr("features.vpsServerDesc"), price: "750 BDT/Month", color: "from-cyan-500/20 to-cyan-600/5" },
-      { icon: Mail, title: tr("nav.emailHosting"), description: tr("features.emailHostingDesc"), price: "799 BDT/Month", color: "from-yellow-500/20 to-yellow-600/5" },
-      { icon: HardDrive, title: tr("nav.dedicated"), description: tr("features.dedicatedServerDesc"), price: "11,200 BDT/Month", color: "from-red-500/20 to-red-600/5" },
+      { icon: Globe, title: tr("features.domain"), description: tr("features.domainDesc"), price: "199 BDT/Year", color: "from-blue-500/20 to-blue-600/5", link: "/services/domain" },
+      { icon: HardDrive, title: tr("nav.webHosting"), description: tr("features.webHostingDesc"), price: "130 BDT/Month", color: "from-green-500/20 to-green-600/5", link: "/services/basic-hosting" },
+      { icon: Cpu, title: tr("nav.proHosting"), description: tr("features.proHostingDesc"), price: "200 BDT/Month", color: "from-purple-500/20 to-purple-600/5", link: "/services/pro-hosting" },
+      { icon: Rocket, title: tr("nav.premiumHosting"), description: tr("features.premiumHostingDesc"), price: "500 BDT/Month", color: "from-orange-500/20 to-orange-600/5", link: "/services/premium-hosting" },
+      { icon: Server, title: tr("nav.reseller"), description: tr("features.resellerHostingDesc"), price: "1,499 BDT/Month", color: "from-pink-500/20 to-pink-600/5", link: "/services/linux-reseller" },
+      { icon: Shield, title: tr("nav.vps"), description: tr("features.vpsServerDesc"), price: "750 BDT/Month", color: "from-cyan-500/20 to-cyan-600/5", link: "/services/usa-vps" },
+      { icon: Mail, title: tr("nav.emailHosting"), description: tr("features.emailHostingDesc"), price: "799 BDT/Month", color: "from-yellow-500/20 to-yellow-600/5", link: "/services/email-hosting" },
+      { icon: HardDrive, title: tr("nav.dedicated"), description: tr("features.dedicatedServerDesc"), price: "11,200 BDT/Month", color: "from-red-500/20 to-red-600/5", link: "/services/dedicated" },
     ];
   }, [siteContent, lang]);
 
@@ -93,28 +95,29 @@ const FeaturesSection = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-24">
           {services.map((service: any, i: number) => (
-            <motion.div
-              key={service.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.06 }}
-              whileHover={{ y: -6, scale: 1.02 }}
-              className="glass-card-elevated p-6 group cursor-pointer relative overflow-hidden"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              <div className="relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <service.icon className="w-6 h-6 text-primary" />
+            <Link to={service.link} key={service.title} className="block">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.06 }}
+                whileHover={{ y: -6, scale: 1.02 }}
+                className="glass-card-elevated p-6 group cursor-pointer relative overflow-hidden h-full"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <service.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground mb-2">{service.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-3">{service.description}</p>
+                  <p className="text-sm font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
+                  <span className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold mt-3 group-hover:gap-3 transition-all">
+                    {tr("features.viewPlan")} <ArrowUpRight className="w-4 h-4" />
+                  </span>
                 </div>
-                <h3 className="text-base font-bold text-foreground mb-2">{service.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-3">{service.description}</p>
-                <p className="text-sm font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
-                <span className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold mt-3 group-hover:gap-3 transition-all">
-                  {tr("features.viewPlan")} <ArrowUpRight className="w-4 h-4" />
-                </span>
-              </div>
-            </motion.div>
+              </motion.div>
+            </Link>
           ))}
         </div>
 
