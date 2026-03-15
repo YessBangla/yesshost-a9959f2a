@@ -21,6 +21,9 @@ const fallbackPrices: Omit<TLDPrice, "id">[] = [
   { ext: ".com", registration_bdt: "৯৯০", renewal_bdt: "১,১৯০", transfer_bdt: "১,১৯০", is_popular: true },
   { ext: ".net", registration_bdt: "১,০৯০", renewal_bdt: "১,২৯০", transfer_bdt: "১,২৯০", is_popular: false },
   { ext: ".org", registration_bdt: "১,১৯০", renewal_bdt: "১,৩৯০", transfer_bdt: "১,৩৯০", is_popular: false },
+  { ext: ".com.bd", registration_bdt: "১,৫০০", renewal_bdt: "১,৫০০", transfer_bdt: "১,৫০০", is_popular: false },
+  { ext: ".net.bd", registration_bdt: "১,২০০", renewal_bdt: "১,২০০", transfer_bdt: "১,২০০", is_popular: false },
+  { ext: ".org.bd", registration_bdt: "১,০০০", renewal_bdt: "১,০০০", transfer_bdt: "১,০০০", is_popular: false },
   { ext: ".top", registration_bdt: "১৮০", renewal_bdt: "৯৯০", transfer_bdt: "৯৯০", is_popular: true },
   { ext: ".xyz", registration_bdt: "২৯৫", renewal_bdt: "১,১৯০", transfer_bdt: "১,১৯০", is_popular: false },
 ];

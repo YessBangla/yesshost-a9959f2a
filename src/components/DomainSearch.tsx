@@ -25,10 +25,10 @@ interface DomainResult {
 
 const staticDomainPrices = [
   { ext: ".com", price: "৯৯০", popular: true },
+  { ext: ".com.bd", price: "১,৫০০", popular: false },
+  { ext: ".net.bd", price: "১,২০০", popular: false },
   { ext: ".top", price: "১৮০", popular: false },
   { ext: ".xyz", price: "২৯৫", popular: false },
-  { ext: ".shop", price: "৩৯০", popular: false },
-  { ext: ".fun", price: "৩৮০", popular: false },
 ];
 
 const formatDate = (dateStr?: string) => {
