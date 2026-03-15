@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import InvoiceReport from "@/components/InvoiceReport";
+import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
 
 type InvoiceWithUser = Tables<"invoices"> & { profiles?: Tables<"profiles"> | null };
