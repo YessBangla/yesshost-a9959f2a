@@ -112,19 +112,19 @@ const WhyChooseUs = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="glass-card-elevated p-6 md:p-8 text-center group"
+              className="glass-card-elevated p-4 md:p-8 text-center group"
             >
-              <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
-                <stat.icon className="w-6 h-6 text-primary-foreground" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg shadow-primary/20">
+                <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
               </div>
-              <p className="text-3xl md:text-4xl font-extrabold text-foreground mb-1">
+              <p className="text-2xl md:text-4xl font-extrabold text-foreground mb-0.5 md:mb-1">
                 {stat.isDecimal ? (
                   <span className="tabular-nums">99.9%</span>
                 ) : (
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                 )}
               </p>
-              <p className="text-sm text-muted-foreground font-medium">
+              <p className="text-[11px] md:text-sm text-muted-foreground font-medium">
                 {lang === "bn" ? stat.labelBn : stat.labelEn}
               </p>
             </motion.div>
