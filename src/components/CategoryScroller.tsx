@@ -48,7 +48,7 @@ const CategoryScroller = () => {
   const items = [...categories, ...categories];
 
   return (
-    <section className="py-10 md:py-14 overflow-hidden">
+    <section className="py-8 md:py-14 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8">
         <div className="flex items-center gap-3 justify-center mb-2">
           <div className="h-px w-8 bg-primary/40" />
@@ -57,7 +57,7 @@ const CategoryScroller = () => {
           </span>
           <div className="h-px w-8 bg-primary/40" />
         </div>
-        <h2 className="text-xl md:text-3xl font-bold text-foreground text-center">
+        <h2 className="text-lg md:text-3xl font-bold text-foreground text-center">
           {lang === "bn" ? "আমাদের সার্ভিস ক্যাটাগরি" : "Our Service Categories"}
         </h2>
         <p className="text-xs md:text-sm text-muted-foreground text-center mt-1.5 max-w-md mx-auto">
@@ -78,9 +78,9 @@ const CategoryScroller = () => {
           <Link
             to={cat.link}
             key={i}
-            className="group relative flex-shrink-0 w-[240px] sm:w-[280px] rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
+            className="group relative flex-shrink-0 w-[180px] sm:w-[280px] rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
           >
-            <div className="aspect-square overflow-hidden">
+            <div className="aspect-[4/3] sm:aspect-square overflow-hidden">
               <img
                 src={cat.img}
                 alt={lang === "bn" ? cat.titleBn : cat.titleEn}

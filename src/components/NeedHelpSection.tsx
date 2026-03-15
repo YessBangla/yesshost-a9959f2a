@@ -59,7 +59,7 @@ const NeedHelpSection = () => {
   };
 
   return (
-    <section className="py-20 relative">
+    <section className="py-12 md:py-20 relative">
       <div className="absolute inset-0 gradient-mesh opacity-30" />
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -67,22 +67,22 @@ const NeedHelpSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
             {bn ? "সাহায্য" : "Support"}
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold tracking-tight mb-3">
+          <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-extrabold tracking-tight mb-2 md:mb-3">
             {bn ? "সাহায্য দরকার? আমরা এখানে আছি" : "Need Help? We Are Here"}
           </h2>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-lg mx-auto">
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-base max-w-lg mx-auto">
             {bn
               ? "যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন — আমরা সবসময় প্রস্তুত"
               : "Contact us anytime — our team is always ready to help"}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-4xl mx-auto">
           {options.map((opt, i) => {
             const Icon = opt.icon;
             const inner = (
@@ -92,10 +92,10 @@ const NeedHelpSection = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.1 }}
                 whileHover={{ y: -6 }}
-                className="glass-card rounded-2xl p-6 text-center cursor-pointer hover:shadow-xl hover:shadow-primary/5 transition-shadow group"
+                className="glass-card rounded-2xl p-4 md:p-6 text-center cursor-pointer hover:shadow-xl hover:shadow-primary/5 transition-shadow group"
               >
                 <div
-                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${opt.color} flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform`}
+                  className={`w-11 h-11 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br ${opt.color} flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg group-hover:scale-110 transition-transform`}
                 >
                   <Icon className="w-6 h-6 text-white" />
                 </div>

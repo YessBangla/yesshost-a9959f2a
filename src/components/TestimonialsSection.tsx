@@ -25,7 +25,7 @@ const fallbackTestimonials = [
 ];
 
 const TestimonialCard = ({ item }: { item: { name: string; company: string; text: string; rating: number; avatarSrc: string } }) => (
-  <div className="glass-card p-6 relative flex-shrink-0 w-[300px] sm:w-[340px]">
+  <div className="glass-card p-4 sm:p-6 relative flex-shrink-0 w-[260px] sm:w-[340px]">
     <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
     <div className="flex gap-1 mb-4">
       {[...Array(item.rating)].map((_, j) => (
@@ -98,19 +98,19 @@ const TestimonialsSection = () => {
   }, [items.length]);
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="py-12 md:py-20 relative overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
             Testimonials
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
             {tr("testimonials.title")}
           </h2>
         </motion.div>

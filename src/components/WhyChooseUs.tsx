@@ -94,7 +94,7 @@ const WhyChooseUs = () => {
   ];
 
   return (
-    <section className="py-20 md:py-28 relative">
+    <section className="py-12 md:py-28 relative">
       <div className="absolute inset-0 gradient-mesh opacity-30" />
       <div className="container mx-auto px-4 relative z-10">
         {/* Stats counters */}
@@ -103,7 +103,7 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 md:mb-20"
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-10 md:mb-20"
         >
           {stats.map((stat, i) => (
             <motion.div
@@ -112,19 +112,19 @@ const WhyChooseUs = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="glass-card-elevated p-6 md:p-8 text-center group"
+              className="glass-card-elevated p-4 md:p-8 text-center group"
             >
-              <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
-                <stat.icon className="w-6 h-6 text-primary-foreground" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg shadow-primary/20">
+                <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
               </div>
-              <p className="text-3xl md:text-4xl font-extrabold text-foreground mb-1">
+              <p className="text-2xl md:text-4xl font-extrabold text-foreground mb-0.5 md:mb-1">
                 {stat.isDecimal ? (
                   <span className="tabular-nums">99.9%</span>
                 ) : (
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                 )}
               </p>
-              <p className="text-sm text-muted-foreground font-medium">
+              <p className="text-[11px] md:text-sm text-muted-foreground font-medium">
                 {lang === "bn" ? stat.labelBn : stat.labelEn}
               </p>
             </motion.div>
@@ -137,22 +137,22 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
             {lang === "bn" ? "কেন আমরা" : "Why Us"}
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
             {lang === "bn" ? "কেন YessHost বেছে নেবেন?" : "Why Choose YessHost?"}
           </h2>
-          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
             {lang === "bn"
               ? "বাংলাদেশের সবচেয়ে নির্ভরযোগ্য ও দ্রুতগতির হোস্টিং সেবা"
               : "Bangladesh's most reliable and fastest hosting service"}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-5 max-w-5xl mx-auto">
           {reasons.map((reason, i) => (
             <motion.div
               key={i}
@@ -161,7 +161,7 @@ const WhyChooseUs = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               whileHover={{ y: -6 }}
-              className="glass-card-elevated p-6 md:p-8 group relative overflow-hidden"
+              className="glass-card-elevated p-5 md:p-8 group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary/5 blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors" />
               <div className="relative z-10">

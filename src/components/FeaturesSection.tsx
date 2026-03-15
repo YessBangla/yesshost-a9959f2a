@@ -73,27 +73,27 @@ const FeaturesSection = () => {
   }, [siteContent, lang]);
 
   return (
-    <section id="features" className="py-24 relative">
+    <section id="features" className="py-12 md:py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
             {tr("features.ourServices")}
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
             {getText("features_section_title", tr("features.allHosting"))}
           </h2>
-          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
             {getText("features_section_subtitle", tr("features.servicesSubtitle"))}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-24">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 mb-12 md:mb-24">
           {services.map((service: any, i: number) => (
             <Link to={service.link} key={service.title} className="block">
               <motion.div
@@ -102,17 +102,17 @@ const FeaturesSection = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.06 }}
                 whileHover={{ y: -6, scale: 1.02 }}
-                className="glass-card-elevated p-6 group cursor-pointer relative overflow-hidden h-full"
+                className="glass-card-elevated p-4 md:p-6 group cursor-pointer relative overflow-hidden h-full"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <service.icon className="w-6 h-6 text-primary" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-primary/20 transition-colors">
+                    <service.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   </div>
-                  <h3 className="text-base font-bold text-foreground mb-2">{service.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-3">{service.description}</p>
-                  <p className="text-sm font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
-                  <span className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold mt-3 group-hover:gap-3 transition-all">
+                  <h3 className="text-sm md:text-base font-bold text-foreground mb-1 md:mb-2">{service.title}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed mb-2 md:mb-3 line-clamp-2">{service.description}</p>
+                  <p className="text-xs md:text-sm font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
+                  <span className="hidden md:inline-flex items-center gap-1.5 text-primary text-sm font-semibold mt-3 group-hover:gap-3 transition-all">
                     {tr("features.viewPlan")} <ArrowUpRight className="w-4 h-4" />
                   </span>
                 </div>
@@ -126,17 +126,17 @@ const FeaturesSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
             {tr("features.extraBenefits")}
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
             {getText("features_benefits_title", tr("features.benefitsTitle"))}
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 max-w-5xl mx-auto">
           {features.map((feature: any, i: number) => (
             <motion.div
               key={feature.title}
@@ -145,13 +145,13 @@ const FeaturesSection = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.4, ease: brandCurve, delay: i * 0.06 }}
               whileHover={{ y: -4 }}
-              className="glass-card p-6 group"
+              className="glass-card p-4 md:p-6 group"
             >
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <feature.icon className="w-5 h-5 text-primary" />
+              <div className="w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-primary/20 transition-colors">
+                <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-primary" />
               </div>
-              <h3 className="text-base font-bold text-foreground mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+              <h3 className="text-sm md:text-base font-bold text-foreground mb-1 md:mb-2">{feature.title}</h3>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed line-clamp-3">{feature.description}</p>
             </motion.div>
           ))}
         </div>

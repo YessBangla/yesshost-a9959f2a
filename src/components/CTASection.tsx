@@ -26,7 +26,7 @@ const CTASection = () => {
   const contacts = get("cta_contacts")?.metadata || {};
 
   return (
-    <section id="contact" className="py-24 relative">
+    <section id="contact" className="py-12 md:py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
