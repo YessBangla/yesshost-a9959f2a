@@ -138,8 +138,20 @@ const Navbar = () => {
               );
             })}
           </div>
+
+          {/* CTA */}
+          {link.cta && (
+            <div className="px-2 pt-1.5 pb-1 mt-1 border-t border-border/40">
+              <Link
+                to={link.cta.href}
+                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-[12px] font-semibold text-primary hover:bg-primary/10 transition-all group"
+              >
+                {link.cta.label}
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+          )}
         </div>
-      </motion.div>
     );
   };
 
