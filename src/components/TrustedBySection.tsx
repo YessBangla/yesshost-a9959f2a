@@ -24,29 +24,29 @@ const TrustedBySection = () => {
   const doubled = [...partners, ...partners];
 
   return (
-    <section className="py-10 md:py-14 border-y border-border/40 bg-muted/30 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8">
-        <div className="flex items-center gap-3 justify-center mb-2">
-          <div className="h-px w-8 bg-primary/40" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+    <section className="py-6 md:py-14 border-y border-border/40 bg-muted/30 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-4 md:mb-8">
+        <div className="flex items-center gap-2 justify-center mb-1 md:mb-2">
+          <div className="h-px w-6 md:w-8 bg-primary/40" />
+          <span className="text-[10px] md:text-xs font-semibold uppercase tracking-widest text-primary">
             {lang === "bn" ? "বিশ্বস্ত পার্টনার" : "Trusted Partners"}
           </span>
-          <div className="h-px w-8 bg-primary/40" />
+          <div className="h-px w-6 md:w-8 bg-primary/40" />
         </div>
-        <h2 className="text-xl md:text-2xl font-bold text-foreground text-center">
+        <h2 className="text-base md:text-2xl font-bold text-foreground text-center">
           {lang === "bn" ? "যারা আমাদের উপর আস্থা রাখেন" : "Trusted by Leading Brands"}
         </h2>
       </div>
 
       <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-muted/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-muted/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-12 md:w-20 bg-gradient-to-r from-muted/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-12 md:w-20 bg-gradient-to-l from-muted/80 to-transparent z-10 pointer-events-none" />
 
-        <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
+        <div className="flex items-center gap-8 md:gap-12 animate-marquee whitespace-nowrap">
           {doubled.map((p, i) => (
             <div
               key={i}
-              className="flex-shrink-0 flex items-center justify-center w-28 h-14 sm:w-36 sm:h-16 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+              className="flex-shrink-0 flex items-center justify-center w-20 h-10 sm:w-36 sm:h-16 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
             >
               <img
                 src={p.logo}
