@@ -94,7 +94,7 @@ const WhyChooseUs = () => {
   ];
 
   return (
-    <section className="py-12 md:py-28 relative">
+    <section className="py-12 md:py-28 relative bg-muted/30">
       <div className="container mx-auto px-4">
         {/* Stats counters */}
         <motion.div

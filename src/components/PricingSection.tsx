@@ -90,7 +90,7 @@ const PricingSection = () => {
   const currentPlans = getPlans(activeTab);
 
   return (
-    <section id="pricing" className="py-12 md:py-24 relative">
+    <section id="pricing" className="py-12 md:py-24 relative bg-muted/30">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
