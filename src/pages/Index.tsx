@@ -11,7 +11,6 @@ import FAQSection from "@/components/FAQSection";
 import CTASection from "@/components/CTASection";
 import NeedHelpSection from "@/components/NeedHelpSection";
 import SEOHead from "@/components/SEOHead";
-import SectionWrapper from "@/components/SectionWrapper";
 
 const Index = () => {
   return (
@@ -30,39 +29,14 @@ const Index = () => {
       />
       <CorporateSlider />
       <HeroSection />
-
-      <SectionWrapper variant="alt" divider="curve">
-        <WhyChooseUs />
-      </SectionWrapper>
-
-      <SectionWrapper variant="default" divider="wave">
-        <FeaturesSection />
-      </SectionWrapper>
-
-      <SectionWrapper variant="accent" divider="curve">
-        <PricingSection />
-      </SectionWrapper>
-
-      <SectionWrapper variant="default" divider="wave">
-        <NeedHelpSection />
-      </SectionWrapper>
-
-      <SectionWrapper variant="alt" divider="curve">
-        <ServerStatus />
-      </SectionWrapper>
-
-      <SectionWrapper variant="default" divider="wave">
-        <TestimonialsSection />
-      </SectionWrapper>
-
-      <SectionWrapper variant="alt" divider="curve">
-        <FAQSection />
-      </SectionWrapper>
-
-      <SectionWrapper variant="default">
-        <CTASection />
-      </SectionWrapper>
-
+      <WhyChooseUs />
+      <FeaturesSection />
+      <PricingSection />
+      <NeedHelpSection />
+      <ServerStatus />
+      <TestimonialsSection />
+      <FAQSection />
+      <CTASection />
       <TrustedBySection />
     </PublicLayout>
   );
