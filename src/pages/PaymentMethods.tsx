@@ -76,7 +76,7 @@ const PaymentMethods = () => {
       typeEn: "Bank Payment",
       detailsBn: [
         "ব্যাংক: ডাচ-বাংলা ব্যাংক লিমিটেড",
-        "অ্যাকাউন্ট নাম: YessHost",
+        "অ্যাকাউন্ট নাম: Yess Host",
         "অ্যাকাউন্ট নম্বর: XXXXXXXXXX",
         "ব্রাঞ্চ: ঢাকা মেইন ব্রাঞ্চ",
       ],
