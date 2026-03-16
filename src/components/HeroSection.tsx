@@ -126,6 +126,10 @@ const HeroSection = () => {
             >
               <Link
                 to="/#pricing"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-2.5 sm:px-7 sm:py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20"
               >
                 {bn ? "প্ল্যান দেখুন" : "View Plans"}
