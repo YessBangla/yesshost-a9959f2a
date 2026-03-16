@@ -246,30 +246,4 @@
   .animate-marquee {
     animation: marquee 60s linear infinite;
   }
-
-  .section-accent-bg {
-    background: 
-      linear-gradient(180deg, hsl(var(--primary) / 0.03) 0%, hsl(var(--background)) 100%);
-  }
-
-  .section-gradient-bg {
-    background: 
-      linear-gradient(180deg, hsl(var(--muted) / 0.5) 0%, hsl(var(--background)) 50%, hsl(var(--muted) / 0.3) 100%);
-  }
-
-  .section-divider {
-    position: relative;
-  }
-
-  .section-divider::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 3px;
-    border-radius: 2px;
-    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent);
-  }
 }
