@@ -154,7 +154,7 @@ const HeroSection = () => {
             <div className="relative flex items-center justify-center min-h-[400px]">
               <img
                 src={heroImg}
-                alt="YessHost Corporate"
+                alt="Yess Host Corporate"
                 className="w-[360px] h-auto object-contain relative z-10 drop-shadow-xl"
               />
               {serviceLinks.map((service, i) => (

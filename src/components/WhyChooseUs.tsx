@@ -111,7 +111,7 @@ const WhyChooseUs = () => {
             {lang === "bn" ? "কেন আমরা" : "Why Us"}
           </span>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
-            {lang === "bn" ? "কেন YessHost বেছে নেবেন?" : "Why Choose YessHost?"}
+            {lang === "bn" ? "কেন Yess Host বেছে নেবেন?" : "Why Choose Yess Host?"}
           </h2>
           <p className="text-muted-foreground text-sm max-w-lg mx-auto">
             {lang === "bn"

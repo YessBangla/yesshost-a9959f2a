@@ -29,7 +29,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background hero-gradient px-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/"><img src={logoWhite} alt="YessHost" className="h-10 mx-auto mb-6" /></Link>
+          <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-10 mx-auto mb-6" /></Link>
           <h1 className="text-2xl font-bold text-foreground">{tr("auth.welcomeBack")}</h1>
           <p className="text-sm text-muted-foreground mt-1">{tr("auth.loginSubtitle")}</p>
         </div>

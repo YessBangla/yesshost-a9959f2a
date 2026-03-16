@@ -16,15 +16,15 @@ const Index = () => {
   return (
     <PublicLayout showOfferBanner>
       <SEOHead
-        title="YessHost — Super Hosting Solution | Cloud Hosting Bangladesh"
-        description="YessHost - Yes, It's a Super Hosting Solution! Enterprise-grade cloud hosting, VPS, domains and SSL certificates with 99.99% uptime in Bangladesh. Starting from ৳99/mo."
+        title="Yess Host — Super Hosting Solution | Cloud Hosting Bangladesh"
+        description="Yess Host - Yes, It's a Super Hosting Solution! Enterprise-grade cloud hosting, VPS, domains and SSL certificates with 99.99% uptime in Bangladesh. Starting from ৳99/mo."
         canonical="/"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          "name": "YessHost - Super Hosting Solution",
+          "name": "Yess Host - Super Hosting Solution",
           "description": "Enterprise-grade cloud hosting, VPS, domains and SSL certificates with 99.99% uptime.",
-          "provider": { "@type": "Organization", "name": "YessHost" },
+          "provider": { "@type": "Organization", "name": "Yess Host" },
         }}
       />
       <HeroSection />

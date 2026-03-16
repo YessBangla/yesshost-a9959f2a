@@ -21,7 +21,7 @@ const About = () => {
   const get = (key: string) => content.find(c => c.section_key === key);
 
   const hero = get("hero");
-  const title = hero ? (bn ? hero.title_bn : hero.title_en) : (bn ? "YessHost — আপনার বিশ্বস্ত হোস্টিং পার্টনার" : "YessHost — Your Trusted Hosting Partner");
+  const title = hero ? (bn ? hero.title_bn : hero.title_en) : (bn ? "Yess Host — আপনার বিশ্বস্ত হোস্টিং পার্টনার" : "Yess Host — Your Trusted Hosting Partner");
   const desc = hero ? (bn ? hero.content_bn : hero.content_en) : (bn ? "২০১৫ সাল থেকে বাংলাদেশে প্রিমিয়াম কোয়ালিটি ওয়েব হোস্টিং, ডোমেইন রেজিস্ট্রেশন ও ক্লাউড সার্ভিস প্রদান করে আসছি।" : "Since 2015, we have been providing premium quality web hosting, domain registration and cloud services in Bangladesh.");
 
   const stats = useMemo(() => {

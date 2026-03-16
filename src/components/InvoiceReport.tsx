@@ -268,7 +268,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
             {/* Footer */}
             <div style={{ textAlign: "center", paddingTop: 30, borderTop: "1px solid #e2e8f0" }}>
               <p style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.8 }}>
-                {isBn ? "ধন্যবাদ আমাদের সেবা ব্যবহার করার জন্য!" : "Thank you for choosing YessHost!"}<br />
+                {isBn ? "ধন্যবাদ আমাদের সেবা ব্যবহার করার জন্য!" : "Thank you for choosing Yess Host!"}<br />
                 <a href="https://yesshost.com" style={{ color: "#0ea5e9", textDecoration: "none" }}>www.yesshost.com</a> | support@yesshost.com<br />
                 {isBn ? "এটি একটি কম্পিউটার জেনারেটেড ইনভয়েস, স্বাক্ষরের প্রয়োজন নেই।" : "This is a computer-generated invoice. No signature required."}
               </p>

@@ -190,7 +190,7 @@ const LiveChatWidget = () => {
             {/* Header */}
             <div className="gradient-primary p-4 flex items-center justify-between shrink-0">
               <div>
-                <p className="text-primary-foreground font-bold text-sm">YessHost Support</p>
+                <p className="text-primary-foreground font-bold text-sm">Yess Host Support</p>
                 <p className="text-primary-foreground/70 text-[10px]">
                   {bn ? "সাধারণত কয়েক মিনিটে উত্তর দিই" : "We typically reply in a few minutes"}
                 </p>

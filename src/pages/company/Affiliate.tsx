@@ -36,7 +36,7 @@ const Affiliate = () => {
 
   const hero = get("hero");
   const title = hero ? (bn ? hero.title_bn : hero.title_en) : (bn ? "রেফার করুন, আয় করুন" : "Refer & Earn");
-  const subtitle = hero ? (bn ? hero.content_bn : hero.content_en) : (bn ? "YessHost অ্যাফিলিয়েট প্রোগ্রামে যোগ দিন এবং প্রতিটি রেফারেলে ১৫% কমিশন পান।" : "Join YessHost affiliate program and earn 15% commission on every referral.");
+  const subtitle = hero ? (bn ? hero.content_bn : hero.content_en) : (bn ? "Yess Host অ্যাফিলিয়েট প্রোগ্রামে যোগ দিন এবং প্রতিটি রেফারেলে ১৫% কমিশন পান।" : "Join Yess Host affiliate program and earn 15% commission on every referral.");
   const badge = hero?.metadata?.badge_bn ? (bn ? hero.metadata.badge_bn : hero.metadata.badge_en) : (bn ? "অ্যাফিলিয়েট প্রোগ্রাম" : "Affiliate Program");
 
   const steps = useMemo(() => {
