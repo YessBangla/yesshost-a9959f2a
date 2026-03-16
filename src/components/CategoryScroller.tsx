@@ -47,25 +47,29 @@ const CategoryScroller = () => {
             <Link
               to={cat.link}
               key={i}
-              className="group relative rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
+              className="group relative rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.03] hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.15),0_20px_40px_hsl(var(--primary)/0.1)] active:scale-[0.98]"
             >
+              {/* Glow overlay on hover */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none rounded-xl sm:rounded-2xl ring-1 ring-primary/40 ring-inset" />
+              <div className="absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0 pointer-events-none bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-xl sm:rounded-2xl" />
+
               <div className="aspect-[4/3] overflow-hidden">
                 <img
                   src={cat.img}
                   alt={lang === "bn" ? cat.titleBn : cat.titleEn}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                   loading="lazy"
                 />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
-                <h3 className="text-xs sm:text-sm md:text-base font-bold text-white">
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-all duration-300 group-hover:from-black/95 group-hover:via-black/70">
+                <h3 className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-primary-foreground transition-colors duration-300">
                   {lang === "bn" ? cat.titleBn : cat.titleEn}
                 </h3>
-                <p className="text-[10px] sm:text-[11px] text-white/60 mt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-white/60 mt-0.5 group-hover:text-white/80 transition-colors duration-300">
                   {lang === "bn" ? cat.desc_bn : cat.desc_en}
                 </p>
-                <div className="flex items-center gap-1 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {lang === "bn" ? "প্ল্যান দেখুন" : "View Plans"} <ArrowRight className="w-3 h-3" />
+                <div className="flex items-center gap-1 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-primary font-medium translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                  {lang === "bn" ? "প্ল্যান দেখুন" : "View Plans"} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </div>
             </Link>
