@@ -150,18 +150,18 @@ const HeroSection = () => {
             transition={{ duration: 0.9, ease: brandCurve, delay: 0.2 }}
             className="hidden lg:block relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40 border border-white/[0.08]">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/10 border border-border">
               <img
                 src={heroImg}
                 alt="YessHost Data Center"
                 className="w-full h-auto object-cover aspect-[4/3]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(220,30%,8%)] via-transparent to-transparent opacity-60" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-60" />
             </div>
             {/* Floating stat badge */}
-            <div className="absolute -bottom-4 -left-4 bg-white/[0.1] backdrop-blur-xl border border-white/[0.15] rounded-xl px-5 py-3 shadow-xl">
-              <p className="text-2xl font-extrabold text-white">99.9%</p>
-              <p className="text-[11px] text-white/60 font-medium">{bn ? "আপটাইম গ্যারান্টি" : "Uptime Guarantee"}</p>
+            <div className="absolute -bottom-4 -left-4 bg-white border border-border rounded-xl px-5 py-3 shadow-xl shadow-black/5">
+              <p className="text-2xl font-extrabold text-foreground">99.9%</p>
+              <p className="text-[11px] text-muted-foreground font-medium">{bn ? "আপটাইম গ্যারান্টি" : "Uptime Guarantee"}</p>
             </div>
           </motion.div>
         </div>
