@@ -1,4 +1,4 @@
-import { Home, Grid3X3, Headphones, User, ShoppingCart, Globe2, Server, Zap, Crown, Wifi, Users, WifiHigh, MonitorSmartphone, HardDrive, MapPin, Mail, Radio, Palette, ListOrdered, X, ChevronRight, ShoppingBag } from "lucide-react";
+import { Home, Grid3X3, Headphones, User, ShoppingCart, Globe2, Server, Zap, Crown, Wifi, Users, WifiHigh, MonitorSmartphone, HardDrive, MapPin, Mail, Radio, Palette, ListOrdered, X, ShoppingBag, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
