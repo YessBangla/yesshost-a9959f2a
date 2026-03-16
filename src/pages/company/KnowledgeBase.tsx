@@ -64,7 +64,10 @@ const KnowledgeBase = () => {
 
   const filtered = categories.map((cat: any) => ({
     ...cat,
-    articles: cat.articles.filter((a: any) => (bn ? a.bn : a.en).toLowerCase().includes(search.toLowerCase()))
+    articles: cat.articles.filter((a: any) => {
+      const q = search.toLowerCase();
+      return a.bn.toLowerCase().includes(q) || a.en.toLowerCase().includes(q);
+    })
   })).filter((cat: any) => cat.articles.length > 0);
 
   return (

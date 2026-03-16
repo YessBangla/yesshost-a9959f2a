@@ -44,9 +44,10 @@ const ThemeStore = () => {
   const filtered = useMemo(() => {
     return themes.filter((t) => {
       const matchCategory = activeCategory === "all" || t.category === activeCategory;
-      const matchSearch = (bn ? t.description_bn : t.description_en || t.name)
-        .toLowerCase()
-        .includes(search.toLowerCase()) || t.name.toLowerCase().includes(search.toLowerCase());
+      const q = search.toLowerCase();
+      const matchSearch = t.name.toLowerCase().includes(q) ||
+        (t.description_bn || "").toLowerCase().includes(q) ||
+        (t.description_en || "").toLowerCase().includes(q);
       return matchCategory && matchSearch;
     });
   }, [themes, activeCategory, search, bn]);
