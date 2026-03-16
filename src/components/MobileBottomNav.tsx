@@ -167,13 +167,15 @@ const MobileBottomNav = () => {
                             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                               <Icon className="w-4 h-4 text-primary" />
                             </div>
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <p className="text-[12px] font-semibold text-foreground leading-tight">
                                 {bn ? item.labelBn : item.label}
                               </p>
-                              <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
-                                {bn ? item.descBn : item.desc}
-                              </p>
+                              {item.price && (
+                                <span className="inline-block mt-1 text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-md">
+                                  ৳{formatPrice(item.price, lang)}/{bn ? "মাস" : "mo"}
+                                </span>
+                              )}
                             </div>
                           </Link>
                         );
