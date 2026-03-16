@@ -176,13 +176,13 @@ const HeroSection = () => {
           {stats.map((stat: any, i: number) => (
             <div
               key={i}
-              className="bg-white/[0.05] border border-white/[0.08] backdrop-blur-sm rounded-xl p-4 text-center group hover:bg-white/[0.08] transition-colors"
+              className="bg-white border border-border rounded-xl p-4 text-center group hover:border-primary/30 hover:shadow-md transition-all"
             >
-              <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/25 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/15 transition-colors">
                 <stat.icon className="w-5 h-5 text-primary" />
               </div>
-              <p className="text-lg font-extrabold tabular-nums text-white">{stat.value}</p>
-              <p className="text-[10px] text-white/50 mt-0.5 font-medium">{stat.label}</p>
+              <p className="text-lg font-extrabold tabular-nums text-foreground">{stat.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">{stat.label}</p>
             </div>
           ))}
         </motion.div>
