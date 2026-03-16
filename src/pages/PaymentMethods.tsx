@@ -135,7 +135,7 @@ const PaymentMethods = () => {
 
   return (
     <PublicLayout>
-      <SEOHead title="Payment Methods - YessHost" description="Pay with bKash, Nagad, SSLCommerz, bank transfer, PayPal or Rocket. Secure and fast payment options for hosting services in Bangladesh." canonical="/payment" />
+      <SEOHead title="Payment Methods - Yess Host" description="Pay with bKash, Nagad, SSLCommerz, bank transfer, PayPal or Rocket. Secure and fast payment options for hosting services in Bangladesh." canonical="/payment" />
       <div className="pt-20 lg:pt-24 pb-16">
         {/* Hero */}
         <section className="container mx-auto px-4 mb-16">
