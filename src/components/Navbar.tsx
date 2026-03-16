@@ -232,14 +232,15 @@ const Navbar = () => {
             <Globe className="w-4 h-4" />
             {lang === "bn" ? "EN" : "বাং"}
           </button>
+          {user && <NotificationBell />}
           <button
             onClick={() => setCartOpen(true)}
             className="relative flex items-center text-muted-foreground hover:text-foreground transition-colors px-2.5 py-2 rounded-lg hover:bg-secondary/60"
           >
             <ShoppingCart className="w-4 h-4" />
             {itemCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                {itemCount}
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                {itemCount > 9 ? "9+" : itemCount}
               </span>
             )}
           </button>
