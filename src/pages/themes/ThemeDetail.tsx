@@ -102,7 +102,7 @@ const ThemeDetail = () => {
 
   return (
     <PublicLayout>
-      <SEOHead title={`${theme.name} Theme - YessHost`} description={bn ? (theme.description_bn || `${theme.name} থিম - YessHost`) : (theme.description_en || `${theme.name} theme - professional website template from YessHost.`)} canonical={`/themes/${theme.slug}`} />
+      <SEOHead title={`${theme.name} Theme - Yess Host`} description={bn ? (theme.description_bn || `${theme.name} থিম - Yess Host`) : (theme.description_en || `${theme.name} theme - professional website template from Yess Host.`)} canonical={`/themes/${theme.slug}`} />
       <div className="pt-20 lg:pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Breadcrumb */}

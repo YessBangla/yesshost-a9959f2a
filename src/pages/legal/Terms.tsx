@@ -15,7 +15,7 @@ const Terms = () => (
     pageKey="terms"
     fallbackTitle={{ bn: "সেবার শর্তাবলী", en: "Terms of Service" }}
     fallbackSections={fallbackSections}
-    seoDescription="YessHost Terms of Service. Read our policies on hosting, payments, acceptable use, uptime guarantee and data backup."
+    seoDescription="Yess Host Terms of Service. Read our policies on hosting, payments, acceptable use, uptime guarantee and data backup."
   />
 );
 
