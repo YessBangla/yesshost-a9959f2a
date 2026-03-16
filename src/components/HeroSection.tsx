@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle } from "lucide-react";
+import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock, ShoppingBag, Layers, HardDrive } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 
-import heroImg from "@/assets/hero-datacenter.jpg";
-
+import heroImg from "@/assets/hero-corporate.png";
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const iconMap: Record<string, typeof Globe> = { Globe, Clock, Zap, Shield };
 
