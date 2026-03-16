@@ -128,8 +128,8 @@ const MobileBottomNav = () => {
   const tabs = [
     { id: "home", icon: Home, label: bn ? "হোম" : "Home", href: "/" },
     { id: "services", icon: Grid3X3, label: bn ? "সার্ভিস" : "Services", href: "#services" },
+    { id: "themes", icon: Brush, label: bn ? "থিম" : "Themes", href: "/themes" },
     { id: "cart", icon: ShoppingCart, label: bn ? "কার্ট" : "Cart", href: "#cart" },
-    { id: "support", icon: Headphones, label: bn ? "সাপোর্ট" : "Support", href: "/contact" },
     {
       id: "account",
       icon: User,
