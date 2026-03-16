@@ -149,21 +149,39 @@ const MobileBottomNav = () => {
               </div>
 
               {/* Header */}
-              <div className="flex items-center justify-between px-4 pb-3 border-b border-border">
-                <h2 className="text-lg font-bold text-foreground">
-                  {bn ? "আমাদের সেবাসমূহ" : "Our Services"}
-                </h2>
-                <button
-                  onClick={() => setServicesOpen(false)}
-                  className="p-2 rounded-xl bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              <div className="px-4 pb-3 border-b border-border space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-foreground">
+                    {bn ? "আমাদের সেবাসমূহ" : "Our Services"}
+                  </h2>
+                  <button
+                    onClick={() => { setServicesOpen(false); setServiceSearch(""); }}
+                    className="p-2 rounded-xl bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                {/* Search bar */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    value={serviceSearch}
+                    onChange={(e) => setServiceSearch(e.target.value)}
+                    placeholder={bn ? "সার্ভিস খুঁজুন..." : "Search services..."}
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    autoFocus
+                  />
+                </div>
               </div>
 
               {/* Service categories */}
               <div className="flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)] px-4 py-3 space-y-4">
-                {serviceCategories.map((cat, ci) => (
+                {filteredCategories.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">
+                    {bn ? "কোনো সার্ভিস পাওয়া যায়নি" : "No services found"}
+                  </p>
+                )}
+                {filteredCategories.map((cat, ci) => (
                   <div key={ci}>
                     <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2 px-1">
                       {bn ? cat.titleBn : cat.title}
