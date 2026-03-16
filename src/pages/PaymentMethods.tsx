@@ -82,7 +82,7 @@ const PaymentMethods = () => {
       ],
       detailsEn: [
         "Bank: Dutch-Bangla Bank Limited",
-        "Account Name: YessHost",
+        "Account Name: Yess Host",
         "Account Number: XXXXXXXXXX",
         "Branch: Dhaka Main Branch",
       ],
