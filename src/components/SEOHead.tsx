@@ -7,11 +7,14 @@ interface SEOHeadProps {
   ogType?: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown>;
+  keywords?: string;
 }
 
 const SITE_NAME = "Yess Host";
 const BASE_URL = "https://yesshost.lovable.app";
 const OG_IMAGE = "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/96551642-88f9-45c1-989b-62c8455854ca/id-preview-fe3020ae--f5a4504a-88d1-4f61-a16f-81a8edc82959.lovable.app-1773492950044.png";
+
+const DEFAULT_KEYWORDS = "ইয়েস হোস্ট, Yess Host, YessHost, Best Web Hosting in Bangladesh, Best Domain Reseller in Bangladesh, bd domain buy, Fast Hosting Site in Bangladesh, Bangladeshi Domain Buy & Sell, web hosting bangladesh, domain registration, whois information";
 
 const SEOHead = ({
   title,
@@ -20,6 +23,7 @@ const SEOHead = ({
   ogType = "website",
   noindex = false,
   jsonLd,
+  keywords = DEFAULT_KEYWORDS,
 }: SEOHeadProps) => {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const canonicalUrl = canonical ? `${BASE_URL}${canonical}` : undefined;
@@ -28,6 +32,7 @@ const SEOHead = ({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      <meta name="keywords" content={keywords} />
       {noindex && <meta name="robots" content="noindex, nofollow" />}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
