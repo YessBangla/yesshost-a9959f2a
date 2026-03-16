@@ -37,14 +37,14 @@ const staticPlans: Record<string, Plan[]> = {
     { name: "Premium VPS", price: "২,৫০০", features: ["4 CPU Cores","8 GB RAM","100GB NVMe Disk","2TB Bandwidth","1 Dedicated IP","Full Root Access","KVM Virtualization","CentOS / Ubuntu / AlmaLinux"] },
   ],
   dedicated: [
-    { name: "Intel Xeon E3", price: "৮,৯০০", features: ["4 Cores 3.30 GHz","16GB DDR4 ECC","256GB SSD","1Gbps Port","1 IP Address","Full Root Access","Fully Managed","24/7 Customer Support"] },
-    { name: "AMD Ryzen 5600X", price: "১১,৯০০", features: ["6 Cores 3.40 GHz","64GB DDR3 ECC","512GB NVMe PCIe 4.0","1Gbps Port","1 IP Address","Fully Managed Service","Powerful Hardware","24/7 Customer Support"], highlighted: true },
-    { name: "Dual Xeon Gold", price: "২৪,৯০০", features: ["16 Cores 2.10 GHz","128GB DDR4 ECC","2x 1TB NVMe SSD","10Gbps Port","5 IP Addresses","Fully Managed Service","RAID Configuration","24/7 Priority Support"] },
+    { name: "DS-USA-1", price: "৮,৫০০", annual: "৯০,০০০", subtitle: "Intel Xeon E3-1230v5", features: ["4 Cores / 8 Threads","16GB DDR4 RAM","500GB SSD Storage","10TB Bandwidth","1Gbps Port","Full Root Access","cPanel/WHM Optional","Free Setup"] },
+    { name: "DS-BD-2", price: "১৮,০০০", annual: "১,৯৫,০০০", subtitle: "Intel Xeon E5-2620v4", features: ["6 Cores / 12 Threads","32GB DDR4 RAM","1TB SSD Storage","BDIX Unlimited","1Gbps BDIX Port","Full Root Access","DDoS Protection","Free Setup"], highlighted: true },
+    { name: "DS-SG-3", price: "৩৫,০০০", annual: "৩,৮০,০০০", subtitle: "Dual Xeon E5-2680v4", features: ["28 Cores / 56 Threads","64GB DDR4 RAM","2TB NVMe Storage","Unlimited Bandwidth","1Gbps Port","cPanel/WHM Included","DDoS Protection","IPMI Access"] },
   ],
   email: [
-    { name: "Workspace 30GB", price: "৭৯৯", features: ["Up To 5 Email Accounts","30GB Mail Storage","CrossBox Suite Panel","250 Email Per Hour","IMAP, SMTP, POP Support","MailChannels SPAM Protection"] },
-    { name: "Workspace 100GB", price: "১,২৫০", features: ["Up To 10 Email Accounts","100GB Mail Storage","CrossBox Suite Panel","250 Email Per Hour","IMAP, SMTP, POP Support","MailChannels SPAM Protection"], highlighted: true },
-    { name: "Workspace 250GB", price: "১,৭৯৯", features: ["Up To 25 Email Accounts","250GB Mail Storage","CrossBox Suite Panel","250 Email Per Hour","IMAP, SMTP, POP Support","MailChannels SPAM Protection"] },
+    { name: "Workspace 30GB", price: "৭৯৯", annual: "৮,৫০০", subtitle: "ছোট ব্যবসার জন্য", features: ["৫টি ইমেইল অ্যাকাউন্ট","30GB NVMe স্টোরেজ","CrossBox Suite Panel","250 Email/Hour","IMAP, SMTP, POP","SPAM Protection","কাস্টম ডোমেইন","24/7 সাপোর্ট"] },
+    { name: "Workspace 100GB", price: "১,২৫০", annual: "১৩,০০০", subtitle: "গ্রোয়িং বিজনেস", features: ["১০টি ইমেইল অ্যাকাউন্ট","100GB NVMe স্টোরেজ","CrossBox Suite Panel","500 Email/Hour","IMAP, SMTP, POP","MailChannels SPAM Protection","অটো রিপ্লাই ও ফরওয়ার্ড","Priority সাপোর্ট"], highlighted: true },
+    { name: "Workspace 250GB", price: "১,৭৯৯", annual: "১৮,৫০০", subtitle: "এন্টারপ্রাইজ", features: ["২৫টি ইমেইল অ্যাকাউন্ট","250GB NVMe স্টোরেজ","CrossBox Suite Panel","1000 Email/Hour","IMAP, SMTP, POP","MailChannels SPAM Protection","ক্যালেন্ডার ও কন্ট্যাক্ট সিঙ্ক","Priority সাপোর্ট"] },
   ],
 };
 
