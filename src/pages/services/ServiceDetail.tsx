@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Check, X, ArrowLeft, Star, Server, Globe, Shield, Zap, Clock,
-  Headphones, ShoppingCart, ChevronDown, Sparkles, ArrowRight,
+  Headphones, ShoppingCart, ChevronDown, ArrowRight,
   Phone, MessageCircle, Plus, Minus
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,11 +13,11 @@ import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { formatPrice } from "@/lib/formatPrice";
 
-const brandCurve = [0.2, 0.8, 0.2, 1] as const;
+const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
 
 /* ─── Plan Card ─── */
-const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart, totalPlans }: any) => {
+const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
   const [cycle, setCycle] = useState<"monthly" | "yearly">(plan.annual_price_bdt ? "yearly" : "monthly");
   const features = Array.isArray(plan.features) ? plan.features : [];
   const price = cycle === "yearly" && plan.annual_price_bdt ? plan.annual_price_bdt : plan.price_bdt;
@@ -39,91 +39,83 @@ const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart, totalPlan
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: brandCurve, delay: i * 0.12 }}
-      whileHover={{ y: -10, transition: { duration: 0.3 } }}
-      className={`relative rounded-2xl overflow-hidden flex flex-col ${
+      transition={{ duration: 0.4, ease, delay: i * 0.08 }}
+      className={`relative bg-card border rounded-xl flex flex-col transition-all duration-200 ${
         plan.is_highlighted
-          ? "glass-card-elevated glow-border scale-[1.02] z-10"
-          : "glass-card"
+          ? "border-primary shadow-md shadow-primary/10 scale-[1.02] z-10"
+          : "border-border hover:border-primary/20 hover:shadow-sm"
       }`}
     >
       {plan.is_highlighted && (
         <>
-          <div className="absolute top-0 left-0 right-0 h-1.5 gradient-primary" />
-          <div className="absolute -top-0 right-4 flex items-center gap-1 px-4 py-2 gradient-primary text-primary-foreground text-xs font-bold rounded-b-xl shadow-lg shadow-primary/20">
-            <Star className="w-3 h-3 fill-current" /> {isBn ? "সবচেয়ে জনপ্রিয়" : "Most Popular"}
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary rounded-t-xl" />
+          <div className="absolute -top-0 right-4 flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold rounded-b-lg">
+            <Star className="w-3 h-3 fill-current" /> {isBn ? "জনপ্রিয়" : "Popular"}
           </div>
         </>
       )}
 
-      <div className="p-6 sm:p-8 flex flex-col flex-1">
-        <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-        {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
+      <div className="p-5 sm:p-6 flex flex-col flex-1">
+        <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
+        {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
 
-        {/* Billing cycle toggle */}
+        {/* Billing toggle */}
         {plan.annual_price_bdt && (
-          <div className="flex items-center gap-1 mt-4 p-1 rounded-xl bg-secondary/50 border border-border">
-            <button
-              onClick={() => setCycle("monthly")}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                cycle === "monthly"
-                  ? "gradient-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {isBn ? "মাসিক" : "Monthly"}
-            </button>
-            <button
-              onClick={() => setCycle("yearly")}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                cycle === "yearly"
-                  ? "gradient-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {isBn ? "বাৎসরিক" : "Yearly"}
-              <span className="ml-1 text-[10px] opacity-80">💰</span>
-            </button>
+          <div className="flex items-center gap-0.5 mt-3 p-0.5 rounded-lg bg-secondary border border-border">
+            {(["monthly", "yearly"] as const).map((c) => (
+              <button
+                key={c}
+                onClick={() => setCycle(c)}
+                className={`flex-1 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
+                  cycle === c
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {c === "monthly" ? (isBn ? "মাসিক" : "Monthly") : (isBn ? "বাৎসরিক" : "Yearly")}
+                {c === "yearly" && <span className="ml-1 text-[9px] opacity-80">💰</span>}
+              </button>
+            ))}
           </div>
         )}
 
-        <div className="flex items-baseline gap-1 my-5">
-          <span className="text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">৳{formatPrice(price, isBn ? "bn" : "en")}</span>
-          <span className="text-sm text-muted-foreground">
+        <div className="flex items-baseline gap-1 my-4">
+          <span className="text-3xl md:text-4xl font-extrabold tabular-nums text-foreground">
+            ৳{formatPrice(price, isBn ? "bn" : "en")}
+          </span>
+          <span className="text-xs text-muted-foreground">
             {cycle === "yearly" ? (isBn ? "/বছর" : "/yr") : (isBn ? "/মাস" : "/mo")}
           </span>
         </div>
 
         {cycle === "monthly" && plan.annual_price_bdt && (
-          <p className="text-xs text-primary font-medium mb-4 px-3 py-1.5 rounded-lg bg-primary/5 inline-block">
-            💰 {isBn ? `বাৎসরিকে মাত্র ৳${formatPrice(plan.annual_price_bdt, "bn")}` : `Only ৳${formatPrice(plan.annual_price_bdt, "en")} yearly`}
+          <p className="text-[11px] text-primary font-medium mb-3 px-2.5 py-1 rounded-md bg-primary/5 inline-block w-fit">
+            💰 {isBn ? `বাৎসরিকে ৳${formatPrice(plan.annual_price_bdt, "bn")}` : `৳${formatPrice(plan.annual_price_bdt, "en")}/yr`}
           </p>
         )}
 
-        <ul className="space-y-3 mb-8 flex-1">
+        <ul className="space-y-2 mb-6 flex-1">
           {features.map((f: string) => (
-            <li key={f} className="flex items-start gap-3 text-sm text-muted-foreground">
-              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Check className="w-3 h-3 text-primary" />
-              </div>
+            <li key={f} className="flex items-start gap-2 text-[13px] text-muted-foreground">
+              <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
               {f}
             </li>
           ))}
         </ul>
 
         {inCart ? (
-          <div className="w-full py-3.5 font-semibold rounded-xl flex items-center justify-center gap-2 bg-primary/5 text-primary border border-primary/20">
+          <div className="w-full py-2.5 text-sm font-semibold rounded-lg flex items-center justify-center gap-2 bg-primary/5 text-primary border border-primary/20">
             <Check className="w-4 h-4" />
-            {isBn ? "কার্টে যোগ হয়েছে" : "Added to Cart"}
+            {isBn ? "কার্টে আছে" : "In Cart"}
           </div>
         ) : (
           <button
             onClick={handleAdd}
-            className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+            className={`w-full py-2.5 text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-2 ${
               plan.is_highlighted
-                ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 hover:shadow-xl hover:shadow-primary/30"
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                 : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
             }`}
           >
@@ -138,7 +130,6 @@ const PlanCard = ({ plan, i, title, slug, isBn, tr, addItem, isInCart, totalPlan
 
 /* ─── Feature Comparison Table ─── */
 const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
-  // Collect all unique features across plans
   const allFeatures = useMemo(() => {
     const featureSet = new Set<string>();
     plans.forEach(p => {
@@ -152,45 +143,36 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.7, ease: brandCurve }}
-      className="glass-card-elevated overflow-hidden"
+      transition={{ duration: 0.5, ease }}
+      className="bg-card border border-border rounded-xl overflow-hidden"
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[600px]">
           <thead>
-            <tr className="border-b border-border bg-secondary/30">
-              <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">
+            <tr className="border-b border-border bg-secondary/40">
+              <th className="text-left px-5 py-3 text-xs font-semibold text-foreground uppercase tracking-wider">
                 {isBn ? "ফিচার" : "Feature"}
               </th>
               {plans.map(p => (
-                <th key={p.id} className="text-center px-4 py-4">
-                  <span className={`text-sm font-bold ${p.is_highlighted ? "text-primary" : "text-foreground"}`}>
-                    {p.name}
-                  </span>
-                  <span className="block text-xs text-muted-foreground mt-0.5">৳{p.price_bdt}/{isBn ? "মাস" : "mo"}</span>
+                <th key={p.id} className="text-center px-3 py-3">
+                  <span className={`text-xs font-bold ${p.is_highlighted ? "text-primary" : "text-foreground"}`}>{p.name}</span>
+                  <span className="block text-[10px] text-muted-foreground mt-0.5">৳{p.price_bdt}/{isBn ? "মাস" : "mo"}</span>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {allFeatures.map((feature, idx) => (
-              <tr
-                key={feature}
-                className={`border-b border-border/50 last:border-0 ${idx % 2 === 0 ? "" : "bg-secondary/10"}`}
-              >
-                <td className="px-6 py-3.5 text-sm text-muted-foreground">{feature}</td>
+              <tr key={feature} className={`border-b border-border/50 last:border-0 ${idx % 2 !== 0 ? "bg-secondary/20" : ""}`}>
+                <td className="px-5 py-3 text-[13px] text-muted-foreground">{feature}</td>
                 {plans.map(p => {
                   const has = Array.isArray(p.features) && p.features.includes(feature);
                   return (
-                    <td key={p.id} className="text-center px-4 py-3.5">
-                      {has ? (
-                        <Check className="w-5 h-5 text-primary mx-auto" />
-                      ) : (
-                        <X className="w-4 h-4 text-muted-foreground/30 mx-auto" />
-                      )}
+                    <td key={p.id} className="text-center px-3 py-3">
+                      {has ? <Check className="w-4 h-4 text-primary mx-auto" /> : <X className="w-3.5 h-3.5 text-muted-foreground/25 mx-auto" />}
                     </td>
                   );
                 })}
@@ -248,7 +230,7 @@ const ServiceDetail = () => {
     return (
       <PublicLayout>
         <div className="flex items-center justify-center h-[60vh]">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="w-7 h-7 border-3 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </PublicLayout>
     );
@@ -258,8 +240,8 @@ const ServiceDetail = () => {
     return (
       <PublicLayout>
         <div className="pt-24 pb-16 text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-4">{isBn ? "পেইজ পাওয়া যায়নি" : "Page Not Found"}</h1>
-          <Link to="/" className="text-primary hover:underline">{isBn ? "হোমপেইজে ফিরুন" : "Go Home"}</Link>
+          <h1 className="text-2xl font-bold text-foreground mb-4">{isBn ? "পেইজ পাওয়া যায়নি" : "Page Not Found"}</h1>
+          <Link to="/" className="text-primary hover:underline text-sm">{isBn ? "হোমপেইজে ফিরুন" : "Go Home"}</Link>
         </div>
       </PublicLayout>
     );
@@ -274,76 +256,56 @@ const ServiceDetail = () => {
       />
 
       {/* ─── Hero Banner ─── */}
-      <section className="relative pt-20 lg:pt-24 pb-16 overflow-hidden">
-        <div className="absolute inset-0 hero-gradient" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
-
-        <div className="relative z-10 container mx-auto px-4">
+      <section className="relative pt-16 lg:pt-20 pb-12 bg-gradient-to-b from-primary/[0.04] to-transparent">
+        <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: brandCurve }}
+            transition={{ duration: 0.4, ease }}
             className="text-center max-w-3xl mx-auto"
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors glass-card px-4 py-2 rounded-full"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-6 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" /> {isBn ? "হোমপেইজ" : "Home"}
+              <ArrowLeft className="w-3.5 h-3.5" /> {isBn ? "হোমপেইজ" : "Home"}
             </Link>
 
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex justify-center mb-6"
-            >
-              <div className="p-5 rounded-3xl bg-primary/10 backdrop-blur-sm border border-primary/20">
-                <ServiceIcon className="w-12 h-12 text-primary" />
+            <div className="flex justify-center mb-5">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/15">
+                <ServiceIcon className="w-7 h-7 text-primary" />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.h1
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: brandCurve, delay: 0.15 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-extrabold tracking-tight mb-5 text-foreground"
-            >
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4 text-foreground">
               {title}
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.25 }}
-              className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed"
-            >
-              {description}
-            </motion.p>
+            {description && (
+              <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+                {description}
+              </p>
+            )}
           </motion.div>
 
           {/* Highlights */}
           {highlights.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.35 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mt-10"
+              transition={{ duration: 0.4, ease, delay: 0.15 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mt-8"
             >
               {highlights.map((h: any, i: number) => (
-                <motion.div
+                <div
                   key={i}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, delay: 0.4 + i * 0.08 }}
-                  className="glass-card p-4 text-center group hover:border-primary/30 transition-all"
+                  className="bg-card border border-border rounded-xl p-3 text-center hover:border-primary/20 transition-all"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/20 transition-colors">
-                    <h.icon className="w-5 h-5 text-primary" />
+                  <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center mx-auto mb-1.5">
+                    <h.icon className="w-4 h-4 text-primary" />
                   </div>
-                  <span className="text-xs font-semibold text-foreground">{h.label}</span>
-                </motion.div>
+                  <span className="text-[11px] font-semibold text-foreground">{h.label}</span>
+                </div>
               ))}
             </motion.div>
           )}
@@ -351,31 +313,29 @@ const ServiceDetail = () => {
       </section>
 
       {/* ─── Pricing Plans ─── */}
-      <section className="py-16 relative">
-        <div className="absolute inset-0 gradient-mesh opacity-30" />
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-10 md:py-16">
+        <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: brandCurve }}
-            className="text-center mb-12"
+            transition={{ duration: 0.4, ease }}
+            className="text-center mb-10"
           >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
-              <Sparkles className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-primary/10 text-primary mb-3">
               {isBn ? "প্ল্যান বেছে নিন" : "Choose Your Plan"}
             </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold tracking-tight mb-3">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-extrabold tracking-tight mb-2">
               {isBn ? "আপনার জন্য পারফেক্ট প্ল্যান" : "The Perfect Plan for You"}
             </h2>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+            <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto">
               {isBn
-                ? "সকল প্ল্যানে ফ্রি SSL, ডেইলি ব্যাকআপ এবং ২৪/৭ সাপোর্ট অন্তর্ভুক্ত"
-                : "All plans include free SSL, daily backups, and 24/7 support"}
+                ? "সকল প্ল্যানে ফ্রি SSL, ডেইলি ব্যাকআপ ও ২৪/৭ সাপোর্ট"
+                : "All plans include free SSL, daily backups & 24/7 support"}
             </p>
           </motion.div>
 
-          <div className={`grid gap-6 max-w-5xl mx-auto ${
+          <div className={`grid gap-4 max-w-5xl mx-auto ${
             plans.length === 1 ? "grid-cols-1 max-w-md" :
             plans.length === 2 ? "grid-cols-1 sm:grid-cols-2 max-w-3xl" :
             plans.length >= 4 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" :
@@ -389,10 +349,8 @@ const ServiceDetail = () => {
                 title={title}
                 slug={slug}
                 isBn={isBn}
-                tr={tr}
                 addItem={addItem}
                 isInCart={isInCart}
-                totalPlans={plans.length}
               />
             ))}
           </div>
@@ -401,29 +359,21 @@ const ServiceDetail = () => {
 
       {/* ─── Feature Comparison Toggle ─── */}
       {plans.length > 1 && (
-        <section className="pb-16 container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-8"
-          >
+        <section className="pb-12 container mx-auto px-4">
+          <div className="text-center mb-6">
             <button
               onClick={() => setShowComparison(!showComparison)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl glass-card text-sm font-semibold text-foreground hover:border-primary/30 transition-all group"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-card border border-border text-sm font-semibold text-foreground hover:border-primary/20 transition-all"
             >
               {isBn ? "ফিচার তুলনা করুন" : "Compare Features"}
               <ChevronDown className={`w-4 h-4 text-primary transition-transform duration-300 ${showComparison ? "rotate-180" : ""}`} />
             </button>
-          </motion.div>
+          </div>
 
           <motion.div
             initial={false}
-            animate={{
-              height: showComparison ? "auto" : 0,
-              opacity: showComparison ? 1 : 0
-            }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
+            animate={{ height: showComparison ? "auto" : 0, opacity: showComparison ? 1 : 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
             className="overflow-hidden"
           >
             <ComparisonTable plans={plans} isBn={isBn} />
@@ -432,79 +382,42 @@ const ServiceDetail = () => {
       )}
 
       {/* ─── Why Choose This Service ─── */}
-      <section className="py-16 relative">
+      <section className="py-10 md:py-16 bg-secondary/30">
         <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: brandCurve }}
-            className="text-center mb-12"
+            transition={{ duration: 0.4, ease }}
+            className="text-center mb-10"
           >
-            <h2 className="text-2xl sm:text-3xl font-display font-extrabold tracking-tight mb-3">
+            <h2 className="text-xl sm:text-2xl font-display font-extrabold tracking-tight mb-2">
               {isBn ? "কেন আমাদের বেছে নেবেন?" : "Why Choose Us?"}
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {[
-              {
-                icon: Zap,
-                titleBn: "লাইটনিং ফাস্ট",
-                titleEn: "Lightning Fast",
-                descBn: "NVMe SSD স্টোরেজ ও LiteSpeed সার্ভারের মাধ্যমে সর্বোচ্চ স্পিড নিশ্চিত করা হয়।",
-                descEn: "Maximum speed guaranteed with NVMe SSD storage and LiteSpeed servers.",
-              },
-              {
-                icon: Shield,
-                titleBn: "এন্টারপ্রাইজ সিকিউরিটি",
-                titleEn: "Enterprise Security",
-                descBn: "ফ্রি SSL সার্টিফিকেট, DDoS প্রোটেকশন ও ম্যালওয়্যার স্ক্যানিং।",
-                descEn: "Free SSL certificate, DDoS protection, and malware scanning.",
-              },
-              {
-                icon: Headphones,
-                titleBn: "২৪/৭ এক্সপার্ট সাপোর্ট",
-                titleEn: "24/7 Expert Support",
-                descBn: "যেকোনো সমস্যায় আমাদের বাংলাদেশি টিম সবসময় প্রস্তুত।",
-                descEn: "Our Bangladeshi team is always ready to help with any issue.",
-              },
-              {
-                icon: Clock,
-                titleBn: "৯৯.৯% আপটাইম",
-                titleEn: "99.9% Uptime",
-                descBn: "গ্লোবাল ডেটা সেন্টার ও রিডান্ড্যান্ট ইনফ্রাস্ট্রাকচার।",
-                descEn: "Global data centers and redundant infrastructure.",
-              },
-              {
-                icon: Globe,
-                titleBn: "ফ্রি মাইগ্রেশন",
-                titleEn: "Free Migration",
-                descBn: "আমরা আপনার ওয়েবসাইট ফ্রিতে ট্রান্সফার করে দেব।",
-                descEn: "We will transfer your website for free.",
-              },
-              {
-                icon: Star,
-                titleBn: "মানিব্যাক গ্যারান্টি",
-                titleEn: "Money Back Guarantee",
-                descBn: "৩০ দিনের মধ্যে সন্তুষ্ট না হলে পূর্ণ রিফান্ড।",
-                descEn: "Full refund within 30 days if not satisfied.",
-              },
+              { icon: Zap, titleBn: "লাইটনিং ফাস্ট", titleEn: "Lightning Fast", descBn: "NVMe SSD স্টোরেজ ও LiteSpeed সার্ভারের মাধ্যমে সর্বোচ্চ স্পিড।", descEn: "Maximum speed with NVMe SSD storage and LiteSpeed servers." },
+              { icon: Shield, titleBn: "এন্টারপ্রাইজ সিকিউরিটি", titleEn: "Enterprise Security", descBn: "ফ্রি SSL, DDoS প্রোটেকশন ও ম্যালওয়্যার স্ক্যানিং।", descEn: "Free SSL, DDoS protection, and malware scanning." },
+              { icon: Headphones, titleBn: "২৪/৭ সাপোর্ট", titleEn: "24/7 Support", descBn: "যেকোনো সমস্যায় আমাদের টিম সবসময় প্রস্তুত।", descEn: "Our team is always ready to help." },
+              { icon: Clock, titleBn: "৯৯.৯% আপটাইম", titleEn: "99.9% Uptime", descBn: "গ্লোবাল ডেটা সেন্টার ও রিডান্ড্যান্ট ইনফ্রাস্ট্রাকচার।", descEn: "Global data centers and redundant infrastructure." },
+              { icon: Globe, titleBn: "ফ্রি মাইগ্রেশন", titleEn: "Free Migration", descBn: "আমরা আপনার ওয়েবসাইট ফ্রিতে ট্রান্সফার করে দেব।", descEn: "We transfer your website for free." },
+              { icon: Star, titleBn: "মানিব্যাক গ্যারান্টি", titleEn: "Money Back Guarantee", descBn: "৩০ দিনের মধ্যে সন্তুষ্ট না হলে পূর্ণ রিফান্ড।", descEn: "Full refund within 30 days." },
             ].map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, ease: brandCurve, delay: i * 0.06 }}
-                whileHover={{ y: -4 }}
-                className="glass-card p-6 group"
+                transition={{ duration: 0.35, ease, delay: i * 0.05 }}
+                className="bg-card border border-border rounded-xl p-5 hover:border-primary/20 hover:shadow-sm transition-all"
               >
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center mb-3">
                   <item.icon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-base font-bold text-foreground mb-2">{isBn ? item.titleBn : item.titleEn}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{isBn ? item.descBn : item.descEn}</p>
+                <h3 className="text-sm font-bold text-foreground mb-1.5">{isBn ? item.titleBn : item.titleEn}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{isBn ? item.descBn : item.descEn}</p>
               </motion.div>
             ))}
           </div>
@@ -513,56 +426,56 @@ const ServiceDetail = () => {
 
       {/* ─── Service FAQ ─── */}
       {serviceFaqs.length > 0 && (
-        <section className="py-16 relative">
+        <section className="py-10 md:py-16">
           <div className="container mx-auto px-4">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: brandCurve }}
-              className="text-center mb-12"
+              transition={{ duration: 0.4, ease }}
+              className="text-center mb-10"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-4">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-primary/10 text-primary mb-3">
                 FAQ
               </span>
-              <h2 className="text-2xl sm:text-3xl font-display font-extrabold tracking-tight mb-3">
+              <h2 className="text-xl sm:text-2xl font-display font-extrabold tracking-tight mb-2">
                 {isBn ? "সচরাচর জিজ্ঞাসা" : "Frequently Asked Questions"}
               </h2>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto">
                 {isBn ? `${title} সম্পর্কে সাধারণ প্রশ্নোত্তর` : `Common questions about ${title}`}
               </p>
             </motion.div>
 
-            <div className="max-w-2xl mx-auto space-y-3">
+            <div className="max-w-2xl mx-auto space-y-2">
               {serviceFaqs.map((faq, i) => (
                 <motion.div
                   key={faq.id}
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, ease: brandCurve, delay: i * 0.06 }}
-                  className="glass-card overflow-hidden"
+                  transition={{ duration: 0.3, ease, delay: i * 0.04 }}
+                  className="bg-card border border-border rounded-xl overflow-hidden"
                 >
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between p-5 text-left"
+                    className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary/30 transition-colors"
                   >
                     <span className="text-sm font-semibold text-foreground pr-4">
                       {isBn ? faq.question_bn : faq.question_en}
                     </span>
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                      openFaq === i ? "gradient-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                    <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                      openFaq === i ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
                     }`}>
-                      {openFaq === i ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      {openFaq === i ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                     </div>
                   </button>
                   <motion.div
                     initial={false}
                     animate={{ height: openFaq === i ? "auto" : 0, opacity: openFaq === i ? 1 : 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                    <p className="px-4 pb-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
                       {isBn ? faq.answer_bn : faq.answer_en}
                     </p>
                   </motion.div>
@@ -574,39 +487,39 @@ const ServiceDetail = () => {
       )}
 
       {/* ─── CTA Banner ─── */}
-      <section className="pb-16 container mx-auto px-4">
+      <section className="pb-12 md:pb-16 container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: brandCurve }}
-          className="relative overflow-hidden rounded-2xl sm:rounded-3xl gradient-primary p-8 sm:p-12 md:p-16 text-center"
+          transition={{ duration: 0.5, ease }}
+          className="relative overflow-hidden rounded-2xl bg-primary p-8 sm:p-10 md:p-14 text-center"
         >
-          <div className="absolute top-0 left-0 w-64 h-64 rounded-full bg-white/10 blur-3xl -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-white/5 blur-3xl translate-x-1/3 translate-y-1/3" />
+          <div className="absolute top-0 left-0 w-48 h-48 rounded-full bg-primary-foreground/10 blur-3xl -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full bg-primary-foreground/5 blur-3xl translate-x-1/3 translate-y-1/3" />
 
           <div className="relative z-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold tracking-tight text-primary-foreground mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-extrabold tracking-tight text-primary-foreground mb-3">
               {isBn ? "সঠিক প্ল্যান বুঝতে পারছেন না?" : "Not Sure Which Plan is Right?"}
             </h2>
-            <p className="text-base md:text-lg text-primary-foreground/80 max-w-xl mx-auto mb-8">
+            <p className="text-sm md:text-base text-primary-foreground/80 max-w-xl mx-auto mb-6">
               {isBn
                 ? "আমাদের এক্সপার্ট টিম আপনাকে সঠিক সলিউশন খুঁজে দিতে প্রস্তুত।"
                 : "Our expert team is ready to help you find the right solution."}
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
                 href="tel:+8809638205205"
-                className="flex items-center gap-2 bg-white text-foreground px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-white/90 transition-all shadow-lg"
+                className="flex items-center gap-2 bg-card text-foreground px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-card/90 transition-all shadow-md"
               >
-                <Phone className="w-5 h-5" />
+                <Phone className="w-4 h-4" />
                 {isBn ? "কল করুন" : "Call Us"}
               </a>
               <Link
                 to="/contact"
-                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-6 py-3.5 rounded-xl font-semibold text-sm hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/30 px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-foreground/10 transition-all"
               >
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-4 h-4" />
                 {isBn ? "লাইভ চ্যাট" : "Live Chat"}
               </Link>
             </div>
