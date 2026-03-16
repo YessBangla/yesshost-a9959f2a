@@ -4,130 +4,69 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 
-const brandCurve = [0.2, 0.8, 0.2, 1] as const;
-
 const NeedHelpSection = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
   const navigate = useNavigate();
 
   const options = [
-    {
-      icon: Phone,
-      titleBn: "কল করুন",
-      titleEn: "Call Us",
-      descBn: "১০AM - ৮PM (প্রতিদিন)",
-      descEn: "10AM - 8PM (Everyday)",
-      href: "tel:+8809638205205",
-      external: true,
-      color: "from-emerald-500 to-green-600",
-    },
-    {
-      icon: MessageCircle,
-      titleBn: "লাইভ চ্যাট",
-      titleEn: "Live Chat",
-      descBn: "তাৎক্ষণিক সাহায্য পান",
-      descEn: "Get instant help",
-      action: "livechat",
-      color: "from-blue-500 to-indigo-600",
-    },
-    {
-      icon: TicketCheck,
-      titleBn: "সাপোর্ট টিকেট",
-      titleEn: "Support Ticket",
-      descBn: "বিস্তারিত সমস্যা জানান",
-      descEn: "Submit detailed issues",
-      href: "/dashboard/support",
-      color: "from-amber-500 to-orange-600",
-    },
-    {
-      icon: Mail,
-      titleBn: "ইমেইল করুন",
-      titleEn: "Email Us",
-      descBn: "support@yesshost.com",
-      descEn: "support@yesshost.com",
-      href: "mailto:support@yesshost.com",
-      external: true,
-      color: "from-purple-500 to-violet-600",
-    },
+    { icon: Phone, titleBn: "কল করুন", titleEn: "Call Us", descBn: "১০AM - ৮PM (প্রতিদিন)", descEn: "10AM - 8PM (Everyday)", href: "tel:+8809638205205", external: true },
+    { icon: MessageCircle, titleBn: "লাইভ চ্যাট", titleEn: "Live Chat", descBn: "তাৎক্ষণিক সাহায্য পান", descEn: "Get instant help", action: "livechat" },
+    { icon: TicketCheck, titleBn: "সাপোর্ট টিকেট", titleEn: "Support Ticket", descBn: "বিস্তারিত সমস্যা জানান", descEn: "Submit detailed issues", href: "/dashboard/support" },
+    { icon: Mail, titleBn: "ইমেইল করুন", titleEn: "Email Us", descBn: "support@yesshost.com", descEn: "support@yesshost.com", href: "mailto:support@yesshost.com", external: true },
   ];
 
   const handleClick = (opt: (typeof options)[0]) => {
-    if (opt.action === "livechat") {
-      navigate("/chat-rooms");
-    }
+    if (opt.action === "livechat") navigate("/chat-rooms");
   };
 
   return (
-    <section className="py-12 md:py-20 relative">
+    <section className="py-10 md:py-20">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-8 md:mb-12"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-6 md:mb-10"
         >
-          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
             {bn ? "সাহায্য" : "Support"}
           </span>
-          <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-extrabold tracking-tight mb-2 md:mb-3">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {bn ? "সাহায্য দরকার? আমরা এখানে আছি" : "Need Help? We Are Here"}
           </h2>
-          <p className="text-muted-foreground text-xs sm:text-sm md:text-base max-w-lg mx-auto">
-            {bn
-              ? "যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন — আমরা সবসময় প্রস্তুত"
-              : "Contact us anytime — our team is always ready to help"}
+          <p className="text-muted-foreground text-xs sm:text-sm max-w-lg mx-auto">
+            {bn ? "যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন" : "Contact us anytime — our team is always ready to help"}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
           {options.map((opt, i) => {
             const Icon = opt.icon;
             const inner = (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.1 }}
-                whileHover={{ y: -6 }}
-                className="glass-card rounded-2xl p-4 md:p-6 text-center cursor-pointer hover:shadow-xl hover:shadow-primary/5 transition-shadow group"
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="bg-card border border-border rounded-xl p-4 md:p-5 text-center cursor-pointer hover:border-primary/25 hover:shadow-sm transition-all group"
               >
-                <div
-                  className={`w-11 h-11 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br ${opt.color} flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg group-hover:scale-110 transition-transform`}
-                >
-                  <Icon className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-3 shadow-sm shadow-primary/15 group-hover:scale-105 transition-transform">
+                  <Icon className="w-5 h-5 text-primary-foreground" />
                 </div>
-                <h3 className="text-sm sm:text-base font-bold text-foreground mb-1">
+                <h3 className="text-sm font-bold text-foreground mb-0.5">
                   {bn ? opt.titleBn : opt.titleEn}
                 </h3>
-                <p className="text-[11px] sm:text-xs text-muted-foreground">
+                <p className="text-[11px] text-muted-foreground">
                   {bn ? opt.descBn : opt.descEn}
                 </p>
               </motion.div>
             );
 
-            if (opt.action) {
-              return (
-                <div key={i} onClick={() => handleClick(opt)}>
-                  {inner}
-                </div>
-              );
-            }
-
-            if (opt.external) {
-              return (
-                <a key={i} href={opt.href} target="_blank" rel="noopener noreferrer">
-                  {inner}
-                </a>
-              );
-            }
-
-            return (
-              <Link key={i} to={opt.href!}>
-                {inner}
-              </Link>
-            );
+            if (opt.action) return <div key={i} onClick={() => handleClick(opt)}>{inner}</div>;
+            if (opt.external) return <a key={i} href={opt.href} target="_blank" rel="noopener noreferrer">{inner}</a>;
+            return <Link key={i} to={opt.href!}>{inner}</Link>;
           })}
         </div>
       </div>

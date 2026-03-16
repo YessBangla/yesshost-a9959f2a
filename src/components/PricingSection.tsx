@@ -6,8 +6,6 @@ import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 
-const brandCurve = [0.2, 0.8, 0.2, 1] as const;
-
 type Plan = {
   id?: string;
   name: string;
@@ -19,7 +17,6 @@ type Plan = {
   category?: string;
 };
 
-// Static fallback plans
 const staticPlans: Record<string, Plan[]> = {
   web: [
     { name: "PH 1GB Host", price: "১৩০", annual: "১,২০০", features: ["Host 2 Domain","1GB NVMe Storage","Unlimited Bandwidth","10 Sub Domain","10 Email Accounts","10 Databases","Ruby, Python, NodeJS","Free SSL Certificate","LiteSpeed Web Server","cPanel Control Panel"] },
@@ -69,7 +66,6 @@ const PricingSection = () => {
     { key: "email", label: tr("pricing.emailHosting") },
   ];
 
-  // Use DB plans if available, else fallback
   const getPlans = (category: string): Plan[] => {
     const fromDb = dbPlans.filter(p => p.category === category);
     if (fromDb.length > 0) {
@@ -90,33 +86,34 @@ const PricingSection = () => {
   const currentPlans = getPlans(activeTab);
 
   return (
-    <section id="pricing" className="py-12 md:py-24 relative bg-muted/30">
+    <section id="pricing" className="py-10 md:py-20 bg-secondary/30">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-8 md:mb-12"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-6 md:mb-10"
         >
-          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
             Pricing
           </span>
-          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {tr("pricing.title")}
           </h2>
-          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto mb-6 md:mb-8">
+          <p className="text-muted-foreground text-sm max-w-lg mx-auto mb-6">
             {tr("pricing.subtitle")}
           </p>
 
-          <div className="flex overflow-x-auto gap-1 p-1 rounded-xl glass-card mb-4 no-scrollbar">
+          {/* Tabs */}
+          <div className="flex overflow-x-auto gap-1 p-1 rounded-xl bg-card border border-border mb-4 no-scrollbar max-w-fit mx-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-3 md:px-5 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
+                className={`px-3 md:px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                   activeTab === tab.key
-                    ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
+                    ? "gradient-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -125,11 +122,11 @@ const PricingSection = () => {
             ))}
           </div>
 
-          {/* Billing cycle toggle */}
-          <div className="inline-flex items-center gap-1 p-1 rounded-xl glass-card">
+          {/* Billing toggle */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-card border border-border">
             <button
               onClick={() => setBillingCycle("monthly")}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                 billingCycle === "monthly"
                   ? "gradient-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -139,61 +136,61 @@ const PricingSection = () => {
             </button>
             <button
               onClick={() => setBillingCycle("yearly")}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                 billingCycle === "yearly"
                   ? "gradient-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {isBn ? "বাৎসরিক" : "Yearly"}
-              <span className="ml-1.5 text-xs opacity-80">{isBn ? "সেভ করুন" : "Save"}</span>
+              <span className="ml-1 text-[10px] opacity-80">{isBn ? "সেভ" : "Save"}</span>
             </button>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 max-w-5xl mx-auto">
+        {/* Plan cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
           {currentPlans.map((plan, i) => (
             <motion.div
               key={`${activeTab}-${plan.name}`}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.1 }}
-              whileHover={{ y: -8 }}
-              className={`relative rounded-2xl overflow-hidden ${
-                plan.highlighted ? "glass-card-elevated glow-border" : "glass-card"
-              }`}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className={`relative rounded-xl overflow-hidden bg-card border ${
+                plan.highlighted ? "border-primary/30 shadow-md shadow-primary/5" : "border-border"
+              } hover:border-primary/25 transition-all`}
             >
-              {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-1 gradient-primary" />}
+              {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-0.5 gradient-primary" />}
               {plan.highlighted && (
-                <div className="absolute -top-0 right-4 flex items-center gap-1 px-3 py-1.5 gradient-primary text-primary-foreground text-xs font-bold rounded-b-lg">
+                <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 gradient-primary text-primary-foreground text-[10px] font-bold rounded-b-lg">
                   <Star className="w-3 h-3 fill-current" /> {tr("pricing.popular")}
                 </div>
               )}
 
-              <div className="p-4 sm:p-8">
-                <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-                {plan.subtitle && <p className="text-xs text-muted-foreground mt-1">{plan.subtitle}</p>}
+              <div className="p-4 sm:p-6">
+                <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
+                {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
 
-                <div className="flex items-baseline gap-1 my-4">
-                  <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold tabular-nums text-foreground">
+                <div className="flex items-baseline gap-1 my-3">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold tabular-nums text-foreground">
                     ৳{formatPrice(billingCycle === "yearly" && plan.annual ? plan.annual : plan.price, lang)}
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {billingCycle === "yearly" ? (isBn ? "/বছর" : "/yr") : tr("pricing.mo")}
                   </span>
                 </div>
 
                 {billingCycle === "monthly" && plan.annual && (
-                  <p className="text-xs text-primary font-medium mb-4">
+                  <p className="text-[11px] text-primary font-medium mb-3">
                     💰 {isBn ? `বাৎসরিকে ৳${formatPrice(plan.annual, lang)}` : `৳${formatPrice(plan.annual, lang)} if billed yearly`}
                   </p>
                 )}
 
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-2 mb-6">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Check className="w-3 h-3 text-primary" />
+                    <li key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="w-4 h-4 rounded-full bg-primary/8 flex items-center justify-center shrink-0">
+                        <Check className="w-2.5 h-2.5 text-primary" />
                       </div>
                       {feature}
                     </li>
@@ -206,8 +203,8 @@ const PricingSection = () => {
                   
                   if (inCart) {
                     return (
-                      <div className="w-full py-3.5 font-semibold rounded-xl flex items-center justify-center gap-2 bg-secondary text-foreground border border-border">
-                        <Check className="w-4 h-4 text-primary" />
+                      <div className="w-full py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-xs">
+                        <Check className="w-3.5 h-3.5 text-primary" />
                         {isBn ? "কার্টে আছে" : "In Cart"}
                       </div>
                     );
@@ -230,13 +227,13 @@ const PricingSection = () => {
                           });
                         }
                       }}
-                      className={`w-full py-3.5 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                      className={`w-full py-2.5 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-xs ${
                         plan.highlighted
-                          ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90"
+                          ? "gradient-primary text-primary-foreground shadow-sm shadow-primary/15 hover:opacity-90"
                           : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
                       }`}
                     >
-                      <ShoppingCart className="w-4 h-4" />
+                      <ShoppingCart className="w-3.5 h-3.5" />
                       {isBn ? "কার্টে যোগ করুন" : "Add to Cart"}
                     </button>
                   );

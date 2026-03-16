@@ -11,8 +11,6 @@ import avatarTanvir from "@/assets/avatars/avatar-tanvir.jpg";
 import avatarNusrat from "@/assets/avatars/avatar-nusrat.jpg";
 import avatarArif from "@/assets/avatars/avatar-arif.jpg";
 
-const brandCurve = [0.2, 0.8, 0.2, 1] as const;
-
 const defaultAvatars = [avatarRahim, avatarFatima, avatarKamal, avatarTanvir, avatarNusrat, avatarArif];
 
 const fallbackTestimonials = [
@@ -25,24 +23,24 @@ const fallbackTestimonials = [
 ];
 
 const TestimonialCard = ({ item }: { item: { name: string; company: string; text: string; rating: number; avatarSrc: string } }) => (
-  <div className="glass-card p-4 sm:p-6 relative flex-shrink-0 w-[260px] sm:w-[340px]">
-    <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
-    <div className="flex gap-1 mb-4">
+  <div className="bg-card border border-border rounded-xl p-4 sm:p-5 relative flex-shrink-0 w-[250px] sm:w-[320px] hover:border-primary/20 transition-colors">
+    <Quote className="w-7 h-7 text-primary/15 absolute top-4 right-4" />
+    <div className="flex gap-0.5 mb-3">
       {[...Array(item.rating)].map((_, j) => (
-        <Star key={j} className="w-4 h-4 fill-warning text-warning" />
+        <Star key={j} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
       ))}
     </div>
-    <p className="text-sm text-muted-foreground leading-relaxed mb-6 line-clamp-4">"{item.text}"</p>
-    <div className="flex items-center gap-3">
+    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-4">"{item.text}"</p>
+    <div className="flex items-center gap-2.5">
       <img
         src={item.avatarSrc}
         alt={item.name}
-        className="w-10 h-10 rounded-full object-cover border-2 border-primary/20"
+        className="w-9 h-9 rounded-full object-cover border border-border"
         loading="lazy"
       />
       <div>
         <p className="text-sm font-semibold text-foreground">{item.name}</p>
-        <p className="text-xs text-muted-foreground">{item.company}</p>
+        <p className="text-[11px] text-muted-foreground">{item.company}</p>
       </div>
     </div>
   </div>
@@ -76,50 +74,44 @@ const TestimonialsSection = () => {
         avatarSrc: t.avatar,
       }));
 
-  // Duplicate for infinite scroll
   const scrollItems = [...items, ...items];
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-
     const animate = () => {
       if (!isPaused.current && el) {
-        el.scrollLeft += 0.5;
-        if (el.scrollLeft >= el.scrollWidth / 2) {
-          el.scrollLeft = 0;
-        }
+        el.scrollLeft += 0.4;
+        if (el.scrollLeft >= el.scrollWidth / 2) el.scrollLeft = 0;
       }
       animRef.current = requestAnimationFrame(animate);
     };
-
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
   }, [items.length]);
 
   return (
-    <section className="py-12 md:py-20 relative overflow-hidden">
+    <section className="py-10 md:py-20 overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-8 md:mb-12"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-6 md:mb-10"
         >
-          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
             Testimonials
           </span>
-          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {tr("testimonials.title")}
           </h2>
         </motion.div>
       </div>
 
-      {/* Scrolling testimonials */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto px-4 cursor-grab active:cursor-grabbing"
+        className="flex gap-3 overflow-x-auto px-4 cursor-grab active:cursor-grabbing"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         onMouseEnter={() => { isPaused.current = true; }}
         onMouseLeave={() => { isPaused.current = false; }}

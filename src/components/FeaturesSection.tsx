@@ -5,8 +5,6 @@ import { Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const brandCurve = [0.2, 0.8, 0.2, 1] as const;
-
 const iconMap: Record<string, typeof Globe> = {
   Globe, Server, HardDrive, Mail, Cpu, Lock, RefreshCw, Rocket,
   MousePointerClick, BarChart3, Shield, Headphones,
@@ -37,19 +35,18 @@ const FeaturesSection = () => {
         title: lang === "bn" ? s.title_bn : s.title_en,
         description: lang === "bn" ? s.desc_bn : s.desc_en,
         price: s.price,
-        color: s.color,
         link: s.link || "#pricing",
       }));
     }
     return [
-      { icon: Globe, title: tr("features.domain"), description: tr("features.domainDesc"), price: "199 BDT/Year", color: "from-blue-500/20 to-blue-600/5", link: "/services/domain" },
-      { icon: HardDrive, title: tr("nav.webHosting"), description: tr("features.webHostingDesc"), price: "130 BDT/Month", color: "from-green-500/20 to-green-600/5", link: "/services/basic-hosting" },
-      { icon: Cpu, title: tr("nav.proHosting"), description: tr("features.proHostingDesc"), price: "200 BDT/Month", color: "from-purple-500/20 to-purple-600/5", link: "/services/pro-hosting" },
-      { icon: Rocket, title: tr("nav.premiumHosting"), description: tr("features.premiumHostingDesc"), price: "500 BDT/Month", color: "from-orange-500/20 to-orange-600/5", link: "/services/premium-hosting" },
-      { icon: Server, title: tr("nav.reseller"), description: tr("features.resellerHostingDesc"), price: "1,499 BDT/Month", color: "from-pink-500/20 to-pink-600/5", link: "/services/linux-reseller" },
-      { icon: Shield, title: tr("nav.vps"), description: tr("features.vpsServerDesc"), price: "750 BDT/Month", color: "from-cyan-500/20 to-cyan-600/5", link: "/services/usa-vps" },
-      { icon: Mail, title: tr("nav.emailHosting"), description: tr("features.emailHostingDesc"), price: "799 BDT/Month", color: "from-yellow-500/20 to-yellow-600/5", link: "/services/email-hosting" },
-      { icon: HardDrive, title: tr("nav.dedicated"), description: tr("features.dedicatedServerDesc"), price: "11,200 BDT/Month", color: "from-red-500/20 to-red-600/5", link: "/services/dedicated" },
+      { icon: Globe, title: tr("features.domain"), description: tr("features.domainDesc"), price: "199 BDT/Year", link: "/services/domain" },
+      { icon: HardDrive, title: tr("nav.webHosting"), description: tr("features.webHostingDesc"), price: "130 BDT/Month", link: "/services/basic-hosting" },
+      { icon: Cpu, title: tr("nav.proHosting"), description: tr("features.proHostingDesc"), price: "200 BDT/Month", link: "/services/pro-hosting" },
+      { icon: Rocket, title: tr("nav.premiumHosting"), description: tr("features.premiumHostingDesc"), price: "500 BDT/Month", link: "/services/premium-hosting" },
+      { icon: Server, title: tr("nav.reseller"), description: tr("features.resellerHostingDesc"), price: "1,499 BDT/Month", link: "/services/linux-reseller" },
+      { icon: Shield, title: tr("nav.vps"), description: tr("features.vpsServerDesc"), price: "750 BDT/Month", link: "/services/usa-vps" },
+      { icon: Mail, title: tr("nav.emailHosting"), description: tr("features.emailHostingDesc"), price: "799 BDT/Month", link: "/services/email-hosting" },
+      { icon: HardDrive, title: tr("nav.dedicated"), description: tr("features.dedicatedServerDesc"), price: "11,200 BDT/Month", link: "/services/dedicated" },
     ];
   }, [siteContent, lang]);
 
@@ -73,85 +70,84 @@ const FeaturesSection = () => {
   }, [siteContent, lang]);
 
   return (
-    <section id="features" className="py-12 md:py-24 relative">
+    <section id="features" className="py-10 md:py-20">
       <div className="container mx-auto px-4">
+        {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-8 md:mb-12"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-6 md:mb-10"
         >
-          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
             {tr("features.ourServices")}
           </span>
-          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {getText("features_section_title", tr("features.allHosting"))}
           </h2>
-          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
+          <p className="text-muted-foreground text-sm max-w-lg mx-auto">
             {getText("features_section_subtitle", tr("features.servicesSubtitle"))}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 mb-12 md:mb-24">
+        {/* Service cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-10 md:mb-16">
           {services.map((service: any, i: number) => (
             <Link to={service.link} key={service.title} className="block">
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, ease: brandCurve, delay: i * 0.06 }}
-                whileHover={{ y: -6, scale: 1.02 }}
-                className="glass-card-elevated p-4 md:p-6 group cursor-pointer relative overflow-hidden h-full"
+                transition={{ duration: 0.4, delay: i * 0.04 }}
+                className="bg-card border border-border rounded-xl p-4 md:p-5 group cursor-pointer h-full hover:border-primary/25 hover:shadow-sm transition-all"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                <div className="relative z-10">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-primary/20 transition-colors">
-                    <service.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                  </div>
-                  <h3 className="text-sm md:text-base font-bold text-foreground mb-1 md:mb-2">{service.title}</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed mb-2 md:mb-3 line-clamp-2">{service.description}</p>
-                  <p className="text-xs md:text-sm font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
-                  <span className="hidden md:inline-flex items-center gap-1.5 text-primary text-sm font-semibold mt-3 group-hover:gap-3 transition-all">
-                    {tr("features.viewPlan")} <ArrowUpRight className="w-4 h-4" />
-                  </span>
+                <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center mb-3 group-hover:bg-primary/12 transition-colors">
+                  <service.icon className="w-5 h-5 text-primary" />
                 </div>
+                <h3 className="text-sm md:text-[15px] font-bold text-foreground mb-1">{service.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-2 line-clamp-2">{service.description}</p>
+                <p className="text-xs font-bold text-primary">{tr("features.startingFrom")} {service.price}</p>
+                <span className="hidden md:inline-flex items-center gap-1 text-primary text-xs font-semibold mt-2 group-hover:gap-2 transition-all">
+                  {tr("features.viewPlan")} <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
               </motion.div>
             </Link>
           ))}
         </div>
 
+        {/* Benefits header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-8 md:mb-12"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-6 md:mb-10"
         >
-          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
             {tr("features.extraBenefits")}
           </span>
-          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {getText("features_benefits_title", tr("features.benefitsTitle"))}
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 max-w-5xl mx-auto">
+        {/* Benefit cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 max-w-4xl mx-auto">
           {features.map((feature: any, i: number) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, scale: 0.96 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, ease: brandCurve, delay: i * 0.06 }}
-              whileHover={{ y: -4 }}
-              className="glass-card p-4 md:p-6 group"
+              transition={{ duration: 0.35, delay: i * 0.04 }}
+              className="bg-card border border-border rounded-xl p-4 md:p-5 group hover:border-primary/20 transition-colors"
             >
-              <div className="w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-primary/20 transition-colors">
-                <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-primary" />
+              <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center mb-3 group-hover:bg-primary/12 transition-colors">
+                <feature.icon className="w-4 h-4 text-primary" />
               </div>
-              <h3 className="text-sm md:text-base font-bold text-foreground mb-1 md:mb-2">{feature.title}</h3>
-              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed line-clamp-3">{feature.description}</p>
+              <h3 className="text-sm font-bold text-foreground mb-1">{feature.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{feature.description}</p>
             </motion.div>
           ))}
         </div>
