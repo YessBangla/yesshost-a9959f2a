@@ -244,6 +244,6 @@
   }
 
   .animate-marquee {
-    animation: marquee 30s linear infinite;
+    animation: marquee 60s linear infinite;
   }
 }

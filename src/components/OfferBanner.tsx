@@ -37,7 +37,7 @@ const OfferBanner = () => {
         <X className="w-3.5 h-3.5" />
       </button>
 
-      <div className="flex animate-marquee whitespace-nowrap py-2 pr-8">
+      <div className="flex whitespace-nowrap py-2 pr-8" style={{ animation: "marquee 45s linear infinite" }}>
         {[...offers, ...offers].map((offer, i) => {
           const Icon = offer.icon;
           return (
