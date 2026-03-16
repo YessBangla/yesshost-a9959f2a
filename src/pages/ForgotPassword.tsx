@@ -27,7 +27,7 @@ const ForgotPassword = () => {
     <div className="min-h-screen flex items-center justify-center bg-background hero-gradient px-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/"><img src={logoWhite} alt="YessHost" className="h-10 mx-auto mb-6" /></Link>
+          <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-10 mx-auto mb-6" /></Link>
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             হোমে ফিরে যান

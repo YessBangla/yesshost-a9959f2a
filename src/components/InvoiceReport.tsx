@@ -143,13 +143,13 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40, paddingBottom: 20, borderBottom: "3px solid #0ea5e9" }}>
               <div className="logo-section">
-                <img src={logoWhite} alt="YessHost" style={{ height: 40, filter: "brightness(0) saturate(100%)" }} />
+                <img src={logoWhite} alt="Yess Host" style={{ height: 40, filter: "brightness(0) saturate(100%)" }} />
                 <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
                   Premium Hosting Solutions
                 </p>
               </div>
               <div style={{ textAlign: "right", fontSize: 12, color: "#64748b", lineHeight: 1.8 }}>
-                <strong style={{ color: "#1a1a2e", fontSize: 14 }}>YessHost</strong><br />
+                <strong style={{ color: "#1a1a2e", fontSize: 14 }}>Yess Host</strong><br />
                 Dhaka, Bangladesh<br />
                 support@yesshost.com<br />
                 www.yesshost.com
@@ -268,7 +268,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
             {/* Footer */}
             <div style={{ textAlign: "center", paddingTop: 30, borderTop: "1px solid #e2e8f0" }}>
               <p style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.8 }}>
-                {isBn ? "ধন্যবাদ আমাদের সেবা ব্যবহার করার জন্য!" : "Thank you for choosing YessHost!"}<br />
+                {isBn ? "ধন্যবাদ আমাদের সেবা ব্যবহার করার জন্য!" : "Thank you for choosing Yess Host!"}<br />
                 <a href="https://yesshost.com" style={{ color: "#0ea5e9", textDecoration: "none" }}>www.yesshost.com</a> | support@yesshost.com<br />
                 {isBn ? "এটি একটি কম্পিউটার জেনারেটেড ইনভয়েস, স্বাক্ষরের প্রয়োজন নেই।" : "This is a computer-generated invoice. No signature required."}
               </p>

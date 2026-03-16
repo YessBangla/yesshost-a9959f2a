@@ -32,7 +32,7 @@ const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections, seoDescrip
 
   return (
     <PublicLayout>
-      <SEOHead title={`${title} - YessHost`} description={seoDescription || `${fallbackTitle.en} - YessHost Bangladesh hosting provider.`} canonical={`/${pageKey}`} />
+      <SEOHead title={`${title} - Yess Host`} description={seoDescription || `${fallbackTitle.en} - Yess Host Bangladesh hosting provider.`} canonical={`/${pageKey}`} />
       <div className="pt-20 lg:pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>

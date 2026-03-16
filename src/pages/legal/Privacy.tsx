@@ -13,7 +13,7 @@ const Privacy = () => (
     pageKey="privacy"
     fallbackTitle={{ bn: "প্রাইভেসি পলিসি", en: "Privacy Policy" }}
     fallbackSections={fallbackSections}
-    seoDescription="YessHost Privacy Policy. Learn how we collect, use and protect your personal data with SSL encryption and security protocols."
+    seoDescription="Yess Host Privacy Policy. Learn how we collect, use and protect your personal data with SSL encryption and security protocols."
   />
 );
 

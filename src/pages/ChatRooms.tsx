@@ -168,7 +168,7 @@ const ChatRooms = () => {
 
   return (
     <PublicLayout>
-      <SEOHead title={bn ? "চ্যাট রুম | YessHost" : "Chat Rooms | YessHost"} description={bn ? "YessHost চ্যাট রুমে আলোচনায় যোগ দিন" : "Join discussions in YessHost chat rooms"} />
+      <SEOHead title={bn ? "চ্যাট রুম | Yess Host" : "Chat Rooms | Yess Host"} description={bn ? "Yess Host চ্যাট রুমে আলোচনায় যোগ দিন" : "Join discussions in Yess Host chat rooms"} />
 
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Header */}

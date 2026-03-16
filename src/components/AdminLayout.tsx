@@ -49,7 +49,7 @@ const AdminLayout = () => {
         <div className="flex items-center justify-between gap-2">
           {!collapsed ? (
             <div className="flex items-center gap-2.5">
-              <img src={logoWhite} alt="YessHost" className="h-7" />
+              <img src={logoWhite} alt="Yess Host" className="h-7" />
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-destructive/15 text-destructive tracking-wider uppercase">Admin</span>
             </div>
           ) : (

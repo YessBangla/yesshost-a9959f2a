@@ -12,7 +12,7 @@ const Refund = () => (
     pageKey="refund"
     fallbackTitle={{ bn: "রিফান্ড পলিসি", en: "Refund Policy" }}
     fallbackSections={fallbackSections}
-    seoDescription="YessHost Refund Policy. 30-day money-back guarantee for shared hosting plans. Learn about refund eligibility and process."
+    seoDescription="Yess Host Refund Policy. 30-day money-back guarantee for shared hosting plans. Learn about refund eligibility and process."
   />
 );
 

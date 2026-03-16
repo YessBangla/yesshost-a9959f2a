@@ -76,7 +76,7 @@ const DomainPricing = () => {
   return (
     <PublicLayout>
       <SEOHead
-        title={bn ? "ডোমেইন মূল্য তালিকা — YessHost" : "Domain Pricing — YessHost"}
+        title={bn ? "ডোমেইন মূল্য তালিকা — Yess Host" : "Domain Pricing — Yess Host"}
         description={bn ? "সকল TLD এর রেজিস্ট্রেশন, রিনিউয়াল ও ট্রান্সফার মূল্য দেখুন" : "View registration, renewal and transfer prices for all TLDs"}
       />
 

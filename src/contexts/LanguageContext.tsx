@@ -88,8 +88,8 @@ const t: Translations = {
 
   // === Testimonials ===
   "testimonials.title": { bn: "আমাদের ক্লায়েন্টরা কী বলেন", en: "What Our Clients Say" },
-  "testimonials.t1": { bn: "YessHost এর সার্ভিস অসাধারণ। আমাদের ওয়েবসাইট এখন অনেক ফাস্ট এবং সাপোর্ট টিম সবসময় সাহায্য করতে প্রস্তুত।", en: "YessHost's service is excellent. Our website is much faster now and the support team is always ready to help." },
-  "testimonials.t2": { bn: "২ বছর ধরে YessHost ব্যবহার করছি। কোনো ডাউনটাইম নেই, প্রাইসিং ট্রান্সপারেন্ট এবং মাইগ্রেশন একদম ফ্রি ছিলো।", en: "Been using YessHost for 2 years. No downtime, transparent pricing and migration was completely free." },
+  "testimonials.t1": { bn: "Yess Host এর সার্ভিস অসাধারণ। আমাদের ওয়েবসাইট এখন অনেক ফাস্ট এবং সাপোর্ট টিম সবসময় সাহায্য করতে প্রস্তুত।", en: "Yess Host's service is excellent. Our website is much faster now and the support team is always ready to help." },
+  "testimonials.t2": { bn: "২ বছর ধরে Yess Host ব্যবহার করছি। কোনো ডাউনটাইম নেই, প্রাইসিং ট্রান্সপারেন্ট এবং মাইগ্রেশন একদম ফ্রি ছিলো।", en: "Been using Yess Host for 2 years. No downtime, transparent pricing and migration was completely free." },
   "testimonials.t3": { bn: "VPS হোস্টিং নিয়ে খুবই সন্তুষ্ট। ডেডিকেটেড রিসোর্স, ফুল root access এবং 24/7 সাপোর্ট — সব মিলিয়ে বেস্ট চয়েস।", en: "Very satisfied with VPS hosting. Dedicated resources, full root access and 24/7 support — the best choice overall." },
 
   // === FAQ ===

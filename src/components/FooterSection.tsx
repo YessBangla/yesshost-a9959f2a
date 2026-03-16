@@ -71,7 +71,7 @@ const FooterSection = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             {/* Brand column */}
             <div className="lg:col-span-4">
-              <img src={logoWhite} alt="YessHost" className="h-9 sm:h-10 mb-5" />
+              <img src={logoWhite} alt="Yess Host" className="h-9 sm:h-10 mb-5" />
               <p className="text-sm text-white/60 leading-relaxed mb-6 max-w-sm">
                 {tr("footer.desc")}
               </p>

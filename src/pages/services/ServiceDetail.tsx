@@ -250,8 +250,8 @@ const ServiceDetail = () => {
   return (
     <PublicLayout>
       <SEOHead
-        title={`${title} - YessHost`}
-        description={description || `${title} - Enterprise-grade hosting solution from YessHost Bangladesh.`}
+        title={`${title} - Yess Host`}
+        description={description || `${title} - Enterprise-grade hosting solution from Yess Host Bangladesh.`}
         canonical={`/services/${slug}`}
       />
 

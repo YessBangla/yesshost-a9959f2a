@@ -321,7 +321,7 @@ const Checkout = () => {
                 <p className="font-semibold text-foreground">{bn ? "ব্যাংক তথ্য:" : "Bank Details:"}</p>
                 <div className="text-muted-foreground space-y-1 text-xs">
                   <p>Bank: Dutch Bangla Bank Ltd</p>
-                  <p>Account: YessHost Technologies</p>
+                  <p>Account: Yess Host Technologies</p>
                   <p>A/C No: 123-456-7890</p>
                   <p>Branch: Dhaka Main</p>
                 </div>

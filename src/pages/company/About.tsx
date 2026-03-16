@@ -21,7 +21,7 @@ const About = () => {
   const get = (key: string) => content.find(c => c.section_key === key);
 
   const hero = get("hero");
-  const title = hero ? (bn ? hero.title_bn : hero.title_en) : (bn ? "YessHost — আপনার বিশ্বস্ত হোস্টিং পার্টনার" : "YessHost — Your Trusted Hosting Partner");
+  const title = hero ? (bn ? hero.title_bn : hero.title_en) : (bn ? "Yess Host — আপনার বিশ্বস্ত হোস্টিং পার্টনার" : "Yess Host — Your Trusted Hosting Partner");
   const desc = hero ? (bn ? hero.content_bn : hero.content_en) : (bn ? "২০১৫ সাল থেকে বাংলাদেশে প্রিমিয়াম কোয়ালিটি ওয়েব হোস্টিং, ডোমেইন রেজিস্ট্রেশন ও ক্লাউড সার্ভিস প্রদান করে আসছি।" : "Since 2015, we have been providing premium quality web hosting, domain registration and cloud services in Bangladesh.");
 
   const stats = useMemo(() => {
@@ -52,7 +52,7 @@ const About = () => {
 
   return (
     <PublicLayout>
-      <SEOHead title="About Us - YessHost" description="Learn about YessHost, Bangladesh's trusted cloud hosting provider with 99.9% uptime, 24/7 support, and 10+ years of experience." canonical="/about" />
+      <SEOHead title="About Us - Yess Host" description="Learn about Yess Host, Bangladesh's trusted cloud hosting provider with 99.9% uptime, 24/7 support, and 10+ years of experience." canonical="/about" />
       <div className="pt-20 lg:pt-24 pb-16">
         <section className="container mx-auto px-4 text-center mb-16">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>

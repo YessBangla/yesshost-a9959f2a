@@ -69,8 +69,8 @@ const DashboardLayout = () => {
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <Link to="/">
-          {!collapsed && <img src={logoWhite} alt="YessHost" className="h-8" />}
-          {collapsed && <img src={logoWhite} alt="YessHost" className="h-6 w-6 object-contain" />}
+          {!collapsed && <img src={logoWhite} alt="Yess Host" className="h-8" />}
+          {collapsed && <img src={logoWhite} alt="Yess Host" className="h-6 w-6 object-contain" />}
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}

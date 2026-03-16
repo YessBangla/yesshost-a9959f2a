@@ -1,7 +1,7 @@
 import DynamicLegalPage from "@/components/DynamicLegalPage";
 
 const fallbackSections = [
-  { title_bn: "১. সেবার বিবরণ", title_en: "1. Service Description", content_bn: "YessHost ওয়েব হোস্টিং, ডোমেইন রেজিস্ট্রেশন, VPS সার্ভার, ডেডিকেটেড সার্ভার এবং সংশ্লিষ্ট সেবা প্রদান করে।", content_en: "YessHost provides web hosting, domain registration, VPS servers, dedicated servers and related services." },
+  { title_bn: "১. সেবার বিবরণ", title_en: "1. Service Description", content_bn: "Yess Host ওয়েব হোস্টিং, ডোমেইন রেজিস্ট্রেশন, VPS সার্ভার, ডেডিকেটেড সার্ভার এবং সংশ্লিষ্ট সেবা প্রদান করে।", content_en: "Yess Host provides web hosting, domain registration, VPS servers, dedicated servers and related services." },
   { title_bn: "২. অ্যাকাউন্ট দায়িত্ব", title_en: "2. Account Responsibility", content_bn: "আপনি আপনার অ্যাকাউন্টের নিরাপত্তার জন্য দায়ী।", content_en: "You are responsible for your account security." },
   { title_bn: "৩. পেমেন্ট পলিসি", title_en: "3. Payment Policy", content_bn: "সকল পেমেন্ট বাংলাদেশি টাকায় (BDT) প্রদান করতে হবে।", content_en: "All payments must be made in Bangladeshi Taka (BDT)." },
   { title_bn: "৪. গ্রহণযোগ্য ব্যবহার", title_en: "4. Acceptable Use", content_bn: "অবৈধ কন্টেন্ট, স্প্যাম, ম্যালওয়্যার বিতরণ নিষিদ্ধ।", content_en: "Illegal content, spam, malware distribution are prohibited." },
@@ -15,7 +15,7 @@ const Terms = () => (
     pageKey="terms"
     fallbackTitle={{ bn: "সেবার শর্তাবলী", en: "Terms of Service" }}
     fallbackSections={fallbackSections}
-    seoDescription="YessHost Terms of Service. Read our policies on hosting, payments, acceptable use, uptime guarantee and data backup."
+    seoDescription="Yess Host Terms of Service. Read our policies on hosting, payments, acceptable use, uptime guarantee and data backup."
   />
 );
 

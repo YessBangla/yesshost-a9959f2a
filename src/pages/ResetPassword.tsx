@@ -40,7 +40,7 @@ const ResetPassword = () => {
     <div className="min-h-screen flex items-center justify-center bg-background hero-gradient px-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <div className="text-center mb-8">
-           <img src={logoWhite} alt="YessHost" className="h-10 mx-auto mb-6" />
+           <img src={logoWhite} alt="Yess Host" className="h-10 mx-auto mb-6" />
           <h1 className="text-2xl font-bold text-foreground">New Password</h1>
         </div>
         <div className="glass-card-elevated p-8">
