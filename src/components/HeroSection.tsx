@@ -77,10 +77,10 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: brandCurve }}
-              className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full bg-white/[0.08] border border-white/[0.1] backdrop-blur-sm"
+              className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full bg-primary/[0.08] border border-primary/[0.15]"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-white/70 text-sm font-medium">{getText("hero_offer", "hero.offer")}</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-foreground/70 text-sm font-medium">{getText("hero_offer", "hero.offer")}</span>
             </motion.div>
 
             <motion.h1
@@ -90,8 +90,8 @@ const HeroSection = () => {
               className="font-display font-extrabold tracking-tight leading-[1.1] mb-5"
               style={{ fontSize: "clamp(1.5rem, 5vw, 3.5rem)" }}
             >
-              <span className="block text-white mb-2">{getText("hero_title1", "hero.title1")}</span>
-              <span className="block bg-gradient-to-r from-blue-400 via-primary to-blue-300 bg-clip-text text-transparent">
+              <span className="block text-foreground mb-2">{getText("hero_title1", "hero.title1")}</span>
+              <span className="block bg-gradient-to-r from-[hsl(215,100%,45%)] via-primary to-[hsl(260,100%,55%)] bg-clip-text text-transparent">
                 {getText("hero_title2", "hero.title2")}
               </span>
             </motion.h1>
@@ -100,7 +100,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: brandCurve, delay: 0.2 }}
-              className="text-sm md:text-base text-white/60 max-w-lg mb-6 leading-relaxed"
+              className="text-sm md:text-base text-muted-foreground max-w-lg mb-6 leading-relaxed"
             >
               {getText("hero_subtitle", "hero.subtitle")}
             </motion.p>
@@ -114,8 +114,8 @@ const HeroSection = () => {
             >
               {highlights.map((h) => (
                 <div key={h} className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="text-sm text-white/70">{h}</span>
+                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span className="text-sm text-muted-foreground">{h}</span>
                 </div>
               ))}
             </motion.div>
@@ -129,14 +129,14 @@ const HeroSection = () => {
             >
               <Link
                 to="/#pricing"
-                className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25"
+                className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20"
               >
                 {bn ? "প্ল্যান দেখুন" : "View Plans"}
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-2 bg-white/[0.08] border border-white/[0.15] text-white px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-semibold text-sm hover:bg-white/[0.12] transition-all backdrop-blur-sm"
+                className="inline-flex items-center gap-2 bg-white border border-border text-foreground px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-semibold text-sm hover:bg-muted transition-all shadow-sm"
               >
                 {bn ? "যোগাযোগ করুন" : "Contact Us"}
               </Link>
