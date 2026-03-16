@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle } from "lucide-react";
+import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock, ShoppingBag, Layers, HardDrive } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 
-import heroImg from "@/assets/hero-datacenter.jpg";
-
+import heroImg from "@/assets/hero-corporate.png";
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const iconMap: Record<string, typeof Globe> = { Globe, Clock, Zap, Shield };
 
@@ -143,25 +142,49 @@ const HeroSection = () => {
             </motion.div>
           </div>
 
-          {/* Right — Hero Image */}
+          {/* Right — Hero Image with floating service icons */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, x: 30 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 0.9, ease: brandCurve, delay: 0.2 }}
             className="hidden lg:block relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/10 border border-border">
+            <div className="relative flex items-center justify-center min-h-[420px]">
+              {/* Corporate person image */}
               <img
                 src={heroImg}
-                alt="YessHost Data Center"
-                className="w-full h-auto object-cover aspect-[4/3]"
+                alt="YessHost Corporate"
+                className="w-[380px] h-auto object-contain relative z-10 drop-shadow-2xl"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-60" />
-            </div>
-            {/* Floating stat badge */}
-            <div className="absolute -bottom-4 -left-4 bg-white border border-border rounded-xl px-5 py-3 shadow-xl shadow-black/5">
-              <p className="text-2xl font-extrabold text-foreground">99.9%</p>
-              <p className="text-[11px] text-muted-foreground font-medium">{bn ? "আপটাইম গ্যারান্টি" : "Uptime Guarantee"}</p>
+
+              {/* Floating service icons around the person */}
+              {[
+                { icon: Globe, label: bn ? "ডোমেইন" : "Domain", link: "/services/domain", pos: "top-2 -left-4", delay: 0.4 },
+                { icon: Server, label: bn ? "হোস্টিং" : "Hosting", link: "/services/basic-hosting", pos: "top-16 -right-6", delay: 0.5 },
+                { icon: HardDrive, label: "VPS", link: "/services/usa-vps", pos: "top-1/2 -left-10", delay: 0.6 },
+                { icon: Lock, label: "SSL", link: "/services/ssl", pos: "bottom-28 -right-8", delay: 0.7 },
+                { icon: Mail, label: bn ? "ইমেইল" : "Email", link: "/services/email-hosting", pos: "bottom-8 -left-6", delay: 0.8 },
+                { icon: ShoppingBag, label: bn ? "থিম স্টোর" : "Themes", link: "/themes", pos: "bottom-2 right-4", delay: 0.9 },
+                { icon: Layers, label: bn ? "রিসেলার" : "Reseller", link: "/services/linux-reseller", pos: "top-4 left-1/3", delay: 1.0 },
+              ].map((service, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, ease: brandCurve, delay: service.delay }}
+                  className={`absolute ${service.pos} z-20`}
+                >
+                  <Link
+                    to={service.link}
+                    className="flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-border/60 rounded-xl px-3 py-2 shadow-lg shadow-black/5 hover:shadow-xl hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <service.icon className="w-4 h-4 text-primary" />
+                    </div>
+                    <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors whitespace-nowrap">{service.label}</span>
+                  </Link>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </div>
