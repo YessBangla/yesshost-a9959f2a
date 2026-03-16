@@ -91,7 +91,7 @@ const HeroSection = () => {
               style={{ fontSize: "clamp(1.5rem, 5vw, 3.5rem)" }}
             >
               <span className="block text-foreground mb-2">{getText("hero_title1", "hero.title1")}</span>
-              <span className="block bg-gradient-to-r from-[hsl(215,100%,45%)] via-primary to-[hsl(260,100%,55%)] bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-[hsl(260,80%,55%)] via-[hsl(270,90%,60%)] to-[hsl(280,100%,65%)] bg-clip-text text-transparent">
                 {getText("hero_title2", "hero.title2")}
               </span>
             </motion.h1>
