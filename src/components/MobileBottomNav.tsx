@@ -5,53 +5,62 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatPrice } from "@/lib/formatPrice";
+
+interface ServiceItem {
+  label: string;
+  labelBn: string;
+  href: string;
+  icon: typeof Home;
+  price?: string; // starting price in BDT e.g. "99"
+}
 
 interface ServiceCategory {
   title: string;
   titleBn: string;
-  items: { label: string; labelBn: string; href: string; icon: typeof Home; desc: string; descBn: string }[];
+  items: ServiceItem[];
 }
 
 const serviceCategories: ServiceCategory[] = [
   {
     title: "Domain", titleBn: "ডোমেইন",
     items: [
-      { label: "Domain Registration", labelBn: "ডোমেইন রেজিস্ট্রেশন", href: "/services/domain", icon: Globe2, desc: "Register .com .net .org", descBn: ".com .net .org রেজিস্টার" },
-      { label: "Domain Pricing", labelBn: "ডোমেইন মূল্য", href: "/domain-pricing", icon: ListOrdered, desc: "View all domain prices", descBn: "সকল মূল্য দেখুন" },
+      { label: "Domain Registration", labelBn: "ডোমেইন রেজিস্ট্রেশন", href: "/services/domain", icon: Globe2, price: "120" },
+      { label: "Domain Pricing", labelBn: "ডোমেইন মূল্য", href: "/domain-pricing", icon: ListOrdered },
     ],
   },
   {
     title: "Web Hosting", titleBn: "ওয়েব হোস্টিং",
     items: [
-      { label: "Basic Hosting", labelBn: "বেসিক হোস্টিং", href: "/services/basic-hosting", icon: Server, desc: "For beginners", descBn: "নতুনদের জন্য" },
-      { label: "Pro Hosting", labelBn: "প্রো হোস্টিং", href: "/services/pro-hosting", icon: Zap, desc: "Fast & professional", descBn: "দ্রুত গতির" },
-      { label: "Premium Hosting", labelBn: "প্রিমিয়াম হোস্টিং", href: "/services/premium-hosting", icon: Crown, desc: "Max performance", descBn: "সর্বোচ্চ পারফরম্যান্স" },
-      { label: "BDIX Hosting", labelBn: "বিডিআইএক্স হোস্টিং", href: "/services/bdix-hosting", icon: Wifi, desc: "Super fast in BD", descBn: "সুপার ফাস্ট স্পিড" },
+      { label: "Basic Hosting", labelBn: "বেসিক হোস্টিং", href: "/services/basic-hosting", icon: Server, price: "99" },
+      { label: "Pro Hosting", labelBn: "প্রো হোস্টিং", href: "/services/pro-hosting", icon: Zap, price: "299" },
+      { label: "Premium Hosting", labelBn: "প্রিমিয়াম হোস্টিং", href: "/services/premium-hosting", icon: Crown, price: "599" },
+      { label: "BDIX Hosting", labelBn: "বিডিআইএক্স হোস্টিং", href: "/services/bdix-hosting", icon: Wifi, price: "199" },
     ],
   },
   {
     title: "Reseller", titleBn: "রিসেলার",
     items: [
-      { label: "Linux Reseller", labelBn: "লিনাক্স রিসেলার", href: "/services/linux-reseller", icon: Users, desc: "Start hosting business", descBn: "হোস্টিং ব্যবসা শুরু" },
-      { label: "BDIX Reseller", labelBn: "বিডিআইএক্স রিসেলার", href: "/services/bdix-reseller", icon: WifiHigh, desc: "BDIX reseller packages", descBn: "বিডিআইএক্স প্যাকেজ" },
+      { label: "Linux Reseller", labelBn: "লিনাক্স রিসেলার", href: "/services/linux-reseller", icon: Users, price: "1,500" },
+      { label: "BDIX Reseller", labelBn: "বিডিআইএক্স রিসেলার", href: "/services/bdix-reseller", icon: WifiHigh, price: "2,000" },
     ],
   },
   {
     title: "VPS & Dedicated", titleBn: "ভিপিএস ও ডেডিকেটেড",
     items: [
-      { label: "USA VPS", labelBn: "USA ভিপিএস", href: "/services/usa-vps", icon: MonitorSmartphone, desc: "USA datacenter", descBn: "USA ডাটাসেন্টার" },
-      { label: "BDIX VPS", labelBn: "বিডিআইএক্স ভিপিএস", href: "/services/bdix-vps", icon: HardDrive, desc: "Bangladesh BDIX", descBn: "বাংলাদেশ বিডিআইএক্স" },
-      { label: "USA Dedicated", labelBn: "USA ডেডিকেটেড", href: "/services/usa-dedicated", icon: MonitorSmartphone, desc: "USA server", descBn: "আমেরিকা সার্ভার" },
-      { label: "BD Dedicated", labelBn: "BD ডেডিকেটেড", href: "/services/bd-dedicated", icon: MapPin, desc: "Bangladesh server", descBn: "বাংলাদেশ সার্ভার" },
+      { label: "USA VPS", labelBn: "USA ভিপিএস", href: "/services/usa-vps", icon: MonitorSmartphone, price: "800" },
+      { label: "BDIX VPS", labelBn: "বিডিআইএক্স ভিপিএস", href: "/services/bdix-vps", icon: HardDrive, price: "1,200" },
+      { label: "USA Dedicated", labelBn: "USA ডেডিকেটেড", href: "/services/usa-dedicated", icon: MonitorSmartphone, price: "5,000" },
+      { label: "BD Dedicated", labelBn: "BD ডেডিকেটেড", href: "/services/bd-dedicated", icon: MapPin, price: "8,000" },
     ],
   },
   {
     title: "More Services", titleBn: "আরো সেবা",
     items: [
-      { label: "Email Hosting", labelBn: "ইমেইল হোস্টিং", href: "/services/email-hosting", icon: Mail, desc: "Professional email", descBn: "প্রফেশনাল ইমেইল" },
-      { label: "Radio Hosting", labelBn: "রেডিও হোস্টিং", href: "/services/radio-hosting", icon: Radio, desc: "Online radio", descBn: "অনলাইন রেডিও" },
-      { label: "Graphics Design", labelBn: "গ্রাফিক্স ডিজাইন", href: "/services/graphics-design", icon: Palette, desc: "Logo & banner", descBn: "লোগো ও ব্যানার" },
-      { label: "Theme Store", labelBn: "থিম স্টোর", href: "/themes", icon: ShoppingBag, desc: "Ready themes", descBn: "রেডি থিম" },
+      { label: "Email Hosting", labelBn: "ইমেইল হোস্টিং", href: "/services/email-hosting", icon: Mail, price: "150" },
+      { label: "Radio Hosting", labelBn: "রেডিও হোস্টিং", href: "/services/radio-hosting", icon: Radio, price: "500" },
+      { label: "Graphics Design", labelBn: "গ্রাফিক্স ডিজাইন", href: "/services/graphics-design", icon: Palette, price: "1,000" },
+      { label: "Theme Store", labelBn: "থিম স্টোর", href: "/themes", icon: ShoppingBag, price: "2,999" },
     ],
   },
 ];
@@ -158,13 +167,15 @@ const MobileBottomNav = () => {
                             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                               <Icon className="w-4 h-4 text-primary" />
                             </div>
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <p className="text-[12px] font-semibold text-foreground leading-tight">
                                 {bn ? item.labelBn : item.label}
                               </p>
-                              <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
-                                {bn ? item.descBn : item.desc}
-                              </p>
+                              {item.price && (
+                                <span className="inline-block mt-1 text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-md">
+                                  ৳{formatPrice(item.price, lang)}/{bn ? "মাস" : "mo"}
+                                </span>
+                              )}
                             </div>
                           </Link>
                         );
