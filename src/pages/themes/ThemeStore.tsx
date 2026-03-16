@@ -10,8 +10,7 @@ import SEOHead from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
 import { formatAmount } from "@/lib/formatPrice";
 
-const categoryLabels: Record<string, { bn: string; en: string }> = {
-  all: { bn: "সকল", en: "All" },
+const defaultCategoryLabels: Record<string, { bn: string; en: string }> = {
   business: { bn: "ব্যবসা/কর্পোরেট", en: "Business" },
   ecommerce: { bn: "ই-কমার্স", en: "E-Commerce" },
   portfolio: { bn: "পোর্টফোলিও", en: "Portfolio" },
@@ -28,18 +27,47 @@ const ThemeStore = () => {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [siteContent, setSiteContent] = useState<any>(null);
 
   useEffect(() => {
-    supabase
-      .from("themes")
-      .select("*")
-      .eq("is_active", true)
-      .order("sort_order")
-      .then(({ data }) => {
-        setThemes(data || []);
-        setLoading(false);
-      });
+    // Fetch themes and page content in parallel
+    Promise.all([
+      supabase.from("themes").select("*").eq("is_active", true).order("sort_order"),
+      supabase.from("site_content").select("*").eq("page", "theme_store").eq("is_active", true).order("sort_order"),
+    ]).then(([themesRes, contentRes]) => {
+      setThemes(themesRes.data || []);
+      const contents = contentRes.data || [];
+      const hero = contents.find((c: any) => c.section_key === "hero");
+      const cats = contents.find((c: any) => c.section_key === "categories");
+      setSiteContent({ hero, categories: cats });
+      setLoading(false);
+    });
   }, []);
+
+  // Dynamic category labels: merge DB overrides with defaults, only show categories that have themes
+  const categoryLabels = useMemo(() => {
+    const dbLabels = siteContent?.categories?.metadata?.labels || {};
+    const merged = { ...defaultCategoryLabels, ...dbLabels };
+    // Only include categories that actually have themes
+    const activeCategories = new Set(themes.map((t) => t.category));
+    const result: Record<string, { bn: string; en: string }> = {};
+    for (const [key, label] of Object.entries(merged)) {
+      if (activeCategories.has(key)) {
+        result[key] = label as { bn: string; en: string };
+      }
+    }
+    return result;
+  }, [themes, siteContent]);
+
+  // Hero content from DB or fallback
+  const heroTitle = siteContent?.hero
+    ? (bn ? siteContent.hero.title_bn : siteContent.hero.title_en)
+    : (bn ? "ওয়েবসাইট থিম বান্ডেল" : "Website Theme Bundle");
+  const heroDesc = siteContent?.hero
+    ? (bn ? siteContent.hero.content_bn : siteContent.hero.content_en)
+    : (bn
+      ? "প্রফেশনাল রেডিমেড থিম বেছে নিন — হোস্টিং সহ বান্ডেল অফারে সাশ্রয় করুন!"
+      : "Choose professional ready-made themes — save with hosting bundle offers!");
 
   const filtered = useMemo(() => {
     return themes.filter((t) => {
@@ -50,7 +78,7 @@ const ThemeStore = () => {
         (t.description_en || "").toLowerCase().includes(q);
       return matchCategory && matchSearch;
     });
-  }, [themes, activeCategory, search, bn]);
+  }, [themes, activeCategory, search]);
 
   return (
     <PublicLayout>
@@ -65,12 +93,10 @@ const ThemeStore = () => {
               </div>
             </div>
             <h1 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-4 text-foreground">
-              {bn ? "ওয়েবসাইট থিম বান্ডেল" : "Website Theme Bundle"}
+              {heroTitle}
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8">
-              {bn
-                ? "প্রফেশনাল রেডিমেড থিম বেছে নিন — হোস্টিং সহ বান্ডেল অফারে সাশ্রয় করুন!"
-                : "Choose professional ready-made themes — save with hosting bundle offers!"}
+              {heroDesc}
             </p>
             <div className="relative max-w-md mx-auto">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -84,22 +110,35 @@ const ThemeStore = () => {
           </motion.div>
         </section>
 
-        {/* Category Filter */}
+        {/* Category Filter - Dynamic */}
         <section className="container mx-auto px-4 mb-10">
           <div className="flex flex-wrap justify-center gap-2">
-            {Object.entries(categoryLabels).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setActiveCategory(key)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeCategory === key
-                    ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
-                    : "bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary"
-                }`}
-              >
-                {bn ? label.bn : label.en}
-              </button>
-            ))}
+            <button
+              onClick={() => setActiveCategory("all")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                activeCategory === "all"
+                  ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
+                  : "bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              {bn ? "সকল" : "All"} ({themes.length})
+            </button>
+            {Object.entries(categoryLabels).map(([key, label]) => {
+              const count = themes.filter((t) => t.category === key).length;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActiveCategory(key)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    activeCategory === key
+                      ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  }`}
+                >
+                  {bn ? label.bn : label.en} ({count})
+                </button>
+              );
+            })}
           </div>
         </section>
 
@@ -154,7 +193,6 @@ const ThemeStore = () => {
                         </Badge>
                       </div>
                     )}
-                    {/* Overlay on hover */}
                     <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                       {theme.preview_url && (
                         <a
@@ -180,8 +218,8 @@ const ThemeStore = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="outline" className="text-xs">
                         {bn
-                          ? categoryLabels[theme.category]?.bn
-                          : categoryLabels[theme.category]?.en}
+                          ? (categoryLabels[theme.category]?.bn || defaultCategoryLabels[theme.category]?.bn || theme.category)
+                          : (categoryLabels[theme.category]?.en || defaultCategoryLabels[theme.category]?.en || theme.category)}
                       </Badge>
                     </div>
                     <h3 className="text-lg font-bold text-foreground mb-1">{theme.name}</h3>
