@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
+import NotificationBell from "@/components/NotificationBell";
 import logoWhite from "@/assets/logo-white.png";
 
 interface NavChild {
