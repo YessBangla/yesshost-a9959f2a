@@ -95,7 +95,7 @@ const WhyChooseUs = () => {
 
   return (
     <section className="py-12 md:py-28 relative">
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4">
         {/* Stats counters */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
