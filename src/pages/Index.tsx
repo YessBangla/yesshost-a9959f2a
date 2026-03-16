@@ -1,6 +1,6 @@
 import PublicLayout from "@/components/PublicLayout";
 import HeroSection from "@/components/HeroSection";
-import CorporateSlider from "@/components/CorporateSlider";
+import DomainSearch from "@/components/DomainSearch";
 import TrustedBySection from "@/components/TrustedBySection";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -27,8 +27,8 @@ const Index = () => {
           "provider": { "@type": "Organization", "name": "YessHost" },
         }}
       />
-      <CorporateSlider />
       <HeroSection />
+      <DomainSearch />
       <WhyChooseUs />
       <FeaturesSection />
       <PricingSection />
