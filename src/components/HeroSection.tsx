@@ -176,10 +176,10 @@ const HeroSection = () => {
           {stats.map((stat: any, i: number) => (
             <div
               key={i}
-              className="bg-white border border-border rounded-xl p-4 text-center group hover:border-primary/30 hover:shadow-md transition-all"
+              className="bg-white border border-border rounded-xl p-4 text-center group hover:border-[hsl(260,80%,70%)]/40 hover:shadow-md transition-all"
             >
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/15 transition-colors">
-                <stat.icon className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-[hsl(260,80%,95%)] flex items-center justify-center mx-auto mb-2 group-hover:bg-[hsl(260,80%,92%)] transition-colors">
+                <stat.icon className="w-5 h-5 text-[hsl(260,80%,55%)]" />
               </div>
               <p className="text-lg font-extrabold tabular-nums text-foreground">{stat.value}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">{stat.label}</p>
