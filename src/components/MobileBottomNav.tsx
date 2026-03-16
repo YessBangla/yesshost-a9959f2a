@@ -3,16 +3,17 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { formatPrice } from "@/lib/formatPrice";
+import { formatPrice, toEnDigits } from "@/lib/formatPrice";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceItem {
   label: string;
   labelBn: string;
   href: string;
   icon: typeof Home;
-  price?: string; // starting price in BDT e.g. "99"
+  slug?: string; // maps to pricing_plans.slug or domain_pricing
 }
 
 interface ServiceCategory {
@@ -25,42 +26,42 @@ const serviceCategories: ServiceCategory[] = [
   {
     title: "Domain", titleBn: "ডোমেইন",
     items: [
-      { label: "Domain Registration", labelBn: "ডোমেইন রেজিস্ট্রেশন", href: "/services/domain", icon: Globe2, price: "120" },
+      { label: "Domain Registration", labelBn: "ডোমেইন রেজিস্ট্রেশন", href: "/services/domain", icon: Globe2, slug: "domain" },
       { label: "Domain Pricing", labelBn: "ডোমেইন মূল্য", href: "/domain-pricing", icon: ListOrdered },
     ],
   },
   {
     title: "Web Hosting", titleBn: "ওয়েব হোস্টিং",
     items: [
-      { label: "Basic Hosting", labelBn: "বেসিক হোস্টিং", href: "/services/basic-hosting", icon: Server, price: "99" },
-      { label: "Pro Hosting", labelBn: "প্রো হোস্টিং", href: "/services/pro-hosting", icon: Zap, price: "299" },
-      { label: "Premium Hosting", labelBn: "প্রিমিয়াম হোস্টিং", href: "/services/premium-hosting", icon: Crown, price: "599" },
-      { label: "BDIX Hosting", labelBn: "বিডিআইএক্স হোস্টিং", href: "/services/bdix-hosting", icon: Wifi, price: "199" },
+      { label: "Basic Hosting", labelBn: "বেসিক হোস্টিং", href: "/services/basic-hosting", icon: Server, slug: "basic-hosting" },
+      { label: "Pro Hosting", labelBn: "প্রো হোস্টিং", href: "/services/pro-hosting", icon: Zap, slug: "pro-hosting" },
+      { label: "Premium Hosting", labelBn: "প্রিমিয়াম হোস্টিং", href: "/services/premium-hosting", icon: Crown, slug: "premium-hosting" },
+      { label: "BDIX Hosting", labelBn: "বিডিআইএক্স হোস্টিং", href: "/services/bdix-hosting", icon: Wifi, slug: "bdix-hosting" },
     ],
   },
   {
     title: "Reseller", titleBn: "রিসেলার",
     items: [
-      { label: "Linux Reseller", labelBn: "লিনাক্স রিসেলার", href: "/services/linux-reseller", icon: Users, price: "1,500" },
-      { label: "BDIX Reseller", labelBn: "বিডিআইএক্স রিসেলার", href: "/services/bdix-reseller", icon: WifiHigh, price: "2,000" },
+      { label: "Linux Reseller", labelBn: "লিনাক্স রিসেলার", href: "/services/linux-reseller", icon: Users, slug: "linux-reseller" },
+      { label: "BDIX Reseller", labelBn: "বিডিআইএক্স রিসেলার", href: "/services/bdix-reseller", icon: WifiHigh, slug: "bdix-reseller" },
     ],
   },
   {
     title: "VPS & Dedicated", titleBn: "ভিপিএস ও ডেডিকেটেড",
     items: [
-      { label: "USA VPS", labelBn: "USA ভিপিএস", href: "/services/usa-vps", icon: MonitorSmartphone, price: "800" },
-      { label: "BDIX VPS", labelBn: "বিডিআইএক্স ভিপিএস", href: "/services/bdix-vps", icon: HardDrive, price: "1,200" },
-      { label: "USA Dedicated", labelBn: "USA ডেডিকেটেড", href: "/services/usa-dedicated", icon: MonitorSmartphone, price: "5,000" },
-      { label: "BD Dedicated", labelBn: "BD ডেডিকেটেড", href: "/services/bd-dedicated", icon: MapPin, price: "8,000" },
+      { label: "USA VPS", labelBn: "USA ভিপিএস", href: "/services/usa-vps", icon: MonitorSmartphone, slug: "usa-vps" },
+      { label: "BDIX VPS", labelBn: "বিডিআইএক্স ভিপিএস", href: "/services/bdix-vps", icon: HardDrive, slug: "bdix-vps" },
+      { label: "USA Dedicated", labelBn: "USA ডেডিকেটেড", href: "/services/usa-dedicated", icon: MonitorSmartphone, slug: "usa-dedicated" },
+      { label: "BD Dedicated", labelBn: "BD ডেডিকেটেড", href: "/services/bd-dedicated", icon: MapPin, slug: "bd-dedicated" },
     ],
   },
   {
     title: "More Services", titleBn: "আরো সেবা",
     items: [
-      { label: "Email Hosting", labelBn: "ইমেইল হোস্টিং", href: "/services/email-hosting", icon: Mail, price: "150" },
-      { label: "Radio Hosting", labelBn: "রেডিও হোস্টিং", href: "/services/radio-hosting", icon: Radio, price: "500" },
-      { label: "Graphics Design", labelBn: "গ্রাফিক্স ডিজাইন", href: "/services/graphics-design", icon: Palette, price: "1,000" },
-      { label: "Theme Store", labelBn: "থিম স্টোর", href: "/themes", icon: ShoppingBag, price: "2,999" },
+      { label: "Email Hosting", labelBn: "ইমেইল হোস্টিং", href: "/services/email-hosting", icon: Mail, slug: "email-hosting" },
+      { label: "Radio Hosting", labelBn: "রেডিও হোস্টিং", href: "/services/radio-hosting", icon: Radio, slug: "radio-hosting" },
+      { label: "Graphics Design", labelBn: "গ্রাফিক্স ডিজাইন", href: "/services/graphics-design", icon: Palette, slug: "graphics-design" },
+      { label: "Theme Store", labelBn: "থিম স্টোর", href: "/themes", icon: ShoppingBag },
     ],
   },
 ];
@@ -73,11 +74,47 @@ const MobileBottomNav = () => {
   const [tapped, setTapped] = useState<string | null>(null);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [serviceSearch, setServiceSearch] = useState("");
+  const [priceMap, setPriceMap] = useState<Record<string, string>>({});
   const bn = lang === "bn";
+
+  // Fetch minimum prices per slug from pricing_plans
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const { data } = await supabase
+        .from("pricing_plans")
+        .select("slug, price_bdt")
+        .eq("is_active", true)
+        .order("sort_order");
+
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach((plan) => {
+          const numericPrice = parseFloat(toEnDigits(plan.price_bdt.replace(/,/g, "")));
+          if (!map[plan.slug] || numericPrice < parseFloat(toEnDigits(map[plan.slug].replace(/,/g, "")))) {
+            map[plan.slug] = plan.price_bdt;
+          }
+        });
+        setPriceMap(map);
+      }
+    };
+    fetchPrices();
+  }, []);
+
+  // Merge dynamic prices into categories
+  const categoriesWithPrices = useMemo(() =>
+    serviceCategories.map((cat) => ({
+      ...cat,
+      items: cat.items.map((item) => ({
+        ...item,
+        price: item.slug ? priceMap[item.slug] : undefined,
+      })),
+    })),
+    [priceMap]
+  );
 
   // Filter service categories by search
   const filteredCategories = serviceSearch.trim()
-    ? serviceCategories
+    ? categoriesWithPrices
         .map((cat) => ({
           ...cat,
           items: cat.items.filter((item) => {
@@ -86,7 +123,7 @@ const MobileBottomNav = () => {
           }),
         }))
         .filter((cat) => cat.items.length > 0)
-    : serviceCategories;
+    : categoriesWithPrices;
 
   const tabs = [
     { id: "home", icon: Home, label: bn ? "হোম" : "Home", href: "/" },
