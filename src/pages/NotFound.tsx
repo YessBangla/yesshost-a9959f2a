@@ -18,7 +18,7 @@ const NotFound = () => {
   return (
     <PublicLayout hideFooter>
       <SEOHead
-        title={bn ? "পেজ পাওয়া যায়নি - YessHost" : "Page Not Found - YessHost"}
+        title={bn ? "পেজ পাওয়া যায়নি - Yess Host" : "Page Not Found - Yess Host"}
         description={bn ? "আপনি যে পেজটি খুঁজছেন তা পাওয়া যায়নি।" : "The page you are looking for could not be found."}
         noindex
       />
