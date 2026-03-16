@@ -53,12 +53,12 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Light purple corporate gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(270,30%,98%)] via-[hsl(265,35%,96%)] to-[hsl(260,25%,94%)]" />
+      {/* Light purple corporate gradient background — slightly darker */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(270,25%,96%)] via-[hsl(265,30%,93%)] to-[hsl(260,20%,90%)]" />
       
       {/* Purple accent glow */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-[hsl(260,100%,70%)]/[0.08] blur-[120px]" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[hsl(270,100%,65%)]/[0.06] blur-[100px]" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-[hsl(260,100%,65%)]/[0.1] blur-[120px]" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[hsl(270,100%,60%)]/[0.08] blur-[100px]" />
       
       {/* Grid texture overlay */}
       <div
