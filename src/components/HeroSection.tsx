@@ -53,18 +53,18 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Dark gradient background like hostseba/hostnin */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,30%,8%)] via-[hsl(215,40%,12%)] to-[hsl(220,25%,10%)]" />
+      {/* Light corporate gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,25%,98%)] via-[hsl(215,30%,96%)] to-[hsl(220,20%,94%)]" />
       
-      {/* Subtle accent glow */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.08] blur-[120px]" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-primary/[0.05] blur-[100px]" />
+      {/* Subtle blue accent glow */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.06] blur-[120px]" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[hsl(260,100%,60%)]/[0.04] blur-[100px]" />
       
       {/* Grid texture overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.04]"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
           backgroundSize: "32px 32px",
         }}
       />
