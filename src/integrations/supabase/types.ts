@@ -873,6 +873,12 @@ export type Database = {
         | "restaurant"
         | "blog"
         | "landing"
+        | "education"
+        | "healthcare"
+        | "news"
+        | "agency"
+        | "realestate"
+        | "travel"
       ticket_department: "billing" | "technical" | "sales" | "general"
       ticket_priority: "low" | "medium" | "high" | "urgent"
       ticket_status: "open" | "in_progress" | "waiting" | "resolved" | "closed"
@@ -1031,6 +1037,12 @@ export const Constants = {
         "restaurant",
         "blog",
         "landing",
+        "education",
+        "healthcare",
+        "news",
+        "agency",
+        "realestate",
+        "travel",
       ],
       ticket_department: ["billing", "technical", "sales", "general"],
       ticket_priority: ["low", "medium", "high", "urgent"],
