@@ -129,7 +129,7 @@ const HeroSection = () => {
             >
               <Link
                 to="/#pricing"
-                className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[hsl(260,80%,55%)] to-[hsl(270,90%,60%)] text-white px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-[hsl(260,80%,55%)]/25"
               >
                 {bn ? "প্ল্যান দেখুন" : "View Plans"}
                 <ArrowRight className="w-4 h-4" />
