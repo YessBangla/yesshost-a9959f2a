@@ -72,7 +72,21 @@ const MobileBottomNav = () => {
   const { itemCount, setCartOpen } = useCart();
   const [tapped, setTapped] = useState<string | null>(null);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState("");
   const bn = lang === "bn";
+
+  // Filter service categories by search
+  const filteredCategories = serviceSearch.trim()
+    ? serviceCategories
+        .map((cat) => ({
+          ...cat,
+          items: cat.items.filter((item) => {
+            const q = serviceSearch.toLowerCase();
+            return item.label.toLowerCase().includes(q) || item.labelBn.includes(q);
+          }),
+        }))
+        .filter((cat) => cat.items.length > 0)
+    : serviceCategories;
 
   const tabs = [
     { id: "home", icon: Home, label: bn ? "হোম" : "Home", href: "/" },
