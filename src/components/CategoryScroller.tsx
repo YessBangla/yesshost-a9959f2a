@@ -9,6 +9,7 @@ import bannerReseller from "@/assets/banners/reseller.jpg";
 import bannerThemeStore from "@/assets/banners/theme-store.jpg";
 import bannerEmail from "@/assets/banners/email-hosting.jpg";
 import bannerDedicated from "@/assets/banners/dedicated-server.jpg";
+import bannerSsl from "@/assets/banners/ssl-certificate.jpg";
 
 const categories = [
   { img: bannerDomain, titleBn: "ডোমেইন রেজিস্ট্রেশন", titleEn: "Domain Registration", link: "/services/domain", desc_bn: ".COM .NET .ORG .XYZ", desc_en: ".COM .NET .ORG .XYZ" },
@@ -18,6 +19,7 @@ const categories = [
   { img: bannerReseller, titleBn: "রিসেলার হোস্টিং", titleEn: "Reseller Hosting", link: "/services/linux-reseller", desc_bn: "আপনার হোস্টিং বিজনেস", desc_en: "Start Your Hosting Business" },
   { img: bannerThemeStore, titleBn: "থিম স্টোর", titleEn: "Theme Store", link: "/themes", desc_bn: "প্রিমিয়াম ওয়েবসাইট থিম", desc_en: "Premium Website Themes" },
   { img: bannerEmail, titleBn: "ইমেইল হোস্টিং", titleEn: "Email Hosting", link: "/services/email-hosting", desc_bn: "প্রফেশনাল ইমেইল", desc_en: "Professional Email" },
+  { img: bannerSsl, titleBn: "SSL সার্টিফিকেট", titleEn: "SSL Certificate", link: "/services/ssl", desc_bn: "ওয়েবসাইট সিকিউরিটি", desc_en: "Secure Your Website" },
 ];
 
 const CategoryScroller = () => {
