@@ -2,13 +2,14 @@ import { Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
 import bkashLogo from "@/assets/partners/bkash.png";
 import nagadLogo from "@/assets/partners/nagad.png";
-import { Mail, Phone, CreditCard, Wallet, ChevronDown } from "lucide-react";
+import { Mail, Phone, CreditCard, Wallet, ChevronDown, MapPin, Facebook, Youtube, MessageCircle, ArrowUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 
 const FooterSection = () => {
   const { tr, lang } = useLanguage();
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const bn = lang === "bn";
 
   const footerLinks: Record<string, { label: string; href: string }[]> = {
     [tr("footer.hosting")]: [
@@ -29,7 +30,7 @@ const FooterSection = () => {
     [tr("footer.support")]: [
       { label: tr("footer.knowledgeBase"), href: "/knowledge-base" },
       { label: tr("footer.contactUs"), href: "/contact" },
-      { label: lang === "bn" ? "পেমেন্ট মেথড" : "Payment Methods", href: "/payment" },
+      { label: bn ? "পেমেন্ট মেথড" : "Payment Methods", href: "/payment" },
       { label: tr("footer.supportTicket"), href: "/dashboard/support" },
       { label: tr("footer.liveChat"), href: "/contact" },
     ],
@@ -54,100 +55,165 @@ const FooterSection = () => {
     setOpenSection(openSection === title ? null : title);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <footer className="border-t border-border py-8 sm:py-16 bg-secondary/30">
-      <div className="container mx-auto px-4">
-        {/* Top: Logo + Contact */}
-        <div className="flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-8 mb-6 sm:mb-10">
-          <div className="sm:flex-[2]">
-            <img src={logoWhite} alt="YessHost" className="h-8 sm:h-10 mb-3 sm:mb-4" />
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-3 sm:mb-4 max-w-sm">
-              {tr("footer.desc")}
-            </p>
-            <div className="flex flex-wrap gap-3 sm:flex-col sm:gap-2">
-              <a href="tel:+8809638205205" className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> +88 096 38 205 205
-              </a>
-              <a href="mailto:support@yesshost.com" className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> support@yesshost.com
-              </a>
+    <footer className="relative bg-[hsl(220,25%,8%)] text-white overflow-hidden">
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(260,30%,12%)]/30 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[hsl(260,100%,60%)]/[0.04] blur-[120px] pointer-events-none" />
+
+      <div className="relative z-10">
+        {/* Main footer content */}
+        <div className="container mx-auto px-4 pt-12 sm:pt-16 pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            {/* Brand column */}
+            <div className="lg:col-span-4">
+              <img src={logoWhite} alt="YessHost" className="h-9 sm:h-10 mb-5" />
+              <p className="text-sm text-white/60 leading-relaxed mb-6 max-w-sm">
+                {tr("footer.desc")}
+              </p>
+
+              {/* Contact info */}
+              <div className="space-y-3 mb-6">
+                <a href="tel:+8809638205205" className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  +88 096 38 205 205
+                </a>
+                <a href="mailto:support@yesshost.com" className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  support@yesshost.com
+                </a>
+                <div className="flex items-center gap-3 text-sm text-white/60">
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  {bn ? "ঢাকা, বাংলাদেশ" : "Dhaka, Bangladesh"}
+                </div>
+              </div>
+
+              {/* Social links */}
+              <div className="flex items-center gap-2">
+                {[
+                  { icon: Facebook, label: "Facebook" },
+                  { icon: Youtube, label: "YouTube" },
+                  { icon: MessageCircle, label: "WhatsApp" },
+                ].map((social) => (
+                  <a
+                    key={social.label}
+                    href="#"
+                    aria-label={social.label}
+                    className="w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.12] hover:border-white/[0.15] transition-all"
+                  >
+                    <social.icon className="w-4 h-4" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Links columns — desktop */}
+            <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-4 gap-6 lg:col-span-8">
+              {Object.entries(footerLinks).map(([title, links]) => (
+                <div key={title}>
+                  <h4 className="text-xs font-bold text-white/90 uppercase tracking-widest mb-4 pb-2 border-b border-white/[0.08]">
+                    {title}
+                  </h4>
+                  <ul className="space-y-2.5">
+                    {links.map((link) => (
+                      <li key={link.label}>
+                        <Link
+                          to={link.href}
+                          className="text-sm text-white/50 hover:text-white hover:pl-1 transition-all duration-200"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile accordion links */}
+            <div className="sm:hidden divide-y divide-white/[0.08] border-y border-white/[0.08] lg:col-span-8">
+              {Object.entries(footerLinks).map(([title, links]) => (
+                <div key={title}>
+                  <button
+                    onClick={() => toggleSection(title)}
+                    className="flex items-center justify-between w-full py-3.5 text-sm font-semibold text-white/90"
+                  >
+                    {title}
+                    <ChevronDown className={`w-4 h-4 text-white/40 transition-transform duration-200 ${openSection === title ? "rotate-180" : ""}`} />
+                  </button>
+                  <div className={`overflow-hidden transition-all duration-200 ${openSection === title ? "max-h-60 pb-3" : "max-h-0"}`}>
+                    <ul className="space-y-2 pl-1">
+                      {links.map((link) => (
+                        <li key={link.label}>
+                          <Link to={link.href} className="text-xs text-white/50 hover:text-white transition-colors">
+                            {link.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Links: Accordion on mobile, Grid on desktop */}
-        <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <h4 className="text-sm font-bold text-foreground mb-3 sm:mb-4">{title}</h4>
-              <ul className="space-y-2">
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <Link to={link.href} className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {link.label}
-                    </Link>
-                  </li>
+        {/* Payment methods bar */}
+        <div className="border-t border-white/[0.08]">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <p className="text-[11px] text-white/40 font-semibold uppercase tracking-wider">
+                {tr("footer.paymentMethods")}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {payments.map((p) => (
+                  <Link
+                    key={p.name}
+                    to="/payment"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] transition-all group"
+                  >
+                    {p.type === "logo" ? (
+                      <img src={p.logo} alt={p.name} className="h-4 sm:h-5 w-auto object-contain brightness-0 invert opacity-50 group-hover:opacity-80 transition-all" />
+                    ) : (
+                      <p.icon className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />
+                    )}
+                    <span className="text-[11px] font-medium text-white/40 group-hover:text-white/70 transition-colors">{p.name}</span>
+                  </Link>
                 ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Mobile accordion links */}
-        <div className="sm:hidden divide-y divide-border/60 border-y border-border/60 mb-6">
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <button
-                onClick={() => toggleSection(title)}
-                className="flex items-center justify-between w-full py-3 text-sm font-semibold text-foreground"
-              >
-                {title}
-                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${openSection === title ? "rotate-180" : ""}`} />
-              </button>
-              <div className={`overflow-hidden transition-all duration-200 ${openSection === title ? "max-h-60 pb-3" : "max-h-0"}`}>
-                <ul className="space-y-2 pl-1">
-                  {links.map((link) => (
-                    <li key={link.label}>
-                      <Link to={link.href} className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Payment methods */}
-        <div className="border-t border-border pt-5 sm:pt-8 mb-5 sm:mb-8">
-          <p className="text-[10px] sm:text-xs text-muted-foreground mb-2 sm:mb-3 font-semibold uppercase tracking-wider">{tr("footer.paymentMethods")}</p>
-          <div className="flex flex-wrap gap-2 sm:gap-3">
-            {payments.map((p) => (
-              <Link
-                key={p.name}
-                to="/payment"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors border border-border group"
-              >
-                {p.type === "logo" ? (
-                  <img src={p.logo} alt={p.name} className="h-4 sm:h-5 w-auto object-contain grayscale group-hover:grayscale-0 transition-all" />
-                ) : (
-                  <p.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                )}
-                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{p.name}</span>
-              </Link>
-            ))}
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-border pt-5 sm:pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-          <p className="text-[11px] sm:text-sm text-muted-foreground text-center sm:text-left">
-            © {new Date().getFullYear()} YessHost.com — {tr("footer.allRights")}
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-success animate-pulse-glow" />
-            <span className="text-[10px] sm:text-xs text-muted-foreground">{tr("footer.allSystems")}</span>
+        <div className="border-t border-white/[0.06] bg-black/20">
+          <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-[11px] sm:text-xs text-white/35 text-center sm:text-left">
+              © {new Date().getFullYear()} YessHost.com — {tr("footer.allRights")}
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[11px] text-white/40">{tr("footer.allSystems")}</span>
+              </div>
+              <button
+                onClick={scrollToTop}
+                className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.12] transition-all"
+                aria-label="Scroll to top"
+              >
+                <ArrowUp className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
