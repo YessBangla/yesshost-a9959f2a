@@ -149,7 +149,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
                 </p>
               </div>
               <div style={{ textAlign: "right", fontSize: 12, color: "#64748b", lineHeight: 1.8 }}>
-                <strong style={{ color: "#1a1a2e", fontSize: 14 }}>YessHost</strong><br />
+                <strong style={{ color: "#1a1a2e", fontSize: 14 }}>Yess Host</strong><br />
                 Dhaka, Bangladesh<br />
                 support@yesshost.com<br />
                 www.yesshost.com
