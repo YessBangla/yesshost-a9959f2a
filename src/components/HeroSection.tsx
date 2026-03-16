@@ -53,18 +53,18 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Dark gradient background like hostseba/hostnin */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,30%,8%)] via-[hsl(215,40%,12%)] to-[hsl(220,25%,10%)]" />
+      {/* Light corporate gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,25%,98%)] via-[hsl(215,30%,96%)] to-[hsl(220,20%,94%)]" />
       
-      {/* Subtle accent glow */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.08] blur-[120px]" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-primary/[0.05] blur-[100px]" />
+      {/* Subtle blue accent glow */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.06] blur-[120px]" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[hsl(260,100%,60%)]/[0.04] blur-[100px]" />
       
       {/* Grid texture overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.04]"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
           backgroundSize: "32px 32px",
         }}
       />
@@ -77,10 +77,10 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: brandCurve }}
-              className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full bg-white/[0.08] border border-white/[0.1] backdrop-blur-sm"
+              className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full bg-primary/[0.08] border border-primary/[0.15]"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-white/70 text-sm font-medium">{getText("hero_offer", "hero.offer")}</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-foreground/70 text-sm font-medium">{getText("hero_offer", "hero.offer")}</span>
             </motion.div>
 
             <motion.h1
@@ -90,8 +90,8 @@ const HeroSection = () => {
               className="font-display font-extrabold tracking-tight leading-[1.1] mb-5"
               style={{ fontSize: "clamp(1.5rem, 5vw, 3.5rem)" }}
             >
-              <span className="block text-white mb-2">{getText("hero_title1", "hero.title1")}</span>
-              <span className="block bg-gradient-to-r from-blue-400 via-primary to-blue-300 bg-clip-text text-transparent">
+              <span className="block text-foreground mb-2">{getText("hero_title1", "hero.title1")}</span>
+              <span className="block bg-gradient-to-r from-[hsl(215,100%,45%)] via-primary to-[hsl(260,100%,55%)] bg-clip-text text-transparent">
                 {getText("hero_title2", "hero.title2")}
               </span>
             </motion.h1>
@@ -100,7 +100,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: brandCurve, delay: 0.2 }}
-              className="text-sm md:text-base text-white/60 max-w-lg mb-6 leading-relaxed"
+              className="text-sm md:text-base text-muted-foreground max-w-lg mb-6 leading-relaxed"
             >
               {getText("hero_subtitle", "hero.subtitle")}
             </motion.p>
@@ -114,8 +114,8 @@ const HeroSection = () => {
             >
               {highlights.map((h) => (
                 <div key={h} className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="text-sm text-white/70">{h}</span>
+                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span className="text-sm text-muted-foreground">{h}</span>
                 </div>
               ))}
             </motion.div>
@@ -129,14 +129,14 @@ const HeroSection = () => {
             >
               <Link
                 to="/#pricing"
-                className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25"
+                className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20"
               >
                 {bn ? "প্ল্যান দেখুন" : "View Plans"}
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-2 bg-white/[0.08] border border-white/[0.15] text-white px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-semibold text-sm hover:bg-white/[0.12] transition-all backdrop-blur-sm"
+                className="inline-flex items-center gap-2 bg-white border border-border text-foreground px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl font-semibold text-sm hover:bg-muted transition-all shadow-sm"
               >
                 {bn ? "যোগাযোগ করুন" : "Contact Us"}
               </Link>
@@ -150,18 +150,18 @@ const HeroSection = () => {
             transition={{ duration: 0.9, ease: brandCurve, delay: 0.2 }}
             className="hidden lg:block relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40 border border-white/[0.08]">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/10 border border-border">
               <img
                 src={heroImg}
                 alt="YessHost Data Center"
                 className="w-full h-auto object-cover aspect-[4/3]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(220,30%,8%)] via-transparent to-transparent opacity-60" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-60" />
             </div>
             {/* Floating stat badge */}
-            <div className="absolute -bottom-4 -left-4 bg-white/[0.1] backdrop-blur-xl border border-white/[0.15] rounded-xl px-5 py-3 shadow-xl">
-              <p className="text-2xl font-extrabold text-white">99.9%</p>
-              <p className="text-[11px] text-white/60 font-medium">{bn ? "আপটাইম গ্যারান্টি" : "Uptime Guarantee"}</p>
+            <div className="absolute -bottom-4 -left-4 bg-white border border-border rounded-xl px-5 py-3 shadow-xl shadow-black/5">
+              <p className="text-2xl font-extrabold text-foreground">99.9%</p>
+              <p className="text-[11px] text-muted-foreground font-medium">{bn ? "আপটাইম গ্যারান্টি" : "Uptime Guarantee"}</p>
             </div>
           </motion.div>
         </div>
@@ -176,13 +176,13 @@ const HeroSection = () => {
           {stats.map((stat: any, i: number) => (
             <div
               key={i}
-              className="bg-white/[0.05] border border-white/[0.08] backdrop-blur-sm rounded-xl p-4 text-center group hover:bg-white/[0.08] transition-colors"
+              className="bg-white border border-border rounded-xl p-4 text-center group hover:border-primary/30 hover:shadow-md transition-all"
             >
-              <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/25 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/15 transition-colors">
                 <stat.icon className="w-5 h-5 text-primary" />
               </div>
-              <p className="text-lg font-extrabold tabular-nums text-white">{stat.value}</p>
-              <p className="text-[10px] text-white/50 mt-0.5 font-medium">{stat.label}</p>
+              <p className="text-lg font-extrabold tabular-nums text-foreground">{stat.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">{stat.label}</p>
             </div>
           ))}
         </motion.div>
