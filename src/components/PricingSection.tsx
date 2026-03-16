@@ -91,8 +91,7 @@ const PricingSection = () => {
 
   return (
     <section id="pricing" className="py-12 md:py-24 relative">
-      <div className="absolute inset-0 gradient-mesh opacity-50" />
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
