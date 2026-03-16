@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -23,32 +22,9 @@ const categories = [
 
 const CategoryScroller = () => {
   const { lang } = useLanguage();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const animRef = useRef<number>(0);
-  const isPaused = useRef(false);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const animate = () => {
-      if (!isPaused.current && el) {
-        el.scrollLeft += 0.6;
-        if (el.scrollLeft >= el.scrollWidth / 2) {
-          el.scrollLeft = 0;
-        }
-      }
-      animRef.current = requestAnimationFrame(animate);
-    };
-
-    animRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animRef.current);
-  }, []);
-
-  const items = [...categories, ...categories];
 
   return (
-    <section className="py-8 md:py-14 overflow-hidden">
+    <section className="py-8 md:py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8">
         <div className="flex items-center gap-3 justify-center mb-2">
           <div className="h-px w-8 bg-primary/40" />
@@ -65,43 +41,36 @@ const CategoryScroller = () => {
         </p>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto cursor-grab active:cursor-grabbing px-4"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        onMouseEnter={() => { isPaused.current = true; }}
-        onMouseLeave={() => { isPaused.current = false; }}
-        onTouchStart={() => { isPaused.current = true; }}
-        onTouchEnd={() => { isPaused.current = false; }}
-      >
-        {items.map((cat, i) => (
-          <Link
-            to={cat.link}
-            key={i}
-            className="group relative flex-shrink-0 w-[180px] sm:w-[280px] rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
-          >
-            <div className="aspect-[4/3] sm:aspect-square overflow-hidden">
-              <img
-                src={cat.img}
-                alt={lang === "bn" ? cat.titleBn : cat.titleEn}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-              />
-            </div>
-            {/* Glass overlay at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
-              <h3 className="text-sm sm:text-base font-bold text-white">
-                {lang === "bn" ? cat.titleBn : cat.titleEn}
-              </h3>
-              <p className="text-[11px] text-white/60 mt-0.5">
-                {lang === "bn" ? cat.desc_bn : cat.desc_en}
-              </p>
-              <div className="flex items-center gap-1 mt-2 text-[11px] text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                {lang === "bn" ? "প্ল্যান দেখুন" : "View Plans"} <ArrowRight className="w-3 h-3" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+          {categories.map((cat, i) => (
+            <Link
+              to={cat.link}
+              key={i}
+              className="group relative rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
+            >
+              <div className="aspect-[4/3] overflow-hidden">
+                <img
+                  src={cat.img}
+                  alt={lang === "bn" ? cat.titleBn : cat.titleEn}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
               </div>
-            </div>
-          </Link>
-        ))}
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+                <h3 className="text-xs sm:text-sm md:text-base font-bold text-white">
+                  {lang === "bn" ? cat.titleBn : cat.titleEn}
+                </h3>
+                <p className="text-[10px] sm:text-[11px] text-white/60 mt-0.5">
+                  {lang === "bn" ? cat.desc_bn : cat.desc_en}
+                </p>
+                <div className="flex items-center gap-1 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {lang === "bn" ? "প্ল্যান দেখুন" : "View Plans"} <ArrowRight className="w-3 h-3" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
