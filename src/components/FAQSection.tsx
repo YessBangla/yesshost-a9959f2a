@@ -4,8 +4,6 @@ import { Plus, Minus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
-const brandCurve = [0.2, 0.8, 0.2, 1] as const;
-
 const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const { tr, lang } = useLanguage();
@@ -28,51 +26,51 @@ const FAQSection = () => {
   ];
 
   return (
-    <section className="py-12 md:py-24 relative bg-muted/30">
+    <section className="py-10 md:py-20 bg-secondary/30">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: brandCurve }}
-          className="text-center mb-8 md:mb-12"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-6 md:mb-10"
         >
-          <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3 md:mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
             FAQ
           </span>
-          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-2 md:mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {tr("faq.title")}
           </h2>
         </motion.div>
 
-        <div className="max-w-2xl mx-auto space-y-3">
+        <div className="max-w-2xl mx-auto space-y-2">
           {faqs.map((faq, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, ease: brandCurve, delay: i * 0.06 }}
-              className="glass-card overflow-hidden"
+              transition={{ duration: 0.3, delay: i * 0.04 }}
+              className="bg-card border border-border rounded-xl overflow-hidden"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="w-full flex items-center justify-between p-5 text-left"
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary/30 transition-colors"
               >
                 <span className="text-sm font-semibold text-foreground pr-4">{faq.q}</span>
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                   openIndex === i ? "gradient-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
                 }`}>
-                  {openIndex === i ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {openIndex === i ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                 </div>
               </button>
               <motion.div
                 initial={false}
                 animate={{ height: openIndex === i ? "auto" : 0, opacity: openIndex === i ? 1 : 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                <p className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
               </motion.div>
             </motion.div>
           ))}
