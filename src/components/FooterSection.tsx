@@ -100,14 +100,16 @@ const FooterSection = () => {
 
               {/* Social links */}
               <div className="flex items-center gap-2">
-                {[
-                  { icon: Facebook, label: "Facebook" },
-                  { icon: Youtube, label: "YouTube" },
-                  { icon: MessageCircle, label: "WhatsApp" },
+              {[
+                  { icon: Facebook, label: "Facebook", href: "https://facebook.com/yesshost" },
+                  { icon: Youtube, label: "YouTube", href: "https://youtube.com/@yesshost" },
+                  { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/8809638205205" },
                 ].map((social) => (
                   <a
                     key={social.label}
-                    href="#"
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={social.label}
                     className="w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.12] hover:border-white/[0.15] transition-all"
                   >
