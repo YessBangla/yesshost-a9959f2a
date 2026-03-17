@@ -200,22 +200,43 @@ const ThemeStore = () => {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-                      {theme.preview_url && (
-                        <a
-                          href={theme.preview_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-3 rounded-xl bg-secondary/80 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
-                        >
-                          <Eye className="w-5 h-5" />
-                        </a>
-                      )}
                       <Link
                         to={`/themes/${theme.slug}`}
-                        className="p-3 rounded-xl bg-secondary/80 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                        className="px-4 py-2.5 rounded-xl bg-secondary/90 text-foreground hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-semibold flex items-center gap-2"
                       >
-                        <ShoppingCart className="w-5 h-5" />
+                        <Eye className="w-4 h-4" />
+                        {bn ? "ডেমো দেখুন" : "View Demo"}
                       </Link>
+                      {(() => {
+                        const hovCartId = `theme-${theme.id}`;
+                        return isInCart(hovCartId) ? (
+                          <div className="px-4 py-2.5 rounded-xl bg-secondary/90 text-foreground text-sm font-semibold flex items-center gap-2">
+                            <Check className="w-4 h-4 text-primary" />
+                            {bn ? "কার্টে আছে" : "In Cart"}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              addItem({
+                                id: hovCartId,
+                                type: "theme",
+                                name: theme.name,
+                                description: bn ? "ওয়েবসাইট থিম" : "Website Theme",
+                                price_bdt: String(theme.discount_price_bdt || theme.price_bdt),
+                                theme_id: theme.id,
+                                theme_slug: theme.slug,
+                                thumbnail_url: theme.thumbnail_url,
+                              });
+                            }}
+                            className="px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm shadow-primary/20"
+                          >
+                            <ShoppingCart className="w-4 h-4" />
+                            {bn ? "কার্টে যোগ করুন" : "Add to Cart"}
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
 

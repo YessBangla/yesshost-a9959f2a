@@ -195,6 +195,19 @@ const ThemeDetail = () => {
                   <span className="text-2xl font-extrabold text-foreground">৳{formatAmount(totalPrice, lang)}</span>
                 </div>
 
+                {/* Live Demo Button */}
+                {theme.preview_url && (
+                  <a
+                    href={theme.preview_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-4 text-base font-semibold rounded-xl flex items-center justify-center gap-2 transition-all bg-accent text-accent-foreground hover:opacity-90 border border-border"
+                  >
+                    <Eye className="w-5 h-5" />
+                    {bn ? "ডেমো দেখুন" : "View Demo"}
+                  </a>
+                )}
+
                 {/* Add to Cart Button */}
                 {inCart ? (
                   <div className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-secondary text-foreground border border-border font-semibold">
