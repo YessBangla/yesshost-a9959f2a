@@ -19,6 +19,12 @@ const categoryLabels: Record<string, { bn: string; en: string }> = {
   restaurant: { bn: "রেস্টুরেন্ট", en: "Restaurant" },
   blog: { bn: "ব্লগ", en: "Blog" },
   landing: { bn: "ল্যান্ডিং পেইজ", en: "Landing Page" },
+  education: { bn: "শিক্ষা", en: "Education" },
+  healthcare: { bn: "স্বাস্থ্যসেবা", en: "Healthcare" },
+  news: { bn: "নিউজ পোর্টাল", en: "News" },
+  agency: { bn: "এজেন্সি", en: "Agency" },
+  realestate: { bn: "রিয়েল এস্টেট", en: "Real Estate" },
+  travel: { bn: "ট্রাভেল", en: "Travel" },
 };
 
 const ThemeDetail = () => {
