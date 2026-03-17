@@ -140,6 +140,12 @@ const AdminCMS = () => {
                   <InputField label={isBn ? "কন্টেন্ট (বাংলা)" : "Content (BN)"} value={editForm.content_bn} onChange={v => setEditForm({ ...editForm, content_bn: v })} multiline />
                   <InputField label={isBn ? "কন্টেন্ট (English)" : "Content (EN)"} value={editForm.content_en} onChange={v => setEditForm({ ...editForm, content_en: v })} multiline />
                 </div>
+                <InputField
+                  label={isBn ? "মেটাডাটা (JSON)" : "Metadata (JSON)"}
+                  value={typeof editForm.metadata === "string" ? editForm.metadata : JSON.stringify(editForm.metadata || {}, null, 2)}
+                  onChange={v => setEditForm({ ...editForm, metadata: v })}
+                  multiline
+                />
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => saveEdit("site_content")} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"><Save className="w-3.5 h-3.5" /> {isBn ? "সেভ" : "Save"}</button>
                   <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary text-foreground text-sm font-semibold hover:bg-secondary/80 transition-colors"><X className="w-3.5 h-3.5" /> {isBn ? "বাতিল" : "Cancel"}</button>
