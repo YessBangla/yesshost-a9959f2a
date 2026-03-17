@@ -228,7 +228,20 @@ const ThemeStore = () => {
                           : (categoryLabels[theme.category]?.en || defaultCategoryLabels[theme.category]?.en || theme.category)}
                       </Badge>
                     </div>
-                    <h3 className="text-lg font-bold text-foreground mb-1">{theme.name}</h3>
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-lg font-bold text-foreground">{theme.name}</h3>
+                      {theme.preview_url && (
+                        <a
+                          href={theme.preview_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                        >
+                          <Eye className="w-3 h-3" />
+                          {bn ? "ডেমো দেখুন" : "Live Demo"}
+                        </a>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                       {bn ? theme.description_bn : theme.description_en}
                     </p>
