@@ -150,7 +150,7 @@ const AdminThemes = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Preview URL</label>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">প্রিভিউ লিংক</label>
           <input value={form.preview_url || ""} onChange={e => setForm({ ...form, preview_url: e.target.value })} className={inputClass} placeholder="https://" />
         </div>
         <div>
