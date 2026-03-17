@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/formatPrice";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
-const CATEGORIES = ["business", "ecommerce", "portfolio", "restaurant", "blog", "landing"] as const;
+const CATEGORIES = ["business", "ecommerce", "portfolio", "restaurant", "blog", "landing", "education", "healthcare", "news", "agency", "realestate", "travel"] as const;
 
 const categoryLabels: Record<string, { bn: string; en: string }> = {
   business: { bn: "ব্যবসা", en: "Business" },
@@ -15,6 +15,12 @@ const categoryLabels: Record<string, { bn: string; en: string }> = {
   restaurant: { bn: "রেস্টুরেন্ট", en: "Restaurant" },
   blog: { bn: "ব্লগ", en: "Blog" },
   landing: { bn: "ল্যান্ডিং", en: "Landing" },
+  education: { bn: "শিক্ষা", en: "Education" },
+  healthcare: { bn: "স্বাস্থ্যসেবা", en: "Healthcare" },
+  news: { bn: "নিউজ পোর্টাল", en: "News" },
+  agency: { bn: "এজেন্সি", en: "Agency" },
+  realestate: { bn: "রিয়েল এস্টেট", en: "Real Estate" },
+  travel: { bn: "ট্রাভেল", en: "Travel" },
 };
 
 const emptyForm = {
