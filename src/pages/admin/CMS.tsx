@@ -59,6 +59,9 @@ const AdminCMS = () => {
     if (table === "pricing_plans" && typeof rest.features === "string") {
       try { rest.features = JSON.parse(rest.features); } catch { /* keep */ }
     }
+    if (table === "site_content" && typeof rest.metadata === "string") {
+      try { rest.metadata = JSON.parse(rest.metadata); } catch { /* keep */ }
+    }
     await (supabase.from(table as any) as any).update(rest).eq("id", id);
     toast({ title: isBn ? "সফলভাবে আপডেট হয়েছে" : "Updated successfully" });
     cancelEdit();
