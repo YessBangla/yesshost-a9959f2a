@@ -127,11 +127,7 @@ const DashboardBilling = () => {
     });
   };
 
-  if (loading) return <BillingSkeleton />;
-
-  const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
-  const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
-  const paidInvoicesAll = invoices.filter(i => i.status === "paid" || i.status === "refunded");
+  const paidInvoicesAll = useMemo(() => invoices.filter(i => i.status === "paid" || i.status === "refunded"), [invoices]);
 
   const paidInvoices = useMemo(() => {
     return paidInvoicesAll.filter(inv => {
@@ -147,6 +143,10 @@ const DashboardBilling = () => {
     });
   }, [paidInvoicesAll, dateFrom, dateTo]);
 
+  if (loading) return <BillingSkeleton />;
+
+  const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
+  const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
   const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
 
   const tabs: { id: TabType; label: string; icon: typeof FileText; count: number }[] = [
