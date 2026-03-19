@@ -201,7 +201,7 @@ const PricingSection = () => {
               <button
                 key={d.key}
                 onClick={() => setAllDurations(d)}
-                className="px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
               >
                 {isBn ? d.shortBn : d.shortEn}
                 {d.discount > 0 && <span className="ml-1 text-primary">-{d.discount}%</span>}
