@@ -256,12 +256,22 @@ const AdminLayout = () => {
 
           <div className="flex-1 hidden sm:block" />
 
-          {/* Search - hidden on mobile */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/40 text-muted-foreground/60 text-xs w-52 cursor-pointer hover:bg-secondary/70 transition-colors">
+          {/* Search trigger */}
+          <button
+            onClick={() => { setSearchOpen(true); setSearchQuery(""); }}
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/40 text-muted-foreground/60 text-xs w-52 hover:bg-secondary/70 transition-colors"
+          >
             <Search className="w-3.5 h-3.5" />
             <span>{bn ? "সার্চ..." : "Search..."}</span>
             <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-background/80 border border-border/50 font-mono">⌘K</kbd>
-          </div>
+          </button>
+          {/* Mobile search icon */}
+          <button
+            onClick={() => { setSearchOpen(true); setSearchQuery(""); }}
+            className="md:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-secondary/60 text-muted-foreground"
+          >
+            <Search className="w-4.5 h-4.5" />
+          </button>
 
           {/* Language */}
           <button
