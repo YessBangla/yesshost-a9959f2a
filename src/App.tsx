@@ -14,6 +14,7 @@ import CallCenterRoute from "@/components/CallCenterRoute";
 import CallCenterLayout from "@/components/CallCenterLayout";
 import DashboardLayout from "@/components/DashboardLayout";
 import AdminLayout from "@/components/AdminLayout";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Eagerly loaded critical pages
 import Index from "./pages/Index";
