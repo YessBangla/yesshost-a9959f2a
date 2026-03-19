@@ -216,9 +216,7 @@ const ResellerHosting = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {plans.map((plan, i) => {
-                const basePrice = parseFloat(plan.price_bdt.replace(/[^\d.]/g, "")) || 0;
-                const annualPrice = plan.annual_price_bdt ? parseFloat(plan.annual_price_bdt.replace(/[^\d.]/g, "")) : null;
-                const price = calcDurationPrice(basePrice, annualPrice, duration);
+                const price = calcDurationPrice(plan.price_bdt, plan.annual_price_bdt, duration);
                 const planFeatures = Array.isArray(plan.features) ? plan.features.map(normalizeFeature) : [];
 
                 return (
@@ -239,8 +237,8 @@ const ResellerHosting = () => {
                       <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
                       {plan.subtitle && <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>}
                       <div className="mt-4 mb-5">
-                        <span className="text-3xl font-extrabold text-foreground">{formatPrice(price, bn)}</span>
-                        <span className="text-xs text-muted-foreground">/{bn ? BILLING_DURATIONS.find(d => d.key === duration)?.labelBn : BILLING_DURATIONS.find(d => d.key === duration)?.labelEn}</span>
+                        <span className="text-3xl font-extrabold text-foreground">৳{formatPrice(String(price), bn ? "bn" : "en")}</span>
+                        <span className="text-xs text-muted-foreground">/{bn ? duration.labelBn : duration.labelEn}</span>
                       </div>
                       <ul className="space-y-2 mb-6">
                         {planFeatures.map((f, fi) => (
