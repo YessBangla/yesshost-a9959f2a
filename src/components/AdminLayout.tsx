@@ -27,6 +27,9 @@ const AdminLayout = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [dbResults, setDbResults] = useState<{ users: any[]; services: any[]; orders: any[]; tickets: any[]; invoices: any[] }>({ users: [], services: [], orders: [], tickets: [], invoices: [] });
+  const [dbSearching, setDbSearching] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, profile, signOut } = useAuth();
