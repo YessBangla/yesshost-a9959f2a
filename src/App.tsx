@@ -149,6 +149,19 @@ const App = () => (
               <Route path="contact-messages" element={<AdminContactMessages />} />
               <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
             </Route>
+            <Route
+              path="/call-center"
+              element={
+                <CallCenterRoute>
+                  <CallCenterLayout />
+                </CallCenterRoute>
+              }
+            >
+              <Route index element={<CallCenterDashboard />} />
+              <Route path="orders" element={<CallCenterOrders />} />
+              <Route path="live-chat" element={<CallCenterLiveChat />} />
+              <Route path="tickets" element={<CallCenterTickets />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
