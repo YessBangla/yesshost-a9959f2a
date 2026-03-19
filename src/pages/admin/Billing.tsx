@@ -45,6 +45,8 @@ const AdminBilling = () => {
     status: "unpaid" as string,
     payment_method: "",
     due_date: "",
+    user_id: "",
+    paid_at: "",
   });
   const [saving, setSaving] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -128,6 +130,8 @@ const AdminBilling = () => {
       status: inv.status,
       payment_method: inv.payment_method || "",
       due_date: inv.due_date ? inv.due_date.split("T")[0] : "",
+      user_id: inv.user_id,
+      paid_at: inv.paid_at ? inv.paid_at.split("T")[0] : "",
     });
   };
 
@@ -141,10 +145,9 @@ const AdminBilling = () => {
       status: editForm.status,
       payment_method: editForm.payment_method || null,
       due_date: editForm.due_date ? new Date(editForm.due_date).toISOString() : null,
+      user_id: editForm.user_id,
+      paid_at: editForm.paid_at ? new Date(editForm.paid_at).toISOString() : (editForm.status === "paid" && editInvoice.status !== "paid" ? new Date().toISOString() : null),
     };
-    if (editForm.status === "paid" && editInvoice.status !== "paid") {
-      update.paid_at = new Date().toISOString();
-    }
     const { error } = await supabase.from("invoices").update(update).eq("id", editInvoice.id);
     if (error) {
       toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
@@ -334,6 +337,21 @@ const AdminBilling = () => {
           </div>
           <div className="space-y-4">
             <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "ক্লায়েন্ট" : "Client"}</label>
+              <select
+                value={editForm.user_id}
+                onChange={e => setEditForm({ ...editForm, user_id: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                <option value="">{isBn ? "— ক্লায়েন্ট বাছুন —" : "— Choose client —"}</option>
+                {allProfiles.map(p => (
+                  <option key={p.user_id} value={p.user_id}>
+                    {p.full_name || p.user_id} {p.phone ? `(${p.phone})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "ইনভয়েস নম্বর" : "Invoice Number"}</label>
               <input
                 value={editForm.invoice_number}
@@ -390,6 +408,15 @@ const AdminBilling = () => {
                   className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "পেমেন্ট তারিখ" : "Payment Date"}</label>
+              <input
+                type="date"
+                value={editForm.paid_at}
+                onChange={e => setEditForm({ ...editForm, paid_at: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
             </div>
             <div className="flex gap-2 pt-2">
               <Button onClick={handleSaveEdit} disabled={saving} className="flex-1 gap-2">
