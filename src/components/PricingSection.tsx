@@ -75,7 +75,7 @@ const DurationDropdown = ({ selected, onChange, isBn }: { selected: BillingDurat
               <button
                 key={d.key}
                 onClick={() => { onChange(d); setOpen(false); }}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-all ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-all ${
                   selected.key === d.key ? "bg-primary/5 text-primary font-bold" : "text-foreground hover:bg-secondary/60"
                 }`}
               >
