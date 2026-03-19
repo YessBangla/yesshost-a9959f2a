@@ -1,0 +1,2 @@
+UPDATE public.profiles SET phone = NULL WHERE id = 'bdc7b78f-ca3b-4339-8c46-cc0de2e474a3' AND phone = '01700000003';
+CREATE UNIQUE INDEX profiles_phone_unique ON public.profiles (phone) WHERE phone IS NOT NULL AND phone != '';
