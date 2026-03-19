@@ -151,7 +151,7 @@ const DashboardBilling = () => {
 
   const tabs: { id: TabType; label: string; icon: typeof FileText; count: number }[] = [
     { id: "invoices", label: isBn ? "ইনভয়েস" : "Invoices", icon: FileText, count: invoices.length },
-    { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoices.length },
+    { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoicesAll.length },
   ];
 
   return (
