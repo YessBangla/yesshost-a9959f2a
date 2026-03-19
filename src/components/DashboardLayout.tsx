@@ -4,7 +4,7 @@ import {
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
   ChevronRight, Home, PanelLeftClose, PanelLeft,
   CreditCard, Share2, KeyRound, Bell, Settings, Wallet,
-  ChevronDown, Package, PlusCircle
+  ChevronDown, Package, PlusCircle, ListOrdered, RefreshCw, ArrowRightLeft, Search
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -58,6 +58,7 @@ const DashboardLayout = () => {
   const [activeTopMenu, setActiveTopMenu] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState(0);
   const [serviceCount, setServiceCount] = useState(0);
+  const [domainCount, setDomainCount] = useState(0);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
@@ -94,9 +95,10 @@ const DashboardLayout = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [{ data: txns }, { count }] = await Promise.all([
+      const [{ data: txns }, { count }, { count: dCount }] = await Promise.all([
         supabase.from("wallet_transactions").select("amount_bdt, type").eq("user_id", user.id).eq("status", "completed"),
         supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("service_type", "domain"),
       ]);
       if (txns) {
         const balance = txns.reduce((acc, t) => {
@@ -107,6 +109,7 @@ const DashboardLayout = () => {
         setWalletBalance(Math.max(0, balance));
       }
       setServiceCount(count || 0);
+      setDomainCount(dCount || 0);
     };
     fetchData();
   }, [user]);
@@ -136,6 +139,14 @@ const DashboardLayout = () => {
       label: bn ? "ডোমেইন" : "Domains",
       href: "/dashboard/domains",
       icon: Globe,
+      hasDropdown: true,
+      children: [
+        { label: bn ? "আমার ডোমেইন লিস্ট" : "My Domain List", href: "/dashboard/domains", icon: ListOrdered, badge: domainCount },
+        { label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain", href: "/services/domain", icon: PlusCircle },
+        { label: bn ? "ডোমেইন রিনিউ" : "Domain Renew", href: "/dashboard/domains", icon: RefreshCw },
+        { label: bn ? "ডোমেইন ট্রান্সফার" : "Transfer Domain", href: "/services/domain", icon: ArrowRightLeft },
+        { label: "WHOIS Lookup", href: "/services/domain", icon: Search },
+      ],
     },
     {
       label: bn ? "বিলিং" : "Billing",
