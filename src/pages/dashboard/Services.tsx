@@ -61,7 +61,7 @@ const DashboardServices = () => {
     return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000; // 30 days
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <ServicesSkeleton />;
 
   return (
     <div className="space-y-5">
