@@ -565,7 +565,7 @@ const ServiceDetail = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
-                href="tel:+8809638205205"
+                href="tel:+8801805464343"
                 className="flex items-center gap-2 bg-card text-foreground px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-card/90 transition-all shadow-md"
               >
                 <Phone className="w-4 h-4" />

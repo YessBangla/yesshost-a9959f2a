@@ -10,7 +10,7 @@ const NeedHelpSection = () => {
   const navigate = useNavigate();
 
   const options = [
-    { icon: Phone, titleBn: "কল করুন", titleEn: "Call Us", descBn: "১০AM - ৮PM (প্রতিদিন)", descEn: "10AM - 8PM (Everyday)", href: "tel:+8809638205205", external: true },
+    { icon: Phone, titleBn: "কল করুন", titleEn: "Call Us", descBn: "১০AM - ৮PM (প্রতিদিন)", descEn: "10AM - 8PM (Everyday)", href: "tel:+8801805464343", external: true },
     { icon: MessageCircle, titleBn: "লাইভ চ্যাট", titleEn: "Live Chat", descBn: "তাৎক্ষণিক সাহায্য পান", descEn: "Get instant help", action: "livechat" },
     { icon: TicketCheck, titleBn: "সাপোর্ট টিকেট", titleEn: "Support Ticket", descBn: "বিস্তারিত সমস্যা জানান", descEn: "Submit detailed issues", href: "/dashboard/support" },
     { icon: Mail, titleBn: "ইমেইল করুন", titleEn: "Email Us", descBn: "support@yesshost.com", descEn: "support@yesshost.com", href: "mailto:support@yesshost.com", external: true },

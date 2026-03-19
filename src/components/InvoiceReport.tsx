@@ -152,7 +152,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
                 <strong style={{ color: "#1a1a2e", fontSize: 14 }}>Yess Host</strong><br />
                 House #12, Road #5, Sector #6<br />
                 Uttara, Dhaka-1230, Bangladesh<br />
-                📞 +880 9638-205205<br />
+                📞 +8801805464343<br />
                 ✉️ support@yesshost.com<br />
                 🌐 www.yesshost.com
               </div>

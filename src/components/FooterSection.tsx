@@ -103,7 +103,7 @@ const FooterSection = () => {
               {[
                   { icon: Facebook, label: "Facebook", href: "https://facebook.com/yesshost" },
                   { icon: Youtube, label: "YouTube", href: "https://youtube.com/@yesshost" },
-                  { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/8809638205205" },
+                  { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/8801805464343" },
                 ].map((social) => (
                   <a
                     key={social.label}
