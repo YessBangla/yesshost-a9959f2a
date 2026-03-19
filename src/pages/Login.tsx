@@ -14,9 +14,11 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
+  const from = (location.state as any)?.from || "/dashboard";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
