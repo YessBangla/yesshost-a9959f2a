@@ -183,7 +183,7 @@ const PricingSection = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-3 md:px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                className={`px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
                   activeTab === tab.key
                     ? "gradient-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
