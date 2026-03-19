@@ -687,6 +687,7 @@ const DashboardLayout = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <LiveChatWidget />
     </div>
   );
 };
