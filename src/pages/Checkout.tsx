@@ -258,7 +258,23 @@ const Checkout = () => {
       // 6. Route to payment
       const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
-      if (selectedPayment === "sslcommerz") {
+      if (selectedPayment === "wallet") {
+        if (walletBalance < totalBdt) {
+          toast({ title: bn ? "অপর্যাপ্ত ব্যালেন্স" : "Insufficient Balance", description: bn ? `আপনার ওয়ালেটে ৳${walletBalance} আছে, প্রয়োজন ৳${totalBdt}` : `Wallet has ৳${walletBalance}, need ৳${totalBdt}`, variant: "destructive" });
+          setLoading(false);
+          return;
+        }
+        const { data, error } = await supabase.functions.invoke("wallet-pay-invoice", {
+          body: { invoice_id: invoiceData.id },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        setWalletBalance(data.new_balance);
+        setPlacedOrderNumber(orderNumber);
+        setOrderPlaced(true);
+        clearCart();
+        toast({ title: bn ? "পেমেন্ট সফল!" : "Payment Successful!", description: bn ? `ওয়ালেট থেকে ৳${totalBdt} কেটে নেওয়া হয়েছে` : `৳${totalBdt} paid from wallet` });
+        return;
+      } else if (selectedPayment === "sslcommerz") {
         const { data, error } = await supabase.functions.invoke("sslcommerz-init", {
           body: {
             invoice_id: invoiceData.id,
