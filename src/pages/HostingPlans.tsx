@@ -180,14 +180,14 @@ const HostingPlans = () => {
                 <div className="p-4 md:p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {cat.plans.map((plan, i) => {
-                      const planFeatures = Array.isArray(plan.features)
-                        ? plan.features.filter((f: any) => f.included !== false).slice(0, 5)
-                        : [];
+                      const allFeatures = Array.isArray(plan.features) ? plan.features : [];
+                      const includedFeatures = allFeatures.filter((f: any) => f.included !== false);
+                      const excludedFeatures = allFeatures.filter((f: any) => f.included === false);
 
                       return (
                         <div
                           key={plan.id}
-                          className={`relative rounded-xl border p-4 transition-all hover:shadow-md ${
+                          className={`relative rounded-xl border p-5 transition-all hover:shadow-md flex flex-col ${
                             plan.is_highlighted
                               ? "border-primary bg-primary/[0.02] shadow-sm"
                               : "border-border/70 hover:border-primary/20"
@@ -204,21 +204,38 @@ const HostingPlans = () => {
                             <p className="text-[11px] text-muted-foreground mb-3">{plan.subtitle}</p>
                           )}
 
-                          <div className="mb-3">
-                            <span className="text-xl font-extrabold text-foreground">{formatPrice(plan.price_bdt, lang)}</span>
+                          <div className="mb-4">
+                            <span className="text-2xl font-extrabold text-foreground">{formatPrice(plan.price_bdt, lang)}</span>
                             <span className="text-xs text-muted-foreground">/{bn ? "মাস" : "mo"}</span>
                             {plan.annual_price_bdt && (
-                              <p className="text-[10px] text-muted-foreground mt-0.5">
-                                {bn ? "বাৎসরিক" : "Yearly"}: {formatPrice(plan.annual_price_bdt, lang)}/{bn ? "বছর" : "yr"}
+                              <p className="text-[11px] text-primary font-medium mt-1">
+                                💰 {bn ? "বাৎসরিক" : "Yearly"}: {formatPrice(plan.annual_price_bdt, lang)}/{bn ? "বছর" : "yr"}
                               </p>
                             )}
                           </div>
 
-                          {planFeatures.length > 0 && (
-                            <ul className="space-y-1.5 mb-4">
-                              {planFeatures.map((f: any, j: number) => (
-                                <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                          {/* All included features */}
+                          {includedFeatures.length > 0 && (
+                            <ul className="space-y-1.5 mb-3 flex-1">
+                              {includedFeatures.map((f: any, j: number) => (
+                                <li key={j} className="flex items-center gap-2 text-xs text-foreground/80">
+                                  <div className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                                    <Check className="w-2.5 h-2.5 text-emerald-500" />
+                                  </div>
+                                  <span>{bn ? (f.label_bn || f.label) : f.label}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+
+                          {/* Excluded / not-included features */}
+                          {excludedFeatures.length > 0 && (
+                            <ul className="space-y-1.5 mb-4 border-t border-border/50 pt-2">
+                              {excludedFeatures.map((f: any, j: number) => (
+                                <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground/60 line-through">
+                                  <div className="w-4 h-4 rounded-full bg-muted/50 flex items-center justify-center shrink-0">
+                                    <span className="text-[9px]">✕</span>
+                                  </div>
                                   <span>{bn ? (f.label_bn || f.label) : f.label}</span>
                                 </li>
                               ))}
@@ -227,9 +244,13 @@ const HostingPlans = () => {
 
                           <Link
                             to={`/services/${plan.slug}`}
-                            className="block w-full text-center py-2 rounded-lg border border-primary/30 text-primary text-xs font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
+                            className={`block w-full text-center py-2.5 rounded-lg text-xs font-semibold transition-all mt-auto ${
+                              plan.is_highlighted
+                                ? "gradient-primary text-primary-foreground shadow-sm hover:opacity-90"
+                                : "border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
+                            }`}
                           >
-                            {bn ? "বিস্তারিত দেখুন" : "View Details"}
+                            {bn ? "এখনই অর্ডার করুন" : "Order Now"}
                           </Link>
                         </div>
                       );
