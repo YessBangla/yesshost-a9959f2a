@@ -62,16 +62,13 @@ const HostingPlans = () => {
   // Group plans by category
   const grouped = categories.map((cat) => {
     const catPlans = plans.filter((p) => p.category === cat.key);
-    // Pick up to 3 highlighted or first plans to show as summary
-    const highlighted = catPlans.filter((p) => p.is_highlighted);
-    const display = highlighted.length > 0 ? highlighted.slice(0, 3) : catPlans.slice(0, 3);
     const startingPrice = catPlans.length > 0
       ? catPlans.reduce((min, p) => {
           const price = p.price_bdt;
           return price < min ? price : min;
         }, catPlans[0].price_bdt)
       : null;
-    return { ...cat, plans: display, allPlans: catPlans, startingPrice };
+    return { ...cat, plans: catPlans, allPlans: catPlans, startingPrice };
   }).filter((cat) => cat.allPlans.length > 0);
 
   const features = [
