@@ -127,6 +127,7 @@ const App = () => (
 
               {/* Service detail pages */}
               <Route path="/services/:slug" element={<ServiceDetail />} />
+              <Route path="/reseller-hosting" element={<ResellerHosting />} />
 
               {/* Company pages */}
               <Route path="/about" element={<About />} />
