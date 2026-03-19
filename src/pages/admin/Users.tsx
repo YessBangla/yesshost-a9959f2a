@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   Users as UsersIcon, Search, Shield, ShieldOff, Eye, X,
   Mail, Phone, MapPin, Building2, Calendar, Globe, Filter, Headphones,
-  UserPlus, Check, Lock
+  UserPlus, Check, Lock, LayoutDashboard, Settings2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
