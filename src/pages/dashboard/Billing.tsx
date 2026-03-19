@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { FileText, Eye } from "lucide-react";
+import { BillingSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -28,7 +30,7 @@ const DashboardBilling = () => {
     supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => { setInvoices(data || []); setLoading(false); });
   }, [user]);
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <BillingSkeleton />;
 
   const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
 
@@ -55,11 +57,11 @@ const DashboardBilling = () => {
       </div>
 
       {invoices.length === 0 ? (
-        <div className="glass-card p-12 text-center">
-          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-foreground mb-2">{tr("dash.noInvoicesTitle")}</h3>
-          <p className="text-sm text-muted-foreground">{tr("dash.noInvoicesDesc")}</p>
-        </div>
+        <EmptyState
+          icon={FileText}
+          title={tr("dash.noInvoicesTitle")}
+          description={tr("dash.noInvoicesDesc")}
+        />
       ) : (
         <div className="glass-card overflow-hidden">
           <div className="overflow-x-auto">

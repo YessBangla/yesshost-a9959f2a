@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ServicesSkeleton } from "@/components/DashboardSkeleton";
 import { Server, ExternalLink, Search, Filter, ChevronDown, ChevronUp, Clock, Globe, Cpu, HardDrive, Wifi, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,7 +62,7 @@ const DashboardServices = () => {
     return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000; // 30 days
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <ServicesSkeleton />;
 
   return (
     <div className="space-y-5">

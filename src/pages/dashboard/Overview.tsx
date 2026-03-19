@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import { OverviewSkeleton } from "@/components/DashboardSkeleton";
 import {
   Server, FileText, HeadphonesIcon, Globe, ArrowUpRight, AlertCircle,
   Bell, Clock, TrendingUp, Zap, ChevronRight, CreditCard, Activity,
@@ -27,6 +28,7 @@ const DashboardOverview = () => {
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
   const [stats, setStats] = useState({ services: 0, invoices: 0, tickets: 0, domains: 0, activeServices: 0, totalSpent: 0, openTickets: 0 });
+  const [loading, setLoading] = useState(true);
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
   const [recentServices, setRecentServices] = useState<any[]>([]);
@@ -62,6 +64,7 @@ const DashboardOverview = () => {
         .from("notifications").select("*").eq("user_id", user.id)
         .order("created_at", { ascending: false }).limit(5);
       setRecentNotifications(notifData || []);
+      setLoading(false);
     };
     fetchData();
   }, [user]);
@@ -91,6 +94,8 @@ const DashboardOverview = () => {
     const days = Math.floor(hrs / 24);
     return bn ? `${days} দিন আগে` : `${days}d ago`;
   };
+
+  if (loading) return <OverviewSkeleton />;
 
   return (
     <div className="space-y-6">

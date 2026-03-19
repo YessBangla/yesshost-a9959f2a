@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { HeadphonesIcon, Plus, Send } from "lucide-react";
+import { SupportSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -48,7 +50,7 @@ const DashboardSupport = () => {
     setReplyMsg(""); fetchReplies(selectedTicket);
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <SupportSkeleton />;
 
   if (showCreate) {
     return (
@@ -136,12 +138,13 @@ const DashboardSupport = () => {
       </div>
 
       {tickets.length === 0 ? (
-        <div className="glass-card p-12 text-center">
-          <HeadphonesIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-foreground mb-2">{tr("dash.noTickets")}</h3>
-          <p className="text-sm text-muted-foreground mb-4">{tr("dash.noTicketsDesc")}</p>
-          <button onClick={() => setShowCreate(true)} className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold">{tr("dash.openTicket")}</button>
-        </div>
+        <EmptyState
+          icon={HeadphonesIcon}
+          title={tr("dash.noTickets")}
+          description={tr("dash.noTicketsDesc")}
+          actionLabel={tr("dash.openTicket")}
+          onAction={() => setShowCreate(true)}
+        />
       ) : (
         <div className="space-y-3">
           {tickets.map(ticket => (
