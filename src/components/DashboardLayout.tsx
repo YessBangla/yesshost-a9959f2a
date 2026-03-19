@@ -6,6 +6,11 @@ import {
   CreditCard, Share2, KeyRound, Bell, Settings
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -87,6 +92,7 @@ const DashboardLayout = () => {
     { title: tr("dash.profile"), url: "/dashboard/profile", icon: UserCircle },
   ];
 
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const handleSignOut = async () => { await signOut(); navigate("/"); };
   const currentBreadcrumb = breadcrumbMap[location.pathname];
   const currentPageTitle = sidebarItems.find(i =>
@@ -341,7 +347,7 @@ const DashboardLayout = () => {
                     </Link>
                   )}
                   <div className="border-t border-border/50 mt-1 pt-1">
-                    <button onClick={handleSignOut} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-destructive hover:bg-destructive/8 active:bg-destructive/15 transition-colors w-full">
+                    <button onClick={() => { setShowUserMenu(false); setSignOutOpen(true); }} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-destructive hover:bg-destructive/8 active:bg-destructive/15 transition-colors w-full">
                       <LogOut className="w-4 h-4" /> {tr("dash.signOut")}
                     </button>
                   </div>
@@ -355,6 +361,22 @@ const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
+      <AlertDialog open={signOutOpen} onOpenChange={setSignOutOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{bn ? "সাইন আউট নিশ্চিত করুন" : "Confirm Sign Out"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {bn ? "আপনি কি সত্যিই সাইন আউট করতে চান?" : "Are you sure you want to sign out?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{bn ? "বাতিল" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSignOut} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {bn ? "সাইন আউট" : "Sign Out"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
