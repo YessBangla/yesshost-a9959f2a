@@ -384,7 +384,7 @@ const ServiceDetail = () => {
             <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-extrabold tracking-tight mb-2">
               {isBn ? "আপনার জন্য পারফেক্ট প্ল্যান" : "The Perfect Plan for You"}
             </h2>
-            <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto">
+              <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
               {isBn
                 ? "সকল প্ল্যানে ফ্রি SSL, ডেইলি ব্যাকআপ ও ২৪/৭ সাপোর্ট"
                 : "All plans include free SSL, daily backups & 24/7 support"}
