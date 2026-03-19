@@ -57,7 +57,7 @@ const DurationDropdown = ({ selected, onChange, isBn }: { selected: BillingDurat
         <span>{isBn ? selected.labelBn : selected.labelEn}</span>
         <div className="flex items-center gap-1.5">
           {selected.discount > 0 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">-{selected.discount}%</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">-{selected.discount}%</span>
           )}
           <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
         </div>
