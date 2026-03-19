@@ -95,6 +95,8 @@ const DashboardOverview = () => {
     return bn ? `${days} দিন আগে` : `${days}d ago`;
   };
 
+  if (loading) return <OverviewSkeleton />;
+
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
