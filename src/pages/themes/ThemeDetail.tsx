@@ -203,15 +203,13 @@ const ThemeDetail = () => {
 
                 {/* Live Demo Button */}
                 {theme.preview_url && (
-                  <a
-                    href={theme.preview_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    to={`/themes/${theme.slug}/demo`}
                     className="w-full py-4 text-base font-semibold rounded-xl flex items-center justify-center gap-2 transition-all bg-secondary text-secondary-foreground hover:bg-secondary/80 border-2 border-primary/30 shadow-md"
                   >
                     <Eye className="w-5 h-5" />
                     {bn ? "ডেমো দেখুন" : "View Demo"}
-                  </a>
+                  </Link>
                 )}
 
                 {/* Add to Cart Button */}

@@ -90,6 +90,7 @@ const App = () => (
             {/* Theme pages */}
             <Route path="/themes" element={<ThemeStore />} />
             <Route path="/themes/:slug" element={<ThemeDetail />} />
+            <Route path="/themes/:slug/demo" element={<ThemeDemo />} />
 
             {/* Legal pages */}
             <Route path="/terms" element={<Terms />} />
