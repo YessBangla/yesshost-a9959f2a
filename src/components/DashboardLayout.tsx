@@ -184,13 +184,7 @@ const DashboardLayout = () => {
           </div>
         )}
 
-        <button
-          onClick={handleSignOut}
-          className={`flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 w-full transition-all active:scale-[0.98] ${collapsed ? "justify-center px-2" : ""}`}
-        >
-          <LogOut className="w-[17px] h-[17px] shrink-0" />
-          {!collapsed && <span>{tr("dash.signOut")}</span>}
-        </button>
+
       </div>
     </div>
   );
