@@ -45,6 +45,8 @@ const AdminBilling = () => {
     status: "unpaid" as string,
     payment_method: "",
     due_date: "",
+    user_id: "",
+    paid_at: "",
   });
   const [saving, setSaving] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
