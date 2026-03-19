@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users as UsersIcon, Search, Shield, ShieldOff, Eye, X,
-  Mail, Phone, MapPin, Building2, Calendar, Globe, Filter
+  Mail, Phone, MapPin, Building2, Calendar, Globe, Filter, Headphones
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
