@@ -18,7 +18,7 @@ type Message = {
 };
 
 const LiveChatWidget = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => localStorage.getItem(CHAT_OPEN_KEY) === "true");
   const [chatId, setChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
