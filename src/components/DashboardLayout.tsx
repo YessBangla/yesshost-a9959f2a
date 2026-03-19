@@ -378,7 +378,7 @@ const DashboardLayout = () => {
             {/* Wallet Balance */}
             <Link
               to="/dashboard/wallet"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors text-[12px] font-semibold whitespace-nowrap text-primary border border-primary/20"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition-colors text-[12px] font-semibold whitespace-nowrap text-primary-foreground border border-white/20"
             >
               <Wallet className="w-3.5 h-3.5" />
               <span>TK {formatAmount(walletBalance, lang)} BDT</span>
