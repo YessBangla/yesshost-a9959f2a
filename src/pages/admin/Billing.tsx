@@ -106,6 +106,8 @@ const AdminBilling = () => {
     setCreating(false);
     fetchData();
   };
+
+  const updateStatus = async (id: string, status: string) => {
     const update: any = { status };
     if (status === "paid") update.paid_at = new Date().toISOString();
     const { error } = await supabase.from("invoices").update(update).eq("id", id);
