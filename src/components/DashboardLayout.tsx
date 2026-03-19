@@ -304,7 +304,7 @@ const DashboardLayout = () => {
 
             {/* Logo */}
             <Link to="/dashboard" className="hidden lg:flex items-center mr-4 shrink-0">
-              <img src={logoWhite} alt="Yess Host" className="h-7 brightness-0 dark:brightness-100" />
+              <img src={logoWhite} alt="Yess Host" className="h-7" />
             </Link>
 
             {/* Top menu items with pipe separators */}
