@@ -127,6 +127,7 @@ const App = () => (
               <Route path="billing" element={<DashboardBilling />} />
               <Route path="support" element={<DashboardSupport />} />
               <Route path="domains" element={<DashboardDomains />} />
+              <Route path="reseller" element={<DashboardReseller />} />
               <Route path="profile" element={<DashboardProfile />} />
             </Route>
             <Route
