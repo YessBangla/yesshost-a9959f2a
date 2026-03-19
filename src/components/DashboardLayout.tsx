@@ -4,7 +4,7 @@ import {
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
   ChevronRight, Home, PanelLeftClose, PanelLeft,
   CreditCard, Share2, KeyRound, Bell, Settings, Wallet,
-  ChevronDown, Package, PlusCircle, ListOrdered, RefreshCw, ArrowRightLeft, Search
+  ChevronDown, Package, PlusCircle, ListOrdered, RefreshCw, ArrowRightLeft, Search, Layers
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -59,6 +59,7 @@ const DashboardLayout = () => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [serviceCount, setServiceCount] = useState(0);
   const [domainCount, setDomainCount] = useState(0);
+  const [unpaidInvoiceCount, setUnpaidInvoiceCount] = useState(0);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
@@ -95,10 +96,11 @@ const DashboardLayout = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [{ data: txns }, { count }, { count: dCount }] = await Promise.all([
+      const [{ data: txns }, { count }, { count: dCount }, { count: invCount }] = await Promise.all([
         supabase.from("wallet_transactions").select("amount_bdt, type").eq("user_id", user.id).eq("status", "completed"),
         supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("service_type", "domain"),
+        supabase.from("invoices").select("id", { count: "exact", head: true }).eq("user_id", user.id).in("status", ["unpaid", "overdue"]),
       ]);
       if (txns) {
         const balance = txns.reduce((acc, t) => {
@@ -110,6 +112,7 @@ const DashboardLayout = () => {
       }
       setServiceCount(count || 0);
       setDomainCount(dCount || 0);
+      setUnpaidInvoiceCount(invCount || 0);
     };
     fetchData();
   }, [user]);
@@ -154,8 +157,9 @@ const DashboardLayout = () => {
       icon: CreditCard,
       hasDropdown: true,
       children: [
-        { label: bn ? "ইনভয়েস" : "Invoices", href: "/dashboard/billing", icon: FileText },
-        { label: bn ? "ওয়ালেট" : "Wallet", href: "/dashboard/wallet", icon: Wallet },
+        { label: bn ? "আমার ইনভয়েস" : "My Invoice", href: "/dashboard/billing", icon: FileText, badge: unpaidInvoiceCount },
+        { label: bn ? "ম্যাস পেমেন্ট" : "Mass Payment", href: "/dashboard/billing", icon: Layers },
+        { label: bn ? "ফান্ড যোগ করুন" : "Add Funds", href: "/dashboard/wallet", icon: PlusCircle },
       ],
     },
     {
