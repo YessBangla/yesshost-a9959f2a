@@ -290,25 +290,19 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* ===== TOP MENUBAR ===== */}
-      <div className="w-full bg-primary text-primary-foreground sticky top-0 z-40 shadow-md">
-        <div className="flex items-center justify-between h-12 px-3 sm:px-4 lg:px-6 max-w-full">
-          {/* Left: Logo + Menu Items */}
-          <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors mr-2"
-            >
-              <Menu className="w-5 h-5 text-primary-foreground" />
-            </button>
+      <div className="w-full glass-surface sticky top-0 z-40">
+        <div className="flex items-center justify-end h-11 px-3 sm:px-4 lg:px-6 max-w-full">
+          {/* Mobile hamburger (left) */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="lg:hidden p-2 rounded-lg hover:bg-primary/10 transition-colors mr-auto"
+          >
+            <Menu className="w-5 h-5 text-foreground" />
+          </button>
 
-            {/* Logo */}
-            <Link to="/dashboard" className="hidden lg:flex items-center mr-4 shrink-0">
-              <img src={logoWhite} alt="Yess Host" className="h-7" />
-            </Link>
-
-            {/* Top menu items with pipe separators */}
-            {topMenuItems.map((item, index) => (
+          {/* Right-aligned menu items */}
+          <div className="hidden lg:flex items-center gap-0 overflow-x-auto no-scrollbar">
+            {topMenuItems.map((item) => (
               <div
                 key={item.label}
                 className="relative flex items-center"
@@ -323,10 +317,10 @@ const DashboardLayout = () => {
                       setActiveTopMenu(activeTopMenu === item.label ? null : item.label);
                     }
                   }}
-                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all hover:bg-white/15 rounded ${
+                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all hover:bg-primary/10 hover:text-primary rounded ${
                     location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
-                      ? "bg-white/15 font-semibold text-primary-foreground"
-                      : "text-primary-foreground/90"
+                      ? "bg-primary/10 font-semibold text-primary"
+                      : "text-foreground/80"
                   }`}
                 >
                   {item.label}
@@ -341,9 +335,9 @@ const DashboardLayout = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 4 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full left-0 pt-1 z-50"
+                      className="absolute top-full right-0 pt-1 z-50"
                     >
-                      <div className="bg-card text-card-foreground rounded-lg shadow-xl border border-border/60 py-1 min-w-[200px]">
+                      <div className="glass-card py-1 min-w-[200px]">
                         {item.children.map((child) => {
                           const Icon = child.icon;
                           return (
@@ -378,14 +372,14 @@ const DashboardLayout = () => {
             {/* Wallet Balance */}
             <Link
               to="/dashboard/wallet"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition-colors text-[12px] font-semibold whitespace-nowrap text-primary-foreground border border-white/20"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors text-[12px] font-semibold whitespace-nowrap text-foreground border border-border"
             >
-              <Wallet className="w-3.5 h-3.5" />
+              <Wallet className="w-3.5 h-3.5 text-primary" />
               <span>TK {formatAmount(walletBalance, lang)} BDT</span>
             </Link>
 
             {/* Notification Bell */}
-            <div className="[&_button]:text-primary-foreground [&_button]:hover:bg-white/15">
+            <div className="[&_button]:text-foreground [&_button]:hover:bg-primary/10">
               <NotificationBell />
             </div>
 
@@ -393,21 +387,21 @@ const DashboardLayout = () => {
             <div className="relative">
               <button
                 onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-white/20 hover:bg-white/15 rounded-r-lg pr-2 py-1 transition-colors"
+                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-border hover:bg-primary/10 rounded-r-lg pr-2 py-1 transition-colors"
               >
-                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
+                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-border shrink-0">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile?.full_name || "User"} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-white/20 flex items-center justify-center text-primary-foreground text-[11px] font-bold">
+                    <div className="w-full h-full bg-primary/15 flex items-center justify-center text-primary text-[11px] font-bold">
                       {(profile?.full_name || "U").charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-primary-foreground">
+                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-foreground">
                   {profile?.full_name || "User"}
                 </span>
-                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-primary-foreground/70" />
+                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-muted-foreground" />
               </button>
 
               {/* User Dropdown */}
@@ -463,7 +457,7 @@ const DashboardLayout = () => {
       <div className="flex-1 flex min-h-0">
         {/* Desktop Sidebar */}
         <aside
-          className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-12 h-[calc(100vh-3rem)] z-20 ${
+          className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-11 h-[calc(100vh-2.75rem)] z-20 ${
             collapsed ? "w-[60px]" : "w-[250px]"
           }`}
         >
