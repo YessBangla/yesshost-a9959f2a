@@ -23,6 +23,9 @@ const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
@@ -45,6 +48,24 @@ const AdminLayout = () => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // ⌘K shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+        setSearchQuery("");
+      }
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen) setTimeout(() => searchInputRef.current?.focus(), 100);
+  }, [searchOpen]);
 
   const menuSections = [
     {
@@ -235,12 +256,22 @@ const AdminLayout = () => {
 
           <div className="flex-1 hidden sm:block" />
 
-          {/* Search - hidden on mobile */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/40 text-muted-foreground/60 text-xs w-52 cursor-pointer hover:bg-secondary/70 transition-colors">
+          {/* Search trigger */}
+          <button
+            onClick={() => { setSearchOpen(true); setSearchQuery(""); }}
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/40 text-muted-foreground/60 text-xs w-52 hover:bg-secondary/70 transition-colors"
+          >
             <Search className="w-3.5 h-3.5" />
             <span>{bn ? "সার্চ..." : "Search..."}</span>
             <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-background/80 border border-border/50 font-mono">⌘K</kbd>
-          </div>
+          </button>
+          {/* Mobile search icon */}
+          <button
+            onClick={() => { setSearchOpen(true); setSearchQuery(""); }}
+            className="md:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-secondary/60 text-muted-foreground"
+          >
+            <Search className="w-4.5 h-4.5" />
+          </button>
 
           {/* Language */}
           <button
@@ -317,6 +348,95 @@ const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
+      {/* Search Command Palette */}
+      <AnimatePresence>
+        {searchOpen && (
+          <div className="fixed inset-0 z-[100]" onClick={() => setSearchOpen(false)}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <div className="relative flex justify-center pt-[15vh] px-4">
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.96 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-lg bg-card border border-border/60 rounded-2xl shadow-2xl overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Search Input */}
+                <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border/40">
+                  <Search className="w-5 h-5 text-muted-foreground/60 shrink-0" />
+                  <input
+                    ref={searchInputRef}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={bn ? "পেজ, মেনু বা ফিচার সার্চ করুন..." : "Search pages, menus or features..."}
+                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
+                  />
+                  <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 border border-border/50 text-muted-foreground font-mono">ESC</kbd>
+                </div>
+
+                {/* Results */}
+                <div className="max-h-[50vh] overflow-y-auto py-2">
+                  {menuSections.map((section) => {
+                    const filtered = section.items.filter(item =>
+                      !searchQuery ||
+                      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      item.url.toLowerCase().includes(searchQuery.toLowerCase())
+                    );
+                    if (filtered.length === 0) return null;
+                    return (
+                      <div key={section.label}>
+                        <p className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                          {section.label}
+                        </p>
+                        {filtered.map((item) => {
+                          const isActive = item.url === "/admin" ? location.pathname === "/admin" : location.pathname.startsWith(item.url);
+                          return (
+                            <button
+                              key={item.url}
+                              onClick={() => { navigate(item.url); setSearchOpen(false); }}
+                              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                                isActive
+                                  ? "text-destructive bg-destructive/5"
+                                  : "text-foreground/80 hover:bg-muted/50 hover:text-foreground"
+                              }`}
+                            >
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                                isActive ? "bg-destructive/10 text-destructive" : "bg-muted/60 text-muted-foreground"
+                              }`}>
+                                <item.icon className="w-4 h-4" />
+                              </div>
+                              <span className="font-medium">{item.title}</span>
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 ml-auto" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+
+                  {/* No results */}
+                  {searchQuery && menuSections.every(s => s.items.every(i =>
+                    !i.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                    !i.url.toLowerCase().includes(searchQuery.toLowerCase())
+                  )) && (
+                    <div className="py-8 text-center">
+                      <Search className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">{bn ? "কিছু পাওয়া যায়নি" : "No results found"}</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <AlertDialog open={signOutOpen} onOpenChange={setSignOutOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
