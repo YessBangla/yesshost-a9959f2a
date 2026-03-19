@@ -318,7 +318,7 @@ const AdminLayout = () => {
                   </div>
                   <div className="border-t border-border/40 pt-1">
                     <button
-                      onClick={() => { setUserMenuOpen(false); handleSignOut(); }}
+                      onClick={() => { setUserMenuOpen(false); setSignOutOpen(true); }}
                       className="flex items-center gap-2.5 px-3 py-2 text-sm text-destructive hover:bg-destructive/8 w-full transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
