@@ -79,11 +79,12 @@ const LiveChatWidget = () => {
 
   const broadcastTyping = useCallback(() => {
     if (!chatId) return;
-    supabase.channel(`live-chat-${chatId}`).send({
+    const channel = supabase.channel(`live-chat-${chatId}`);
+    channel.send({
       type: "broadcast",
       event: "typing",
       payload: { sender: "visitor" },
-    });
+    }).catch(() => {});
   }, [chatId]);
 
   // Auto-scroll
