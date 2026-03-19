@@ -332,6 +332,12 @@ const DashboardLayout = () => {
                   <Link to="/dashboard/billing" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
                     <CreditCard className="w-4 h-4" /> {bn ? "বিলিং" : "Billing"}
                   </Link>
+                  <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
+                    <KeyRound className="w-4 h-4" /> {bn ? "পাসওয়ার্ড পরিবর্তন" : "Change Password"}
+                  </Link>
+                  <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
+                    <Bell className="w-4 h-4" /> {bn ? "নোটিফিকেশন সেটিংস" : "Notification Settings"}
+                  </Link>
                   <button onClick={() => setLang(lang === "bn" ? "en" : "bn")} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors w-full">
                     <Globe className="w-4 h-4" /> {lang === "bn" ? "English" : "বাংলা"}
                   </button>
