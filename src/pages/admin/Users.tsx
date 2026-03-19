@@ -125,14 +125,14 @@ const AdminUsers = () => {
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
           />
         </div>
-        <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50">
-          {(["all", "admin", "user"] as const).map(f => (
+        <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50 flex-wrap">
+          {(["all", "admin", "call_center", "user"] as const).map(f => (
             <button
               key={f}
               onClick={() => setRoleFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${roleFilter === f ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
             >
-              {f === "all" ? (isBn ? "সকল" : "All") : f === "admin" ? (isBn ? "অ্যাডমিন" : "Admin") : (isBn ? "ইউজার" : "User")}
+              {f === "all" ? (isBn ? "সকল" : "All") : f === "admin" ? (isBn ? "অ্যাডমিন" : "Admin") : f === "call_center" ? (isBn ? "কল সেন্টার" : "Call Center") : (isBn ? "ইউজার" : "User")}
             </button>
           ))}
         </div>
