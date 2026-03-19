@@ -168,11 +168,12 @@ const HostingPlans = () => {
 
             return (
               <motion.div
+                id={`cat-${cat.key}`}
                 key={cat.key}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + idx * 0.08, duration: 0.45, ease }}
-                className="bg-card border border-border rounded-2xl overflow-hidden"
+                className="bg-card border border-border rounded-2xl overflow-hidden scroll-mt-24"
               >
                 {/* Category Header */}
                 <div className="p-5 md:p-6 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
