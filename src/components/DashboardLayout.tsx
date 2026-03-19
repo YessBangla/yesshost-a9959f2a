@@ -92,6 +92,7 @@ const DashboardLayout = () => {
     { title: tr("dash.profile"), url: "/dashboard/profile", icon: UserCircle },
   ];
 
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const handleSignOut = async () => { await signOut(); navigate("/"); };
   const currentBreadcrumb = breadcrumbMap[location.pathname];
   const currentPageTitle = sidebarItems.find(i =>
