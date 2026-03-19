@@ -25,6 +25,7 @@ import DashboardSupport from "./pages/dashboard/Support";
 import DashboardDomains from "./pages/dashboard/Domains";
 import DashboardProfile from "./pages/dashboard/Profile";
 import DashboardOrders from "./pages/dashboard/Orders";
+import DashboardReseller from "./pages/dashboard/Reseller";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUsers from "./pages/admin/Users";
 import AdminServices from "./pages/admin/Services";
