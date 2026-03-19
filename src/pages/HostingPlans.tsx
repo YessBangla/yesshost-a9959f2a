@@ -205,7 +205,7 @@ const HostingPlans = () => {
                           )}
 
                           <div className="mb-3">
-                            <span className="text-xl font-extrabold text-foreground">{formatPrice(plan.price_bdt)}</span>
+                            <span className="text-xl font-extrabold text-foreground">{formatPrice(plan.price_bdt, lang)}</span>
                             <span className="text-xs text-muted-foreground">/{bn ? "মাস" : "mo"}</span>
                             {plan.annual_price_bdt && (
                               <p className="text-[10px] text-muted-foreground mt-0.5">
