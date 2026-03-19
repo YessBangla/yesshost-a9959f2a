@@ -276,11 +276,13 @@ const DashboardBilling = () => {
           >
             <tab.icon className="w-4 h-4" />
             {tab.label}
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-              activeTab === tab.id ? "bg-primary-foreground/20" : "bg-secondary"
-            }`}>
-              {tab.count}
-            </span>
+            {tab.count !== undefined && (
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                activeTab === tab.id ? "bg-primary-foreground/20" : "bg-secondary"
+              }`}>
+                {tab.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
