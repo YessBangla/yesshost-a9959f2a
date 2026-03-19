@@ -183,11 +183,24 @@ const ResellerDashboard = () => {
           <Server className="w-10 h-10 text-muted-foreground/30" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground">{bn ? "রিসেলার প্যাকেজ নেই" : "No Reseller Package"}</h2>
+          <h2 className="text-xl font-bold text-foreground">
+            {loadError ? (bn ? "প্যাকেজ লোড করা যায়নি" : "Failed to load reseller package") : (bn ? "রিসেলার প্যাকেজ নেই" : "No Reseller Package")}
+          </h2>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-            {bn ? "রিসেলার হোস্টিং ক্রয় করলে এখানে আপনার প্যাকেজ দেখা যাবে এবং ক্লায়েন্ট অ্যাকাউন্ট পরিচালনা করতে পারবেন।" : "Purchase a reseller hosting plan to manage client accounts here."}
+            {loadError
+              ? (bn ? "আপনার ডেটা পড়তে সমস্যা হয়েছে। আবার চেষ্টা করুন।" : "There was a problem reading your data. Please retry.")
+              : (bn ? "রিসেলার হোস্টিং ক্রয় করলে এখানে আপনার প্যাকেজ দেখা যাবে এবং ক্লায়েন্ট অ্যাকাউন্ট পরিচালনা করতে পারবেন।" : "Purchase a reseller hosting plan to manage client accounts here.")}
           </p>
         </div>
+        {loadError && (
+          <button
+            onClick={fetchPackages}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+          >
+            <RefreshCw className="w-4 h-4" />
+            {bn ? "আবার চেষ্টা করুন" : "Try again"}
+          </button>
+        )}
       </div>
     );
   }
