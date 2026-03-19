@@ -82,6 +82,7 @@ const AdminLayout = () => {
     i.url === "/admin" ? location.pathname === "/admin" : location.pathname.startsWith(i.url)
   );
 
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const handleSignOut = async () => { await signOut(); navigate("/"); };
 
   const handleDragEnd = useCallback((_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
