@@ -409,6 +409,19 @@ const AdminLayout = () => {
                     ref={searchInputRef}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && searchQuery) {
+                        const allItems = menuSections.flatMap(s => s.items);
+                        const match = allItems.find(item =>
+                          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          item.url.toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+                        if (match) {
+                          navigate(match.url);
+                          setSearchOpen(false);
+                        }
+                      }
+                    }}
                     placeholder={bn ? "পেজ, মেনু বা ফিচার সার্চ করুন..." : "Search pages, menus or features..."}
                     className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
                   />
