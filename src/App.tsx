@@ -9,6 +9,8 @@ import { CartProvider } from "@/contexts/CartContext";
 import CartDrawer from "@/components/CartDrawer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
+import CallCenterRoute from "@/components/CallCenterRoute";
+import CallCenterLayout from "@/components/CallCenterLayout";
 import DashboardLayout from "@/components/DashboardLayout";
 import AdminLayout from "@/components/AdminLayout";
 import Index from "./pages/Index";
@@ -54,6 +56,11 @@ import HostingPlans from "./pages/HostingPlans";
 import Checkout from "./pages/Checkout";
 import PaymentMethods from "./pages/PaymentMethods";
 import { PaymentSuccess, PaymentFail, PaymentCancel } from "./pages/PaymentResult";
+import AdminLogin from "./pages/AdminLogin";
+import CallCenterDashboard from "./pages/callcenter/Dashboard";
+import CallCenterOrders from "./pages/callcenter/Orders";
+import CallCenterLiveChat from "./pages/callcenter/LiveChat";
+import CallCenterTickets from "./pages/callcenter/Tickets";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +77,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment" element={<PaymentMethods />} />
@@ -140,6 +148,19 @@ const App = () => (
               <Route path="chat-rooms" element={<AdminChatRooms />} />
               <Route path="contact-messages" element={<AdminContactMessages />} />
               <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
+            </Route>
+            <Route
+              path="/call-center"
+              element={
+                <CallCenterRoute>
+                  <CallCenterLayout />
+                </CallCenterRoute>
+              }
+            >
+              <Route index element={<CallCenterDashboard />} />
+              <Route path="orders" element={<CallCenterOrders />} />
+              <Route path="live-chat" element={<CallCenterLiveChat />} />
+              <Route path="tickets" element={<CallCenterTickets />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

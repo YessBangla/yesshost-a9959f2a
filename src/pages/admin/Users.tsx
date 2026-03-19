@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users as UsersIcon, Search, Shield, ShieldOff, Eye, X,
-  Mail, Phone, MapPin, Building2, Calendar, Globe, Filter
+  Mail, Phone, MapPin, Building2, Calendar, Globe, Filter, Headphones
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -20,7 +20,7 @@ const AdminUsers = () => {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user">("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user" | "call_center">("all");
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
 
@@ -55,6 +55,17 @@ const AdminUsers = () => {
     fetchUsers();
   };
 
+  const toggleCallCenterRole = async (userId: string, hasCC: boolean) => {
+    if (hasCC) {
+      const { data: roleData } = await supabase.from("user_roles").select("id").eq("user_id", userId).eq("role", "call_center" as any).single();
+      if (roleData) await supabase.from("user_roles").delete().eq("id", roleData.id);
+    } else {
+      await supabase.from("user_roles").insert({ user_id: userId, role: "call_center" as any });
+    }
+    toast({ title: isBn ? "কল সেন্টার রোল আপডেট হয়েছে" : "Call center role updated" });
+    fetchUsers();
+  };
+
   const filtered = users.filter(u => {
     const matchSearch = !search ||
       (u.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -62,13 +73,15 @@ const AdminUsers = () => {
       (u.company_name || "").toLowerCase().includes(search.toLowerCase());
     const matchRole = roleFilter === "all" ||
       (roleFilter === "admin" && u.roles.includes("admin")) ||
-      (roleFilter === "user" && !u.roles.includes("admin"));
+      (roleFilter === "call_center" && u.roles.includes("call_center")) ||
+      (roleFilter === "user" && !u.roles.includes("admin") && !u.roles.includes("call_center"));
     return matchSearch && matchRole;
   });
 
   const stats = {
     total: users.length,
     admins: users.filter(u => u.roles.includes("admin")).length,
+    callCenter: users.filter(u => u.roles.includes("call_center")).length,
     thisMonth: users.filter(u => {
       const d = new Date(u.created_at);
       const now = new Date();
@@ -87,10 +100,11 @@ const AdminUsers = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: isBn ? "মোট ইউজার" : "Total Users", value: stats.total, color: "text-primary" },
           { label: isBn ? "অ্যাডমিন" : "Admins", value: stats.admins, color: "text-destructive" },
+          { label: isBn ? "কল সেন্টার" : "Call Center", value: stats.callCenter, color: "text-blue-500" },
           { label: isBn ? "এই মাসে নতুন" : "New This Month", value: stats.thisMonth, color: "text-success" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-card p-4 rounded-xl">
@@ -111,14 +125,14 @@ const AdminUsers = () => {
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
           />
         </div>
-        <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50">
-          {(["all", "admin", "user"] as const).map(f => (
+        <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50 flex-wrap">
+          {(["all", "admin", "call_center", "user"] as const).map(f => (
             <button
               key={f}
               onClick={() => setRoleFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${roleFilter === f ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
             >
-              {f === "all" ? (isBn ? "সকল" : "All") : f === "admin" ? (isBn ? "অ্যাডমিন" : "Admin") : (isBn ? "ইউজার" : "User")}
+              {f === "all" ? (isBn ? "সকল" : "All") : f === "admin" ? (isBn ? "অ্যাডমিন" : "Admin") : f === "call_center" ? (isBn ? "কল সেন্টার" : "Call Center") : (isBn ? "ইউজার" : "User")}
             </button>
           ))}
         </div>
@@ -165,12 +179,10 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex gap-1 flex-wrap">
-                        {isAdmin ? (
-                          <Badge variant="destructive" className="text-[10px]">Admin</Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-[10px]">User</Badge>
-                        )}
+                        {isAdmin && <Badge variant="destructive" className="text-[10px]">Admin</Badge>}
+                        {u.roles.includes("call_center") && <Badge className="text-[10px] bg-blue-500/10 text-blue-500 border-0">CC</Badge>}
                         {u.roles.includes("moderator") && <Badge variant="outline" className="text-[10px]">Mod</Badge>}
+                        {!isAdmin && !u.roles.includes("call_center") && <Badge variant="secondary" className="text-[10px]">User</Badge>}
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
@@ -188,6 +200,13 @@ const AdminUsers = () => {
                           title={isAdmin ? (isBn ? "অ্যাডমিন সরান" : "Remove Admin") : (isBn ? "অ্যাডমিন করুন" : "Make Admin")}
                         >
                           {isAdmin ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => toggleCallCenterRole(u.user_id, u.roles.includes("call_center"))}
+                          className={`p-2 rounded-lg transition-colors ${u.roles.includes("call_center") ? "hover:bg-blue-500/10 text-blue-500" : "hover:bg-secondary/60 text-muted-foreground"}`}
+                          title={u.roles.includes("call_center") ? (isBn ? "কল সেন্টার সরান" : "Remove Call Center") : (isBn ? "কল সেন্টার করুন" : "Make Call Center")}
+                        >
+                          <Headphones className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
