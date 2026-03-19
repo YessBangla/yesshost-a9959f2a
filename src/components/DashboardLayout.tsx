@@ -109,6 +109,7 @@ const DashboardLayout = () => {
         setWalletBalance(Math.max(0, balance));
       }
       setServiceCount(count || 0);
+      setDomainCount(dCount || 0);
     };
     fetchData();
   }, [user]);
