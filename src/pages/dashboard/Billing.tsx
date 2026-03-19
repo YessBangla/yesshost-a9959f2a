@@ -9,6 +9,8 @@ import type { Tables } from "@/integrations/supabase/types";
 import InvoiceReport from "@/components/InvoiceReport";
 import { formatAmount } from "@/lib/formatPrice";
 import jsPDF from "jspdf";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart3 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -59,7 +61,7 @@ const paymentMethods = [
   { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, desc: "Manual Bank Transfer", descBn: "ম্যানুয়াল ব্যাংক ট্রান্সফার", ready: true },
 ];
 
-type TabType = "invoices" | "history";
+type TabType = "invoices" | "history" | "chart";
 
 const DashboardBilling = () => {
   const { user } = useAuth();
@@ -200,6 +202,26 @@ const DashboardBilling = () => {
 
     doc.save(`payment-history-${format(new Date(), "yyyy-MM-dd")}.pdf`);
   };
+  const monthlyData = useMemo(() => {
+    const map = new Map<string, number>();
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      map.set(key, 0);
+    }
+    paidInvoicesAll.forEach(inv => {
+      if (!inv.paid_at) return;
+      const d = new Date(inv.paid_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (map.has(key)) map.set(key, (map.get(key) || 0) + Number(inv.amount_bdt));
+    });
+    return Array.from(map.entries()).map(([month, amount]) => {
+      const [y, m] = month.split("-");
+      const label = new Date(Number(y), Number(m) - 1).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short" });
+      return { month: label, amount };
+    });
+  }, [paidInvoicesAll, isBn]);
 
   if (loading) return <BillingSkeleton />;
 
@@ -207,9 +229,10 @@ const DashboardBilling = () => {
   const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
   const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
 
-  const tabs: { id: TabType; label: string; icon: typeof FileText; count: number }[] = [
+  const tabs: { id: TabType; label: string; icon: typeof FileText; count?: number }[] = [
     { id: "invoices", label: isBn ? "ইনভয়েস" : "Invoices", icon: FileText, count: invoices.length },
     { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoicesAll.length },
+    { id: "chart", label: isBn ? "মাসিক সামারি" : "Monthly Summary", icon: BarChart3 },
   ];
 
   return (
@@ -253,11 +276,13 @@ const DashboardBilling = () => {
           >
             <tab.icon className="w-4 h-4" />
             {tab.label}
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-              activeTab === tab.id ? "bg-primary-foreground/20" : "bg-secondary"
-            }`}>
-              {tab.count}
-            </span>
+            {tab.count !== undefined && (
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                activeTab === tab.id ? "bg-primary-foreground/20" : "bg-secondary"
+              }`}>
+                {tab.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -493,6 +518,36 @@ const DashboardBilling = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Monthly Chart Tab */}
+      {activeTab === "chart" && (
+        <div className="glass-card rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
+            {isBn ? "গত ৬ মাসের পেমেন্ট সামারি" : "Last 6 Months Payment Summary"}
+          </h3>
+          {monthlyData.every(d => d.amount === 0) ? (
+            <EmptyState
+              icon={BarChart3}
+              title={isBn ? "কোনো ডেটা নেই" : "No Data"}
+              description={isBn ? "গত ৬ মাসে কোনো পেমেন্ট পাওয়া যায়নি" : "No payments found in the last 6 months"}
+            />
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={monthlyData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} className="fill-muted-foreground" />
+                <YAxis tick={{ fontSize: 11 }} className="fill-muted-foreground" tickFormatter={(v) => `৳${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`} />
+                <Tooltip
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }}
+                  labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+                  formatter={(value: number) => [`৳${value.toLocaleString()}`, isBn ? "পরিমাণ" : "Amount"]}
+                />
+                <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
       )}
 
       {/* Payment Dialog */}
