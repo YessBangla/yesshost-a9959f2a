@@ -28,6 +28,12 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background hero-gradient px-4">
+      <SEOHead
+        title={bn ? "লগইন - Yess Host" : "Login - Yess Host"}
+        description={bn ? "আপনার Yess Host অ্যাকাউন্টে লগইন করুন।" : "Sign in to your Yess Host account to manage hosting, domains and services."}
+        canonical="/login"
+        noindex
+      />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-10 mx-auto mb-6" /></Link>
