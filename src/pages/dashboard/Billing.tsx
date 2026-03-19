@@ -223,6 +223,12 @@ const DashboardBilling = () => {
     });
   }, [paidInvoicesAll, isBn]);
 
+  if (loading) return <BillingSkeleton />;
+
+  const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
+  const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
+  const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
+
   const tabs: { id: TabType; label: string; icon: typeof FileText; count?: number }[] = [
     { id: "invoices", label: isBn ? "ইনভয়েস" : "Invoices", icon: FileText, count: invoices.length },
     { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoicesAll.length },
