@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Server, Shield, Layers, Users, Globe, HardDrive, Wifi, Zap, Clock,
+  Server, Shield, Globe, HardDrive, Zap, Clock,
   Headphones, Check, ArrowRight, Star, Award, TrendingUp, Lock,
-  Monitor, Settings, ChevronDown, ShoppingCart
+  Monitor, ChevronDown, ShoppingCart
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
