@@ -47,6 +47,7 @@ const Checkout = () => {
   const [selectedPayment, setSelectedPayment] = useState("");
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrderNumber, setPlacedOrderNumber] = useState("");
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
@@ -62,13 +63,11 @@ const Checkout = () => {
   const [orderNote, setOrderNote] = useState("");
 
   const parseBdtPrice = (price: string): number => {
-    // Convert Bengali numerals to ASCII
     const ascii = price.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
     return parseInt(ascii.replace(/[^\d]/g, ""), 10) || 0;
   };
   const subtotalBdt = items.reduce((sum, item) => sum + parseBdtPrice(item.price_bdt), 0);
 
-  // Calculate discount
   const discountAmount = appliedCoupon
     ? appliedCoupon.discount_type === "percentage"
       ? Math.min(
@@ -99,21 +98,18 @@ const Checkout = () => {
         return;
       }
 
-      // Check expiry
       if (data.expires_at && new Date(data.expires_at) < new Date()) {
         setCouponError(bn ? "কুপনের মেয়াদ শেষ হয়ে গেছে" : "Coupon has expired");
         setCouponLoading(false);
         return;
       }
 
-      // Check max uses
       if (data.max_uses !== null && data.used_count >= data.max_uses) {
         setCouponError(bn ? "কুপন ব্যবহারের সীমা শেষ" : "Coupon usage limit reached");
         setCouponLoading(false);
         return;
       }
 
-      // Check min order
       if (data.min_order_amount && subtotalBdt < data.min_order_amount) {
         setCouponError(
           bn
@@ -163,65 +159,66 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      const domainItems = items.filter(i => i.type === "domain");
-      const hostingItems = items.filter(i => i.type === "hosting");
-      const themeItems = items.filter(i => i.type === "theme");
+      // Generate order number
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
 
-      // Create domain services
-      for (const item of domainItems) {
-        const { error } = await supabase.from("services").insert({
+      // 1. Create the order
+      const { data: orderData, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          order_number: orderNumber,
           user_id: user.id,
-          name: `Domain: ${item.domain}`,
-          service_type: "domain" as const,
-          domain: item.domain,
-          price_bdt: parseBdtPrice(item.price_bdt),
-          billing_cycle: "yearly",
+          subtotal_bdt: subtotalBdt,
+          discount_bdt: discountAmount,
+          total_bdt: totalBdt,
+          payment_method: selectedPayment,
+          coupon_code: appliedCoupon?.code || null,
+          order_note: orderNote.trim() || null,
           status: "pending" as const,
-        });
-        if (error) throw error;
-      }
+          payment_status: "unpaid",
+        })
+        .select("id")
+        .single();
 
-      // Create hosting services
-      for (const item of hostingItems) {
-        const { error } = await supabase.from("services").insert({
-          user_id: user.id,
-          name: item.name,
-          service_type: item.category === "vps" ? "vps" : item.category === "reseller" ? "reseller" : "shared_hosting",
-          price_bdt: parseBdtPrice(item.price_bdt),
-          billing_cycle: item.billing_cycle || "monthly",
-          plan: item.plan_id,
-          status: "pending" as const,
-        });
-        if (error) throw error;
-      }
+      if (orderError) throw orderError;
+      const orderId = orderData.id;
 
-      // Create theme orders
-      for (const item of themeItems) {
-        const { error } = await supabase.from("theme_orders").insert({
-          user_id: user.id,
-          theme_id: item.theme_id,
-          amount_bdt: parseBdtPrice(item.price_bdt),
-          include_hosting: item.include_hosting || false,
-          status: "pending",
-        });
-        if (error) throw error;
-      }
+      // 2. Create order items
+      const orderItems = items.map(item => ({
+        order_id: orderId,
+        item_type: item.type,
+        item_name: item.name,
+        item_description: item.description || null,
+        price_bdt: parseBdtPrice(item.price_bdt),
+        domain_name: item.domain || null,
+        domain_ext: item.ext || null,
+        plan_id: item.plan_id || null,
+        billing_cycle: item.billing_cycle || null,
+        hosting_category: item.category || null,
+        theme_id: item.theme_id || null,
+        theme_slug: item.theme_slug || null,
+        include_hosting: item.include_hosting || false,
+      }));
 
-      // Build description
-      const descParts: string[] = [];
-      if (domainItems.length) descParts.push(`Domain: ${domainItems.map(i => i.domain).join(", ")}`);
-      if (hostingItems.length) descParts.push(`Hosting: ${hostingItems.map(i => i.name).join(", ")}`);
-      if (themeItems.length) descParts.push(`Theme: ${themeItems.map(i => i.name).join(", ")}`);
-      if (appliedCoupon) descParts.push(`Coupon: ${appliedCoupon.code} (-৳${discountAmount})`);
-      if (orderNote.trim()) descParts.push(`Note: ${orderNote.trim().slice(0, 500)}`);
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
+      if (itemsError) throw itemsError;
 
-      // Increment coupon used_count
+      // 3. Increment coupon usage
       if (appliedCoupon) {
         await supabase.rpc("increment_coupon_usage" as any, { coupon_id: appliedCoupon.id });
       }
 
-      // Create invoice
+      // 4. Create invoice
       const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
+      const descParts: string[] = [];
+      const domainItems = items.filter(i => i.type === "domain");
+      const hostingItems = items.filter(i => i.type === "hosting");
+      const themeItems = items.filter(i => i.type === "theme");
+      if (domainItems.length) descParts.push(`Domain: ${domainItems.map(i => i.domain).join(", ")}`);
+      if (hostingItems.length) descParts.push(`Hosting: ${hostingItems.map(i => i.name).join(", ")}`);
+      if (themeItems.length) descParts.push(`Theme: ${themeItems.map(i => i.name).join(", ")}`);
+      if (appliedCoupon) descParts.push(`Coupon: ${appliedCoupon.code} (-৳${discountAmount})`);
+
       const { data: invoiceData, error: invoiceError } = await supabase.from("invoices").insert({
         user_id: user.id,
         invoice_number: invoiceNumber,
@@ -233,15 +230,17 @@ const Checkout = () => {
       }).select("id").single();
 
       if (invoiceError) throw invoiceError;
-      const invoiceId = invoiceData.id;
 
+      // 5. Link invoice to order
+      await supabase.from("orders").update({ invoice_id: invoiceData.id }).eq("id", orderId);
+
+      // 6. Route to payment
       const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
-      // Route to payment gateway
       if (selectedPayment === "sslcommerz") {
         const { data, error } = await supabase.functions.invoke("sslcommerz-init", {
           body: {
-            invoice_id: invoiceId,
+            invoice_id: invoiceData.id,
             amount: totalBdt,
             customer_name: profile?.full_name || "Customer",
             customer_email: user.email,
@@ -262,7 +261,7 @@ const Checkout = () => {
         }
       } else if (selectedPayment === "bkash") {
         const { data, error } = await supabase.functions.invoke("bkash-init", {
-          body: { invoice_id: invoiceId, amount: totalBdt, payer_reference: user.email },
+          body: { invoice_id: invoiceData.id, amount: totalBdt, payer_reference: user.email },
         });
         if (error || data?.error) {
           if (data?.is_sandbox) {
@@ -275,7 +274,7 @@ const Checkout = () => {
         if (data?.bkash_url) { clearCart(); window.location.href = data.bkash_url; return; }
       } else if (selectedPayment === "nagad") {
         const { data, error } = await supabase.functions.invoke("nagad-init", {
-          body: { invoice_id: invoiceId, amount: totalBdt },
+          body: { invoice_id: invoiceData.id, amount: totalBdt },
         });
         if (error || data?.error) {
           if (data?.is_sandbox) {
@@ -286,11 +285,14 @@ const Checkout = () => {
           throw new Error(data?.error || error?.message);
         }
       } else if (selectedPayment === "bank") {
+        // Mark order as confirmed (awaiting bank transfer)
+        await supabase.from("orders").update({ status: "confirmed" as const, confirmed_at: new Date().toISOString() }).eq("id", orderId);
+        setPlacedOrderNumber(orderNumber);
         setOrderPlaced(true);
         clearCart();
         toast({
           title: bn ? "অর্ডার সফল!" : "Order Placed!",
-          description: bn ? `ইনভয়েস: ${invoiceNumber}। ব্যাংক ট্রান্সফারের পর আমাদের জানান।` : `Invoice: ${invoiceNumber}. Notify us after bank transfer.`,
+          description: bn ? `অর্ডার: ${orderNumber}। ব্যাংক ট্রান্সফারের পর আমাদের জানান।` : `Order: ${orderNumber}. Notify us after bank transfer.`,
         });
         return;
       }
@@ -311,6 +313,7 @@ const Checkout = () => {
               <CheckCircle2 className="w-10 h-10 text-primary" />
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">{bn ? "অর্ডার সফল হয়েছে!" : "Order Placed Successfully!"}</h1>
+            <p className="text-xs font-mono text-primary bg-primary/5 px-3 py-1.5 rounded-lg inline-block mb-4">{placedOrderNumber}</p>
             <p className="text-sm text-muted-foreground mb-6">
               {selectedPayment === "bank"
                 ? (bn ? "অনুগ্রহ করে নিচের ব্যাংক অ্যাকাউন্টে টাকা পাঠান এবং আমাদের জানান।" : "Please transfer the amount to our bank account and notify us.")
@@ -328,8 +331,8 @@ const Checkout = () => {
               </div>
             )}
             <div className="flex gap-3 justify-center">
-              <Link to="/dashboard/billing" className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
-                {bn ? "বিলিং দেখুন" : "View Billing"}
+              <Link to="/dashboard/orders" className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                {bn ? "অর্ডার ট্র্যাক করুন" : "Track Order"}
               </Link>
               <Link to="/" className="px-6 py-3 rounded-xl font-semibold text-sm border border-border hover:bg-secondary/60 text-foreground transition-all">
                 {bn ? "হোমে যান" : "Go Home"}

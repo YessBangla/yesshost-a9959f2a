@@ -1,66 +1,135 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingBag, FileText, CreditCard, Eye } from "lucide-react";
+import { ShoppingBag, Package, Clock, CheckCircle2, XCircle, Truck, CreditCard, Eye, ChevronDown, ChevronUp, Globe, Server, Palette } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import InvoiceReport from "@/components/InvoiceReport";
 import { formatAmount } from "@/lib/formatPrice";
 
-type Invoice = {
+type Order = {
   id: string;
-  invoice_number: string;
-  description: string | null;
-  amount_bdt: number;
+  order_number: string;
   status: string;
+  subtotal_bdt: number;
+  discount_bdt: number;
+  total_bdt: number;
   payment_method: string | null;
-  due_date: string | null;
-  paid_at: string | null;
+  payment_status: string;
+  coupon_code: string | null;
+  order_note: string | null;
   created_at: string;
-  service_id: string | null;
+  confirmed_at: string | null;
+  processed_at: string | null;
+  completed_at: string | null;
+  cancelled_at: string | null;
+  paid_at: string | null;
 };
 
-const statusConfig: Record<string, { label_en: string; label_bn: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  paid: { label_en: "Paid", label_bn: "পরিশোধিত", variant: "default" },
-  unpaid: { label_en: "Unpaid", label_bn: "অপরিশোধিত", variant: "secondary" },
-  overdue: { label_en: "Overdue", label_bn: "মেয়াদোত্তীর্ণ", variant: "destructive" },
-  cancelled: { label_en: "Cancelled", label_bn: "বাতিল", variant: "outline" },
-  refunded: { label_en: "Refunded", label_bn: "ফেরতকৃত", variant: "outline" },
+type OrderItem = {
+  id: string;
+  order_id: string;
+  item_type: string;
+  item_name: string;
+  item_description: string | null;
+  price_bdt: number;
+  domain_name: string | null;
+  provisioned_at: string | null;
+};
+
+const statusSteps = [
+  { key: "pending", icon: Clock, en: "Pending", bn: "পেন্ডিং" },
+  { key: "confirmed", icon: CheckCircle2, en: "Confirmed", bn: "কনফার্মড" },
+  { key: "processing", icon: Truck, en: "Processing", bn: "প্রসেসিং" },
+  { key: "active", icon: Package, en: "Active", bn: "সক্রিয়" },
+];
+
+const statusConfig: Record<string, { color: string; en: string; bn: string }> = {
+  pending: { color: "bg-amber-500/10 text-amber-600 border-amber-500/20", en: "Pending", bn: "পেন্ডিং" },
+  confirmed: { color: "bg-blue-500/10 text-blue-600 border-blue-500/20", en: "Confirmed", bn: "কনফার্মড" },
+  processing: { color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20", en: "Processing", bn: "প্রসেসিং" },
+  provisioning: { color: "bg-purple-500/10 text-purple-600 border-purple-500/20", en: "Provisioning", bn: "প্রভিশনিং" },
+  active: { color: "bg-green-500/10 text-green-600 border-green-500/20", en: "Active", bn: "সক্রিয়" },
+  completed: { color: "bg-green-500/10 text-green-600 border-green-500/20", en: "Completed", bn: "সম্পন্ন" },
+  cancelled: { color: "bg-destructive/10 text-destructive border-destructive/20", en: "Cancelled", bn: "বাতিল" },
+  refunded: { color: "bg-muted text-muted-foreground border-border", en: "Refunded", bn: "ফেরতকৃত" },
+};
+
+const itemIcon = (type: string) => {
+  switch (type) {
+    case "hosting": return Server;
+    case "theme": return Palette;
+    default: return Globe;
+  }
 };
 
 const OrdersPage = () => {
   const { lang } = useLanguage();
-  const isBn = lang === "bn";
+  const bn = lang === "bn";
   const { user } = useAuth();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
   const [loading, setLoading] = useState(true);
-  const [reportInvoice, setReportInvoice] = useState<Invoice | null>(null);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
-    supabase
-      .from("invoices")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setInvoices((data as Invoice[]) || []);
-        setLoading(false);
-      });
-  }, [user]);
+    const fetchOrders = async () => {
+      setLoading(true);
+      const { data: ordersData } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
-  const stats = {
-    total: invoices.length,
-    paid: invoices.filter((i) => i.status === "paid").length,
-    unpaid: invoices.filter((i) => i.status === "unpaid" || i.status === "overdue").length,
-    totalSpent: invoices.filter((i) => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0),
-  };
+      const ordersList = (ordersData || []) as Order[];
+      setOrders(ordersList);
+
+      // Fetch items for all orders
+      if (ordersList.length > 0) {
+        const orderIds = ordersList.map(o => o.id);
+        const { data: itemsData } = await supabase
+          .from("order_items")
+          .select("*")
+          .in("order_id", orderIds);
+
+        const grouped: Record<string, OrderItem[]> = {};
+        (itemsData || []).forEach((item: any) => {
+          if (!grouped[item.order_id]) grouped[item.order_id] = [];
+          grouped[item.order_id].push(item as OrderItem);
+        });
+        setOrderItems(grouped);
+      }
+      setLoading(false);
+    };
+    fetchOrders();
+
+    // Realtime subscription
+    const channel = supabase
+      .channel("user-orders")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => {
+        fetchOrders();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
 
   const formatDate = (d: string | null) => {
     if (!d) return "—";
-    return new Date(d).toLocaleDateString(isBn ? "bn-BD" : "en-US", { year: "numeric", month: "short", day: "numeric" });
+    return new Date(d).toLocaleDateString(bn ? "bn-BD" : "en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  };
+
+  const getStepIndex = (status: string) => {
+    const idx = statusSteps.findIndex(s => s.key === status);
+    return idx >= 0 ? idx : (status === "completed" ? statusSteps.length : -1);
+  };
+
+  const stats = {
+    total: orders.length,
+    active: orders.filter(o => ["active", "completed"].includes(o.status)).length,
+    pending: orders.filter(o => ["pending", "confirmed", "processing", "provisioning"].includes(o.status)).length,
+    totalSpent: orders.filter(o => o.payment_status === "paid").reduce((s, o) => s + Number(o.total_bdt), 0),
   };
 
   if (loading) {
@@ -75,20 +144,20 @@ const OrdersPage = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">
-          {isBn ? "অর্ডার হিস্ট্রি" : "Order History"}
+          {bn ? "অর্ডার ট্র্যাকিং" : "Order Tracking"}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {isBn ? "আপনার সকল অর্ডার ও পেমেন্ট স্ট্যাটাস" : "All your orders and payment status"}
+          {bn ? "আপনার সকল অর্ডারের রিয়েলটাইম স্ট্যাটাস" : "Real-time status of all your orders"}
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: isBn ? "মোট অর্ডার" : "Total Orders", value: stats.total, icon: ShoppingBag },
-          { label: isBn ? "পরিশোধিত" : "Paid", value: stats.paid, icon: CreditCard },
-          { label: isBn ? "বকেয়া" : "Due", value: stats.unpaid, icon: FileText },
-          { label: isBn ? "মোট ব্যয়" : "Total Spent", value: `৳${formatAmount(stats.totalSpent, lang)}`, icon: CreditCard },
+          { label: bn ? "মোট অর্ডার" : "Total Orders", value: stats.total, icon: ShoppingBag },
+          { label: bn ? "সক্রিয়" : "Active", value: stats.active, icon: CheckCircle2 },
+          { label: bn ? "প্রসেসিং" : "In Progress", value: stats.pending, icon: Clock },
+          { label: bn ? "মোট ব্যয়" : "Total Spent", value: `৳${formatAmount(stats.totalSpent, lang)}`, icon: CreditCard },
         ].map((s, i) => (
           <motion.div
             key={i}
@@ -107,81 +176,162 @@ const OrdersPage = () => {
       </div>
 
       {/* Orders list */}
-      {invoices.length === 0 ? (
+      {orders.length === 0 ? (
         <div className="glass-card rounded-xl p-12 text-center">
-          <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">{isBn ? "কোনো অর্ডার পাওয়া যায়নি" : "No orders found"}</p>
+          <ShoppingBag className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+          <p className="text-muted-foreground">{bn ? "কোনো অর্ডার পাওয়া যায়নি" : "No orders found"}</p>
         </div>
       ) : (
-        <div className="glass-card rounded-xl overflow-hidden">
-          {/* Desktop table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "ইনভয়েস" : "Invoice"}</th>
-                  <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "বিবরণ" : "Description"}</th>
-                  <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "পরিমাণ" : "Amount"}</th>
-                  <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "স্ট্যাটাস" : "Status"}</th>
-                  <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "তারিখ" : "Date"}</th>
-                  <th className="px-4 py-3 font-semibold text-muted-foreground">{isBn ? "রিপোর্ট" : "Report"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((inv) => {
-                  const sc = statusConfig[inv.status] || statusConfig.unpaid;
-                  return (
-                    <tr key={inv.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-primary">{inv.invoice_number}</td>
-                      <td className="px-4 py-3 text-foreground max-w-[200px] truncate">{inv.description || "—"}</td>
-                      <td className="px-4 py-3 font-semibold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</td>
-                      <td className="px-4 py-3">
-                        <Badge variant={sc.variant}>{isBn ? sc.label_bn : sc.label_en}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatDate(inv.created_at)}</td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => setReportInvoice(inv)}
-                          className="p-1.5 rounded-lg hover:bg-secondary/60 text-primary hover:text-primary/80 transition-colors"
-                          title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+        <div className="space-y-4">
+          {orders.map((order, i) => {
+            const sc = statusConfig[order.status] || statusConfig.pending;
+            const isExpanded = expandedOrder === order.id;
+            const items = orderItems[order.id] || [];
+            const currentStep = getStepIndex(order.status);
+            const isCancelled = order.status === "cancelled" || order.status === "refunded";
 
-          {/* Mobile cards */}
-          <div className="md:hidden divide-y divide-border/50">
-            {invoices.map((inv) => {
-              const sc = statusConfig[inv.status] || statusConfig.unpaid;
-              return (
-                <button key={inv.id} onClick={() => setReportInvoice(inv)} className="w-full text-left p-4 hover:bg-secondary/30 transition-colors">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-xs text-primary">{inv.invoice_number}</span>
-                    <Badge variant={sc.variant} className="text-xs">{isBn ? sc.label_bn : sc.label_en}</Badge>
-                  </div>
-                  <p className="text-sm text-foreground truncate">{inv.description || "—"}</p>
-                  <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground">৳{formatAmount(Number(inv.amount_bdt), lang)}</span>
-                    <span>{formatDate(inv.created_at)}</span>
+            return (
+              <motion.div
+                key={order.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                className="glass-card rounded-xl overflow-hidden"
+              >
+                {/* Order Header */}
+                <button
+                  onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                  className="w-full p-4 sm:p-5 text-left hover:bg-secondary/20 transition-colors"
+                >
+                  <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <Package className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-foreground">{order.order_number}</span>
+                          <Badge className={`${sc.color} border text-[10px] px-1.5 py-0`}>
+                            {bn ? sc.bn : sc.en}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {formatDate(order.created_at)} • {items.length} {bn ? "আইটেম" : "items"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+                      <span className="text-lg font-bold text-foreground">৳{formatAmount(Number(order.total_bdt), lang)}</span>
+                      {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                    </div>
                   </div>
                 </button>
-              );
-            })}
-          </div>
+
+                {/* Expanded Content */}
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    className="border-t border-border"
+                  >
+                    {/* Status Timeline */}
+                    {!isCancelled && (
+                      <div className="px-4 sm:px-5 py-4">
+                        <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                          {bn ? "অর্ডার প্রগ্রেস" : "Order Progress"}
+                        </p>
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          {statusSteps.map((step, idx) => {
+                            const isActive = idx <= currentStep;
+                            const isCurrent = idx === currentStep;
+                            const StepIcon = step.icon;
+                            return (
+                              <div key={step.key} className="flex items-center flex-1">
+                                <div className="flex flex-col items-center flex-1">
+                                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${
+                                    isCurrent ? "bg-primary text-primary-foreground ring-4 ring-primary/20" :
+                                    isActive ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"
+                                  }`}>
+                                    <StepIcon className="w-4 h-4" />
+                                  </div>
+                                  <span className={`text-[10px] mt-1.5 font-medium text-center ${isCurrent ? "text-primary" : isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                                    {bn ? step.bn : step.en}
+                                  </span>
+                                </div>
+                                {idx < statusSteps.length - 1 && (
+                                  <div className={`h-0.5 flex-1 mx-1 rounded-full transition-all ${
+                                    idx < currentStep ? "bg-primary" : "bg-border"
+                                  }`} />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Order Items */}
+                    <div className="px-4 sm:px-5 pb-4 space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {bn ? "আইটেমসমূহ" : "Items"}
+                      </p>
+                      {items.map(item => {
+                        const Icon = itemIcon(item.item_type);
+                        return (
+                          <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 border border-border/50">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                              <Icon className="w-4 h-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{item.item_name}</p>
+                              {item.item_description && <p className="text-[11px] text-muted-foreground truncate">{item.item_description}</p>}
+                              {item.domain_name && <p className="text-[11px] text-primary font-mono">{item.domain_name}</p>}
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-sm font-semibold text-foreground">৳{formatAmount(Number(item.price_bdt), lang)}</p>
+                              {item.provisioned_at && (
+                                <span className="text-[10px] text-green-600">✓ {bn ? "সক্রিয়" : "Active"}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Order Details */}
+                    <div className="px-4 sm:px-5 pb-4">
+                      <div className="p-3 rounded-xl bg-secondary/20 border border-border/50 space-y-1.5 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">{bn ? "পেমেন্ট মেথড" : "Payment"}</span>
+                          <span className="text-foreground font-medium capitalize">{order.payment_method || "—"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">{bn ? "পেমেন্ট স্ট্যাটাস" : "Payment Status"}</span>
+                          <span className={`font-medium capitalize ${order.payment_status === "paid" ? "text-green-600" : "text-amber-600"}`}>
+                            {order.payment_status === "paid" ? (bn ? "পরিশোধিত" : "Paid") : (bn ? "অপরিশোধিত" : "Unpaid")}
+                          </span>
+                        </div>
+                        {order.discount_bdt > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">{bn ? "ডিসকাউন্ট" : "Discount"}</span>
+                            <span className="text-primary font-medium">-৳{formatAmount(Number(order.discount_bdt), lang)} {order.coupon_code && `(${order.coupon_code})`}</span>
+                          </div>
+                        )}
+                        {order.order_note && (
+                          <div className="pt-1.5 border-t border-border/50">
+                            <span className="text-muted-foreground">{bn ? "নোট: " : "Note: "}</span>
+                            <span className="text-foreground">{order.order_note}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
       )}
-
-      <InvoiceReport
-        invoice={reportInvoice}
-        open={!!reportInvoice}
-        onClose={() => setReportInvoice(null)}
-      />
     </div>
   );
 };
