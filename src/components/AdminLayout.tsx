@@ -1,10 +1,11 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
   LogOut, ChevronLeft, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
-  Bell, Search, ChevronRight
+  Search, ChevronRight, X, Bell, Settings, PanelLeftClose, PanelLeft
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
@@ -17,112 +18,126 @@ const AdminLayout = () => {
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+  const bn = lang === "bn";
 
-  const isBn = lang === "bn";
+  // Close mobile sidebar on route change
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
-  const sidebarItems = [
-    { title: tr("admin.dashboard"), url: "/admin", icon: LayoutDashboard },
-    { title: tr("admin.users"), url: "/admin/users", icon: Users },
-    { title: tr("admin.services"), url: "/admin/services", icon: Server },
-    { title: tr("admin.billing"), url: "/admin/billing", icon: FileText },
-    { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
-    { title: isBn ? "থিম স্টোর" : "Theme Store", url: "/admin/themes", icon: Palette },
-    { title: isBn ? "কুপন" : "Coupons", url: "/admin/coupons", icon: Tag },
-    { title: isBn ? "লাইভ চ্যাট" : "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
-    { title: isBn ? "চ্যাট রুম" : "Chat Rooms", url: "/admin/chat-rooms", icon: Users },
-    { title: isBn ? "কন্টাক্ট মেসেজ" : "Contact Messages", url: "/admin/contact-messages", icon: Mail },
-    { title: isBn ? "নলেজ বেস" : "Knowledge Base", url: "/admin/knowledge-base", icon: BookOpen },
-    { title: "CMS", url: "/admin/cms", icon: Layers },
+  const menuSections = [
+    {
+      label: bn ? "প্রধান" : "Main",
+      items: [
+        { title: tr("admin.dashboard"), url: "/admin", icon: LayoutDashboard },
+        { title: tr("admin.users"), url: "/admin/users", icon: Users },
+        { title: tr("admin.services"), url: "/admin/services", icon: Server },
+        { title: tr("admin.billing"), url: "/admin/billing", icon: FileText },
+        { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
+      ],
+    },
+    {
+      label: bn ? "কন্টেন্ট" : "Content",
+      items: [
+        { title: bn ? "থিম স্টোর" : "Themes", url: "/admin/themes", icon: Palette },
+        { title: bn ? "কুপন" : "Coupons", url: "/admin/coupons", icon: Tag },
+        { title: "CMS", url: "/admin/cms", icon: Layers },
+        { title: bn ? "নলেজ বেস" : "Knowledge Base", url: "/admin/knowledge-base", icon: BookOpen },
+      ],
+    },
+    {
+      label: bn ? "যোগাযোগ" : "Communication",
+      items: [
+        { title: bn ? "লাইভ চ্যাট" : "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
+        { title: bn ? "চ্যাট রুম" : "Chat Rooms", url: "/admin/chat-rooms", icon: Users },
+        { title: bn ? "কন্টাক্ট" : "Contact", url: "/admin/contact-messages", icon: Mail },
+      ],
+    },
   ];
 
-  const currentPage = sidebarItems.find(i => 
+  const allItems = menuSections.flatMap(s => s.items);
+  const currentPage = allItems.find(i =>
     i.url === "/admin" ? location.pathname === "/admin" : location.pathname.startsWith(i.url)
   );
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-  };
+  const handleSignOut = async () => { await signOut(); navigate("/"); };
 
-  const SidebarContent = () => (
+  const SidebarInner = () => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="p-4 border-b border-border/50">
-        <div className="flex items-center justify-between gap-2">
-          {!collapsed ? (
-            <div className="flex items-center gap-2.5">
-              <img src={logoWhite} alt="Yess Host" className="h-7" />
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-destructive/15 text-destructive tracking-wider uppercase">Admin</span>
-            </div>
-          ) : (
-            <div className="w-full flex justify-center">
-              <Shield className="w-5 h-5 text-destructive" />
-            </div>
-          )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground"
-          >
-            <ChevronLeft className={`w-4 h-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
-          </button>
-        </div>
+      {/* Logo Header */}
+      <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
+        {!collapsed ? (
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-7" /></Link>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-destructive/10 text-destructive tracking-widest uppercase border border-destructive/20">
+              Admin
+            </span>
+          </div>
+        ) : (
+          <div className="flex justify-center w-full">
+            <Shield className="w-5 h-5 text-destructive" />
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
-        {!collapsed && (
-          <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest">
-            {isBn ? "মেইন মেনু" : "Main Menu"}
-          </p>
-        )}
-        {sidebarItems.map((item) => (
-          <NavLink
-            key={item.url}
-            to={item.url}
-            end={item.url === "/admin"}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all ${collapsed ? "justify-center" : ""}`}
-            activeClassName="bg-destructive/10 text-destructive shadow-sm"
-            onClick={() => setMobileOpen(false)}
-          >
-            <item.icon className="w-[18px] h-[18px] shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
-          </NavLink>
+      <nav className="flex-1 overflow-y-auto py-3 px-2.5 space-y-5 no-scrollbar">
+        {menuSections.map((section) => (
+          <div key={section.label}>
+            {!collapsed && (
+              <p className="px-3 mb-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em]">
+                {section.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {section.items.map((item) => (
+                <NavLink
+                  key={item.url}
+                  to={item.url}
+                  end={item.url === "/admin"}
+                  className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-accent/8 transition-all duration-200 ${collapsed ? "justify-center px-2" : ""}`}
+                  activeClassName="!bg-destructive/8 !text-destructive font-semibold"
+                >
+                  <item.icon className={`w-[17px] h-[17px] shrink-0 transition-colors ${collapsed ? "" : ""}`} />
+                  {!collapsed && <span className="truncate">{item.title}</span>}
+                </NavLink>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 
       {/* Footer */}
-      <div className="p-2.5 border-t border-border/50 space-y-0.5">
+      <div className="border-t border-border/40 p-2.5 space-y-0.5 shrink-0">
         {!collapsed && (
-          <>
-            <NavLink
-              to="/dashboard"
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/50 w-full transition-all"
-              activeClassName=""
-            >
-              <LayoutDashboard className="w-[18px] h-[18px] shrink-0" />
-              {tr("admin.clientDashboard")}
-            </NavLink>
-            <button
-              onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/50 w-full transition-all"
-            >
-              <Globe className="w-[18px] h-[18px] shrink-0" />
-              {lang === "bn" ? "English" : "বাংলা"}
-            </button>
-          </>
+          <NavLink
+            to="/dashboard"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:bg-accent/8 hover:text-foreground transition-all"
+            activeClassName=""
+          >
+            <LayoutDashboard className="w-[17px] h-[17px] shrink-0" />
+            <span>{tr("admin.clientDashboard")}</span>
+          </NavLink>
         )}
-        {/* User info */}
+
+        {/* User Card */}
         {!collapsed && (
-          <div className="px-3 py-2.5 mt-1 rounded-xl bg-secondary/30">
-            <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || "Admin"}</p>
-            <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
+          <div className="mx-1 mt-2 p-3 rounded-xl bg-secondary/40 border border-border/30">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive text-xs font-bold shrink-0">
+                {(profile?.full_name || "A").charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-foreground truncate">{profile?.full_name || "Admin"}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
+              </div>
+            </div>
           </div>
         )}
+
         <button
           onClick={handleSignOut}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 w-full transition-all ${collapsed ? "justify-center" : ""}`}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 w-full transition-all ${collapsed ? "justify-center px-2" : ""}`}
         >
-          <LogOut className="w-[18px] h-[18px] shrink-0" />
+          <LogOut className="w-[17px] h-[17px] shrink-0" />
           {!collapsed && <span>{tr("dash.signOut")}</span>}
         </button>
       </div>
@@ -132,70 +147,100 @@ const AdminLayout = () => {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:flex flex-col border-r border-border/50 bg-card/50 backdrop-blur-xl transition-all duration-300 ${collapsed ? "w-[68px]" : "w-64"}`}>
-        <SidebarContent />
+      <aside
+        className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-0 h-screen z-20 ${
+          collapsed ? "w-[60px]" : "w-[250px]"
+        }`}
+      >
+        <SidebarInner />
       </aside>
 
-      {/* Mobile Sidebar */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-50 shadow-2xl">
-            <SidebarContent />
-          </aside>
-        </div>
-      )}
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl"
+            >
+              <SidebarInner />
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
 
-      {/* Main Area */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Bar */}
-        <header className="h-16 flex items-center gap-3 px-4 md:px-6 border-b border-border/50 bg-card/30 backdrop-blur-xl sticky top-0 z-30">
-          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-xl hover:bg-secondary/60 text-muted-foreground">
+        {/* Top Header */}
+        <header className="h-14 flex items-center gap-2 px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-30">
+          {/* Mobile Menu */}
+          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground">
             <Menu className="w-5 h-5" />
           </button>
 
+          {/* Desktop Collapse Toggle */}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors"
+          >
+            {collapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </button>
+
           {/* Breadcrumb */}
-          <div className="hidden sm:flex items-center gap-1.5 text-sm">
-            <span className="text-muted-foreground">{isBn ? "অ্যাডমিন" : "Admin"}</span>
+          <div className="hidden sm:flex items-center gap-1.5 text-xs ml-1">
+            <Link to="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
+              {bn ? "অ্যাডমিন" : "Admin"}
+            </Link>
             {currentPage && currentPage.url !== "/admin" && (
               <>
-                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
+                <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
                 <span className="font-medium text-foreground">{currentPage.title}</span>
-              </>
-            )}
-            {currentPage?.url === "/admin" && (
-              <>
-                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
-                <span className="font-medium text-foreground">{isBn ? "ড্যাশবোর্ড" : "Dashboard"}</span>
               </>
             )}
           </div>
 
           <div className="flex-1" />
 
-          {/* Language Toggle */}
-          <button
-            onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50 hover:bg-secondary/80 transition-all text-sm font-medium text-foreground"
-          >
-            <Globe className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs">{lang === "bn" ? "EN" : "বাং"}</span>
-          </button>
-
-          {/* Quick search placeholder */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/40 border border-border/50 text-muted-foreground text-sm w-56">
-            <Search className="w-4 h-4" />
-            <span className="text-xs">{isBn ? "সার্চ করুন..." : "Search..."}</span>
+          {/* Search */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/40 text-muted-foreground/60 text-xs w-52 cursor-pointer hover:bg-secondary/70 transition-colors">
+            <Search className="w-3.5 h-3.5" />
+            <span>{bn ? "সার্চ..." : "Search..."}</span>
+            <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-background/80 border border-border/50 font-mono">⌘K</kbd>
           </div>
 
-          <span className="text-sm text-muted-foreground hidden md:block font-medium">{profile?.full_name || user?.email}</span>
-          <div className="w-9 h-9 rounded-xl bg-destructive/15 flex items-center justify-center text-destructive text-sm font-bold">
-            {(profile?.full_name || "A").charAt(0).toUpperCase()}
+          {/* Language */}
+          <button
+            onClick={() => setLang(lang === "bn" ? "en" : "bn")}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-secondary/60 transition-colors text-xs font-medium text-muted-foreground"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            {lang === "bn" ? "EN" : "বাং"}
+          </button>
+
+          {/* User Avatar */}
+          <div className="flex items-center gap-2.5 pl-2 ml-1 border-l border-border/40">
+            <div className="hidden sm:block text-right">
+              <p className="text-xs font-semibold text-foreground leading-none">{profile?.full_name || "Admin"}</p>
+              <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{bn ? "সুপার অ্যাডমিন" : "Super Admin"}</p>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-destructive/20 to-destructive/10 flex items-center justify-center text-destructive text-xs font-bold border border-destructive/20">
+              {(profile?.full_name || "A").charAt(0).toUpperCase()}
+            </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-auto bg-background">
           <Outlet />
         </main>
       </div>

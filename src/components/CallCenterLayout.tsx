@@ -1,12 +1,15 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, LogOut, ChevronLeft, Menu, Globe, Headphones,
-  ShoppingCart, MessageCircle, HeadphonesIcon, ChevronRight
+  LayoutDashboard, LogOut, Menu, Globe, Headphones,
+  ShoppingCart, MessageCircle, HeadphonesIcon, ChevronRight,
+  PanelLeftClose, PanelLeft, Phone
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
+import { Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
 
 const CallCenterLayout = () => {
@@ -18,11 +21,13 @@ const CallCenterLayout = () => {
   const location = useLocation();
   const bn = lang === "bn";
 
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
   const sidebarItems = [
     { title: bn ? "ড্যাশবোর্ড" : "Dashboard", url: "/call-center", icon: LayoutDashboard },
-    { title: bn ? "অর্ডার ম্যানেজমেন্ট" : "Order Management", url: "/call-center/orders", icon: ShoppingCart },
+    { title: bn ? "অর্ডার" : "Orders", url: "/call-center/orders", icon: ShoppingCart },
     { title: bn ? "লাইভ চ্যাট" : "Live Chat", url: "/call-center/live-chat", icon: MessageCircle },
-    { title: bn ? "সাপোর্ট টিকেট" : "Support Tickets", url: "/call-center/tickets", icon: HeadphonesIcon },
+    { title: bn ? "টিকেট" : "Tickets", url: "/call-center/tickets", icon: HeadphonesIcon },
   ];
 
   const currentPage = sidebarItems.find(i =>
@@ -31,53 +36,81 @@ const CallCenterLayout = () => {
 
   const handleSignOut = async () => { await signOut(); navigate("/admin-login"); };
 
-  const SidebarContent = () => (
+  const SidebarInner = () => (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border/50">
-        <div className="flex items-center justify-between gap-2">
-          {!collapsed ? (
-            <div className="flex items-center gap-2.5">
-              <img src={logoWhite} alt="Yess Host" className="h-7" />
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-accent/15 text-accent-foreground tracking-wider uppercase">
-                {bn ? "কল সেন্টার" : "Call Center"}
-              </span>
-            </div>
-          ) : (
-            <div className="w-full flex justify-center"><Headphones className="w-5 h-5 text-primary" /></div>
-          )}
-          <button onClick={() => setCollapsed(!collapsed)} className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground">
-            <ChevronLeft className={`w-4 h-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
-          </button>
-        </div>
-      </div>
-
-      <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
-        {!collapsed && <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest">{bn ? "মেইন মেনু" : "Main Menu"}</p>}
-        {sidebarItems.map(item => (
-          <NavLink key={item.url} to={item.url} end={item.url === "/call-center"}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all ${collapsed ? "justify-center" : ""}`}
-            activeClassName="bg-primary/10 text-primary shadow-sm"
-            onClick={() => setMobileOpen(false)}>
-            <item.icon className="w-[18px] h-[18px] shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
-          </NavLink>
-        ))}
-      </nav>
-
-      <div className="p-2.5 border-t border-border/50 space-y-0.5">
-        {!collapsed && (
-          <button onClick={() => setLang(lang === "bn" ? "en" : "bn")} className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/50 w-full transition-all">
-            <Globe className="w-[18px] h-[18px] shrink-0" />{lang === "bn" ? "English" : "বাংলা"}
-          </button>
-        )}
-        {!collapsed && (
-          <div className="px-3 py-2.5 mt-1 rounded-xl bg-secondary/30">
-            <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || "Agent"}</p>
-            <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
+      {/* Logo */}
+      <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
+        {!collapsed ? (
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-7" /></Link>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary tracking-widest uppercase border border-primary/20">
+              {bn ? "সাপোর্ট" : "Support"}
+            </span>
+          </div>
+        ) : (
+          <div className="flex justify-center w-full">
+            <Headphones className="w-5 h-5 text-primary" />
           </div>
         )}
-        <button onClick={handleSignOut} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 w-full transition-all ${collapsed ? "justify-center" : ""}`}>
-          <LogOut className="w-[18px] h-[18px] shrink-0" />{!collapsed && <span>{tr("dash.signOut")}</span>}
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto py-4 px-2.5 no-scrollbar">
+        {!collapsed && (
+          <p className="px-3 mb-2 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em]">
+            {bn ? "কাজের তালিকা" : "Workspace"}
+          </p>
+        )}
+        <div className="space-y-0.5">
+          {sidebarItems.map((item) => (
+            <NavLink
+              key={item.url}
+              to={item.url}
+              end={item.url === "/call-center"}
+              className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 ${collapsed ? "justify-center px-2" : ""}`}
+              activeClassName="!bg-primary/8 !text-primary font-semibold"
+            >
+              <item.icon className="w-[18px] h-[18px] shrink-0" />
+              {!collapsed && <span className="truncate">{item.title}</span>}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+
+      {/* Footer */}
+      <div className="border-t border-border/40 p-2.5 space-y-0.5 shrink-0">
+        {/* Online Status */}
+        {!collapsed && (
+          <div className="mx-0.5 mb-2 p-3 rounded-xl bg-success/5 border border-success/15">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              <span className="text-xs font-medium text-success">{bn ? "অনলাইন" : "Online"}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">{bn ? "কল ও চ্যাট গ্রহণে প্রস্তুত" : "Ready to take calls & chats"}</p>
+          </div>
+        )}
+
+        {/* User Card */}
+        {!collapsed && (
+          <div className="mx-0.5 p-3 rounded-xl bg-secondary/40 border border-border/30">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/15 shrink-0">
+                {(profile?.full_name || "A").charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-foreground truncate">{profile?.full_name || "Agent"}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{bn ? "সাপোর্ট এজেন্ট" : "Support Agent"}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleSignOut}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 w-full transition-all ${collapsed ? "justify-center px-2" : ""}`}
+        >
+          <LogOut className="w-[17px] h-[17px] shrink-0" />
+          {!collapsed && <span>{tr("dash.signOut")}</span>}
         </button>
       </div>
     </div>
@@ -85,32 +118,93 @@ const CallCenterLayout = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <aside className={`hidden lg:flex flex-col border-r border-border/50 bg-card/50 backdrop-blur-xl transition-all duration-300 ${collapsed ? "w-[68px]" : "w-64"}`}>
-        <SidebarContent />
+      {/* Desktop Sidebar */}
+      <aside
+        className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-0 h-screen z-20 ${
+          collapsed ? "w-[60px]" : "w-[250px]"
+        }`}
+      >
+        <SidebarInner />
       </aside>
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-50 shadow-2xl"><SidebarContent /></aside>
-        </div>
-      )}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 flex items-center gap-3 px-4 md:px-6 border-b border-border/50 bg-card/30 backdrop-blur-xl sticky top-0 z-30">
-          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-xl hover:bg-secondary/60 text-muted-foreground"><Menu className="w-5 h-5" /></button>
-          <div className="hidden sm:flex items-center gap-1.5 text-sm">
-            <span className="text-muted-foreground">{bn ? "কল সেন্টার" : "Call Center"}</span>
-            {currentPage && currentPage.url !== "/call-center" && (<><ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" /><span className="font-medium text-foreground">{currentPage.title}</span></>)}
+
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl"
+            >
+              <SidebarInner />
+            </motion.aside>
           </div>
-          <div className="flex-1" />
-          <button onClick={() => setLang(lang === "bn" ? "en" : "bn")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50 hover:bg-secondary/80 transition-all text-sm font-medium text-foreground">
-            <Globe className="w-3.5 h-3.5 text-primary" /><span className="text-xs">{lang === "bn" ? "EN" : "বাং"}</span>
+        )}
+      </AnimatePresence>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-14 flex items-center gap-2 px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-30">
+          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground">
+            <Menu className="w-5 h-5" />
           </button>
-          <span className="text-sm text-muted-foreground hidden md:block font-medium">{profile?.full_name || user?.email}</span>
-          <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center text-primary text-sm font-bold">
-            {(profile?.full_name || "A").charAt(0).toUpperCase()}
+
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors"
+          >
+            {collapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </button>
+
+          {/* Breadcrumb */}
+          <div className="hidden sm:flex items-center gap-1.5 text-xs ml-1">
+            <Link to="/call-center" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <Phone className="w-3 h-3" />
+              {bn ? "সাপোর্ট" : "Support"}
+            </Link>
+            {currentPage && currentPage.url !== "/call-center" && (
+              <>
+                <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
+                <span className="font-medium text-foreground">{currentPage.title}</span>
+              </>
+            )}
+          </div>
+
+          <div className="flex-1" />
+
+          {/* Language */}
+          <button
+            onClick={() => setLang(lang === "bn" ? "en" : "bn")}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-secondary/60 transition-colors text-xs font-medium text-muted-foreground"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            {lang === "bn" ? "EN" : "বাং"}
+          </button>
+
+          {/* Agent Info */}
+          <div className="flex items-center gap-2.5 pl-2.5 ml-1 border-l border-border/40">
+            <div className="hidden sm:flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-success" />
+              <span className="text-xs font-medium text-foreground">{profile?.full_name || "Agent"}</span>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/15">
+              {(profile?.full_name || "A").charAt(0).toUpperCase()}
+            </div>
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto"><Outlet /></main>
+
+        <main className="flex-1 p-4 md:p-6 overflow-auto bg-background">
+          <Outlet />
+        </main>
       </div>
     </div>
   );
