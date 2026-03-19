@@ -360,7 +360,7 @@ const ServiceDetail = () => {
                   <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center mx-auto mb-1.5">
                     <h.icon className="w-4 h-4 text-primary" />
                   </div>
-                  <span className="text-[11px] font-semibold text-foreground">{h.label}</span>
+                  <span className="text-xs font-semibold text-foreground">{h.label}</span>
                 </div>
               ))}
             </motion.div>
