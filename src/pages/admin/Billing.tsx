@@ -305,6 +305,13 @@ const AdminBilling = () => {
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
+                        <button
+                          onClick={() => setDeleteInvoice(inv)}
+                          className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                          title={isBn ? "ডিলিট করুন" : "Delete"}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                         <select
                           value={inv.status}
                           onChange={e => updateStatus(inv.id, e.target.value)}
