@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Server, Globe, HardDrive, Shield, Mail, Layers, ArrowRight, Check, Star, Zap, Clock, Headphones } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Server, Globe, HardDrive, Shield, Mail, Layers, ArrowRight, Check, Star, Zap, Clock, Headphones, Calendar, CalendarDays } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
@@ -22,14 +22,13 @@ interface PlanRow {
   features: any;
 }
 
-// Category definitions with icons and routes
 const categories = [
-  { key: "web", icon: Server, colorClass: "bg-blue-500/10 text-blue-600", slugs: ["basic-hosting", "pro-hosting", "premium-hosting", "bdix-hosting"] },
-  { key: "vps", icon: HardDrive, colorClass: "bg-violet-500/10 text-violet-600", slugs: ["usa-vps", "bdix-vps"] },
-  { key: "reseller", icon: Layers, colorClass: "bg-emerald-500/10 text-emerald-600", slugs: ["linux-reseller", "bdix-reseller"] },
-  { key: "dedicated", icon: Shield, colorClass: "bg-amber-500/10 text-amber-600", slugs: ["usa-dedicated", "bd-dedicated", "singapore-dedicated"] },
-  { key: "email", icon: Mail, colorClass: "bg-pink-500/10 text-pink-600", slugs: ["email-hosting"] },
-  { key: "ssl", icon: Globe, colorClass: "bg-cyan-500/10 text-cyan-600", slugs: ["ssl"] },
+  { key: "web", icon: Server, colorClass: "text-blue-600", bgClass: "bg-blue-500/10" },
+  { key: "vps", icon: HardDrive, colorClass: "text-violet-600", bgClass: "bg-violet-500/10" },
+  { key: "reseller", icon: Layers, colorClass: "text-emerald-600", bgClass: "bg-emerald-500/10" },
+  { key: "dedicated", icon: Shield, colorClass: "text-amber-600", bgClass: "bg-amber-500/10" },
+  { key: "email", icon: Mail, colorClass: "text-pink-600", bgClass: "bg-pink-500/10" },
+  { key: "ssl", icon: Globe, colorClass: "text-cyan-600", bgClass: "bg-cyan-500/10" },
 ];
 
 const categoryLabels: Record<string, { bn: string; en: string; descBn: string; descEn: string }> = {
@@ -41,11 +40,135 @@ const categoryLabels: Record<string, { bn: string; en: string; descBn: string; d
   ssl: { bn: "SSL সার্টিফিকেট", en: "SSL Certificate", descBn: "আপনার ওয়েবসাইটকে সিকিউর করুন", descEn: "Secure your website with SSL" },
 };
 
+const normalizeFeature = (f: any) => {
+  if (typeof f === "string") return { label: f, included: true };
+  return { label: f.label || f, label_bn: f.label_bn, included: f.included !== false };
+};
+
+/* ─── Billing Toggle Sub-component ─── */
+const BillingToggle = ({ value, onChange, bn }: { value: "monthly" | "yearly"; onChange: (v: "monthly" | "yearly") => void; bn: boolean }) => (
+  <div className="inline-flex items-center gap-0.5 p-1 rounded-xl bg-secondary/60 border border-border">
+    <button
+      onClick={() => onChange("monthly")}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+        value === "monthly" ? "gradient-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      <Calendar className="w-3 h-3" />
+      {bn ? "মাসিক" : "Monthly"}
+    </button>
+    <button
+      onClick={() => onChange("yearly")}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+        value === "yearly" ? "gradient-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      <CalendarDays className="w-3 h-3" />
+      {bn ? "বাৎসরিক" : "Yearly"}
+      {value !== "yearly" && <span className="text-[9px] px-1 py-0.5 rounded bg-primary/10 text-primary font-bold">{bn ? "সেভ" : "Save"}</span>}
+    </button>
+  </div>
+);
+
+/* ─── Plan Card Sub-component ─── */
+const PlanCard = ({ plan, billingCycle, bn, lang }: { plan: PlanRow; billingCycle: "monthly" | "yearly"; bn: boolean; lang: string }) => {
+  const rawFeatures = Array.isArray(plan.features) ? plan.features : [];
+  const allFeatures = rawFeatures.map(normalizeFeature);
+  const includedFeatures = allFeatures.filter((f) => f.included);
+  const excludedFeatures = allFeatures.filter((f) => !f.included);
+  const showYearly = billingCycle === "yearly" && plan.annual_price_bdt;
+  const displayPrice = showYearly ? plan.annual_price_bdt! : plan.price_bdt;
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      className={`relative rounded-xl border p-5 transition-all hover:shadow-md flex flex-col ${
+        plan.is_highlighted ? "border-primary bg-primary/[0.02] shadow-sm" : "border-border/70 hover:border-primary/20"
+      }`}
+    >
+      {plan.is_highlighted && (
+        <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-b-lg">
+          <Star className="w-2.5 h-2.5 fill-current" /> {bn ? "জনপ্রিয়" : "Popular"}
+        </div>
+      )}
+
+      <h3 className="text-sm font-bold text-foreground mb-1">{plan.name}</h3>
+      {plan.subtitle && <p className="text-[11px] text-muted-foreground mb-3">{plan.subtitle}</p>}
+
+      <div className="mb-4">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={displayPrice}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2 }}
+            className="inline-block text-2xl font-extrabold text-foreground"
+          >
+            {formatPrice(displayPrice, lang)}
+          </motion.span>
+        </AnimatePresence>
+        <span className="text-xs text-muted-foreground ml-1">
+          {showYearly ? (bn ? "/বছর" : "/yr") : (bn ? "/মাস" : "/mo")}
+        </span>
+        {billingCycle === "monthly" && plan.annual_price_bdt && (
+          <p className="text-[11px] text-primary font-medium mt-1">
+            💰 {bn ? `বাৎসরিকে ৳${formatPrice(plan.annual_price_bdt, lang)}` : `৳${formatPrice(plan.annual_price_bdt, lang)} if billed yearly`}
+          </p>
+        )}
+      </div>
+
+      {includedFeatures.length > 0 && (
+        <ul className="space-y-1.5 mb-3 flex-1">
+          {includedFeatures.map((f, j) => (
+            <li key={j} className="flex items-center gap-2 text-xs text-foreground/80">
+              <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Check className="w-2.5 h-2.5 text-primary" />
+              </div>
+              <span>{bn ? (f.label_bn || f.label) : f.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {excludedFeatures.length > 0 && (
+        <ul className="space-y-1.5 mb-4 border-t border-border/50 pt-2">
+          {excludedFeatures.map((f, j) => (
+            <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground/60 line-through">
+              <div className="w-4 h-4 rounded-full bg-muted/50 flex items-center justify-center shrink-0">
+                <span className="text-[9px]">✕</span>
+              </div>
+              <span>{bn ? (f.label_bn || f.label) : f.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Link
+        to={`/services/${plan.slug}`}
+        className={`block w-full text-center py-2.5 rounded-lg text-xs font-semibold transition-all mt-auto ${
+          plan.is_highlighted
+            ? "gradient-primary text-primary-foreground shadow-sm hover:opacity-90"
+            : "border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
+        }`}
+      >
+        {bn ? "এখনই অর্ডার করুন" : "Order Now"}
+      </Link>
+    </motion.div>
+  );
+};
+
+/* ─── Main Page ─── */
 const HostingPlans = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
   const [plans, setPlans] = useState<PlanRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [billingCycles, setBillingCycles] = useState<Record<string, "monthly" | "yearly">>({});
 
   useEffect(() => {
     supabase
@@ -59,17 +182,41 @@ const HostingPlans = () => {
       });
   }, []);
 
-  // Group plans by category
+  const getCycleFn = useCallback((catKey: string) => billingCycles[catKey] || "monthly", [billingCycles]);
+  const setCycleFn = useCallback((catKey: string, cycle: "monthly" | "yearly") => {
+    setBillingCycles((prev) => ({ ...prev, [catKey]: cycle }));
+  }, []);
+
   const grouped = categories.map((cat) => {
     const catPlans = plans.filter((p) => p.category === cat.key);
     const startingPrice = catPlans.length > 0
-      ? catPlans.reduce((min, p) => {
-          const price = p.price_bdt;
-          return price < min ? price : min;
-        }, catPlans[0].price_bdt)
+      ? catPlans.reduce((min, p) => (p.price_bdt < min ? p.price_bdt : min), catPlans[0].price_bdt)
       : null;
-    return { ...cat, plans: catPlans, allPlans: catPlans, startingPrice };
-  }).filter((cat) => cat.allPlans.length > 0);
+    return { ...cat, plans: catPlans, startingPrice };
+  }).filter((cat) => cat.plans.length > 0);
+
+  const handleFilterClick = useCallback((key: string) => {
+    setActiveFilter(key);
+    document.getElementById(`cat-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  // Track active section via IntersectionObserver
+  const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  useEffect(() => {
+    if (grouped.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveFilter(entry.target.id.replace("cat-", ""));
+          }
+        }
+      },
+      { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
+    );
+    sectionRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [grouped.length]);
 
   const features = [
     { icon: Zap, label: bn ? "LiteSpeed ওয়েব সার্ভার" : "LiteSpeed Web Server" },
@@ -105,7 +252,7 @@ const HostingPlans = () => {
         </section>
 
         {/* Global Features Bar */}
-        <section className="container mx-auto px-4 mb-12">
+        <section className="container mx-auto px-4 mb-10">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -121,33 +268,37 @@ const HostingPlans = () => {
           </motion.div>
         </section>
 
-        {/* Category Filter Buttons */}
+        {/* Sticky Category Filter Bar */}
         {!loading && grouped.length > 0 && (
-          <div className="sticky top-16 z-30 bg-background/90 backdrop-blur-md border-b border-border/50 py-3 mb-8 -mx-4 px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.4, ease }}
-              className="flex overflow-x-auto gap-2 max-w-4xl mx-auto no-scrollbar justify-start md:justify-center"
-            >
-              {grouped.map((cat) => {
-                const label = categoryLabels[cat.key];
-                const Icon = cat.icon;
-                return (
-                  <button
-                    key={cat.key}
-                    onClick={() => {
-                      document.getElementById(`cat-${cat.key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-card text-xs font-semibold text-foreground hover:border-primary/40 hover:shadow-sm transition-all whitespace-nowrap shrink-0"
-                  >
-                    <Icon className="w-3.5 h-3.5 text-primary" />
-                    {bn ? label.bn : label.en}
-                    <span className="text-[10px] text-muted-foreground">({cat.allPlans.length})</span>
-                  </button>
-                );
-              })}
-            </motion.div>
+          <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40 shadow-sm">
+            <div className="container mx-auto px-4">
+              <div className="flex overflow-x-auto gap-1.5 py-2.5 max-w-5xl mx-auto no-scrollbar justify-start md:justify-center">
+                {grouped.map((cat) => {
+                  const label = categoryLabels[cat.key];
+                  const Icon = cat.icon;
+                  const isActive = activeFilter === cat.key;
+                  return (
+                    <button
+                      key={cat.key}
+                      onClick={() => handleFilterClick(cat.key)}
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap shrink-0 ${
+                        isActive
+                          ? "gradient-primary text-primary-foreground shadow-sm shadow-primary/20"
+                          : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30"
+                      }`}
+                    >
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? "" : cat.colorClass}`} />
+                      {bn ? label.bn : label.en}
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                        isActive ? "bg-white/20 text-primary-foreground" : "bg-secondary text-muted-foreground"
+                      }`}>
+                        {cat.plans.length}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 
@@ -159,149 +310,64 @@ const HostingPlans = () => {
         )}
 
         {/* Category Sections */}
-        <section className="container mx-auto px-4 space-y-10 max-w-6xl">
+        <section className="container mx-auto px-4 space-y-10 max-w-6xl mt-8">
           {grouped.map((cat, idx) => {
             const label = categoryLabels[cat.key];
             const Icon = cat.icon;
-            // Determine the primary link for "View All"
-            const primarySlug = cat.slugs[0];
+            const cycle = getCycleFn(cat.key);
+            const hasAnnual = cat.plans.some((p) => p.annual_price_bdt);
 
             return (
               <motion.div
                 id={`cat-${cat.key}`}
                 key={cat.key}
+                ref={(el) => { if (el) sectionRefs.current.set(cat.key, el); }}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + idx * 0.08, duration: 0.45, ease }}
-                className="bg-card border border-border rounded-2xl overflow-hidden scroll-mt-24"
+                className="bg-card border border-border rounded-2xl overflow-hidden scroll-mt-32"
               >
                 {/* Category Header */}
-                <div className="p-5 md:p-6 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl ${cat.colorClass}`}>
-                      <Icon className="w-5 h-5" />
+                <div className="p-5 md:p-6 border-b border-border/50">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${cat.bgClass} ${cat.colorClass}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-foreground">{bn ? label.bn : label.en}</h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">{bn ? label.descBn : label.descEn}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-foreground">{bn ? label.bn : label.en}</h2>
-                      <p className="text-xs text-muted-foreground mt-0.5">{bn ? label.descBn : label.descEn}</p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {cat.startingPrice && (
+                        <span className="text-sm text-muted-foreground">
+                          {bn ? "শুরু" : "From"}{" "}
+                          <span className="font-bold text-foreground">{formatPrice(cat.startingPrice, lang)}</span>
+                          <span className="text-xs">/{bn ? "মাস" : "mo"}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {cat.startingPrice && (
-                      <span className="text-sm text-muted-foreground">
-                        {bn ? "শুরু" : "From"}{" "}
-                        <span className="font-bold text-foreground">{formatPrice(cat.startingPrice, lang)}</span>
-                        <span className="text-xs">/{bn ? "মাস" : "mo"}</span>
+
+                  {/* Billing Toggle per category */}
+                  {hasAnnual && (
+                    <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground">
+                        {bn ? "বিলিং সাইকেল:" : "Billing cycle:"}
                       </span>
-                    )}
-                    <Link
-                      to={`/services/${primarySlug}`}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-all shadow-sm"
-                    >
-                      {bn ? "সব প্ল্যান দেখুন" : "View All Plans"}
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
+                      <BillingToggle value={cycle} onChange={(v) => setCycleFn(cat.key, v)} bn={bn} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Plan Cards */}
                 <div className="p-4 md:p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {cat.plans.map((plan, i) => {
-                      const rawFeatures = Array.isArray(plan.features) ? plan.features : [];
-                      // Features can be strings or objects {label, label_bn, included}
-                      const normalizeFeature = (f: any) => {
-                        if (typeof f === "string") return { label: f, included: true };
-                        return { label: f.label || f, label_bn: f.label_bn, included: f.included !== false };
-                      };
-                      const allFeatures = rawFeatures.map(normalizeFeature);
-                      const includedFeatures = allFeatures.filter((f) => f.included);
-                      const excludedFeatures = allFeatures.filter((f) => !f.included);
-
-                      return (
-                        <div
-                          key={plan.id}
-                          className={`relative rounded-xl border p-5 transition-all hover:shadow-md flex flex-col ${
-                            plan.is_highlighted
-                              ? "border-primary bg-primary/[0.02] shadow-sm"
-                              : "border-border/70 hover:border-primary/20"
-                          }`}
-                        >
-                          {plan.is_highlighted && (
-                            <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-b-lg">
-                              <Star className="w-2.5 h-2.5 fill-current" /> {bn ? "জনপ্রিয়" : "Popular"}
-                            </div>
-                          )}
-
-                          <h3 className="text-sm font-bold text-foreground mb-1">{plan.name}</h3>
-                          {plan.subtitle && (
-                            <p className="text-[11px] text-muted-foreground mb-3">{plan.subtitle}</p>
-                          )}
-
-                          <div className="mb-4">
-                            <span className="text-2xl font-extrabold text-foreground">{formatPrice(plan.price_bdt, lang)}</span>
-                            <span className="text-xs text-muted-foreground">/{bn ? "মাস" : "mo"}</span>
-                            {plan.annual_price_bdt && (
-                              <p className="text-[11px] text-primary font-medium mt-1">
-                                💰 {bn ? "বাৎসরিক" : "Yearly"}: {formatPrice(plan.annual_price_bdt, lang)}/{bn ? "বছর" : "yr"}
-                              </p>
-                            )}
-                          </div>
-
-                          {includedFeatures.length > 0 && (
-                            <ul className="space-y-1.5 mb-3 flex-1">
-                              {includedFeatures.map((f, j) => (
-                                <li key={j} className="flex items-center gap-2 text-xs text-foreground/80">
-                                  <div className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                                    <Check className="w-2.5 h-2.5 text-emerald-500" />
-                                  </div>
-                                  <span>{bn ? (f.label_bn || f.label) : f.label}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-
-                          {excludedFeatures.length > 0 && (
-                            <ul className="space-y-1.5 mb-4 border-t border-border/50 pt-2">
-                              {excludedFeatures.map((f, j) => (
-                                <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground/60 line-through">
-                                  <div className="w-4 h-4 rounded-full bg-muted/50 flex items-center justify-center shrink-0">
-                                    <span className="text-[9px]">✕</span>
-                                  </div>
-                                  <span>{bn ? (f.label_bn || f.label) : f.label}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-
-                          <Link
-                            to={`/services/${plan.slug}`}
-                            className={`block w-full text-center py-2.5 rounded-lg text-xs font-semibold transition-all mt-auto ${
-                              plan.is_highlighted
-                                ? "gradient-primary text-primary-foreground shadow-sm hover:opacity-90"
-                                : "border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
-                            }`}
-                          >
-                            {bn ? "এখনই অর্ডার করুন" : "Order Now"}
-                          </Link>
-                        </div>
-                      );
-                    })}
+                    {cat.plans.map((plan) => (
+                      <PlanCard key={plan.id} plan={plan} billingCycle={cycle} bn={bn} lang={lang} />
+                    ))}
                   </div>
-
-                  {/* Show count if more plans exist */}
-                  {cat.allPlans.length > 3 && (
-                    <div className="text-center mt-4">
-                      <Link
-                        to={`/services/${primarySlug}`}
-                        className="text-xs text-primary hover:underline font-medium"
-                      >
-                        {bn
-                          ? `আরো ${cat.allPlans.length - cat.plans.length}টি প্ল্যান দেখুন →`
-                          : `View ${cat.allPlans.length - cat.plans.length} more plans →`}
-                      </Link>
-                    </div>
-                  )}
                 </div>
               </motion.div>
             );
