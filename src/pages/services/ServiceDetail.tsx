@@ -324,7 +324,7 @@ const ServiceDetail = () => {
               to="/"
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-6 transition-colors"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> {isBn ? "হোমপেইজ" : "Home"}
+              <ArrowLeft className="w-4 h-4" /> {isBn ? "হোমপেইজ" : "Home"}
             </Link>
 
             <div className="flex justify-center mb-5">
