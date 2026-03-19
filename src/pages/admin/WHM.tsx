@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   Server, Users, HardDrive, Wifi, Plus, Settings, Eye, Trash2,
   Shield, Activity, Globe, Package, AlertTriangle, Check, X,
-  Search, ChevronDown, BarChart3, Cpu, Zap, Clock
+  Search, ChevronDown, BarChart3, Cpu, Zap, Clock, Pencil
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -46,13 +46,19 @@ const AdminWHM = () => {
   const [selectedPkg, setSelectedPkg] = useState<ResellerPkg | null>(null);
   const [showAssign, setShowAssign] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [assignForm, setAssignForm] = useState({
     user_id: "", package_name: "Reseller Package",
     max_accounts: 25, max_disk_mb: 50000, max_bandwidth_mb: 500000,
     whm_server_host: "", whm_username: "",
   });
+  const [editForm, setEditForm] = useState({
+    id: "", package_name: "", max_accounts: 25, max_disk_mb: 50000, max_bandwidth_mb: 500000,
+    whm_server_host: "", whm_username: "",
+  });
   const [assigning, setAssigning] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   // Stats
   const [stats, setStats] = useState({
@@ -165,6 +171,39 @@ const AdminWHM = () => {
     await supabase.from("reseller_packages").update({ status: newStatus }).eq("id", pkg.id);
     toast({ title: bn ? "স্ট্যাটাস আপডেট হয়েছে" : "Status updated" });
     fetchAll();
+  };
+
+  const openEditDialog = (pkg: ResellerPkg) => {
+    setEditForm({
+      id: pkg.id,
+      package_name: pkg.package_name,
+      max_accounts: pkg.max_accounts,
+      max_disk_mb: pkg.max_disk_mb,
+      max_bandwidth_mb: pkg.max_bandwidth_mb,
+      whm_server_host: pkg.whm_server_host || "",
+      whm_username: pkg.whm_username || "",
+    });
+    setShowEdit(true);
+  };
+
+  const handleEditSave = async () => {
+    setEditing(true);
+    const { error } = await supabase.from("reseller_packages").update({
+      package_name: editForm.package_name,
+      max_accounts: editForm.max_accounts,
+      max_disk_mb: editForm.max_disk_mb,
+      max_bandwidth_mb: editForm.max_bandwidth_mb,
+      whm_server_host: editForm.whm_server_host || null,
+      whm_username: editForm.whm_username || null,
+    }).eq("id", editForm.id);
+    if (error) {
+      toast({ title: bn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: bn ? "প্যাকেজ আপডেট হয়েছে!" : "Package updated!" });
+      setShowEdit(false);
+      fetchAll();
+    }
+    setEditing(false);
   };
 
   const filtered = packages.filter(p => {
@@ -318,6 +357,13 @@ const AdminWHM = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => openEditDialog(pkg)}
+                            className="p-1.5 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-colors"
+                            title={bn ? "এডিট করুন" : "Edit"}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
                           <button
                             onClick={() => handleViewAccounts(pkg)}
                             className="p-1.5 rounded-lg hover:bg-primary/10 text-primary transition-colors"
@@ -510,6 +556,93 @@ const AdminWHM = () => {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Package Dialog */}
+      <Dialog open={showEdit} onOpenChange={setShowEdit}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-primary" />
+              {bn ? "রিসেলার প্যাকেজ এডিট করুন" : "Edit Reseller Package"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "প্যাকেজ নাম" : "Package Name"}</label>
+              <input
+                value={editForm.package_name}
+                onChange={e => setEditForm(p => ({ ...p, package_name: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "সর্বোচ্চ অ্যাকাউন্ট" : "Max Accounts"}</label>
+                <input
+                  type="number"
+                  value={editForm.max_accounts}
+                  onChange={e => setEditForm(p => ({ ...p, max_accounts: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ডিস্ক (MB)" : "Disk (MB)"}</label>
+                <input
+                  type="number"
+                  value={editForm.max_disk_mb}
+                  onChange={e => setEditForm(p => ({ ...p, max_disk_mb: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ব্যান্ডউইথ (MB)" : "BW (MB)"}</label>
+                <input
+                  type="number"
+                  value={editForm.max_bandwidth_mb}
+                  onChange={e => setEditForm(p => ({ ...p, max_bandwidth_mb: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-border/30">
+              <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                {bn ? "WHM সার্ভার কনফিগারেশন (ঐচ্ছিক)" : "WHM Server Config (Optional)"}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "সার্ভার হোস্ট" : "Server Host"}</label>
+                  <input
+                    value={editForm.whm_server_host}
+                    onChange={e => setEditForm(p => ({ ...p, whm_server_host: e.target.value }))}
+                    placeholder="server1.yesshost.com"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "WHM ইউজারনেম" : "WHM Username"}</label>
+                  <input
+                    value={editForm.whm_username}
+                    onChange={e => setEditForm(p => ({ ...p, whm_username: e.target.value }))}
+                    placeholder="root"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleEditSave}
+              disabled={editing}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+            >
+              {editing ? (bn ? "আপডেট হচ্ছে..." : "Updating...") : (bn ? "আপডেট করুন" : "Update Package")}
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
