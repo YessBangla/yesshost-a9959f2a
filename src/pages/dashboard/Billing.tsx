@@ -103,6 +103,48 @@ const DashboardBilling = () => {
   const handlePay = async () => {
     if (!payInvoice || !selectedPayment) return;
 
+    if (selectedPayment === "wallet") {
+      const amount = Number(payInvoice.amount_bdt);
+      if (walletBalance < amount) {
+        toast({
+          title: isBn ? "অপর্যাপ্ত ব্যালেন্স" : "Insufficient Balance",
+          description: isBn
+            ? `আপনার ওয়ালেটে ৳${formatAmount(walletBalance, lang)} আছে, কিন্তু ৳${formatAmount(amount, lang)} প্রয়োজন।`
+            : `Your wallet has ৳${formatAmount(walletBalance, lang)}, but ৳${formatAmount(amount, lang)} is required.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      setPaying(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("wallet-pay-invoice", {
+          body: { invoice_id: payInvoice.id },
+        });
+        if (error || !data?.success) {
+          toast({
+            title: isBn ? "ত্রুটি" : "Error",
+            description: data?.error || (isBn ? "পেমেন্ট ব্যর্থ হয়েছে" : "Payment failed"),
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: isBn ? "সফল!" : "Success!",
+            description: isBn
+              ? `৳${formatAmount(amount, lang)} ওয়ালেট থেকে পরিশোধ করা হয়েছে`
+              : `৳${formatAmount(amount, lang)} paid from wallet`,
+          });
+          setPayInvoice(null);
+          setSelectedPayment("");
+          fetchInvoices();
+          fetchWalletBalance();
+        }
+      } catch {
+        toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট প্রসেসিং এ সমস্যা" : "Payment processing error", variant: "destructive" });
+      }
+      setPaying(false);
+      return;
+    }
+
     if (selectedPayment === "bank") {
       toast({
         title: isBn ? "ব্যাংক ট্রান্সফার" : "Bank Transfer",
