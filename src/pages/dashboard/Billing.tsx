@@ -131,7 +131,22 @@ const DashboardBilling = () => {
 
   const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
   const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
-  const paidInvoices = invoices.filter(i => i.status === "paid" || i.status === "refunded");
+  const paidInvoicesAll = invoices.filter(i => i.status === "paid" || i.status === "refunded");
+
+  const paidInvoices = useMemo(() => {
+    return paidInvoicesAll.filter(inv => {
+      const paidDate = inv.paid_at ? new Date(inv.paid_at) : null;
+      if (!paidDate) return true;
+      if (dateFrom && paidDate < dateFrom) return false;
+      if (dateTo) {
+        const endOfDay = new Date(dateTo);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (paidDate > endOfDay) return false;
+      }
+      return true;
+    });
+  }, [paidInvoicesAll, dateFrom, dateTo]);
+
   const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
 
   const tabs: { id: TabType; label: string; icon: typeof FileText; count: number }[] = [
