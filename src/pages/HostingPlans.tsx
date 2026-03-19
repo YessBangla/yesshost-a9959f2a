@@ -209,7 +209,7 @@ const HostingPlans = () => {
                             <span className="text-xs text-muted-foreground">/{bn ? "মাস" : "mo"}</span>
                             {plan.annual_price_bdt && (
                               <p className="text-[10px] text-muted-foreground mt-0.5">
-                                {bn ? "বাৎসরিক" : "Yearly"}: {formatPrice(plan.annual_price_bdt)}/{bn ? "বছর" : "yr"}
+                                {bn ? "বাৎসরিক" : "Yearly"}: {formatPrice(plan.annual_price_bdt, lang)}/{bn ? "বছর" : "yr"}
                               </p>
                             )}
                           </div>
