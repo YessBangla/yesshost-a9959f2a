@@ -70,7 +70,37 @@ const AdminLayout = () => {
 
   useEffect(() => {
     if (searchOpen) setTimeout(() => searchInputRef.current?.focus(), 100);
+    if (!searchOpen) { setDbResults({ users: [], services: [], orders: [], tickets: [], invoices: [] }); setSearchQuery(""); }
   }, [searchOpen]);
+
+  // Debounced database search
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    if (!searchQuery || searchQuery.length < 2) {
+      setDbResults({ users: [], services: [], orders: [], tickets: [], invoices: [] });
+      return;
+    }
+    setDbSearching(true);
+    searchTimerRef.current = setTimeout(async () => {
+      const q = searchQuery.toLowerCase();
+      const [usersRes, servicesRes, ordersRes, ticketsRes, invoicesRes] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name, phone, company_name").or(`full_name.ilike.%${q}%,phone.ilike.%${q}%,company_name.ilike.%${q}%`).limit(5),
+        supabase.from("services").select("id, name, domain, status, service_type").or(`name.ilike.%${q}%,domain.ilike.%${q}%`).limit(5),
+        supabase.from("orders").select("id, order_number, status, total_bdt").ilike("order_number", `%${q}%`).limit(5),
+        supabase.from("support_tickets").select("id, ticket_number, subject, status").or(`ticket_number.ilike.%${q}%,subject.ilike.%${q}%`).limit(5),
+        supabase.from("invoices").select("id, invoice_number, status, amount_bdt").ilike("invoice_number", `%${q}%`).limit(5),
+      ]);
+      setDbResults({
+        users: usersRes.data || [],
+        services: servicesRes.data || [],
+        orders: ordersRes.data || [],
+        tickets: ticketsRes.data || [],
+        invoices: invoicesRes.data || [],
+      });
+      setDbSearching(false);
+    }, 300);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [searchQuery]);
 
   const menuSections = [
     {
