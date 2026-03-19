@@ -280,6 +280,44 @@ const DashboardBilling = () => {
       {/* Payment History Tab */}
       {activeTab === "history" && (
         <>
+          {/* Date Filter */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs h-8", !dateFrom && "text-muted-foreground")}>
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                  {dateFrom ? format(dateFrom, "dd MMM yyyy") : (isBn ? "শুরুর তারিখ" : "From")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className={cn("p-3 pointer-events-auto")} />
+              </PopoverContent>
+            </Popover>
+            <span className="text-xs text-muted-foreground">—</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs h-8", !dateTo && "text-muted-foreground")}>
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                  {dateTo ? format(dateTo, "dd MMM yyyy") : (isBn ? "শেষ তারিখ" : "To")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className={cn("p-3 pointer-events-auto")} />
+              </PopoverContent>
+            </Popover>
+            {(dateFrom || dateTo) && (
+              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs gap-1" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                <X className="w-3 h-3" />
+                {isBn ? "রিসেট" : "Reset"}
+              </Button>
+            )}
+            {(dateFrom || dateTo) && (
+              <span className="text-[11px] text-muted-foreground ml-1">
+                {paidInvoices.length}/{paidInvoicesAll.length} {isBn ? "টি ফলাফল" : "results"}
+              </span>
+            )}
+          </div>
+
           {paidInvoices.length === 0 ? (
             <EmptyState
               icon={History}
