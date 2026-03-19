@@ -491,7 +491,7 @@ const ServiceDetail = () => {
               transition={{ duration: 0.4, ease }}
               className="text-center mb-10"
             >
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-primary/10 text-primary mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-3">
                 FAQ
               </span>
               <h2 className="text-xl sm:text-2xl font-display font-extrabold tracking-tight mb-2">
