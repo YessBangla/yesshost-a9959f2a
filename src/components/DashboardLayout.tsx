@@ -221,6 +221,15 @@ const DashboardLayout = () => {
     dragX.set(0);
   }, [dragX]);
 
+  const [expandedSidebarMenu, setExpandedSidebarMenu] = useState<string | null>(null);
+
+  const sidebarMenusWithSubs = [
+    { key: "services", title: bn ? "সার্ভিস" : "Services", icon: Server, children: topMenuItems[0].children || [] },
+    { key: "domains", title: bn ? "ডোমেইন" : "Domains", icon: Globe, children: topMenuItems[1].children || [] },
+    { key: "billing", title: bn ? "বিলিং" : "Billing", icon: CreditCard, children: topMenuItems[2].children || [] },
+    { key: "support", title: bn ? "সাপোর্ট" : "Support", icon: HeadphonesIcon, children: topMenuItems[3].children || [] },
+  ];
+
   const SidebarInner = () => (
     <div className="flex flex-col h-full safe-top safe-bottom">
       {/* Logo */}
@@ -244,18 +253,97 @@ const DashboardLayout = () => {
           </p>
         )}
         <div className="space-y-0.5">
-          {sidebarItems.map((item) => (
+          {/* Overview */}
+          <NavLink
+            to="/dashboard"
+            end
+            className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
+          >
+            <LayoutDashboard className="w-[18px] h-[18px] shrink-0" />
+            {!collapsed && <span className="truncate">{tr("dash.overview")}</span>}
+          </NavLink>
+
+          {/* Menus with accordion submenus */}
+          {sidebarMenusWithSubs.map((menu) => (
+            <div key={menu.key}>
+              <button
+                onClick={() => setExpandedSidebarMenu(expandedSidebarMenu === menu.key ? null : menu.key)}
+                className={`w-full group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98] ${collapsed ? "justify-center px-2" : ""}`}
+              >
+                <menu.icon className="w-[18px] h-[18px] shrink-0" />
+                {!collapsed && (
+                  <>
+                    <span className="truncate flex-1 text-left">{menu.title}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground/60 transition-transform duration-200 ${expandedSidebarMenu === menu.key ? "rotate-180" : ""}`} />
+                  </>
+                )}
+              </button>
+              <AnimatePresence>
+                {!collapsed && expandedSidebarMenu === menu.key && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="ml-4 pl-3 border-l-2 border-border/40 space-y-0.5 py-1">
+                      {menu.children.map((child) => {
+                        const Icon = child.icon;
+                        return (
+                          <Link
+                            key={child.label}
+                            to={child.href}
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            <Icon className="w-4 h-4 shrink-0" />
+                            <span className="truncate">{child.label}</span>
+                            {child.badge !== undefined && child.badge > 0 && (
+                              <span className="ml-auto text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-bold">{child.badge}</span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+
+          {/* Orders */}
+          <NavLink
+            to="/dashboard/orders"
+            className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
+          >
+            <ShoppingBag className="w-[18px] h-[18px] shrink-0" />
+            {!collapsed && <span className="truncate">{bn ? "অর্ডার" : "Orders"}</span>}
+          </NavLink>
+
+          {/* Wallet */}
+          <NavLink
+            to="/dashboard/wallet"
+            className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
+          >
+            <Wallet className="w-[18px] h-[18px] shrink-0" />
+            {!collapsed && <span className="truncate">{bn ? "ওয়ালেট" : "Wallet"}</span>}
+          </NavLink>
+
+          {/* Reseller */}
+          {isReseller && (
             <NavLink
-              key={item.url}
-              to={item.url}
-              end={item.url === "/dashboard"}
-              className={`group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98] ${collapsed ? "justify-center px-2" : ""}`}
+              to="/dashboard/reseller"
+              className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
               activeClassName="!bg-primary/8 !text-primary font-semibold"
             >
-              <item.icon className="w-[18px] h-[18px] shrink-0" />
-              {!collapsed && <span className="truncate">{item.title}</span>}
+              <Share2 className="w-[18px] h-[18px] shrink-0" />
+              {!collapsed && <span className="truncate">{bn ? "রিসেলার" : "Reseller"}</span>}
             </NavLink>
-          ))}
+          )}
         </div>
       </nav>
 
