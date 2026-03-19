@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { AdminDashboardSkeleton } from "@/components/DashboardSkeleton";
 import {
   Users, Server, FileText, HeadphonesIcon, TrendingUp,
   DollarSign, Activity, ArrowUpRight, ArrowDownRight, Tag, BarChart3, Target, Download
