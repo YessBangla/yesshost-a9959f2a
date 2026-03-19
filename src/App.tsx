@@ -14,6 +14,9 @@ import CallCenterRoute from "@/components/CallCenterRoute";
 import CallCenterLayout from "@/components/CallCenterLayout";
 import DashboardLayout from "@/components/DashboardLayout";
 import AdminLayout from "@/components/AdminLayout";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import ScrollToTop from "@/components/ScrollToTop";
+import OfflineBanner from "@/components/OfflineBanner";
 
 // Eagerly loaded critical pages
 import Index from "./pages/Index";
@@ -84,7 +87,15 @@ const CallCenterOrders = lazy(() => import("./pages/callcenter/Orders"));
 const CallCenterLiveChat = lazy(() => import("./pages/callcenter/LiveChat"));
 const CallCenterTickets = lazy(() => import("./pages/callcenter/Tickets"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Minimal loading fallback
 const PageLoader = () => (
@@ -94,121 +105,125 @@ const PageLoader = () => (
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <LanguageProvider>
-        <CartProvider>
-        <AuthProvider>
-          {/* Skip to content for accessibility */}
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-semibold">
-            Skip to content
-          </a>
-          <CartDrawer />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin-login" element={<AdminLogin />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/payment" element={<PaymentMethods />} />
-              <Route path="/payment/success" element={<PaymentResult />} />
-              <Route path="/payment/fail" element={<PaymentFail />} />
-              <Route path="/payment/cancel" element={<PaymentCancel />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <LanguageProvider>
+          <CartProvider>
+          <AuthProvider>
+            {/* Skip to content for accessibility */}
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-semibold">
+              Skip to content
+            </a>
+            <ScrollToTop />
+            <OfflineBanner />
+            <CartDrawer />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/admin-login" element={<AdminLogin />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/payment" element={<PaymentMethods />} />
+                <Route path="/payment/success" element={<PaymentResult />} />
+                <Route path="/payment/fail" element={<PaymentFail />} />
+                <Route path="/payment/cancel" element={<PaymentCancel />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-              {/* Domain pricing */}
-              <Route path="/domain-pricing" element={<DomainPricing />} />
-              <Route path="/hosting-plans" element={<HostingPlans />} />
+                {/* Domain pricing */}
+                <Route path="/domain-pricing" element={<DomainPricing />} />
+                <Route path="/hosting-plans" element={<HostingPlans />} />
 
-              {/* Service detail pages */}
-              <Route path="/services/:slug" element={<ServiceDetail />} />
-              <Route path="/reseller-hosting" element={<ResellerHosting />} />
+                {/* Service detail pages */}
+                <Route path="/services/:slug" element={<ServiceDetail />} />
+                <Route path="/reseller-hosting" element={<ResellerHosting />} />
 
-              {/* Company pages */}
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/knowledge-base" element={<KnowledgeBase />} />
-              <Route path="/knowledge-base/:slug" element={<KnowledgeBaseArticle />} />
-              <Route path="/affiliate" element={<Affiliate />} />
+                {/* Company pages */}
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/knowledge-base" element={<KnowledgeBase />} />
+                <Route path="/knowledge-base/:slug" element={<KnowledgeBaseArticle />} />
+                <Route path="/affiliate" element={<Affiliate />} />
 
-              {/* Theme pages */}
-              <Route path="/themes" element={<ThemeStore />} />
-              <Route path="/themes/:slug" element={<ThemeDetail />} />
-              <Route path="/themes/:slug/demo" element={<ThemeDemo />} />
+                {/* Theme pages */}
+                <Route path="/themes" element={<ThemeStore />} />
+                <Route path="/themes/:slug" element={<ThemeDetail />} />
+                <Route path="/themes/:slug/demo" element={<ThemeDemo />} />
 
-              {/* Legal pages */}
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/refund" element={<Refund />} />
-              <Route path="/chat-rooms" element={<ChatRooms />} />
+                {/* Legal pages */}
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/refund" element={<Refund />} />
+                <Route path="/chat-rooms" element={<ChatRooms />} />
 
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<DashboardOverview />} />
-                <Route path="services" element={<DashboardServices />} />
-                <Route path="orders" element={<DashboardOrders />} />
-                <Route path="billing" element={<DashboardBilling />} />
-                <Route path="support" element={<DashboardSupport />} />
-                <Route path="domains" element={<DashboardDomains />} />
-                <Route path="reseller" element={<DashboardReseller />} />
-                <Route path="wallet" element={<DashboardWallet />} />
-                <Route path="profile" element={<DashboardProfile />} />
-              </Route>
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <AdminLayout />
-                  </AdminRoute>
-                }
-              >
-                <Route index element={<AdminDashboard />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="services" element={<AdminServices />} />
-                <Route path="billing" element={<AdminBilling />} />
-                <Route path="tickets" element={<AdminTickets />} />
-                <Route path="cms" element={<AdminCMS />} />
-                <Route path="themes" element={<AdminThemes />} />
-                <Route path="coupons" element={<AdminCoupons />} />
-                <Route path="live-chat" element={<AdminLiveChat />} />
-                <Route path="chat-rooms" element={<AdminChatRooms />} />
-                <Route path="contact-messages" element={<AdminContactMessages />} />
-                <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
-                <Route path="whm" element={<AdminWHM />} />
-              </Route>
-              <Route
-                path="/call-center"
-                element={
-                  <CallCenterRoute>
-                    <CallCenterLayout />
-                  </CallCenterRoute>
-                }
-              >
-                <Route index element={<CallCenterDashboard />} />
-                <Route path="orders" element={<CallCenterOrders />} />
-                <Route path="live-chat" element={<CallCenterLiveChat />} />
-                <Route path="tickets" element={<CallCenterTickets />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </AuthProvider>
-        </CartProvider>
-        </LanguageProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<DashboardOverview />} />
+                  <Route path="services" element={<DashboardServices />} />
+                  <Route path="orders" element={<DashboardOrders />} />
+                  <Route path="billing" element={<DashboardBilling />} />
+                  <Route path="support" element={<DashboardSupport />} />
+                  <Route path="domains" element={<DashboardDomains />} />
+                  <Route path="reseller" element={<DashboardReseller />} />
+                  <Route path="wallet" element={<DashboardWallet />} />
+                  <Route path="profile" element={<DashboardProfile />} />
+                </Route>
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <AdminLayout />
+                    </AdminRoute>
+                  }
+                >
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="services" element={<AdminServices />} />
+                  <Route path="billing" element={<AdminBilling />} />
+                  <Route path="tickets" element={<AdminTickets />} />
+                  <Route path="cms" element={<AdminCMS />} />
+                  <Route path="themes" element={<AdminThemes />} />
+                  <Route path="coupons" element={<AdminCoupons />} />
+                  <Route path="live-chat" element={<AdminLiveChat />} />
+                  <Route path="chat-rooms" element={<AdminChatRooms />} />
+                  <Route path="contact-messages" element={<AdminContactMessages />} />
+                  <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
+                  <Route path="whm" element={<AdminWHM />} />
+                </Route>
+                <Route
+                  path="/call-center"
+                  element={
+                    <CallCenterRoute>
+                      <CallCenterLayout />
+                    </CallCenterRoute>
+                  }
+                >
+                  <Route index element={<CallCenterDashboard />} />
+                  <Route path="orders" element={<CallCenterOrders />} />
+                  <Route path="live-chat" element={<CallCenterLiveChat />} />
+                  <Route path="tickets" element={<CallCenterTickets />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </AuthProvider>
+          </CartProvider>
+          </LanguageProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,16 +14,28 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
+  const from = (location.state as any)?.from || "/dashboard";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim() || !password.trim()) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) { toast({ title: "Login Failed", description: error.message, variant: "destructive" }); }
-    else { navigate("/dashboard"); }
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error) {
+      const msg = error.message.includes("Invalid login")
+        ? (bn ? "ভুল ইমেইল বা পাসওয়ার্ড" : "Invalid email or password")
+        : error.message.includes("Email not confirmed")
+        ? (bn ? "অনুগ্রহ করে আপনার ইমেইল ভেরিফাই করুন" : "Please verify your email first")
+        : error.message.includes("Too many requests")
+        ? (bn ? "অনেক চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন" : "Too many attempts. Please try again later")
+        : error.message;
+      toast({ title: bn ? "লগইন ব্যর্থ" : "Login Failed", description: msg, variant: "destructive" });
+    }
+    else { navigate(from); }
     setLoading(false);
   };
 
