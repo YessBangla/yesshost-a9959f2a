@@ -104,6 +104,9 @@ const AdminLogin = () => {
                 </button>
               </div>
             </div>
+            <div className="flex items-center justify-end">
+              <Link to="/forgot-password" className="text-sm text-destructive hover:underline">{bn ? "পাসওয়ার্ড ভুলে গেছেন?" : "Forgot Password?"}</Link>
+            </div>
             <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-destructive text-destructive-foreground py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg shadow-destructive/20 disabled:opacity-50">
               {loading ? <div className="w-5 h-5 border-2 border-destructive-foreground border-t-transparent rounded-full animate-spin" /> : <>{bn ? "লগইন করুন" : "Sign In"} <ArrowRight className="w-4 h-4" /></>}
             </button>
