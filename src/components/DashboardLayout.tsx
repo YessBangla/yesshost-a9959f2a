@@ -167,6 +167,14 @@ const DashboardLayout = () => {
       label: bn ? "সাপোর্ট" : "Support",
       href: "/dashboard/support",
       icon: HeadphonesIcon,
+      hasDropdown: true,
+      children: [
+        { label: bn ? "সাপোর্ট টিকেট খুলুন" : "Open Support Ticket", href: "/dashboard/support", icon: TicketPlus },
+        { label: bn ? "আমার সাপোর্ট টিকেট" : "My Support Tickets", href: "/dashboard/support", icon: Ticket },
+        { label: bn ? "সাপোর্ট পিন" : "Support PIN", href: "/dashboard", icon: KeyIcon },
+        { label: bn ? "নলেজবেস" : "Knowledgebase", href: "/knowledge-base", icon: BookOpen },
+        { label: bn ? "সার্ভার স্ট্যাটাস" : "Server Status", href: "/dashboard", icon: Activity },
+      ],
     },
     {
       label: bn ? "অ্যাফিলিয়েট" : "Affiliate",
