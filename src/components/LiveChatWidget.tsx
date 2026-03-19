@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const CHAT_STORAGE_KEY = "yesshost_live_chat_id";
+const CHAT_OPEN_KEY = "yesshost_live_chat_open";
 
 type Message = {
   id: string;
@@ -17,7 +18,7 @@ type Message = {
 };
 
 const LiveChatWidget = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => localStorage.getItem(CHAT_OPEN_KEY) === "true");
   const [chatId, setChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -32,6 +33,11 @@ const LiveChatWidget = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { lang } = useLanguage();
   const bn = lang === "bn";
+
+  // Persist open state
+  useEffect(() => {
+    localStorage.setItem(CHAT_OPEN_KEY, open ? "true" : "false");
+  }, [open]);
 
   // Restore chat from localStorage
   useEffect(() => {
