@@ -59,6 +59,7 @@ const DashboardLayout = () => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [serviceCount, setServiceCount] = useState(0);
   const [domainCount, setDomainCount] = useState(0);
+  const [unpaidInvoiceCount, setUnpaidInvoiceCount] = useState(0);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
