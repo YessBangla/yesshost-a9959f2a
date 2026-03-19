@@ -30,6 +30,17 @@ const AdminLayout = () => {
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
+  // Close user menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   const menuSections = [
     {
       label: bn ? "প্রধান" : "Main",
