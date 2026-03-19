@@ -64,6 +64,7 @@ const DashboardOverview = () => {
         .from("notifications").select("*").eq("user_id", user.id)
         .order("created_at", { ascending: false }).limit(5);
       setRecentNotifications(notifData || []);
+      setLoading(false);
     };
     fetchData();
   }, [user]);
