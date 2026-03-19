@@ -62,6 +62,26 @@ const Checkout = () => {
   } | null>(null);
   const [couponError, setCouponError] = useState("");
   const [orderNote, setOrderNote] = useState("");
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletLoading, setWalletLoading] = useState(false);
+
+  // Fetch wallet balance
+  useEffect(() => {
+    if (!user) return;
+    const fetchBalance = async () => {
+      const { data } = await supabase
+        .from("wallet_transactions")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "completed");
+      const balance = (data || []).reduce((sum, t) => {
+        const isCredit = t.type === "deposit" || t.type === "refund";
+        return isCredit ? sum + Number(t.amount_bdt) : sum - Number(t.amount_bdt);
+      }, 0);
+      setWalletBalance(balance);
+    };
+    fetchBalance();
+  }, [user]);
 
   const parseBdtPrice = (price: string): number => {
     const ascii = price.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
