@@ -167,7 +167,7 @@ const PricingSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-6 md:mb-10"
         >
-          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3">
             Pricing
           </span>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
