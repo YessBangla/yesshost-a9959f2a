@@ -130,6 +130,8 @@ const AdminBilling = () => {
       status: inv.status,
       payment_method: inv.payment_method || "",
       due_date: inv.due_date ? inv.due_date.split("T")[0] : "",
+      user_id: inv.user_id,
+      paid_at: inv.paid_at ? inv.paid_at.split("T")[0] : "",
     });
   };
 
