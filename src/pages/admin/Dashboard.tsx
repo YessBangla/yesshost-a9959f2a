@@ -186,11 +186,7 @@ const AdminDashboard = () => {
     return { paymentRate, activationRate, revGrowth, avgOrderValue, rev7 };
   }, [allInvoices, allProfiles, allServices]);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <AdminDashboardSkeleton />;
 
   const statCards = [
     { label: tr("admin.totalUsers"), value: stats.totalUsers, icon: Users, color: "text-primary", bg: "bg-primary/10", trend: "+12%", up: true },
