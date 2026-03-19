@@ -194,6 +194,34 @@ const AdminUsers = () => {
     fetchUsers();
   };
 
+  // Save client profile
+  const handleSaveProfile = async () => {
+    if (!editProfileUser) return;
+    setSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: editProfileForm.full_name || null,
+          phone: editProfileForm.phone || null,
+          company_name: editProfileForm.company_name || null,
+          company_website: editProfileForm.company_website || null,
+          address: editProfileForm.address || null,
+          city: editProfileForm.city || null,
+          country: editProfileForm.country || null,
+          vat_id: editProfileForm.vat_id || null,
+        })
+        .eq("user_id", editProfileUser.user_id);
+      if (error) throw error;
+      toast({ title: "✅", description: isBn ? "ক্লায়েন্ট প্রোফাইল আপডেট হয়েছে" : "Client profile updated successfully" });
+      setEditProfileUser(null);
+      fetchUsers();
+    } catch (err: any) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: err.message, variant: "destructive" });
+    }
+    setSavingProfile(false);
+  };
+
   const togglePermission = (perm: string, perms: string[], setPerms: (p: string[]) => void) => {
     setPerms(perms.includes(perm) ? perms.filter(p => p !== perm) : [...perms, perm]);
   };
