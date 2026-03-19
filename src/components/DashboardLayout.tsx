@@ -127,8 +127,9 @@ const DashboardLayout = () => {
       icon: Server,
       hasDropdown: true,
       children: [
-        { label: bn ? "আমার সার্ভিস" : "My Services", href: "/dashboard/services", icon: Server },
-        { label: bn ? "অর্ডার" : "Orders", href: "/dashboard/orders", icon: ShoppingBag },
+        { label: bn ? "আমার সকল সার্ভিস" : "My All Services", href: "/dashboard/services", icon: Server, badge: serviceCount },
+        { label: bn ? "নতুন সার্ভিস অর্ডার" : "Order New Services", href: "/services/basic-hosting", icon: PlusCircle },
+        { label: bn ? "এভেইলেবল অ্যাডঅন দেখুন" : "View Available Addons", href: "/dashboard/orders", icon: Package },
       ],
     },
     {
