@@ -361,11 +361,6 @@ const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
-    </div>
-  );
-  return (
-    <>
-      {content}
       <AlertDialog open={signOutOpen} onOpenChange={setSignOutOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -382,7 +377,7 @@ const DashboardLayout = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 };
 
