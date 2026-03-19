@@ -84,6 +84,7 @@ const DashboardLayout = () => {
     { title: tr("dash.services"), url: "/dashboard/services", icon: Server },
     { title: bn ? "অর্ডার" : "Orders", url: "/dashboard/orders", icon: ShoppingBag },
     { title: tr("dash.billing"), url: "/dashboard/billing", icon: CreditCard },
+    { title: bn ? "ওয়ালেট" : "Wallet", url: "/dashboard/wallet", icon: Wallet },
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
     ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),
