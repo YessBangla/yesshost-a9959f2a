@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Globe, ExternalLink, Search, Clock, Shield, Server, AlertTriangle } from "lucide-react";
+import { DomainsSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
