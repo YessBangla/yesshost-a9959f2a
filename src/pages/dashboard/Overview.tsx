@@ -2,51 +2,78 @@ import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { OverviewSkeleton } from "@/components/DashboardSkeleton";
 import {
-  Server, FileText, HeadphonesIcon, Globe, ArrowUpRight, AlertCircle,
+  Server, FileText, HeadphonesIcon, Globe, AlertCircle,
   Bell, Clock, TrendingUp, Zap, ChevronRight, CreditCard, Activity,
-  Sun, Moon, CloudSun, Sunrise
+  Sun, Moon, CloudSun, Sunrise, Copy, RefreshCw, ShoppingBag,
+  CheckCircle2, Calendar, MapPin, Mail, User, LogIn, Wallet,
+  AlertTriangle, ChevronDown, ChevronUp
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { formatAmount } from "@/lib/formatPrice";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
-
-const getGreeting = (bn: boolean) => {
-  const h = new Date().getHours();
-  if (h < 6) return { text: bn ? "শুভ রাত্রি" : "Good Night", icon: Moon };
-  if (h < 12) return { text: bn ? "সুপ্রভাত" : "Good Morning", icon: Sunrise };
-  if (h < 17) return { text: bn ? "শুভ অপরাহ্ন" : "Good Afternoon", icon: Sun };
-  if (h < 21) return { text: bn ? "শুভ সন্ধ্যা" : "Good Evening", icon: CloudSun };
-  return { text: bn ? "শুভ রাত্রি" : "Good Night", icon: Moon };
-};
 
 const DashboardOverview = () => {
   const { user, profile } = useAuth();
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
-  const [stats, setStats] = useState({ services: 0, invoices: 0, tickets: 0, domains: 0, activeServices: 0, totalSpent: 0, openTickets: 0 });
+  const [stats, setStats] = useState({
+    services: 0, invoices: 0, tickets: 0, domains: 0,
+    activeServices: 0, totalSpent: 0, openTickets: 0,
+    unpaidCount: 0, unpaidTotal: 0, overdueTotal: 0,
+    walletBalance: 0
+  });
   const [loading, setLoading] = useState(true);
-  const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
-  const [recentServices, setRecentServices] = useState<any[]>([]);
+  const [expiringServices, setExpiringServices] = useState<any[]>([]);
+  const [expiringDomains, setExpiringDomains] = useState<any[]>([]);
+  const [clientActivitiesOpen, setClientActivitiesOpen] = useState(true);
+
+  // Support PIN (random 6-digit tied to user id)
+  const supportPin = useMemo(() => {
+    if (!user?.id) return "000000";
+    let hash = 0;
+    for (let i = 0; i < user.id.length; i++) {
+      hash = ((hash << 5) - hash) + user.id.charCodeAt(i);
+      hash |= 0;
+    }
+    return String(Math.abs(hash) % 1000000).padStart(6, "0");
+  }, [user?.id]);
+
+  const copyPin = () => {
+    navigator.clipboard.writeText(supportPin);
+    toast.success(bn ? "কপি করা হয়েছে" : "Copied!");
+  };
 
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [servicesRes, invoicesRes, ticketsRes, domainsRes, activeRes, openTicketsRes, allServicesRes] = await Promise.all([
+      const [servicesRes, invoicesRes, ticketsRes, domainsRes, activeRes, openTicketsRes, unpaidInvRes, walletRes] = await Promise.all([
         supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+        supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("support_tickets").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("service_type", "domain"),
         supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "active"),
         supabase.from("support_tickets").select("id", { count: "exact", head: true }).eq("user_id", user.id).in("status", ["open", "in_progress"]),
-        supabase.from("services").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
+        supabase.from("invoices").select("*").eq("user_id", user.id).in("status", ["unpaid", "overdue"]),
+        supabase.from("wallet_transactions").select("*").eq("user_id", user.id).eq("status", "completed"),
       ]);
 
       const totalSpent = (invoicesRes.data || []).filter((i: any) => i.status === "paid").reduce((s: number, i: any) => s + Number(i.amount_bdt), 0);
+      const unpaidData = unpaidInvRes.data || [];
+      const unpaidTotal = unpaidData.filter((i: any) => i.status === "unpaid").reduce((s: number, i: any) => s + Number(i.amount_bdt), 0);
+      const overdueTotal = unpaidData.filter((i: any) => i.status === "overdue").reduce((s: number, i: any) => s + Number(i.amount_bdt), 0);
+
+      const walletBalance = (walletRes.data || []).reduce((sum: number, t: any) => {
+        const isCredit = t.type === "deposit" || t.type === "refund";
+        return isCredit ? sum + Number(t.amount_bdt) : sum - Number(t.amount_bdt);
+      }, 0);
 
       setStats({
         services: servicesRes.count || 0,
@@ -56,9 +83,29 @@ const DashboardOverview = () => {
         activeServices: activeRes.count || 0,
         totalSpent,
         openTickets: openTicketsRes.count || 0,
+        unpaidCount: unpaidData.length,
+        unpaidTotal,
+        overdueTotal,
+        walletBalance,
       });
-      setRecentInvoices(invoicesRes.data || []);
-      setRecentServices(allServicesRes.data || []);
+
+      // Expiring services (within 30 days)
+      const { data: allServices } = await supabase
+        .from("services").select("*").eq("user_id", user.id)
+        .neq("service_type", "domain").eq("status", "active");
+      const now = new Date();
+      const in30 = new Date(now.getTime() + 30 * 86400000);
+      setExpiringServices((allServices || []).filter((s: any) =>
+        s.expiry_date && new Date(s.expiry_date) <= in30 && new Date(s.expiry_date) >= now
+      ));
+
+      // Expiring domains
+      const { data: allDomains } = await supabase
+        .from("services").select("*").eq("user_id", user.id)
+        .eq("service_type", "domain").eq("status", "active");
+      setExpiringDomains((allDomains || []).filter((s: any) =>
+        s.expiry_date && new Date(s.expiry_date) <= in30 && new Date(s.expiry_date) >= now
+      ));
 
       const { data: notifData } = await supabase
         .from("notifications").select("*").eq("user_id", user.id)
@@ -69,21 +116,10 @@ const DashboardOverview = () => {
     fetchData();
   }, [user]);
 
-  const greeting = useMemo(() => getGreeting(bn), [bn]);
-  const GreetingIcon = greeting.icon;
-
-  const statusColors: Record<string, string> = {
-    active: "bg-success/10 text-success",
-    pending: "bg-warning/10 text-warning",
-    suspended: "bg-destructive/10 text-destructive",
+  const daysUntil = (date: string) => {
+    const diff = Math.ceil((new Date(date).getTime() - Date.now()) / 86400000);
+    return diff;
   };
-
-  const cards = [
-    { title: bn ? "সক্রিয় সার্ভিস" : "Active Services", value: stats.activeServices, total: stats.services, icon: Server, color: "from-blue-500 to-indigo-600", link: "/dashboard/services" },
-    { title: bn ? "ডোমেইন" : "Domains", value: stats.domains, icon: Globe, color: "from-emerald-500 to-green-600", link: "/dashboard/domains" },
-    { title: bn ? "ওপেন টিকেট" : "Open Tickets", value: stats.openTickets, total: stats.tickets, icon: HeadphonesIcon, color: "from-amber-500 to-orange-600", link: "/dashboard/support" },
-    { title: bn ? "মোট ব্যয়" : "Total Spent", value: `৳${formatAmount(stats.totalSpent, lang)}`, icon: CreditCard, color: "from-purple-500 to-violet-600", link: "/dashboard/billing" },
-  ];
 
   const ago = (date: string) => {
     const mins = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
@@ -95,209 +131,357 @@ const DashboardOverview = () => {
     return bn ? `${days} দিন আগে` : `${days}d ago`;
   };
 
+  const clientFor = useMemo(() => {
+    if (!user?.created_at) return "";
+    const created = new Date(user.created_at);
+    const now = new Date();
+    const months = (now.getFullYear() - created.getFullYear()) * 12 + (now.getMonth() - created.getMonth());
+    const years = Math.floor(months / 12);
+    const rem = months % 12;
+    if (years > 0) return bn ? `${years} বছর, ${rem} মাস` : `${years} Year${years > 1 ? "s" : ""}, ${rem} Month${rem !== 1 ? "s" : ""}`;
+    return bn ? `${rem} মাস` : `${rem} Month${rem !== 1 ? "s" : ""}`;
+  }, [user?.created_at, bn]);
+
   if (loading) return <OverviewSkeleton />;
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: brandCurve }}
-        className="relative overflow-hidden rounded-2xl gradient-primary p-6 sm:p-8"
-      >
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 blur-3xl translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/10 blur-3xl -translate-x-1/3 translate-y-1/3" />
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <GreetingIcon className="w-5 h-5 text-primary-foreground/80" />
-              <span className="text-sm text-primary-foreground/80 font-medium">{greeting.text}</span>
+    <div className="space-y-5">
+      {/* Top Row: Welcome + Support PIN */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
+        {/* Welcome */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+            {bn ? "স্বাগতম," : "Welcome,"}{" "}
+            <span className="text-primary">{profile?.full_name || "User"}</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {bn ? "আজ আপনার অ্যাকাউন্টে কী হচ্ছে তা দেখুন।" : "Here's what's happening with your account today."}
+          </p>
+          <div className="h-1 w-16 bg-primary rounded-full mt-3" />
+        </motion.div>
+
+        {/* Support PIN Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="rounded-xl border border-border bg-card overflow-hidden"
+        >
+          <div className="bg-primary px-4 py-2.5">
+            <div className="flex items-center gap-2">
+              <HeadphonesIcon className="w-4 h-4 text-primary-foreground" />
+              <span className="text-sm font-bold text-primary-foreground">
+                {bn ? "সাপোর্ট পিন" : "Support PIN"}
+              </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-primary-foreground">
-              {profile?.full_name || "User"} 👋
-            </h1>
-            <p className="text-sm text-primary-foreground/70 mt-1">
-              {bn ? "আপনার অ্যাকাউন্টের সংক্ষিপ্ত বিবরণ" : "Here's your account summary"}
+          </div>
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                {bn ? "আইডেন্টিটি পিন" : "IDENTITY PIN"}
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/10 text-success font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                {bn ? "সক্রিয়" : "Active"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-extrabold text-foreground tracking-wider tabular-nums">
+                {supportPin}
+              </span>
+              <button onClick={copyPin} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Copy">
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Stat Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.4 }}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+      >
+        {/* Active Services */}
+        <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-primary">{bn ? "সক্রিয় সার্ভিস" : "Active Services"}</span>
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+              <Server className="w-5 h-5 text-emerald-600" />
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.activeServices}</p>
+          <Link to="/hosting-plans" className="mt-3 flex items-center gap-1 text-xs text-emerald-600 font-semibold hover:underline">
+            <span>+</span> {bn ? "নতুন সার্ভিস অর্ডার" : "Order New Service"}
+          </Link>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500 rounded-b-xl" />
+        </div>
+
+        {/* Total Domains */}
+        <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-primary">{bn ? "মোট ডোমেইন" : "Total Domains"}</span>
+            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+              <Globe className="w-5 h-5 text-blue-600" />
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.domains}</p>
+          <Link to="/domain-pricing" className="mt-3 flex items-center gap-1 text-xs text-blue-600 font-semibold hover:underline">
+            <span>+</span> {bn ? "ডোমেইন কিনুন" : "Buy Domain"}
+          </Link>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-b-xl" />
+        </div>
+
+        {/* Unpaid Invoices */}
+        <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-primary">{bn ? "বকেয়া ইনভয়েস" : "Unpaid Invoices"}</span>
+            <div className="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-red-600" />
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.unpaidCount}</p>
+          <div className="mt-1 space-y-0.5">
+            <p className="text-[10px] text-destructive font-medium">
+              {bn ? "ওভারডিউ:" : "Overdue:"} ৳{formatAmount(stats.overdueTotal, lang)}
+            </p>
+            <p className="text-[10px] text-warning font-medium">
+              {bn ? "বকেয়া:" : "Unpaid:"} ৳{formatAmount(stats.unpaidTotal, lang)}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/dashboard/support"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-primary-foreground text-sm font-semibold transition-colors backdrop-blur-sm"
-            >
-              <HeadphonesIcon className="w-4 h-4" />
-              {bn ? "সাপোর্ট" : "Get Help"}
-            </Link>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-500 rounded-b-xl" />
+        </div>
+
+        {/* Active Tickets */}
+        <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-primary">{bn ? "ওপেন টিকেট" : "Active Tickets"}</span>
+            <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+              <HeadphonesIcon className="w-5 h-5 text-purple-600" />
+            </div>
           </div>
+          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.openTickets}</p>
+          <Link to="/dashboard/support" className="mt-3 flex items-center gap-1 text-xs text-purple-600 font-semibold hover:underline">
+            <span>+</span> {bn ? "টিকেট খুলুন" : "Open Ticket"}
+          </Link>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-purple-500 rounded-b-xl" />
         </div>
       </motion.div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {cards.map((card, i) => (
+      {/* Middle Section: Client Activities + Expiring sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5">
+        {/* Left Column: Client Activities + Quick Actions */}
+        <div className="space-y-4">
+          {/* Client Activities */}
           <motion.div
-            key={card.title}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="rounded-xl border border-border bg-card overflow-hidden"
           >
-            <Link to={card.link} className="block glass-card p-4 sm:p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all group rounded-xl">
-              <div className="flex items-center justify-between mb-3">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center shadow-lg`}>
-                  <card.icon className="w-5 h-5 text-white" />
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            <button
+              onClick={() => setClientActivitiesOpen(!clientActivitiesOpen)}
+              className="w-full bg-primary px-4 py-2.5 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-primary-foreground" />
+                <span className="text-sm font-bold text-primary-foreground">
+                  {bn ? "ক্লায়েন্ট তথ্য" : "Client Activities"}
+                </span>
               </div>
-              <p className="text-xl sm:text-2xl font-extrabold text-foreground tabular-nums">{card.value}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{card.title}</p>
-              {card.total !== undefined && card.total > 0 && (
-                <div className="mt-2 h-1 rounded-full bg-secondary overflow-hidden">
-                  <div
-                    className={`h-full rounded-full bg-gradient-to-r ${card.color}`}
-                    style={{ width: `${Math.min(100, (Number(card.value) / card.total) * 100)}%` }}
-                  />
-                </div>
+              {clientActivitiesOpen ? (
+                <ChevronUp className="w-4 h-4 text-primary-foreground" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-primary-foreground" />
               )}
-            </Link>
-          </motion.div>
-        ))}
-      </div>
+            </button>
+            {clientActivitiesOpen && (
+              <div className="p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{bn ? "স্ট্যাটাস" : "Status"}</span>
+                  <span className="text-success font-semibold">{bn ? "সক্রিয়" : "Active"}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{bn ? "নিবন্ধন" : "Registered"}</span>
+                  <span className="text-foreground font-medium">
+                    {user?.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : "—"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{bn ? "ক্লায়েন্ট" : "Client for"}</span>
+                  <span className="text-foreground font-medium">{clientFor || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{bn ? "ইমেইল যাচাই" : "Email Verified"}</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-success/10 text-success font-semibold">
+                    {bn ? "যাচাইকৃত" : "Verified"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{bn ? "ওয়ালেট" : "Wallet"}</span>
+                  <span className="text-foreground font-bold">৳{formatAmount(stats.walletBalance, lang)}</span>
+                </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass-card p-5 sm:p-6 rounded-xl"
-        >
-          <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-primary" />
-            {bn ? "দ্রুত অ্যাকশন" : "Quick Actions"}
-          </h3>
-          <div className="space-y-2">
+                {/* Last Login */}
+                <div className="mt-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold text-center">
+                  <LogIn className="w-3.5 h-3.5 inline mr-1.5" />
+                  {bn ? "শেষ লগইন:" : "Last Login:"} {user?.last_sign_in_at
+                    ? format(new Date(user.last_sign_in_at), "dd MMM yyyy, hh:mm a")
+                    : "—"}
+                </div>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+            className="rounded-xl border border-border bg-card p-4 space-y-1"
+          >
             {[
-              { to: "/dashboard/support", icon: HeadphonesIcon, label: bn ? "নতুন টিকেট খুলুন" : "Open New Ticket", color: "text-blue-500" },
-              { to: "/dashboard/billing", icon: FileText, label: bn ? "ইনভয়েস দেখুন" : "View Invoices", color: "text-amber-500" },
-              { to: "/dashboard/services", icon: Server, label: bn ? "সার্ভিস ম্যানেজ" : "Manage Services", color: "text-emerald-500" },
-              { to: "/dashboard/domains", icon: Globe, label: bn ? "ডোমেইন ম্যানেজ" : "Manage Domains", color: "text-purple-500" },
-              { to: "/dashboard/profile", icon: Activity, label: bn ? "প্রোফাইল আপডেট" : "Update Profile", color: "text-pink-500" },
+              { to: "/hosting-plans", icon: ShoppingBag, label: bn ? "নতুন সার্ভিস অর্ডার" : "Order New Services" },
+              { to: "/domain-pricing", icon: Globe, label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain" },
+              { to: "/dashboard/wallet", icon: Wallet, label: bn ? "ফান্ড যোগ করুন" : "Add Fund" },
+              { to: "/dashboard/support", icon: HeadphonesIcon, label: bn ? "সাপোর্ট টিকেট" : "Support Ticket" },
             ].map((action) => (
               <Link
                 key={action.to}
                 to={action.to}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/60 transition-colors group"
+                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-secondary/60 transition-colors group"
               >
-                <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                  <action.icon className={`w-4 h-4 ${action.color}`} />
-                </div>
-                <span className="text-sm font-medium text-foreground flex-1">{action.label}</span>
-                <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <action.icon className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-sm font-medium text-foreground">{action.label}</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
               </Link>
             ))}
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
-        {/* Recent Invoices */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="glass-card p-5 sm:p-6 rounded-xl"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <FileText className="w-4 h-4 text-primary" />
-              {bn ? "সাম্প্রতিক ইনভয়েস" : "Recent Invoices"}
-            </h3>
-            <Link to="/dashboard/billing" className="text-xs text-primary hover:underline font-medium">
-              {bn ? "সব দেখুন" : "View all"}
-            </Link>
-          </div>
-          {recentInvoices.length === 0 ? (
-            <div className="text-center py-10">
-              <FileText className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">{bn ? "কোনো ইনভয়েস নেই" : "No invoices yet"}</p>
+        {/* Right Column: Expiring Services + Domains */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Services Expiring Soon */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+            className="rounded-xl border border-border bg-card overflow-hidden"
+          >
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Server className="w-4 h-4 text-primary" />
+                <span className="text-sm font-bold text-foreground">
+                  {bn ? "মেয়াদ শেষ হচ্ছে সার্ভিস" : "Services Expiring Soon"}
+                </span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-bold">
+                {expiringServices.length}
+              </span>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {recentInvoices.map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{inv.invoice_number}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{inv.description || "—"}</p>
-                  </div>
-                  <div className="text-right shrink-0 ml-3">
-                    <p className="text-sm font-bold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</p>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                      inv.status === "paid" ? "bg-success/10 text-success" :
-                      inv.status === "unpaid" ? "bg-warning/10 text-warning" :
-                      "bg-destructive/10 text-destructive"
-                    }`}>
-                      {inv.status === "paid" ? (bn ? "পরিশোধিত" : "Paid") :
-                       inv.status === "unpaid" ? (bn ? "বকেয়া" : "Unpaid") :
-                       inv.status}
-                    </span>
-                  </div>
+            <div className="p-4">
+              {expiringServices.length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle2 className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground">
+                    {bn ? "শীঘ্রই মেয়াদ শেষ হচ্ছে এমন কোনো সার্ভিস নেই" : "No services expiring soon"}
+                  </p>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-2">
+                  {expiringServices.map((s: any) => {
+                    const days = daysUntil(s.expiry_date);
+                    return (
+                      <div key={s.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground truncate">{s.name}</p>
+                          <p className="text-[11px] text-muted-foreground">{s.domain || s.plan || ""}</p>
+                        </div>
+                        <div className="text-right shrink-0 ml-3">
+                          <p className="text-[11px] text-muted-foreground">
+                            {format(new Date(s.expiry_date), "dd/MM/yyyy")}
+                          </p>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                            days <= 7 ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"
+                          }`}>
+                            {days} {bn ? "দিন" : "days"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
-        </motion.div>
+          </motion.div>
 
-        {/* Recent Services */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="glass-card p-5 sm:p-6 rounded-xl"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <Server className="w-4 h-4 text-primary" />
-              {bn ? "সাম্প্রতিক সার্ভিস" : "Recent Services"}
-            </h3>
-            <Link to="/dashboard/services" className="text-xs text-primary hover:underline font-medium">
-              {bn ? "সব দেখুন" : "View all"}
-            </Link>
-          </div>
-          {recentServices.length === 0 ? (
-            <div className="text-center py-10">
-              <Server className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">{bn ? "কোনো সার্ভিস নেই" : "No services yet"}</p>
-              <Link to="/#pricing" className="inline-block mt-3 text-xs text-primary hover:underline font-medium">
-                {bn ? "প্ল্যান দেখুন" : "Browse Plans"} →
-              </Link>
+          {/* Domains Expiring Soon */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            className="rounded-xl border border-border bg-card overflow-hidden"
+          >
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-primary" />
+                <span className="text-sm font-bold text-foreground">
+                  {bn ? "মেয়াদ শেষ হচ্ছে ডোমেইন" : "Domains Expiring Soon"}
+                </span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-bold">
+                {expiringDomains.length}
+              </span>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {recentServices.map((s: any) => (
-                <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Server className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{s.name}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{s.domain || s.plan || s.service_type}</p>
-                  </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 ${statusColors[s.status] || "bg-muted text-muted-foreground"}`}>
-                    {s.status}
-                  </span>
+            <div className="p-4">
+              {expiringDomains.length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle2 className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground">
+                    {bn ? "শীঘ্রই মেয়াদ শেষ হচ্ছে এমন কোনো ডোমেইন নেই" : "No domains expiring soon"}
+                  </p>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-2">
+                  {expiringDomains.map((d: any) => {
+                    const days = daysUntil(d.expiry_date);
+                    return (
+                      <div key={d.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground truncate">{d.domain || d.name}</p>
+                        </div>
+                        <div className="text-right shrink-0 ml-3">
+                          <p className="text-[11px] text-muted-foreground">
+                            {format(new Date(d.expiry_date), "dd/MM/yyyy")}
+                          </p>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                            days <= 7 ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"
+                          }`}>
+                            {days} {bn ? "দিন" : "days"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
 
       {/* Notifications */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.45 }}
-        className="glass-card p-5 sm:p-6 rounded-xl"
+        transition={{ delay: 0.35, duration: 0.4 }}
+        className="rounded-xl border border-border bg-card p-5"
       >
         <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
           <Bell className="w-4 h-4 text-primary" />
