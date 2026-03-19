@@ -381,7 +381,7 @@ const DashboardLayout = () => {
                     <Link to="/dashboard/wallet" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
                       <Wallet className="w-4 h-4" />
                       <span className="flex-1">{bn ? "ওয়ালেট" : "Wallet"}</span>
-                      <span className="text-xs font-semibold text-primary">TK {formatAmount(walletBalance)}</span>
+                      <span className="text-xs font-semibold text-primary">TK {formatAmount(walletBalance, lang)}</span>
                     </Link>
                     <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
                       <KeyRound className="w-4 h-4" /> {bn ? "পাসওয়ার্ড পরিবর্তন" : "Change Password"}
