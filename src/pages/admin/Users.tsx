@@ -73,7 +73,8 @@ const AdminUsers = () => {
       (u.company_name || "").toLowerCase().includes(search.toLowerCase());
     const matchRole = roleFilter === "all" ||
       (roleFilter === "admin" && u.roles.includes("admin")) ||
-      (roleFilter === "user" && !u.roles.includes("admin"));
+      (roleFilter === "call_center" && u.roles.includes("call_center")) ||
+      (roleFilter === "user" && !u.roles.includes("admin") && !u.roles.includes("call_center"));
     return matchSearch && matchRole;
   });
 
