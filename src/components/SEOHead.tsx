@@ -42,9 +42,9 @@ const SEOHead = ({
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
       )}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-      {canonicalUrl && <link rel="alternate" hreflang="bn" href={canonicalUrl} />}
-      {canonicalUrl && <link rel="alternate" hreflang="en" href={canonicalUrl} />}
-      {canonicalUrl && <link rel="alternate" hreflang="x-default" href={canonicalUrl} />}
+      {canonicalUrl && <link rel="alternate" hrefLang="bn" href={canonicalUrl} />}
+      {canonicalUrl && <link rel="alternate" hrefLang="en" href={canonicalUrl} />}
+      {canonicalUrl && <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />}
 
       {/* Open Graph */}
       <meta property="og:type" content={ogType} />
