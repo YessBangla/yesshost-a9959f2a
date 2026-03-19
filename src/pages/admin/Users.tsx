@@ -74,6 +74,14 @@ const AdminUsers = () => {
   const [editRoles, setEditRoles] = useState<string[]>([]);
   const [savingPerms, setSavingPerms] = useState(false);
 
+  // Edit client profile dialog
+  const [editProfileUser, setEditProfileUser] = useState<UserWithRoles | null>(null);
+  const [editProfileForm, setEditProfileForm] = useState({
+    full_name: "", phone: "", company_name: "", company_website: "",
+    address: "", city: "", country: "", vat_id: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+
   const fetchUsers = async () => {
     const [profiles, roles, services, invoices, perms] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
