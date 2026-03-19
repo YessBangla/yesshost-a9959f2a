@@ -3,16 +3,19 @@ import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
   ChevronRight, Home, PanelLeftClose, PanelLeft,
-  CreditCard, Settings
+  CreditCard
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
 import { supabase } from "@/integrations/supabase/client";
 import logoWhite from "@/assets/logo-white.png";
 import NotificationBell from "@/components/NotificationBell";
+
+const SIDEBAR_W = 260;
+const SWIPE_THRESHOLD = 80;
 
 const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard": { en: "Overview", bn: "ওভারভিউ" },
@@ -34,6 +37,9 @@ const DashboardLayout = () => {
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
   const bn = lang === "bn";
+  const dragX = useMotionValue(0);
+  const sidebarX = useTransform(dragX, [0, -SIDEBAR_W], [0, -SIDEBAR_W]);
+  const overlayOpacity = useTransform(dragX, [0, -SIDEBAR_W], [1, 0]);
 
   useEffect(() => {
     if (user) supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
@@ -63,9 +69,19 @@ const DashboardLayout = () => {
 
   const handleSignOut = async () => { await signOut(); navigate("/"); };
   const currentBreadcrumb = breadcrumbMap[location.pathname];
+  const currentPageTitle = sidebarItems.find(i =>
+    i.url === "/dashboard" ? location.pathname === "/dashboard" : location.pathname.startsWith(i.url)
+  )?.title || bottomItems.find(i => location.pathname.startsWith(i.url))?.title;
+
+  const handleDragEnd = useCallback((_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
+    if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -300) {
+      setMobileOpen(false);
+    }
+    dragX.set(0);
+  }, [dragX]);
 
   const SidebarInner = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full safe-top safe-bottom">
       {/* Logo */}
       <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
         {!collapsed ? (
@@ -80,7 +96,7 @@ const DashboardLayout = () => {
       </div>
 
       {/* Main Nav */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2.5 no-scrollbar">
+      <nav className="flex-1 overflow-y-auto py-4 px-2.5 no-scrollbar overscroll-contain">
         {!collapsed && (
           <p className="px-3 mb-2 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em]">
             {bn ? "মেনু" : "Menu"}
@@ -92,7 +108,7 @@ const DashboardLayout = () => {
               key={item.url}
               to={item.url}
               end={item.url === "/dashboard"}
-              className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 ${collapsed ? "justify-center px-2" : ""}`}
+              className={`group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98] ${collapsed ? "justify-center px-2" : ""}`}
               activeClassName="!bg-primary/8 !text-primary font-semibold"
             >
               <item.icon className="w-[18px] h-[18px] shrink-0" />
@@ -108,7 +124,7 @@ const DashboardLayout = () => {
           <NavLink
             key={item.url}
             to={item.url}
-            className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all ${collapsed ? "justify-center px-2" : ""}`}
+            className={`group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all active:scale-[0.98] ${collapsed ? "justify-center px-2" : ""}`}
             activeClassName="!bg-primary/8 !text-primary font-semibold"
           >
             <item.icon className="w-[17px] h-[17px] shrink-0" />
@@ -119,7 +135,7 @@ const DashboardLayout = () => {
         {!collapsed && isAdmin && (
           <NavLink
             to="/admin"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-amber-600 hover:bg-amber-500/8 transition-all"
+            className="flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-amber-600 hover:bg-amber-500/8 transition-all active:scale-[0.98]"
             activeClassName=""
           >
             <Shield className="w-[17px] h-[17px] shrink-0" />
@@ -150,7 +166,7 @@ const DashboardLayout = () => {
 
         <button
           onClick={handleSignOut}
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 w-full transition-all ${collapsed ? "justify-center px-2" : ""}`}
+          className={`flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 w-full transition-all active:scale-[0.98] ${collapsed ? "justify-center px-2" : ""}`}
         >
           <LogOut className="w-[17px] h-[17px] shrink-0" />
           {!collapsed && <span>{tr("dash.signOut")}</span>}
@@ -170,7 +186,7 @@ const DashboardLayout = () => {
         <SidebarInner />
       </aside>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay with swipe-to-close */}
       <AnimatePresence>
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
@@ -178,15 +194,21 @@ const DashboardLayout = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              style={{ opacity: overlayOpacity }}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: -SIDEBAR_W }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: -SIDEBAR_W }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl"
+              style={{ x: sidebarX }}
+              drag="x"
+              dragConstraints={{ left: -SIDEBAR_W, right: 0 }}
+              dragElastic={0.1}
+              onDragEnd={handleDragEnd}
+              className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl touch-pan-y"
             >
               <SidebarInner />
             </motion.aside>
@@ -196,9 +218,8 @@ const DashboardLayout = () => {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="h-14 flex items-center gap-2 px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-30">
-          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground">
+        <header className="h-14 flex items-center gap-2 px-3 sm:px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-30 safe-left safe-right">
+          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-secondary/60 active:bg-secondary/80 text-muted-foreground">
             <Menu className="w-5 h-5" />
           </button>
 
@@ -209,7 +230,7 @@ const DashboardLayout = () => {
             {collapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
           </button>
 
-          {/* Breadcrumb */}
+          {/* Breadcrumb - desktop */}
           <div className="hidden sm:flex items-center gap-1.5 text-xs ml-1">
             <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
               <Home className="w-3.5 h-3.5" />
@@ -222,7 +243,14 @@ const DashboardLayout = () => {
             )}
           </div>
 
-          <div className="flex-1" />
+          {/* Mobile Page Title */}
+          <div className="sm:hidden flex-1 text-center">
+            <span className="text-sm font-semibold text-foreground">
+              {currentPageTitle || (bn ? "ড্যাশবোর্ড" : "Dashboard")}
+            </span>
+          </div>
+
+          <div className="flex-1 hidden sm:block" />
 
           {/* Quick Links */}
           <Link
@@ -238,7 +266,7 @@ const DashboardLayout = () => {
           {/* Language */}
           <button
             onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-secondary/60 transition-colors text-xs font-medium text-muted-foreground"
+            className="flex items-center gap-1 px-2 py-2 min-h-[44px] rounded-lg hover:bg-secondary/60 active:bg-secondary/80 transition-colors text-xs font-medium text-muted-foreground"
           >
             <Globe className="w-3.5 h-3.5" />
             {lang === "bn" ? "EN" : "বাং"}
@@ -248,13 +276,13 @@ const DashboardLayout = () => {
           <div className="relative">
             <button
               onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-              className="flex items-center gap-2 pl-2.5 ml-1 border-l border-border/40"
+              className="flex items-center gap-2 pl-2.5 ml-1 border-l border-border/40 min-h-[44px]"
             >
               <div className="hidden md:block text-right">
                 <p className="text-xs font-semibold text-foreground leading-none">{profile?.full_name || "User"}</p>
                 <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{profile?.company_name || (bn ? "ক্লায়েন্ট" : "Client")}</p>
               </div>
-              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary/15">
+              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-primary/15">
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -278,22 +306,22 @@ const DashboardLayout = () => {
                     <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name}</p>
                     <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                   </div>
-                  <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
+                  <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
                     <UserCircle className="w-4 h-4" /> {bn ? "প্রোফাইল" : "Profile"}
                   </Link>
-                  <Link to="/dashboard/billing" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
+                  <Link to="/dashboard/billing" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
                     <CreditCard className="w-4 h-4" /> {bn ? "বিলিং" : "Billing"}
                   </Link>
-                  <button onClick={() => setLang(lang === "bn" ? "en" : "bn")} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors w-full">
+                  <button onClick={() => setLang(lang === "bn" ? "en" : "bn")} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors w-full">
                     <Globe className="w-4 h-4" /> {lang === "bn" ? "English" : "বাংলা"}
                   </button>
                   {isAdmin && (
-                    <Link to="/admin" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-amber-600 hover:bg-amber-500/8 transition-colors">
+                    <Link to="/admin" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-amber-600 hover:bg-amber-500/8 active:bg-amber-500/15 transition-colors">
                       <Shield className="w-4 h-4" /> {bn ? "অ্যাডমিন" : "Admin"}
                     </Link>
                   )}
                   <div className="border-t border-border/50 mt-1 pt-1">
-                    <button onClick={handleSignOut} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/8 transition-colors w-full">
+                    <button onClick={handleSignOut} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-destructive hover:bg-destructive/8 active:bg-destructive/15 transition-colors w-full">
                       <LogOut className="w-4 h-4" /> {tr("dash.signOut")}
                     </button>
                   </div>
@@ -303,7 +331,7 @@ const DashboardLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-6 overflow-auto bg-background">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto bg-background">
           <Outlet />
         </main>
       </div>
