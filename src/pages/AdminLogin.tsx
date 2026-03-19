@@ -40,7 +40,15 @@ const AdminLogin = () => {
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      toast({ title: bn ? "লগইন ব্যর্থ" : "Login Failed", description: error.message, variant: "destructive" });
+      let desc = error.message;
+      if (error.message.includes("Invalid login credentials")) {
+        desc = bn ? "ইমেইল বা পাসওয়ার্ড ভুল। আবার চেষ্টা করুন।" : "Invalid email or password. Please try again.";
+      } else if (error.message.includes("Email not confirmed")) {
+        desc = bn ? "আপনার ইমেইল এখনো ভেরিফাই হয়নি। ইনবক্স চেক করুন।" : "Your email is not verified yet. Please check your inbox.";
+      } else if (error.message.includes("Too many requests")) {
+        desc = bn ? "অনেকবার চেষ্টা করেছেন। কিছুক্ষণ পর আবার চেষ্টা করুন।" : "Too many attempts. Please try again later.";
+      }
+      toast({ title: bn ? "লগইন ব্যর্থ" : "Login Failed", description: desc, variant: "destructive" });
       setLoading(false);
       return;
     }
