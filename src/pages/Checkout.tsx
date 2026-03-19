@@ -469,6 +469,12 @@ const Checkout = () => {
                         )}
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{method.desc}</p>
+                      {method.id === "wallet" && user && (
+                        <p className={`text-[11px] mt-0.5 font-semibold ${walletBalance >= totalBdt ? "text-primary" : "text-destructive"}`}>
+                          {bn ? `ব্যালেন্স: ৳${walletBalance}` : `Balance: ৳${walletBalance}`}
+                          {walletBalance < totalBdt && (` • ${bn ? "অপর্যাপ্ত" : "Insufficient"}`)}
+                        </p>
+                      )}
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedPayment === method.id ? "border-primary bg-primary" : "border-border"}`}>
                       {selectedPayment === method.id && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
