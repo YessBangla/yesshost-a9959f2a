@@ -691,6 +691,29 @@ const DashboardBilling = () => {
                   );
                 })}
               </div>
+
+              {/* Wallet balance indicator */}
+              {selectedPayment === "wallet" && (
+                <div className={`mt-2 p-3 rounded-lg border ${
+                  walletBalance >= Number(payInvoice?.amount_bdt || 0)
+                    ? "border-success/30 bg-success/5"
+                    : "border-destructive/30 bg-destructive/5"
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">{isBn ? "ওয়ালেট ব্যালেন্স" : "Wallet Balance"}</span>
+                    <span className={`text-sm font-bold ${
+                      walletBalance >= Number(payInvoice?.amount_bdt || 0) ? "text-success" : "text-destructive"
+                    }`}>
+                      ৳{formatAmount(walletBalance, lang)}
+                    </span>
+                  </div>
+                  {walletBalance < Number(payInvoice?.amount_bdt || 0) && (
+                    <p className="text-[10px] text-destructive mt-1">
+                      {isBn ? "অপর্যাপ্ত ব্যালেন্স। অনুগ্রহ করে প্রথমে ফান্ড যোগ করুন।" : "Insufficient balance. Please add funds first."}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2 pt-1">
