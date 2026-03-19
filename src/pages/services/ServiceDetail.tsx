@@ -68,8 +68,8 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
       )}
 
       <div className="p-5 sm:p-6 flex flex-col flex-1">
-        <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-        {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
+        <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
+        {plan.subtitle && <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>}
 
         {/* Duration Selector */}
         <div className="relative mt-3">
