@@ -32,6 +32,12 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background hero-gradient px-4 py-12">
+      <SEOHead
+        title={bn ? "অ্যাকাউন্ট তৈরি করুন - Yess Host" : "Create Account - Yess Host"}
+        description={bn ? "Yess Host-এ ফ্রি অ্যাকাউন্ট তৈরি করুন এবং হোস্টিং, ডোমেইন ও আরো অনেক সেবা পান।" : "Create a free Yess Host account and get access to hosting, domains and more services."}
+        canonical="/signup"
+        noindex
+      />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-10 mx-auto mb-6" /></Link>
