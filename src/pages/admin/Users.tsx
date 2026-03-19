@@ -100,10 +100,11 @@ const AdminUsers = () => {
     if (hasAdmin) {
       const { data: roleData } = await supabase.from("user_roles").select("id").eq("user_id", userId).eq("role", "admin").single();
       if (roleData) await supabase.from("user_roles").delete().eq("id", roleData.id);
+      toast({ title: "✅", description: isBn ? "অ্যাডমিন রোল সরানো হয়েছে" : "Admin role removed" });
     } else {
       await supabase.from("user_roles").insert({ user_id: userId, role: "admin" });
+      toast({ title: "✅", description: isBn ? "অ্যাডমিন রোল যুক্ত হয়েছে" : "Admin role granted" });
     }
-    toast({ title: isBn ? "রোল আপডেট হয়েছে" : "Role updated" });
     fetchUsers();
   };
 
