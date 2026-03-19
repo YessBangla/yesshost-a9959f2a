@@ -133,6 +133,7 @@ const App = () => (
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="live-chat" element={<AdminLiveChat />} />
               <Route path="chat-rooms" element={<AdminChatRooms />} />
+              <Route path="contact-messages" element={<AdminContactMessages />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
