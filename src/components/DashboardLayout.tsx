@@ -3,7 +3,8 @@ import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
   ChevronRight, Home, PanelLeftClose, PanelLeft,
-  CreditCard, Share2, KeyRound, Bell, Settings, Wallet
+  CreditCard, Share2, KeyRound, Bell, Settings, Wallet,
+  ChevronDown
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -18,6 +19,7 @@ import { NavLink } from "@/components/NavLink";
 import { supabase } from "@/integrations/supabase/client";
 import logoWhite from "@/assets/logo-white.png";
 import NotificationBell from "@/components/NotificationBell";
+import { formatAmount } from "@/lib/formatPrice";
 
 const SIDEBAR_W = 260;
 const SWIPE_THRESHOLD = 80;
@@ -34,10 +36,20 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
 };
 
+interface TopMenuItem {
+  label: string;
+  href: string;
+  icon: typeof Server;
+  hasDropdown?: boolean;
+  children?: { label: string; href: string; icon: typeof Server }[];
+}
+
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [activeTopMenu, setActiveTopMenu] = useState<string | null>(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
@@ -70,14 +82,73 @@ const DashboardLayout = () => {
     checkAccess();
   }, [user]);
 
+  // Fetch wallet balance
+  useEffect(() => {
+    if (!user) return;
+    const fetchBalance = async () => {
+      const { data } = await supabase
+        .from("wallet_transactions")
+        .select("amount_bdt, type")
+        .eq("user_id", user.id)
+        .eq("status", "completed");
+      if (data) {
+        const balance = data.reduce((acc, t) => {
+          return t.type === "deposit" || t.type === "refund"
+            ? acc + Number(t.amount_bdt)
+            : acc - Number(t.amount_bdt);
+        }, 0);
+        setWalletBalance(Math.max(0, balance));
+      }
+    };
+    fetchBalance();
+  }, [user]);
+
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
   useEffect(() => {
-    if (!showUserMenu) return;
-    const handle = () => setShowUserMenu(false);
+    if (!showUserMenu && !activeTopMenu) return;
+    const handle = () => { setShowUserMenu(false); setActiveTopMenu(null); };
     document.addEventListener("click", handle);
     return () => document.removeEventListener("click", handle);
-  }, [showUserMenu]);
+  }, [showUserMenu, activeTopMenu]);
+
+  const topMenuItems: TopMenuItem[] = [
+    {
+      label: bn ? "সার্ভিস" : "Services",
+      href: "/dashboard/services",
+      icon: Server,
+      hasDropdown: true,
+      children: [
+        { label: bn ? "আমার সার্ভিস" : "My Services", href: "/dashboard/services", icon: Server },
+        { label: bn ? "অর্ডার" : "Orders", href: "/dashboard/orders", icon: ShoppingBag },
+      ],
+    },
+    {
+      label: bn ? "ডোমেইন" : "Domains",
+      href: "/dashboard/domains",
+      icon: Globe,
+    },
+    {
+      label: bn ? "বিলিং" : "Billing",
+      href: "/dashboard/billing",
+      icon: CreditCard,
+      hasDropdown: true,
+      children: [
+        { label: bn ? "ইনভয়েস" : "Invoices", href: "/dashboard/billing", icon: FileText },
+        { label: bn ? "ওয়ালেট" : "Wallet", href: "/dashboard/wallet", icon: Wallet },
+      ],
+    },
+    {
+      label: bn ? "সাপোর্ট" : "Support",
+      href: "/dashboard/support",
+      icon: HeadphonesIcon,
+    },
+    {
+      label: bn ? "অ্যাফিলিয়েট" : "Affiliate",
+      href: "/company/affiliate",
+      icon: Share2,
+    },
+  ];
 
   const sidebarItems = [
     { title: tr("dash.overview"), url: "/dashboard", icon: LayoutDashboard },
@@ -170,179 +241,270 @@ const DashboardLayout = () => {
             <span>{tr("admin.panel")}</span>
           </NavLink>
         )}
-
-
-
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Desktop Sidebar */}
-      <aside
-        className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-0 h-screen z-20 ${
-          collapsed ? "w-[60px]" : "w-[250px]"
-        }`}
-      >
-        <SidebarInner />
-      </aside>
-
-      {/* Mobile Overlay with swipe-to-close */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{ opacity: overlayOpacity }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.aside
-              initial={{ x: -SIDEBAR_W }}
-              animate={{ x: 0 }}
-              exit={{ x: -SIDEBAR_W }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              style={{ x: sidebarX }}
-              drag="x"
-              dragConstraints={{ left: -SIDEBAR_W, right: 0 }}
-              dragElastic={0.1}
-              onDragEnd={handleDragEnd}
-              className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl touch-pan-y"
-            >
-              <SidebarInner />
-            </motion.aside>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 flex items-center gap-2 px-3 sm:px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-30 safe-left safe-right">
-          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-secondary/60 active:bg-secondary/80 text-muted-foreground">
-            <Menu className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors"
-          >
-            {collapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-          </button>
-
-          {/* Breadcrumb - desktop */}
-          <div className="hidden sm:flex items-center gap-1.5 text-xs ml-1">
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-              <Home className="w-3.5 h-3.5" />
-            </Link>
-            {currentBreadcrumb && location.pathname !== "/dashboard" && (
-              <>
-                <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
-                <span className="font-medium text-foreground">{bn ? currentBreadcrumb.bn : currentBreadcrumb.en}</span>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Page Title */}
-          <div className="sm:hidden flex-1 text-center">
-            <span className="text-sm font-semibold text-foreground">
-              {currentPageTitle || (bn ? "ড্যাশবোর্ড" : "Dashboard")}
-            </span>
-          </div>
-
-          <div className="flex-1 hidden sm:block" />
-
-          {/* Quick Links */}
-          <Link
-            to="/"
-            className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-secondary/50"
-          >
-            <Home className="w-3.5 h-3.5" />
-            {bn ? "সাইট" : "Website"}
-          </Link>
-
-          <NotificationBell />
-
-          {/* Language */}
-          <button
-            onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-            className="flex items-center gap-1 px-2 py-2 min-h-[44px] rounded-lg hover:bg-secondary/60 active:bg-secondary/80 transition-colors text-xs font-medium text-muted-foreground"
-          >
-            <Globe className="w-3.5 h-3.5" />
-            {lang === "bn" ? "EN" : "বাং"}
-          </button>
-
-          {/* User */}
-          <div className="relative">
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* ===== TOP MENUBAR ===== */}
+      <div className="w-full bg-primary text-primary-foreground sticky top-0 z-40">
+        <div className="flex items-center justify-between h-11 px-3 sm:px-4 lg:px-6 max-w-full">
+          {/* Left: Logo (mobile) + Menu Items */}
+          <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar">
+            {/* Mobile hamburger */}
             <button
-              onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-              className="flex items-center gap-2 pl-2.5 ml-1 border-l border-border/40 min-h-[44px]"
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden p-2 rounded-lg hover:bg-primary-foreground/10 transition-colors mr-1"
             >
-              <div className="hidden md:block text-right">
-                <p className="text-xs font-semibold text-foreground leading-none">{profile?.full_name || "User"}</p>
-                <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{profile?.company_name || (bn ? "ক্লায়েন্ট" : "Client")}</p>
-              </div>
-              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-primary/15">
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt={profile?.full_name || "User avatar"} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                    {(profile?.full_name || "U").charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
+              <Menu className="w-4 h-4" />
             </button>
 
-            <AnimatePresence>
-              {showUserMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-56 bg-card rounded-xl p-1.5 shadow-xl border border-border z-50"
+            {/* Top menu items */}
+            {topMenuItems.map((item) => (
+              <div
+                key={item.label}
+                className="relative"
+                onMouseEnter={() => item.hasDropdown && setActiveTopMenu(item.label)}
+                onMouseLeave={() => setActiveTopMenu(null)}
+              >
+                <Link
+                  to={item.href}
+                  onClick={(e) => {
+                    if (item.hasDropdown) {
+                      e.stopPropagation();
+                      setActiveTopMenu(activeTopMenu === item.label ? null : item.label);
+                    }
+                  }}
+                  className={`flex items-center gap-1 px-2.5 lg:px-3 py-1.5 rounded-md text-[13px] font-medium whitespace-nowrap transition-all hover:bg-primary-foreground/10 ${
+                    location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
+                      ? "bg-primary-foreground/15"
+                      : ""
+                  }`}
                 >
-                  <div className="px-3 py-2.5 border-b border-border/50 mb-1">
-                    <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                  </div>
-                  <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
-                    <UserCircle className="w-4 h-4" /> {bn ? "প্রোফাইল" : "Profile"}
-                  </Link>
-                  <Link to="/dashboard/billing" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
-                    <CreditCard className="w-4 h-4" /> {bn ? "বিলিং" : "Billing"}
-                  </Link>
-                  <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
-                    <KeyRound className="w-4 h-4" /> {bn ? "পাসওয়ার্ড পরিবর্তন" : "Change Password"}
-                  </Link>
-                  <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors">
-                    <Bell className="w-4 h-4" /> {bn ? "নোটিফিকেশন সেটিংস" : "Notification Settings"}
-                  </Link>
-                  <button onClick={() => setLang(lang === "bn" ? "en" : "bn")} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 active:bg-secondary/80 transition-colors w-full">
-                    <Globe className="w-4 h-4" /> {lang === "bn" ? "English" : "বাংলা"}
-                  </button>
-                  {isAdmin && (
-                    <Link to="/admin" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-amber-600 hover:bg-amber-500/8 active:bg-amber-500/15 transition-colors">
-                      <Shield className="w-4 h-4" /> {bn ? "অ্যাডমিন" : "Admin"}
-                    </Link>
-                  )}
-                  <div className="border-t border-border/50 mt-1 pt-1">
-                    <button onClick={() => { setShowUserMenu(false); setSignOutOpen(true); }} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-destructive hover:bg-destructive/8 active:bg-destructive/15 transition-colors w-full">
-                      <LogOut className="w-4 h-4" /> {tr("dash.signOut")}
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </header>
+                  {item.label}
+                  {item.hasDropdown && <ChevronDown className="w-3 h-3 opacity-70" />}
+                </Link>
 
-        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto bg-background">
-          <Outlet />
-        </main>
+                {/* Dropdown */}
+                <AnimatePresence>
+                  {item.hasDropdown && activeTopMenu === item.label && item.children && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 pt-1 z-50"
+                    >
+                      <div className="bg-card text-card-foreground rounded-lg shadow-xl border border-border/60 py-1 min-w-[180px]">
+                        {item.children.map((child) => {
+                          const Icon = child.icon;
+                          return (
+                            <Link
+                              key={child.href}
+                              to={child.href}
+                              className={`flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium hover:bg-muted/60 transition-colors ${
+                                location.pathname === child.href ? "text-primary bg-primary/5" : "text-foreground"
+                              }`}
+                              onClick={() => setActiveTopMenu(null)}
+                            >
+                              <Icon className="w-4 h-4 opacity-60" />
+                              {child.label}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+
+          {/* Right: Wallet + Bell + User */}
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-2">
+            {/* Wallet Balance */}
+            <Link
+              to="/dashboard/wallet"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/15 transition-colors text-[12px] font-semibold whitespace-nowrap border border-primary-foreground/15"
+            >
+              <Wallet className="w-3.5 h-3.5" />
+              <span>TK {formatAmount(walletBalance)} BDT</span>
+            </Link>
+
+            {/* Notification Bell */}
+            <div className="[&_button]:text-primary-foreground [&_button]:hover:bg-primary-foreground/10">
+              <NotificationBell />
+            </div>
+
+            {/* User Profile */}
+            <div className="relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
+                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-primary-foreground/20 hover:bg-primary-foreground/10 rounded-r-lg pr-2 py-1 transition-colors"
+              >
+                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-primary-foreground/25 shrink-0">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt={profile?.full_name || "User"} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-primary-foreground/20 flex items-center justify-center text-primary-foreground text-[11px] font-bold">
+                      {(profile?.full_name || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate">
+                  {profile?.full_name || "User"}
+                </span>
+                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block" />
+              </button>
+
+              {/* User Dropdown */}
+              <AnimatePresence>
+                {showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-card text-card-foreground rounded-xl p-1.5 shadow-xl border border-border z-50"
+                  >
+                    <div className="px-3 py-2.5 border-b border-border/50 mb-1">
+                      <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                    <Link to="/dashboard" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
+                      <LayoutDashboard className="w-4 h-4" /> {bn ? "ড্যাশবোর্ড" : "Dashboard"}
+                    </Link>
+                    <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
+                      <UserCircle className="w-4 h-4" /> {bn ? "প্রোফাইল" : "Profile"}
+                    </Link>
+                    <Link to="/dashboard/wallet" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
+                      <Wallet className="w-4 h-4" />
+                      <span className="flex-1">{bn ? "ওয়ালেট" : "Wallet"}</span>
+                      <span className="text-xs font-semibold text-primary">TK {formatAmount(walletBalance)}</span>
+                    </Link>
+                    <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
+                      <KeyRound className="w-4 h-4" /> {bn ? "পাসওয়ার্ড পরিবর্তন" : "Change Password"}
+                    </Link>
+                    <button onClick={() => setLang(lang === "bn" ? "en" : "bn")} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors w-full">
+                      <Globe className="w-4 h-4" /> {lang === "bn" ? "English" : "বাংলা"}
+                    </button>
+                    {isAdmin && (
+                      <Link to="/admin" className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-amber-600 hover:bg-amber-500/8 transition-colors">
+                        <Shield className="w-4 h-4" /> {bn ? "অ্যাডমিন" : "Admin"}
+                      </Link>
+                    )}
+                    <div className="border-t border-border/50 mt-1 pt-1">
+                      <button onClick={() => { setShowUserMenu(false); setSignOutOpen(true); }} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-destructive hover:bg-destructive/8 transition-colors w-full">
+                        <LogOut className="w-4 h-4" /> {tr("dash.signOut")}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* ===== BODY: Sidebar + Content ===== */}
+      <div className="flex-1 flex min-h-0">
+        {/* Desktop Sidebar */}
+        <aside
+          className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-11 h-[calc(100vh-2.75rem)] z-20 ${
+            collapsed ? "w-[60px]" : "w-[250px]"
+          }`}
+        >
+          <SidebarInner />
+        </aside>
+
+        {/* Mobile Overlay with swipe-to-close */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <div className="fixed inset-0 z-50 lg:hidden">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{ opacity: overlayOpacity }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setMobileOpen(false)}
+              />
+              <motion.aside
+                initial={{ x: -SIDEBAR_W }}
+                animate={{ x: 0 }}
+                exit={{ x: -SIDEBAR_W }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                style={{ x: sidebarX }}
+                drag="x"
+                dragConstraints={{ left: -SIDEBAR_W, right: 0 }}
+                dragElastic={0.1}
+                onDragEnd={handleDragEnd}
+                className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl touch-pan-y"
+              >
+                <SidebarInner />
+              </motion.aside>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Main */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Sub-header with breadcrumb & collapse toggle */}
+          <header className="h-11 flex items-center gap-2 px-3 sm:px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-11 z-30 safe-left safe-right">
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors"
+            >
+              {collapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+            </button>
+
+            {/* Breadcrumb - desktop */}
+            <div className="hidden sm:flex items-center gap-1.5 text-xs ml-1">
+              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Home className="w-3.5 h-3.5" />
+              </Link>
+              {currentBreadcrumb && location.pathname !== "/dashboard" && (
+                <>
+                  <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
+                  <span className="font-medium text-foreground">{bn ? currentBreadcrumb.bn : currentBreadcrumb.en}</span>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Page Title */}
+            <div className="sm:hidden flex-1 text-center">
+              <span className="text-sm font-semibold text-foreground">
+                {currentPageTitle || (bn ? "ড্যাশবোর্ড" : "Dashboard")}
+              </span>
+            </div>
+
+            <div className="flex-1 hidden sm:block" />
+
+            {/* Wallet badge - mobile */}
+            <Link
+              to="/dashboard/wallet"
+              className="sm:hidden flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-semibold"
+            >
+              <Wallet className="w-3 h-3" />
+              TK {formatAmount(walletBalance)}
+            </Link>
+
+            <Link
+              to="/"
+              className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-secondary/50"
+            >
+              <Home className="w-3.5 h-3.5" />
+              {bn ? "সাইট" : "Website"}
+            </Link>
+          </header>
+
+          <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto bg-background">
+            <Outlet />
+          </main>
+        </div>
+      </div>
+
       <AlertDialog open={signOutOpen} onOpenChange={setSignOutOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
