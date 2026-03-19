@@ -39,7 +39,7 @@ const DashboardDomains = () => {
     return Math.ceil((new Date(date).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <DomainsSkeleton />;
 
   const activeDomains = domains.filter(d => d.status === "active").length;
   const expiringSoon = domains.filter(d => isExpiringSoon(d.expiry_date)).length;
