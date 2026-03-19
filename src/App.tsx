@@ -38,6 +38,7 @@ import AdminLiveChat from "./pages/admin/LiveChat";
 import AdminChatRooms from "./pages/admin/ChatRooms";
 import AdminContactMessages from "./pages/admin/ContactMessages";
 import AdminKnowledgeBase from "./pages/admin/KnowledgeBase";
+import AdminWHM from "./pages/admin/WHM";
 import ServiceDetail from "./pages/services/ServiceDetail";
 import About from "./pages/company/About";
 import Contact from "./pages/company/Contact";
