@@ -173,6 +173,39 @@ const AdminWHM = () => {
     fetchAll();
   };
 
+  const openEditDialog = (pkg: ResellerPkg) => {
+    setEditForm({
+      id: pkg.id,
+      package_name: pkg.package_name,
+      max_accounts: pkg.max_accounts,
+      max_disk_mb: pkg.max_disk_mb,
+      max_bandwidth_mb: pkg.max_bandwidth_mb,
+      whm_server_host: pkg.whm_server_host || "",
+      whm_username: pkg.whm_username || "",
+    });
+    setShowEdit(true);
+  };
+
+  const handleEditSave = async () => {
+    setEditing(true);
+    const { error } = await supabase.from("reseller_packages").update({
+      package_name: editForm.package_name,
+      max_accounts: editForm.max_accounts,
+      max_disk_mb: editForm.max_disk_mb,
+      max_bandwidth_mb: editForm.max_bandwidth_mb,
+      whm_server_host: editForm.whm_server_host || null,
+      whm_username: editForm.whm_username || null,
+    }).eq("id", editForm.id);
+    if (error) {
+      toast({ title: bn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: bn ? "প্যাকেজ আপডেট হয়েছে!" : "Package updated!" });
+      setShowEdit(false);
+      fetchAll();
+    }
+    setEditing(false);
+  };
+
   const filtered = packages.filter(p => {
     const term = searchTerm.toLowerCase();
     return !term || (p.profile?.full_name || "").toLowerCase().includes(term)
