@@ -266,7 +266,7 @@ const DashboardOverview = () => {
               <HeadphonesIcon className="w-5 h-5 text-purple-600" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.openTickets}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.openTickets}</p>
           <Link to="/dashboard/support" className="mt-3 flex items-center gap-1 text-xs text-purple-600 font-semibold hover:underline">
             <span>+</span> {bn ? "টিকেট খুলুন" : "Open Ticket"}
           </Link>
