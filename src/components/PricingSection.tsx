@@ -292,7 +292,7 @@ const PricingSection = () => {
                   </ul>
 
                   {inCart ? (
-                    <div className="w-full py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-xs">
+                    <div className="w-full py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-sm">
                       <Check className="w-3.5 h-3.5 text-primary" />
                       {isBn ? "কার্টে আছে" : "In Cart"}
                     </div>
