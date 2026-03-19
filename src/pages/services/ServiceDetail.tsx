@@ -223,7 +223,7 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
           <tbody>
             {allFeatures.map((feature, idx) => (
               <tr key={feature} className={`border-b border-border/50 last:border-0 ${idx % 2 !== 0 ? "bg-secondary/20" : ""}`}>
-                <td className="px-5 py-3 text-[13px] text-muted-foreground">{feature}</td>
+                <td className="px-5 py-3.5 text-sm text-muted-foreground">{feature}</td>
                 {plans.map(p => {
                   const has = planHasFeature(p, feature);
                   return (
