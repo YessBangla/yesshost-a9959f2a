@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star } from "lucide-react";
+import { ThemesSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -200,7 +202,7 @@ const AdminThemes = () => {
     </div>
   );
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <ThemesSkeleton />;
 
   return (
     <div className="space-y-6">
@@ -309,7 +311,11 @@ const AdminThemes = () => {
         ))}
 
         {filtered.length === 0 && (
-          <div className="glass-card p-8 text-center text-muted-foreground">কোনো থিম পাওয়া যায়নি</div>
+          <EmptyState
+            icon={Palette}
+            title={lang === "bn" ? "কোনো থিম পাওয়া যায়নি" : "No themes found"}
+            description={lang === "bn" ? "নতুন থিম যোগ করুন অথবা সার্চ ফিল্টার পরিবর্তন করুন" : "Add a new theme or adjust your search filters"}
+          />
         )}
       </div>
     </div>

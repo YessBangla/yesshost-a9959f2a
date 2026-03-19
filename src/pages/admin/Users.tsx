@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import {
   Users as UsersIcon, Search, Shield, ShieldOff, Eye, X,
   Mail, Phone, MapPin, Building2, Calendar, Globe, Filter, Headphones,
@@ -224,7 +225,7 @@ const AdminUsers = () => {
     }).length,
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <AdminTableSkeleton columns={5} rows={8} statsCount={4} />;
 
   // Permission checklist component
   const PermissionChecklist = ({ perms, setPerms }: { perms: string[]; setPerms: (p: string[]) => void }) => (

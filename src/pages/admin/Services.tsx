@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import {
   Server, Search, AlertTriangle, CheckCircle2, Clock, XCircle, Ban,
   Globe, Calendar, CreditCard
@@ -78,7 +80,7 @@ const AdminServices = () => {
     }).length,
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <AdminTableSkeleton columns={6} rows={6} statsCount={4} />;
 
   return (
     <div className="space-y-6">
@@ -191,7 +193,13 @@ const AdminServices = () => {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">{isBn ? "কোনো সার্ভিস পাওয়া যায়নি" : "No services found"}</td></tr>
+                <tr><td colSpan={6} className="p-0">
+                  <EmptyState
+                    icon={Server}
+                    title={isBn ? "কোনো সার্ভিস পাওয়া যায়নি" : "No services found"}
+                    description={isBn ? "সার্চ ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন" : "Try adjusting your search filters"}
+                  />
+                </td></tr>
               )}
             </tbody>
           </table>

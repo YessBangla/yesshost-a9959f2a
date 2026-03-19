@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import {
   FileText, Search, DollarSign, TrendingUp, AlertTriangle, Eye,
   CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw
@@ -75,7 +77,7 @@ const AdminBilling = () => {
     return matchSearch && matchStatus;
   });
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <AdminTableSkeleton columns={7} rows={6} statsCount={4} />;
 
   return (
     <div className="space-y-6">
@@ -196,7 +198,13 @@ const AdminBilling = () => {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">{isBn ? "কোনো ইনভয়েস পাওয়া যায়নি" : "No invoices found"}</td></tr>
+                <tr><td colSpan={7} className="p-0">
+                  <EmptyState
+                    icon={FileText}
+                    title={isBn ? "কোনো ইনভয়েস পাওয়া যায়নি" : "No invoices found"}
+                    description={isBn ? "সার্চ ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন" : "Try adjusting your search filters"}
+                  />
+                </td></tr>
               )}
             </tbody>
           </table>

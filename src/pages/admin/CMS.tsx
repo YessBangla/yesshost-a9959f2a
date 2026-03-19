@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { CMSSkeleton } from "@/components/DashboardSkeleton";
 import {
   Plus, Pencil, Trash2, Save, X, FileText, MessageSquare,
   HelpCircle, Layout, Eye, EyeOff, GripVertical, Search, Globe
@@ -109,7 +110,7 @@ const AdminCMS = () => {
     </div>
   );
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <CMSSkeleton />;
 
   const getAddDefaults = (): any => {
     switch (tab) {

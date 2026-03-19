@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import {
   HeadphonesIcon, Search, Send, ArrowLeft, MessageSquare,
   Clock, CheckCircle2, AlertTriangle, Inbox, Filter, User
@@ -107,7 +109,7 @@ const AdminTickets = () => {
   const formatDate = (d: string) => new Date(d).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" });
   const formatTime = (d: string) => new Date(d).toLocaleTimeString(isBn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" });
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <AdminTableSkeleton columns={4} rows={5} statsCount={4} />;
 
   // Ticket Detail View
   if (selectedTicket) {
@@ -270,10 +272,11 @@ const AdminTickets = () => {
       {/* Tickets - Card based for better mobile */}
       <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="glass-card rounded-xl p-12 text-center">
-            <Inbox className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground">{isBn ? "কোনো টিকেট পাওয়া যায়নি" : "No tickets found"}</p>
-          </div>
+          <EmptyState
+            icon={Inbox}
+            title={isBn ? "কোনো টিকেট পাওয়া যায়নি" : "No tickets found"}
+            description={isBn ? "সার্চ ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন" : "Try adjusting your search filters"}
+          />
         )}
         {filtered.map((t, i) => {
           const sc = statusConfig[t.status] || statusConfig.open;
