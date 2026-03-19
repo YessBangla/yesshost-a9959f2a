@@ -24,8 +24,28 @@ const Signup = () => {
     e.preventDefault();
     if (password.length < 6) { toast({ title: "Error", description: tr("auth.passwordMinError"), variant: "destructive" }); return; }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName, phone }, emailRedirectTo: window.location.origin } });
-    if (error) { toast({ title: "Signup Failed", description: error.message, variant: "destructive" }); }
+
+    // Check duplicate phone
+    if (phone.trim()) {
+      const { data: existingPhone } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("phone", phone.trim())
+        .maybeSingle();
+      if (existingPhone) {
+        toast({ title: bn ? "ত্রুটি" : "Error", description: bn ? "এই ফোন নাম্বার দিয়ে ইতোমধ্যে একটি অ্যাকাউন্ট আছে" : "An account with this phone number already exists", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+    }
+
+    const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName, phone: phone.trim() }, emailRedirectTo: window.location.origin } });
+    if (error) {
+      const msg = error.message.includes("already registered")
+        ? (bn ? "এই ইমেইল দিয়ে ইতোমধ্যে একটি অ্যাকাউন্ট আছে" : "An account with this email already exists")
+        : error.message;
+      toast({ title: bn ? "সাইনআপ ব্যর্থ" : "Signup Failed", description: msg, variant: "destructive" });
+    }
     else { toast({ title: "Success!", description: tr("auth.accountCreated") }); navigate("/login"); }
     setLoading(false);
   };
