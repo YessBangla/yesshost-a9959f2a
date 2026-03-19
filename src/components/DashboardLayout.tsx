@@ -290,25 +290,19 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* ===== TOP MENUBAR ===== */}
-      <div className="w-full bg-primary text-primary-foreground sticky top-0 z-40 shadow-md">
-        <div className="flex items-center justify-between h-12 px-3 sm:px-4 lg:px-6 max-w-full">
-          {/* Left: Logo + Menu Items */}
-          <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors mr-2"
-            >
-              <Menu className="w-5 h-5 text-primary-foreground" />
-            </button>
+      <div className="w-full glass-surface sticky top-0 z-40">
+        <div className="flex items-center justify-end h-11 px-3 sm:px-4 lg:px-6 max-w-full">
+          {/* Mobile hamburger (left) */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="lg:hidden p-2 rounded-lg hover:bg-primary/10 transition-colors mr-auto"
+          >
+            <Menu className="w-5 h-5 text-foreground" />
+          </button>
 
-            {/* Logo */}
-            <Link to="/dashboard" className="hidden lg:flex items-center mr-4 shrink-0">
-              <img src={logoWhite} alt="Yess Host" className="h-7" />
-            </Link>
-
-            {/* Top menu items with pipe separators */}
-            {topMenuItems.map((item, index) => (
+          {/* Right-aligned menu items */}
+          <div className="hidden lg:flex items-center gap-0 overflow-x-auto no-scrollbar">
+            {topMenuItems.map((item) => (
               <div
                 key={item.label}
                 className="relative flex items-center"
@@ -323,10 +317,10 @@ const DashboardLayout = () => {
                       setActiveTopMenu(activeTopMenu === item.label ? null : item.label);
                     }
                   }}
-                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all hover:bg-white/15 rounded ${
+                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all hover:bg-primary/10 hover:text-primary rounded ${
                     location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
-                      ? "bg-white/15 font-semibold text-primary-foreground"
-                      : "text-primary-foreground/90"
+                      ? "bg-primary/10 font-semibold text-primary"
+                      : "text-foreground/80"
                   }`}
                 >
                   {item.label}
@@ -341,9 +335,9 @@ const DashboardLayout = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 4 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full left-0 pt-1 z-50"
+                      className="absolute top-full right-0 pt-1 z-50"
                     >
-                      <div className="bg-card text-card-foreground rounded-lg shadow-xl border border-border/60 py-1 min-w-[200px]">
+                      <div className="glass-card py-1 min-w-[200px]">
                         {item.children.map((child) => {
                           const Icon = child.icon;
                           return (
