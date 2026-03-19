@@ -267,7 +267,7 @@ const PricingSection = () => {
                           <span className="text-sm text-muted-foreground">/{durationLabel}</span>
                         </div>
                         {duration.discount > 0 && (
-                          <p className="text-[11px] text-primary font-medium mt-1">
+                          <p className="text-xs text-primary font-medium mt-1">
                             🎉 {isBn ? `${toBengaliNum(duration.discount)}% ছাড়!` : `${duration.discount}% off!`}
                           </p>
                         )}
