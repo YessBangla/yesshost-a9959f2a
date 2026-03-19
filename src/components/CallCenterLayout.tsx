@@ -4,13 +4,16 @@ import {
   ShoppingCart, MessageCircle, HeadphonesIcon, ChevronRight,
   PanelLeftClose, PanelLeft, Phone
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
+
+const SIDEBAR_W = 260;
+const SWIPE_THRESHOLD = 80;
 
 const CallCenterLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -20,6 +23,9 @@ const CallCenterLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const bn = lang === "bn";
+  const dragX = useMotionValue(0);
+  const sidebarX = useTransform(dragX, [0, -SIDEBAR_W], [0, -SIDEBAR_W]);
+  const overlayOpacity = useTransform(dragX, [0, -SIDEBAR_W], [1, 0]);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
@@ -36,8 +42,15 @@ const CallCenterLayout = () => {
 
   const handleSignOut = async () => { await signOut(); navigate("/admin-login"); };
 
+  const handleDragEnd = useCallback((_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
+    if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -300) {
+      setMobileOpen(false);
+    }
+    dragX.set(0);
+  }, [dragX]);
+
   const SidebarInner = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full safe-top safe-bottom">
       {/* Logo */}
       <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
         {!collapsed ? (
@@ -55,7 +68,7 @@ const CallCenterLayout = () => {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2.5 no-scrollbar">
+      <nav className="flex-1 overflow-y-auto py-4 px-2.5 no-scrollbar overscroll-contain">
         {!collapsed && (
           <p className="px-3 mb-2 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em]">
             {bn ? "কাজের তালিকা" : "Workspace"}
@@ -67,7 +80,7 @@ const CallCenterLayout = () => {
               key={item.url}
               to={item.url}
               end={item.url === "/call-center"}
-              className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 ${collapsed ? "justify-center px-2" : ""}`}
+              className={`group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98] ${collapsed ? "justify-center px-2" : ""}`}
               activeClassName="!bg-primary/8 !text-primary font-semibold"
             >
               <item.icon className="w-[18px] h-[18px] shrink-0" />
@@ -107,7 +120,7 @@ const CallCenterLayout = () => {
 
         <button
           onClick={handleSignOut}
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 w-full transition-all ${collapsed ? "justify-center px-2" : ""}`}
+          className={`flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 w-full transition-all active:scale-[0.98] ${collapsed ? "justify-center px-2" : ""}`}
         >
           <LogOut className="w-[17px] h-[17px] shrink-0" />
           {!collapsed && <span>{tr("dash.signOut")}</span>}
@@ -127,7 +140,7 @@ const CallCenterLayout = () => {
         <SidebarInner />
       </aside>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay with swipe-to-close */}
       <AnimatePresence>
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
@@ -135,15 +148,21 @@ const CallCenterLayout = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              style={{ opacity: overlayOpacity }}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: -SIDEBAR_W }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: -SIDEBAR_W }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl"
+              style={{ x: sidebarX }}
+              drag="x"
+              dragConstraints={{ left: -SIDEBAR_W, right: 0 }}
+              dragElastic={0.1}
+              onDragEnd={handleDragEnd}
+              className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl touch-pan-y"
             >
               <SidebarInner />
             </motion.aside>
@@ -153,8 +172,8 @@ const CallCenterLayout = () => {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 flex items-center gap-2 px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-30">
-          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground">
+        <header className="h-14 flex items-center gap-2 px-3 sm:px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-30 safe-left safe-right">
+          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-secondary/60 active:bg-secondary/80 text-muted-foreground">
             <Menu className="w-5 h-5" />
           </button>
 
@@ -165,7 +184,7 @@ const CallCenterLayout = () => {
             {collapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
           </button>
 
-          {/* Breadcrumb */}
+          {/* Breadcrumb - desktop */}
           <div className="hidden sm:flex items-center gap-1.5 text-xs ml-1">
             <Link to="/call-center" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
               <Phone className="w-3 h-3" />
@@ -179,12 +198,19 @@ const CallCenterLayout = () => {
             )}
           </div>
 
-          <div className="flex-1" />
+          {/* Mobile Page Title */}
+          <div className="sm:hidden flex-1 text-center">
+            <span className="text-sm font-semibold text-foreground">
+              {currentPage?.title || (bn ? "সাপোর্ট" : "Support")}
+            </span>
+          </div>
+
+          <div className="flex-1 hidden sm:block" />
 
           {/* Language */}
           <button
             onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-secondary/60 transition-colors text-xs font-medium text-muted-foreground"
+            className="flex items-center gap-1 px-2.5 py-2 min-h-[44px] rounded-lg hover:bg-secondary/60 active:bg-secondary/80 transition-colors text-xs font-medium text-muted-foreground"
           >
             <Globe className="w-3.5 h-3.5" />
             {lang === "bn" ? "EN" : "বাং"}
@@ -196,13 +222,13 @@ const CallCenterLayout = () => {
               <div className="w-2 h-2 rounded-full bg-success" />
               <span className="text-xs font-medium text-foreground">{profile?.full_name || "Agent"}</span>
             </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/15">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/15">
               {(profile?.full_name || "A").charAt(0).toUpperCase()}
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-6 overflow-auto bg-background">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto bg-background">
           <Outlet />
         </main>
       </div>
