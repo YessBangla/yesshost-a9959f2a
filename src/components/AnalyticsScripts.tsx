@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 // =============================================
 // 🔧 আপনার ট্র্যাকিং আইডি এখানে বসান:
 // =============================================
-const GA_MEASUREMENT_ID = "G-XXXXX"; // Google Analytics 4 Measurement ID
+const GA_MEASUREMENT_ID = "G-WKRJJB7EPB"; // Google Analytics 4 Measurement ID
 const FB_PIXEL_ID = "XXXXX";           // Facebook Pixel ID
 // =============================================
 
