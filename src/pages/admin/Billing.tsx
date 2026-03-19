@@ -47,6 +47,17 @@ const AdminBilling = () => {
     due_date: "",
   });
   const [saving, setSaving] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [allProfiles, setAllProfiles] = useState<Tables<"profiles">[]>([]);
+  const [createForm, setCreateForm] = useState({
+    user_id: "",
+    description: "",
+    amount_bdt: "",
+    status: "unpaid" as string,
+    payment_method: "",
+    due_date: "",
+  });
+  const [creating, setCreating] = useState(false);
 
   const fetchData = async () => {
     const [inv, prof] = await Promise.all([
