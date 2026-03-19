@@ -69,12 +69,43 @@ const AdminBilling = () => {
       profiles: (prof.data || []).find(p => p.user_id === i.user_id) || null,
     }));
     setInvoices(invoicesWithUser);
+    setAllProfiles(prof.data || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
 
-  const updateStatus = async (id: string, status: string) => {
+  const generateInvoiceNumber = () => {
+    const now = new Date();
+    return `INV-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  };
+
+  const handleCreate = async () => {
+    if (!createForm.user_id || !createForm.amount_bdt) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "ক্লায়েন্ট এবং পরিমাণ আবশ্যক" : "Client and amount are required", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const { error } = await supabase.from("invoices").insert({
+      user_id: createForm.user_id,
+      invoice_number: generateInvoiceNumber(),
+      description: createForm.description || null,
+      amount_bdt: Number(createForm.amount_bdt),
+      status: createForm.status as any,
+      payment_method: createForm.payment_method || null,
+      due_date: createForm.due_date ? new Date(createForm.due_date).toISOString() : null,
+      paid_at: createForm.status === "paid" ? new Date().toISOString() : null,
+    });
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: isBn ? "নতুন ইনভয়েস তৈরি হয়েছে" : "Invoice created successfully" });
+      setShowCreate(false);
+      setCreateForm({ user_id: "", description: "", amount_bdt: "", status: "unpaid", payment_method: "", due_date: "" });
+    }
+    setCreating(false);
+    fetchData();
+  };
     const update: any = { status };
     if (status === "paid") update.paid_at = new Date().toISOString();
     const { error } = await supabase.from("invoices").update(update).eq("id", id);
