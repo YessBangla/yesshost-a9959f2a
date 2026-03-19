@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Check, X, ArrowLeft, Star, Server, Globe, Shield, Zap, Clock,
   Headphones, ShoppingCart, ChevronDown, ArrowRight,
@@ -12,16 +12,26 @@ import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { formatPrice } from "@/lib/formatPrice";
+import { BILLING_DURATIONS, calcDurationPrice, toBengaliNum, type BillingDuration } from "@/lib/billingDurations";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
 
+const normalizeFeature = (f: any): string => {
+  if (typeof f === "string") return f;
+  return f.label || String(f);
+};
+
 /* ─── Plan Card ─── */
 const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
-  const [cycle, setCycle] = useState<"monthly" | "yearly">(plan.annual_price_bdt ? "yearly" : "monthly");
-  const features = Array.isArray(plan.features) ? plan.features : [];
-  const price = cycle === "yearly" && plan.annual_price_bdt ? plan.annual_price_bdt : plan.price_bdt;
-  const cartId = `hosting-${plan.id}-${cycle}`;
+  const [duration, setDuration] = useState<BillingDuration>(BILLING_DURATIONS[0]);
+  const [durationOpen, setDurationOpen] = useState(false);
+  const rawFeatures = Array.isArray(plan.features) ? plan.features : [];
+  const features = rawFeatures.map(normalizeFeature);
+  
+  const totalPrice = calcDurationPrice(plan.price_bdt, plan.annual_price_bdt, duration);
+  const durationLabel = isBn ? duration.labelBn : duration.labelEn;
+  const cartId = `hosting-${plan.id}-${duration.key}`;
   const inCart = isInCart(cartId);
 
   const handleAdd = () => {
@@ -29,10 +39,10 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
       id: cartId,
       type: "hosting",
       name: plan.name,
-      description: `${title} • ${cycle === "yearly" ? (isBn ? "বাৎসরিক" : "Yearly") : (isBn ? "মাসিক" : "Monthly")}`,
-      price_bdt: price,
+      description: `${title} • ${durationLabel}`,
+      price_bdt: totalPrice.toString(),
       plan_id: plan.id,
-      billing_cycle: cycle,
+      billing_cycle: duration.key,
       category: slug || "",
     });
   };
@@ -61,38 +71,78 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
         <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
         {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
 
-        {/* Billing toggle */}
-        {plan.annual_price_bdt && (
-          <div className="flex items-center gap-0.5 mt-3 p-0.5 rounded-lg bg-secondary border border-border">
-            {(["monthly", "yearly"] as const).map((c) => (
-              <button
-                key={c}
-                onClick={() => setCycle(c)}
-                className={`flex-1 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
-                  cycle === c
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+        {/* Duration Selector */}
+        <div className="relative mt-3">
+          <button
+            onClick={() => setDurationOpen(!durationOpen)}
+            className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-secondary/40 text-xs font-semibold text-foreground hover:border-primary/40 transition-all"
+          >
+            <span>{durationLabel}</span>
+            <div className="flex items-center gap-1.5">
+              {duration.discount > 0 && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">-{duration.discount}%</span>
+              )}
+              <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${durationOpen ? "rotate-180" : ""}`} />
+            </div>
+          </button>
+          <AnimatePresence>
+            {durationOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.12 }}
+                className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg z-20 overflow-hidden max-h-56 overflow-y-auto"
               >
-                {c === "monthly" ? (isBn ? "মাসিক" : "Monthly") : (isBn ? "বাৎসরিক" : "Yearly")}
-                {c === "yearly" && <span className="ml-1 text-[9px] opacity-80">💰</span>}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="flex items-baseline gap-1 my-4">
-          <span className="text-3xl md:text-4xl font-extrabold tabular-nums text-foreground">
-            ৳{formatPrice(price, isBn ? "bn" : "en")}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {cycle === "yearly" ? (isBn ? "/বছর" : "/yr") : (isBn ? "/মাস" : "/mo")}
-          </span>
+                {BILLING_DURATIONS.map((d) => (
+                  <button
+                    key={d.key}
+                    onClick={() => { setDuration(d); setDurationOpen(false); }}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-all ${
+                      duration.key === d.key ? "bg-primary/5 text-primary font-bold" : "text-foreground hover:bg-secondary/60"
+                    }`}
+                  >
+                    <span>{isBn ? d.labelBn : d.labelEn}</span>
+                    <div className="flex items-center gap-1.5">
+                      {d.discount > 0 && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                          {isBn ? `${toBengaliNum(d.discount)}%` : `${d.discount}%`}
+                        </span>
+                      )}
+                      {duration.key === d.key && <Check className="w-3 h-3 text-primary" />}
+                    </div>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {cycle === "monthly" && plan.annual_price_bdt && (
+        {/* Price */}
+        <div className="flex items-baseline gap-1 my-4">
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={`${plan.id}-${duration.key}`}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.2 }}
+              className="text-3xl md:text-4xl font-extrabold tabular-nums text-foreground"
+            >
+              ৳{isBn ? toBengaliNum(totalPrice) : totalPrice.toLocaleString()}
+            </motion.span>
+          </AnimatePresence>
+          <span className="text-xs text-muted-foreground">/{durationLabel}</span>
+        </div>
+
+        {duration.discount > 0 && (
           <p className="text-[11px] text-primary font-medium mb-3 px-2.5 py-1 rounded-md bg-primary/5 inline-block w-fit">
-            💰 {isBn ? `বাৎসরিকে ৳${formatPrice(plan.annual_price_bdt, "bn")}` : `৳${formatPrice(plan.annual_price_bdt, "en")}/yr`}
+            🎉 {isBn ? `${toBengaliNum(duration.discount)}% ছাড়!` : `${duration.discount}% off!`}
+          </p>
+        )}
+        {duration.months > 1 && (
+          <p className="text-[10px] text-muted-foreground mb-3">
+            ≈ ৳{isBn ? toBengaliNum(Math.round(totalPrice / duration.months)) : Math.round(totalPrice / duration.months).toLocaleString()}/{isBn ? "মাস" : "mo"}
           </p>
         )}
 
@@ -134,12 +184,18 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
     const featureSet = new Set<string>();
     plans.forEach(p => {
       const features = Array.isArray(p.features) ? p.features : [];
-      features.forEach((f: string) => featureSet.add(f));
+      features.forEach((f: any) => featureSet.add(normalizeFeature(f)));
     });
     return Array.from(featureSet);
   }, [plans]);
 
   if (plans.length === 0 || allFeatures.length === 0) return null;
+
+  // Helper to check if a plan has a feature
+  const planHasFeature = (p: any, feature: string) => {
+    const features = Array.isArray(p.features) ? p.features.map(normalizeFeature) : [];
+    return features.includes(feature);
+  };
 
   return (
     <motion.div
@@ -169,7 +225,7 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
               <tr key={feature} className={`border-b border-border/50 last:border-0 ${idx % 2 !== 0 ? "bg-secondary/20" : ""}`}>
                 <td className="px-5 py-3 text-[13px] text-muted-foreground">{feature}</td>
                 {plans.map(p => {
-                  const has = Array.isArray(p.features) && p.features.includes(feature);
+                  const has = planHasFeature(p, feature);
                   return (
                     <td key={p.id} className="text-center px-3 py-3">
                       {has ? <Check className="w-4 h-4 text-primary mx-auto" /> : <X className="w-3.5 h-3.5 text-muted-foreground/25 mx-auto" />}
