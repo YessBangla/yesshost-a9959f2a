@@ -558,6 +558,93 @@ const AdminWHM = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Package Dialog */}
+      <Dialog open={showEdit} onOpenChange={setShowEdit}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-primary" />
+              {bn ? "রিসেলার প্যাকেজ এডিট করুন" : "Edit Reseller Package"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "প্যাকেজ নাম" : "Package Name"}</label>
+              <input
+                value={editForm.package_name}
+                onChange={e => setEditForm(p => ({ ...p, package_name: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "সর্বোচ্চ অ্যাকাউন্ট" : "Max Accounts"}</label>
+                <input
+                  type="number"
+                  value={editForm.max_accounts}
+                  onChange={e => setEditForm(p => ({ ...p, max_accounts: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ডিস্ক (MB)" : "Disk (MB)"}</label>
+                <input
+                  type="number"
+                  value={editForm.max_disk_mb}
+                  onChange={e => setEditForm(p => ({ ...p, max_disk_mb: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ব্যান্ডউইথ (MB)" : "BW (MB)"}</label>
+                <input
+                  type="number"
+                  value={editForm.max_bandwidth_mb}
+                  onChange={e => setEditForm(p => ({ ...p, max_bandwidth_mb: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-border/30">
+              <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                {bn ? "WHM সার্ভার কনফিগারেশন (ঐচ্ছিক)" : "WHM Server Config (Optional)"}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "সার্ভার হোস্ট" : "Server Host"}</label>
+                  <input
+                    value={editForm.whm_server_host}
+                    onChange={e => setEditForm(p => ({ ...p, whm_server_host: e.target.value }))}
+                    placeholder="server1.yesshost.com"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "WHM ইউজারনেম" : "WHM Username"}</label>
+                  <input
+                    value={editForm.whm_username}
+                    onChange={e => setEditForm(p => ({ ...p, whm_username: e.target.value }))}
+                    placeholder="root"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleEditSave}
+              disabled={editing}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+            >
+              {editing ? (bn ? "আপডেট হচ্ছে..." : "Updating...") : (bn ? "আপডেট করুন" : "Update Package")}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
