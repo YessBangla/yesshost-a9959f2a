@@ -65,6 +65,8 @@ const AdminBilling = () => {
     due_date: "",
   });
   const [creating, setCreating] = useState(false);
+  const [deleteInvoice, setDeleteInvoice] = useState<InvoiceWithUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     const [inv, prof] = await Promise.all([
