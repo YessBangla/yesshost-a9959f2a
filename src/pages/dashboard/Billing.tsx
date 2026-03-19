@@ -518,6 +518,36 @@ const DashboardBilling = () => {
         </>
       )}
 
+      {/* Monthly Chart Tab */}
+      {activeTab === "chart" && (
+        <div className="glass-card rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
+            {isBn ? "গত ৬ মাসের পেমেন্ট সামারি" : "Last 6 Months Payment Summary"}
+          </h3>
+          {monthlyData.every(d => d.amount === 0) ? (
+            <EmptyState
+              icon={BarChart3}
+              title={isBn ? "কোনো ডেটা নেই" : "No Data"}
+              description={isBn ? "গত ৬ মাসে কোনো পেমেন্ট পাওয়া যায়নি" : "No payments found in the last 6 months"}
+            />
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={monthlyData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} className="fill-muted-foreground" />
+                <YAxis tick={{ fontSize: 11 }} className="fill-muted-foreground" tickFormatter={(v) => `৳${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`} />
+                <Tooltip
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }}
+                  labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+                  formatter={(value: number) => [`৳${value.toLocaleString()}`, isBn ? "পরিমাণ" : "Amount"]}
+                />
+                <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      )}
+
       {/* Payment Dialog */}
       <Dialog open={!!payInvoice} onOpenChange={() => { setPayInvoice(null); setSelectedPayment(""); }}>
         <DialogContent className="max-w-md">
