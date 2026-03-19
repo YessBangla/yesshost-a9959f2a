@@ -179,12 +179,10 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex gap-1 flex-wrap">
-                        {isAdmin ? (
-                          <Badge variant="destructive" className="text-[10px]">Admin</Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-[10px]">User</Badge>
-                        )}
+                        {isAdmin && <Badge variant="destructive" className="text-[10px]">Admin</Badge>}
+                        {u.roles.includes("call_center") && <Badge className="text-[10px] bg-blue-500/10 text-blue-500 border-0">CC</Badge>}
                         {u.roles.includes("moderator") && <Badge variant="outline" className="text-[10px]">Mod</Badge>}
+                        {!isAdmin && !u.roles.includes("call_center") && <Badge variant="secondary" className="text-[10px]">User</Badge>}
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
