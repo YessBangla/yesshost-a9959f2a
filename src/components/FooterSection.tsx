@@ -78,7 +78,7 @@ const FooterSection = () => {
 
               {/* Contact info */}
               <div className="space-y-3 mb-6">
-                <a href="tel:+8809638205205" className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
+                <a href="tel:+8801805464343" className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors">
                     <Phone className="w-4 h-4" />
                   </div>
