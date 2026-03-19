@@ -49,6 +49,7 @@ import ThemeDemo from "./pages/themes/ThemeDemo";
 import NotFound from "./pages/NotFound";
 import ChatRooms from "./pages/ChatRooms";
 import DomainPricing from "./pages/DomainPricing";
+import HostingPlans from "./pages/HostingPlans";
 import Checkout from "./pages/Checkout";
 import PaymentMethods from "./pages/PaymentMethods";
 import { PaymentSuccess, PaymentFail, PaymentCancel } from "./pages/PaymentResult";
@@ -79,6 +80,7 @@ const App = () => (
 
             {/* Domain pricing */}
             <Route path="/domain-pricing" element={<DomainPricing />} />
+            <Route path="/hosting-plans" element={<HostingPlans />} />
 
             {/* Service detail pages */}
             <Route path="/services/:slug" element={<ServiceDetail />} />
