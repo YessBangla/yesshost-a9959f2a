@@ -506,7 +506,7 @@ const DashboardLayout = () => {
         {/* Main */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Sub-header with breadcrumb & collapse toggle */}
-          <header className="h-11 flex items-center gap-2 px-3 sm:px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-11 z-30 safe-left safe-right">
+          <header className="h-11 flex items-center gap-2 px-3 sm:px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-12 z-30 safe-left safe-right">
             <button
               onClick={() => setCollapsed(!collapsed)}
               className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors"
