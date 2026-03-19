@@ -272,10 +272,11 @@ const AdminTickets = () => {
       {/* Tickets - Card based for better mobile */}
       <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="glass-card rounded-xl p-12 text-center">
-            <Inbox className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground">{isBn ? "কোনো টিকেট পাওয়া যায়নি" : "No tickets found"}</p>
-          </div>
+          <EmptyState
+            icon={Inbox}
+            title={isBn ? "কোনো টিকেট পাওয়া যায়নি" : "No tickets found"}
+            description={isBn ? "সার্চ ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন" : "Try adjusting your search filters"}
+          />
         )}
         {filtered.map((t, i) => {
           const sc = statusConfig[t.status] || statusConfig.open;

@@ -193,7 +193,13 @@ const AdminServices = () => {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">{isBn ? "কোনো সার্ভিস পাওয়া যায়নি" : "No services found"}</td></tr>
+                <tr><td colSpan={6} className="p-0">
+                  <EmptyState
+                    icon={Server}
+                    title={isBn ? "কোনো সার্ভিস পাওয়া যায়নি" : "No services found"}
+                    description={isBn ? "সার্চ ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন" : "Try adjusting your search filters"}
+                  />
+                </td></tr>
               )}
             </tbody>
           </table>

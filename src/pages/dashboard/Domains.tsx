@@ -91,14 +91,13 @@ const DashboardDomains = () => {
 
       {/* Domains */}
       {filtered.length === 0 ? (
-        <div className="glass-card p-12 text-center rounded-xl">
-          <Globe className="w-14 h-14 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="text-base font-bold text-foreground mb-2">{search ? (bn ? "কোনো ডোমেইন পাওয়া যায়নি" : "No domains found") : (bn ? "কোনো ডোমেইন নেই" : "No domains yet")}</h3>
-          <p className="text-sm text-muted-foreground mb-4">{bn ? "আপনার পারফেক্ট ডোমেইন রেজিস্টার করুন" : "Register your perfect domain today"}</p>
-          <Link to="/services/domain" className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm">
-            {bn ? "ডোমেইন খুঁজুন" : "Search Domains"} <ExternalLink className="w-4 h-4" />
-          </Link>
-        </div>
+        <EmptyState
+          icon={Globe}
+          title={search ? (bn ? "কোনো ডোমেইন পাওয়া যায়নি" : "No domains found") : (bn ? "কোনো ডোমেইন নেই" : "No domains yet")}
+          description={bn ? "আপনার পারফেক্ট ডোমেইন রেজিস্টার করুন" : "Register your perfect domain today"}
+          actionLabel={bn ? "ডোমেইন খুঁজুন" : "Search Domains"}
+          actionTo="/services/domain"
+        />
       ) : (
         <div className="space-y-3">
           {filtered.map((d, i) => {

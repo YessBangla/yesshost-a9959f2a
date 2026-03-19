@@ -198,7 +198,13 @@ const AdminBilling = () => {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">{isBn ? "কোনো ইনভয়েস পাওয়া যায়নি" : "No invoices found"}</td></tr>
+                <tr><td colSpan={7} className="p-0">
+                  <EmptyState
+                    icon={FileText}
+                    title={isBn ? "কোনো ইনভয়েস পাওয়া যায়নি" : "No invoices found"}
+                    description={isBn ? "সার্চ ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন" : "Try adjusting your search filters"}
+                  />
+                </td></tr>
               )}
             </tbody>
           </table>
