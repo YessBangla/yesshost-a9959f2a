@@ -98,7 +98,12 @@ const Signup = () => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <PasswordStrengthMeter password={password} lang={lang} />
             </div>
+            <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <Shield className="w-3 h-3" />
+              {bn ? "আপনার তথ্য সম্পূর্ণ নিরাপদ ও এনক্রিপ্টেড" : "Your data is fully secure and encrypted"}
+            </p>
             <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 gradient-primary text-primary-foreground py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50">
               {loading ? <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <>{tr("auth.createAccount")} <ArrowRight className="w-4 h-4" /></>}
             </button>
