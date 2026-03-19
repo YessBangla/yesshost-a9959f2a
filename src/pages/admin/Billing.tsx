@@ -179,9 +179,15 @@ const AdminBilling = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{isBn ? "বিলিং ম্যানেজমেন্ট" : "Billing Management"}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ইনভয়েস ও পেমেন্ট পরিচালনা" : "Manage all invoices and payments"}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{isBn ? "বিলিং ম্যানেজমেন্ট" : "Billing Management"}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ইনভয়েস ও পেমেন্ট পরিচালনা" : "Manage all invoices and payments"}</p>
+        </div>
+        <Button onClick={() => setShowCreate(true)} className="gap-2">
+          <Plus className="w-4 h-4" />
+          {isBn ? "নতুন ইনভয়েস" : "New Invoice"}
+        </Button>
       </div>
 
       {/* Stats */}
