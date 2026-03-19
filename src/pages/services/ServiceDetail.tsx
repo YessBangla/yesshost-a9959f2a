@@ -141,7 +141,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
           </p>
         )}
         {duration.months > 1 && (
-          <p className="text-[10px] text-muted-foreground mb-3">
+          <p className="text-xs text-muted-foreground mb-3">
             ≈ ৳{isBn ? toBengaliNum(Math.round(totalPrice / duration.months)) : Math.round(totalPrice / duration.months).toLocaleString()}/{isBn ? "মাস" : "mo"}
           </p>
         )}
