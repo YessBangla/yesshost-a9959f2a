@@ -162,7 +162,7 @@ const HostingPlans = () => {
                     {cat.startingPrice && (
                       <span className="text-sm text-muted-foreground">
                         {bn ? "শুরু" : "From"}{" "}
-                        <span className="font-bold text-foreground">{formatPrice(cat.startingPrice)}</span>
+                        <span className="font-bold text-foreground">{formatPrice(cat.startingPrice, lang)}</span>
                         <span className="text-xs">/{bn ? "মাস" : "mo"}</span>
                       </span>
                     )}
