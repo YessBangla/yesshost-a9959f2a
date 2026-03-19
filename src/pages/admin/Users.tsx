@@ -719,6 +719,128 @@ const AdminUsers = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Client Profile Dialog */}
+      <Dialog open={!!editProfileUser} onOpenChange={() => setEditProfileUser(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit3 className="w-5 h-5 text-amber-600" />
+              {isBn ? "ক্লায়েন্ট প্রোফাইল এডিট" : "Edit Client Profile"} — {editProfileUser?.full_name || "User"}
+            </DialogTitle>
+          </DialogHeader>
+          {editProfileUser && (
+            <div className="space-y-4 mt-2">
+              {/* Client ID badge */}
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/30 border border-border/40">
+                <UsersIcon className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{isBn ? "ক্লায়েন্ট আইডি:" : "Client ID:"}</span>
+                <span className="text-xs font-mono font-semibold text-foreground">{editProfileUser.user_id.slice(0, 12)}...</span>
+              </div>
+
+              {/* Form fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "পূর্ণ নাম" : "Full Name"}</label>
+                  <input
+                    value={editProfileForm.full_name}
+                    onChange={e => setEditProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder={isBn ? "পূর্ণ নাম" : "Full name"}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "ফোন নম্বর" : "Phone Number"}</label>
+                  <input
+                    value={editProfileForm.phone}
+                    onChange={e => setEditProfileForm(prev => ({ ...prev, phone: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder="01XXXXXXXXX"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "কোম্পানির নাম" : "Company Name"}</label>
+                  <input
+                    value={editProfileForm.company_name}
+                    onChange={e => setEditProfileForm(prev => ({ ...prev, company_name: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder={isBn ? "কোম্পানির নাম" : "Company name"}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "কোম্পানি ওয়েবসাইট" : "Company Website"}</label>
+                  <input
+                    value={editProfileForm.company_website}
+                    onChange={e => setEditProfileForm(prev => ({ ...prev, company_website: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder="https://example.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "ঠিকানা" : "Address"}</label>
+                <input
+                  value={editProfileForm.address}
+                  onChange={e => setEditProfileForm(prev => ({ ...prev, address: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  placeholder={isBn ? "সম্পূর্ণ ঠিকানা" : "Full address"}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "শহর" : "City"}</label>
+                  <input
+                    value={editProfileForm.city}
+                    onChange={e => setEditProfileForm(prev => ({ ...prev, city: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder={isBn ? "শহর" : "City"}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "দেশ" : "Country"}</label>
+                  <input
+                    value={editProfileForm.country}
+                    onChange={e => setEditProfileForm(prev => ({ ...prev, country: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder={isBn ? "দেশ" : "Country"}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">VAT ID</label>
+                <input
+                  value={editProfileForm.vat_id}
+                  onChange={e => setEditProfileForm(prev => ({ ...prev, vat_id: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  placeholder="VAT ID"
+                />
+              </div>
+
+              {/* Save button */}
+              <button
+                onClick={handleSaveProfile}
+                disabled={savingProfile}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+              >
+                {savingProfile ? (
+                  <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    {isBn ? "প্রোফাইল আপডেট করুন" : "Update Profile"}
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
