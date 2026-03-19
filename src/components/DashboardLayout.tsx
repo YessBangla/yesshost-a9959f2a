@@ -318,7 +318,12 @@ const DashboardLayout = () => {
                               onClick={() => setActiveTopMenu(null)}
                             >
                               <Icon className="w-4 h-4 opacity-60" />
-                              {child.label}
+                              <span className="flex-1">{child.label}</span>
+                              {child.badge !== undefined && child.badge > 0 && (
+                                <span className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center">
+                                  {child.badge}
+                                </span>
+                              )}
                             </Link>
                           );
                         })}
