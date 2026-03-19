@@ -34,6 +34,7 @@ const PaymentCancel = lazy(() => import("./pages/PaymentResult").then(m => ({ de
 const DomainPricing = lazy(() => import("./pages/DomainPricing"));
 const HostingPlans = lazy(() => import("./pages/HostingPlans"));
 const ServiceDetail = lazy(() => import("./pages/services/ServiceDetail"));
+const ResellerHosting = lazy(() => import("./pages/ResellerHosting"));
 
 const About = lazy(() => import("./pages/company/About"));
 const Contact = lazy(() => import("./pages/company/Contact"));
@@ -126,6 +127,7 @@ const App = () => (
 
               {/* Service detail pages */}
               <Route path="/services/:slug" element={<ServiceDetail />} />
+              <Route path="/reseller-hosting" element={<ResellerHosting />} />
 
               {/* Company pages */}
               <Route path="/about" element={<About />} />
