@@ -105,7 +105,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
                     <span>{isBn ? d.labelBn : d.labelEn}</span>
                     <div className="flex items-center gap-1.5">
                       {d.discount > 0 && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
                           {isBn ? `${toBengaliNum(d.discount)}%` : `${d.discount}%`}
                         </span>
                       )}
