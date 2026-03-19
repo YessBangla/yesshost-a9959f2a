@@ -104,6 +104,7 @@ const AdminUsers = () => {
         {[
           { label: isBn ? "মোট ইউজার" : "Total Users", value: stats.total, color: "text-primary" },
           { label: isBn ? "অ্যাডমিন" : "Admins", value: stats.admins, color: "text-destructive" },
+          { label: isBn ? "কল সেন্টার" : "Call Center", value: stats.callCenter, color: "text-blue-500" },
           { label: isBn ? "এই মাসে নতুন" : "New This Month", value: stats.thisMonth, color: "text-success" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-card p-4 rounded-xl">
