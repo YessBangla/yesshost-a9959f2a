@@ -31,6 +31,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/domains": { en: "Domains", bn: "ডোমেইন" },
   "/dashboard/profile": { en: "Profile", bn: "প্রোফাইল" },
   "/dashboard/reseller": { en: "Reseller", bn: "রিসেলার" },
+  "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
 };
 
 const DashboardLayout = () => {
