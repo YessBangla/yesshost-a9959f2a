@@ -62,7 +62,7 @@ const ResellerHosting = () => {
   const bn = lang === "bn";
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [duration, setDuration] = useState<BillingDuration>("monthly");
+  const [duration, setDuration] = useState(BILLING_DURATIONS[0]);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
@@ -71,9 +71,8 @@ const ResellerHosting = () => {
   }, []);
 
   const handleAddToCart = (plan: Plan) => {
-    const basePrice = parseFloat(plan.price_bdt.replace(/[^\d.]/g, "")) || 0;
-    const price = calcDurationPrice(basePrice, plan.annual_price_bdt ? parseFloat(plan.annual_price_bdt.replace(/[^\d.]/g, "")) : null, duration);
-    addItem({ id: `hosting-${plan.id}-${duration}`, name: plan.name, type: "hosting", price, billing_cycle: duration, plan_id: plan.slug, hosting_category: "reseller" });
+    const price = calcDurationPrice(plan.price_bdt, plan.annual_price_bdt, duration);
+    addItem({ id: `hosting-${plan.id}-${duration.key}`, name: plan.name, type: "hosting", price, billing_cycle: duration.key, plan_id: plan.slug, hosting_category: "reseller" });
   };
 
   return (
