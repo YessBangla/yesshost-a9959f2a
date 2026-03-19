@@ -264,7 +264,7 @@ const PricingSection = () => {
                           <span className="text-2xl sm:text-3xl font-extrabold tabular-nums text-foreground">
                             ৳{isBn ? toBengaliNum(totalPrice) : totalPrice.toLocaleString()}
                           </span>
-                          <span className="text-xs text-muted-foreground">/{durationLabel}</span>
+                          <span className="text-sm text-muted-foreground">/{durationLabel}</span>
                         </div>
                         {duration.discount > 0 && (
                           <p className="text-[11px] text-primary font-medium mt-1">
