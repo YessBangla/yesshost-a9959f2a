@@ -311,6 +311,89 @@ export type Database = {
           },
         ]
       }
+      kb_articles: {
+        Row: {
+          category_id: string
+          content_bn: string
+          content_en: string
+          created_at: string
+          id: string
+          is_active: boolean
+          slug: string
+          sort_order: number
+          title_bn: string
+          title_en: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          content_bn?: string
+          content_en?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          sort_order?: number
+          title_bn: string
+          title_en: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          content_bn?: string
+          content_en?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          sort_order?: number
+          title_bn?: string
+          title_en?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "kb_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_categories: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          is_active: boolean
+          slug: string
+          sort_order: number
+          title_bn: string
+          title_en: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          sort_order?: number
+          title_bn: string
+          title_en: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          sort_order?: number
+          title_bn?: string
+          title_en?: string
+        }
+        Relationships: []
+      }
       live_chat_messages: {
         Row: {
           chat_id: string
