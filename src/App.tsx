@@ -60,6 +60,7 @@ const DashboardDomains = lazy(() => import("./pages/dashboard/Domains"));
 const DashboardProfile = lazy(() => import("./pages/dashboard/Profile"));
 const DashboardOrders = lazy(() => import("./pages/dashboard/Orders"));
 const DashboardReseller = lazy(() => import("./pages/dashboard/Reseller"));
+const DashboardWallet = lazy(() => import("./pages/dashboard/Wallet"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
