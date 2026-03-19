@@ -136,7 +136,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
         </div>
 
         {duration.discount > 0 && (
-          <p className="text-[11px] text-primary font-medium mb-3 px-2.5 py-1 rounded-md bg-primary/5 inline-block w-fit">
+          <p className="text-xs text-primary font-medium mb-3 px-2.5 py-1 rounded-md bg-primary/5 inline-block w-fit">
             🎉 {isBn ? `${toBengaliNum(duration.discount)}% ছাড়!` : `${duration.discount}% off!`}
           </p>
         )}
