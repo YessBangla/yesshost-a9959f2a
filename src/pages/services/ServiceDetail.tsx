@@ -184,12 +184,18 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
     const featureSet = new Set<string>();
     plans.forEach(p => {
       const features = Array.isArray(p.features) ? p.features : [];
-      features.forEach((f: string) => featureSet.add(f));
+      features.forEach((f: any) => featureSet.add(normalizeFeature(f)));
     });
     return Array.from(featureSet);
   }, [plans]);
 
   if (plans.length === 0 || allFeatures.length === 0) return null;
+
+  // Helper to check if a plan has a feature
+  const planHasFeature = (p: any, feature: string) => {
+    const features = Array.isArray(p.features) ? p.features.map(normalizeFeature) : [];
+    return features.includes(feature);
+  };
 
   return (
     <motion.div
@@ -219,7 +225,7 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
               <tr key={feature} className={`border-b border-border/50 last:border-0 ${idx % 2 !== 0 ? "bg-secondary/20" : ""}`}>
                 <td className="px-5 py-3 text-[13px] text-muted-foreground">{feature}</td>
                 {plans.map(p => {
-                  const has = Array.isArray(p.features) && p.features.includes(feature);
+                  const has = planHasFeature(p, feature);
                   return (
                     <td key={p.id} className="text-center px-3 py-3">
                       {has ? <Check className="w-4 h-4 text-primary mx-auto" /> : <X className="w-3.5 h-3.5 text-muted-foreground/25 mx-auto" />}
