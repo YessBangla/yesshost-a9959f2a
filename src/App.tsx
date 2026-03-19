@@ -139,6 +139,7 @@ const App = () => (
               <Route path="live-chat" element={<AdminLiveChat />} />
               <Route path="chat-rooms" element={<AdminChatRooms />} />
               <Route path="contact-messages" element={<AdminContactMessages />} />
+              <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
