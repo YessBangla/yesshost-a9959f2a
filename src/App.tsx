@@ -15,6 +15,8 @@ import CallCenterLayout from "@/components/CallCenterLayout";
 import DashboardLayout from "@/components/DashboardLayout";
 import AdminLayout from "@/components/AdminLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ScrollToTop from "@/components/ScrollToTop";
+import OfflineBanner from "@/components/OfflineBanner";
 
 // Eagerly loaded critical pages
 import Index from "./pages/Index";
