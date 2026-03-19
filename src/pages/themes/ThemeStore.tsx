@@ -205,7 +205,7 @@ const ThemeStore = () => {
                         className="px-4 py-2.5 rounded-xl bg-secondary/90 text-foreground hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-semibold flex items-center gap-2"
                       >
                         <Eye className="w-4 h-4" />
-                        {bn ? "ডেমো দেখুন" : "View Demo"}
+                        {bn ? "বিস্তারিত" : "Details"}
                       </Link>
                       {(() => {
                         const hovCartId = `theme-${theme.id}`;
