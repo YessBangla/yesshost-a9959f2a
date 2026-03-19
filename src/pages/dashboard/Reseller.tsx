@@ -44,11 +44,12 @@ const ResellerDashboard = () => {
 
   const fetchPackages = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("reseller_packages")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
+    console.log("Reseller packages fetch:", { data, error, userId: user.id });
     setPackages(data || []);
     setLoading(false);
     if (data && data.length > 0 && !selectedPkg) {
