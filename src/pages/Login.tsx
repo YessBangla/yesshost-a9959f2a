@@ -35,7 +35,7 @@ const Login = () => {
         : error.message;
       toast({ title: bn ? "লগইন ব্যর্থ" : "Login Failed", description: msg, variant: "destructive" });
     }
-    else { navigate("/dashboard"); }
+    else { navigate(from); }
     setLoading(false);
   };
 
