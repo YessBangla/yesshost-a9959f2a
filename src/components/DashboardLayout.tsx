@@ -297,9 +297,9 @@ const DashboardLayout = () => {
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors mr-2"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors mr-2"
             >
-              <Menu className="w-5 h-5 text-foreground" />
+              <Menu className="w-5 h-5 text-primary-foreground" />
             </button>
 
             {/* Logo */}
