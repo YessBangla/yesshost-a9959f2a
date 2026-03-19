@@ -487,7 +487,7 @@ const DashboardLayout = () => {
               className="sm:hidden flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-semibold"
             >
               <Wallet className="w-3 h-3" />
-              TK {formatAmount(walletBalance)}
+              TK {formatAmount(walletBalance, lang)}
             </Link>
 
             <Link
