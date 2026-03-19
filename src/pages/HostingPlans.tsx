@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Server, Globe, HardDrive, Shield, Mail, Layers, ArrowRight, Check, Star, Zap, Clock, Headphones, Calendar, CalendarDays } from "lucide-react";
+import { Server, Globe, HardDrive, Shield, Mail, Layers, ArrowRight, Check, Star, Zap, Clock, Headphones, ChevronDown, ShoppingCart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { formatPrice } from "@/lib/formatPrice";
+import { BILLING_DURATIONS, calcDurationPrice, toBengaliNum, type BillingDuration } from "@/lib/billingDurations";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -45,39 +47,95 @@ const normalizeFeature = (f: any) => {
   return { label: f.label || f, label_bn: f.label_bn, included: f.included !== false };
 };
 
-/* ─── Billing Toggle Sub-component ─── */
-const BillingToggle = ({ value, onChange, bn }: { value: "monthly" | "yearly"; onChange: (v: "monthly" | "yearly") => void; bn: boolean }) => (
-  <div className="inline-flex items-center gap-0.5 p-1 rounded-xl bg-secondary/60 border border-border">
-    <button
-      onClick={() => onChange("monthly")}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
-        value === "monthly" ? "gradient-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      <Calendar className="w-3 h-3" />
-      {bn ? "মাসিক" : "Monthly"}
-    </button>
-    <button
-      onClick={() => onChange("yearly")}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
-        value === "yearly" ? "gradient-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      <CalendarDays className="w-3 h-3" />
-      {bn ? "বাৎসরিক" : "Yearly"}
-      {value !== "yearly" && <span className="text-[9px] px-1 py-0.5 rounded bg-primary/10 text-primary font-bold">{bn ? "সেভ" : "Save"}</span>}
-    </button>
-  </div>
-);
+/* ─── Duration Selector ─── */
+const DurationSelector = ({
+  selected,
+  onChange,
+  bn,
+}: {
+  selected: BillingDuration;
+  onChange: (d: BillingDuration) => void;
+  bn: boolean;
+}) => {
+  const [open, setOpen] = useState(false);
 
-/* ─── Plan Card Sub-component ─── */
-const PlanCard = ({ plan, billingCycle, bn, lang }: { plan: PlanRow; billingCycle: "monthly" | "yearly"; bn: boolean; lang: string }) => {
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-secondary/50 text-xs font-semibold text-foreground hover:border-primary/40 transition-all w-full justify-between"
+      >
+        <span>{bn ? selected.labelBn : selected.labelEn}</span>
+        {selected.discount > 0 && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+            -{selected.discount}%
+          </span>
+        )}
+        <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg z-20 overflow-hidden max-h-64 overflow-y-auto"
+          >
+            {BILLING_DURATIONS.map((d) => (
+              <button
+                key={d.key}
+                onClick={() => { onChange(d); setOpen(false); }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-xs transition-all ${
+                  selected.key === d.key
+                    ? "bg-primary/5 text-primary font-bold"
+                    : "text-foreground hover:bg-secondary/60"
+                }`}
+              >
+                <span>{bn ? d.labelBn : d.labelEn}</span>
+                <div className="flex items-center gap-2">
+                  {d.discount > 0 && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                      {bn ? `${toBengaliNum(d.discount)}% ছাড়` : `${d.discount}% off`}
+                    </span>
+                  )}
+                  {selected.key === d.key && <Check className="w-3 h-3 text-primary" />}
+                </div>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+/* ─── Plan Card ─── */
+const PlanCard = ({
+  plan,
+  duration,
+  onDurationChange,
+  bn,
+  lang,
+}: {
+  plan: PlanRow;
+  duration: BillingDuration;
+  onDurationChange: (d: BillingDuration) => void;
+  bn: boolean;
+  lang: string;
+}) => {
+  const { addItem, isInCart } = useCart();
   const rawFeatures = Array.isArray(plan.features) ? plan.features : [];
   const allFeatures = rawFeatures.map(normalizeFeature);
   const includedFeatures = allFeatures.filter((f) => f.included);
   const excludedFeatures = allFeatures.filter((f) => !f.included);
-  const showYearly = billingCycle === "yearly" && plan.annual_price_bdt;
-  const displayPrice = showYearly ? plan.annual_price_bdt! : plan.price_bdt;
+  
+  const totalPrice = calcDurationPrice(plan.price_bdt, plan.annual_price_bdt, duration);
+  const cartId = `hosting-${plan.id}-${duration.key}`;
+  const inCart = isInCart(cartId);
+
+  const durationLabel = bn ? duration.labelBn : duration.labelEn;
 
   return (
     <motion.div
@@ -98,29 +156,40 @@ const PlanCard = ({ plan, billingCycle, bn, lang }: { plan: PlanRow; billingCycl
       <h3 className="text-sm font-bold text-foreground mb-1">{plan.name}</h3>
       {plan.subtitle && <p className="text-[11px] text-muted-foreground mb-3">{plan.subtitle}</p>}
 
-      <div className="mb-4">
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={displayPrice}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.2 }}
-            className="inline-block text-2xl font-extrabold text-foreground"
-          >
-            {formatPrice(displayPrice, lang)}
-          </motion.span>
-        </AnimatePresence>
-        <span className="text-xs text-muted-foreground ml-1">
-          {showYearly ? (bn ? "/বছর" : "/yr") : (bn ? "/মাস" : "/mo")}
-        </span>
-        {billingCycle === "monthly" && plan.annual_price_bdt && (
-          <p className="text-[11px] text-primary font-medium mt-1">
-            💰 {bn ? `বাৎসরিকে ৳${formatPrice(plan.annual_price_bdt, lang)}` : `৳${formatPrice(plan.annual_price_bdt, lang)} if billed yearly`}
-          </p>
-        )}
+      {/* Duration Selector */}
+      <div className="mb-3">
+        <DurationSelector selected={duration} onChange={onDurationChange} bn={bn} />
       </div>
 
+      {/* Price */}
+      <div className="mb-4">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${plan.id}-${duration.key}`}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.2 }}
+          >
+            <span className="text-2xl font-extrabold text-foreground">
+              ৳{bn ? toBengaliNum(totalPrice) : totalPrice.toLocaleString()}
+            </span>
+            <span className="text-xs text-muted-foreground ml-1">/{durationLabel}</span>
+            {duration.discount > 0 && (
+              <p className="text-[11px] text-primary font-medium mt-1">
+                🎉 {bn ? `${toBengaliNum(duration.discount)}% ছাড় পাচ্ছেন!` : `${duration.discount}% discount applied!`}
+              </p>
+            )}
+            {duration.months > 1 && (
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                ≈ ৳{bn ? toBengaliNum(Math.round(totalPrice / duration.months)) : Math.round(totalPrice / duration.months).toLocaleString()}/{bn ? "মাস" : "mo"}
+              </p>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Features */}
       {includedFeatures.length > 0 && (
         <ul className="space-y-1.5 mb-3 flex-1">
           {includedFeatures.map((f, j) => (
@@ -147,16 +216,36 @@ const PlanCard = ({ plan, billingCycle, bn, lang }: { plan: PlanRow; billingCycl
         </ul>
       )}
 
-      <Link
-        to={`/services/${plan.slug}`}
-        className={`block w-full text-center py-2.5 rounded-lg text-xs font-semibold transition-all mt-auto ${
-          plan.is_highlighted
-            ? "gradient-primary text-primary-foreground shadow-sm hover:opacity-90"
-            : "border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
-        }`}
-      >
-        {bn ? "এখনই অর্ডার করুন" : "Order Now"}
-      </Link>
+      {/* CTA */}
+      {inCart ? (
+        <div className="w-full py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-xs mt-auto">
+          <Check className="w-3.5 h-3.5 text-primary" />
+          {bn ? "কার্টে আছে" : "In Cart"}
+        </div>
+      ) : (
+        <button
+          onClick={() => {
+            addItem({
+              id: cartId,
+              type: "hosting",
+              name: plan.name,
+              description: `${plan.subtitle || plan.name} • ${durationLabel}`,
+              price_bdt: totalPrice.toString(),
+              plan_id: plan.id,
+              billing_cycle: duration.key,
+              category: plan.category,
+            });
+          }}
+          className={`w-full py-2.5 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-xs mt-auto ${
+            plan.is_highlighted
+              ? "gradient-primary text-primary-foreground shadow-sm hover:opacity-90"
+              : "border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
+          }`}
+        >
+          <ShoppingCart className="w-3.5 h-3.5" />
+          {bn ? "কার্টে যোগ করুন" : "Add to Cart"}
+        </button>
+      )}
     </motion.div>
   );
 };
@@ -168,7 +257,8 @@ const HostingPlans = () => {
   const [plans, setPlans] = useState<PlanRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [billingCycles, setBillingCycles] = useState<Record<string, "monthly" | "yearly">>({});
+  // Per-plan duration state
+  const [planDurations, setPlanDurations] = useState<Record<string, BillingDuration>>({});
 
   useEffect(() => {
     supabase
@@ -182,9 +272,9 @@ const HostingPlans = () => {
       });
   }, []);
 
-  const getCycleFn = useCallback((catKey: string) => billingCycles[catKey] || "monthly", [billingCycles]);
-  const setCycleFn = useCallback((catKey: string, cycle: "monthly" | "yearly") => {
-    setBillingCycles((prev) => ({ ...prev, [catKey]: cycle }));
+  const getPlanDuration = useCallback((planId: string) => planDurations[planId] || BILLING_DURATIONS[0], [planDurations]);
+  const setPlanDuration = useCallback((planId: string, d: BillingDuration) => {
+    setPlanDurations((prev) => ({ ...prev, [planId]: d }));
   }, []);
 
   const grouped = categories.map((cat) => {
@@ -200,16 +290,14 @@ const HostingPlans = () => {
     document.getElementById(`cat-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  // Track active section via IntersectionObserver
+  // Track active section
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   useEffect(() => {
     if (grouped.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveFilter(entry.target.id.replace("cat-", ""));
-          }
+          if (entry.isIntersecting) setActiveFilter(entry.target.id.replace("cat-", ""));
         }
       },
       { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
@@ -218,7 +306,17 @@ const HostingPlans = () => {
     return () => observer.disconnect();
   }, [grouped.length]);
 
-  const features = [
+  // Set all plans in a category to same duration
+  const setCategoryDuration = useCallback((catKey: string, d: BillingDuration) => {
+    const catPlans = plans.filter((p) => p.category === catKey);
+    setPlanDurations((prev) => {
+      const updated = { ...prev };
+      catPlans.forEach((p) => { updated[p.id] = d; });
+      return updated;
+    });
+  }, [plans]);
+
+  const globalFeatures = [
     { icon: Zap, label: bn ? "LiteSpeed ওয়েব সার্ভার" : "LiteSpeed Web Server" },
     { icon: Shield, label: bn ? "ফ্রি SSL সার্টিফিকেট" : "Free SSL Certificate" },
     { icon: Clock, label: bn ? "৯৯.৯% আপটাইম গ্যারান্টি" : "99.9% Uptime Guarantee" },
@@ -245,8 +343,8 @@ const HostingPlans = () => {
             </h1>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
               {bn
-                ? "ওয়েব হোস্টিং থেকে ডেডিকেটেড সার্ভার — আপনার প্রয়োজন অনুযায়ী সেরা প্ল্যানটি বেছে নিন।"
-                : "From web hosting to dedicated servers — choose the best plan for your needs."}
+                ? "১ মাস থেকে ১০ বছর পর্যন্ত — আপনার প্রয়োজন অনুযায়ী মেয়াদ ও প্ল্যান বেছে নিন।"
+                : "From 1 month to 10 years — choose the perfect duration and plan for your needs."}
             </p>
           </motion.div>
         </section>
@@ -259,7 +357,7 @@ const HostingPlans = () => {
             transition={{ delay: 0.15, duration: 0.4, ease }}
             className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto"
           >
-            {features.map((f, i) => (
+            {globalFeatures.map((f, i) => (
               <div key={i} className="flex items-center gap-2.5 bg-card border border-border rounded-xl p-3.5 text-center justify-center">
                 <f.icon className="w-4 h-4 text-primary shrink-0" />
                 <span className="text-xs font-medium text-foreground">{f.label}</span>
@@ -268,7 +366,7 @@ const HostingPlans = () => {
           </motion.div>
         </section>
 
-        {/* Sticky Category Filter Bar */}
+        {/* Sticky Category Filter */}
         {!loading && grouped.length > 0 && (
           <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40 shadow-sm">
             <div className="container mx-auto px-4">
@@ -314,8 +412,6 @@ const HostingPlans = () => {
           {grouped.map((cat, idx) => {
             const label = categoryLabels[cat.key];
             const Icon = cat.icon;
-            const cycle = getCycleFn(cat.key);
-            const hasAnnual = cat.plans.some((p) => p.annual_price_bdt);
 
             return (
               <motion.div
@@ -339,33 +435,57 @@ const HostingPlans = () => {
                         <p className="text-xs text-muted-foreground mt-0.5">{bn ? label.descBn : label.descEn}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      {cat.startingPrice && (
-                        <span className="text-sm text-muted-foreground">
-                          {bn ? "শুরু" : "From"}{" "}
-                          <span className="font-bold text-foreground">{formatPrice(cat.startingPrice, lang)}</span>
-                          <span className="text-xs">/{bn ? "মাস" : "mo"}</span>
-                        </span>
-                      )}
-                    </div>
+                    {cat.startingPrice && (
+                      <span className="text-sm text-muted-foreground">
+                        {bn ? "শুরু" : "From"}{" "}
+                        <span className="font-bold text-foreground">{formatPrice(cat.startingPrice, lang)}</span>
+                        <span className="text-xs">/{bn ? "মাস" : "mo"}</span>
+                      </span>
+                    )}
                   </div>
 
-                  {/* Billing Toggle per category */}
-                  {hasAnnual && (
-                    <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between">
-                      <span className="text-[11px] text-muted-foreground">
-                        {bn ? "বিলিং সাইকেল:" : "Billing cycle:"}
+                  {/* Quick Duration Shortcuts for whole category */}
+                  <div className="mt-3 pt-3 border-t border-border/40">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] text-muted-foreground shrink-0">
+                        {bn ? "সবগুলোর মেয়াদ:" : "Set all to:"}
                       </span>
-                      <BillingToggle value={cycle} onChange={(v) => setCycleFn(cat.key, v)} bn={bn} />
+                      <div className="flex gap-1 flex-wrap">
+                        {[
+                          BILLING_DURATIONS[0],  // 1m
+                          BILLING_DURATIONS[3],  // 6m
+                          BILLING_DURATIONS[4],  // 1y
+                          BILLING_DURATIONS[6],  // 3y
+                          BILLING_DURATIONS[8],  // 5y
+                        ].map((d) => (
+                          <button
+                            key={d.key}
+                            onClick={() => setCategoryDuration(cat.key, d)}
+                            className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-border bg-secondary/40 text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
+                          >
+                            {bn ? d.shortBn : d.shortEn}
+                            {d.discount > 0 && (
+                              <span className="ml-1 text-primary">-{d.discount}%</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* Plan Cards */}
                 <div className="p-4 md:p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {cat.plans.map((plan) => (
-                      <PlanCard key={plan.id} plan={plan} billingCycle={cycle} bn={bn} lang={lang} />
+                      <PlanCard
+                        key={plan.id}
+                        plan={plan}
+                        duration={getPlanDuration(plan.id)}
+                        onDurationChange={(d) => setPlanDuration(plan.id, d)}
+                        bn={bn}
+                        lang={lang}
+                      />
                     ))}
                   </div>
                 </div>
