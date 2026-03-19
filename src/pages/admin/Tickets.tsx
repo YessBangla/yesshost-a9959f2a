@@ -69,8 +69,13 @@ const AdminTickets = () => {
   };
 
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from("support_tickets").update({ status: status as any }).eq("id", id);
-    toast({ title: isBn ? "স্ট্যাটাস আপডেট হয়েছে" : "Status updated" });
+    const { error } = await supabase.from("support_tickets").update({ status: status as any }).eq("id", id);
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      const sc = statusConfig[status];
+      toast({ title: "✅", description: isBn ? `টিকেট "${sc?.label_bn || status}" এ আপডেট হয়েছে` : `Ticket updated to "${sc?.label_en || status}"` });
+    }
     fetchData();
     if (selectedTicket?.id === id) setSelectedTicket({ ...selectedTicket, status: status as any });
   };

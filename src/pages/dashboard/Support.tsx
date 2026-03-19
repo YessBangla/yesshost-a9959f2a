@@ -126,8 +126,10 @@ const DashboardSupport = () => {
             ))}
           </div>
           <div className="flex gap-2">
-            <input value={replyMsg} onChange={e => setReplyMsg(e.target.value)} placeholder={tr("dash.replyPlaceholder")} className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none text-sm" onKeyDown={e => e.key === "Enter" && sendReply()} />
-            <button onClick={sendReply} className="gradient-primary text-primary-foreground px-4 py-3 rounded-xl hover:opacity-90 transition-all"><Send className="w-4 h-4" /></button>
+            <input value={replyMsg} onChange={e => setReplyMsg(e.target.value)} placeholder={tr("dash.replyPlaceholder")} className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none text-sm" onKeyDown={e => e.key === "Enter" && !sendingReply && sendReply()} />
+            <button onClick={sendReply} disabled={sendingReply || !replyMsg.trim()} className="gradient-primary text-primary-foreground px-4 py-3 rounded-xl hover:opacity-90 transition-all disabled:opacity-50">
+              {sendingReply ? <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
           </div>
         </div>
       </div>

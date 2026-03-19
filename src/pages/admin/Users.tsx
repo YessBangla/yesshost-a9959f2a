@@ -180,7 +180,7 @@ const AdminUsers = () => {
       const inserts = editPerms.map(p => ({ user_id: editPermUser.user_id, permission: p }));
       await supabase.from("user_permissions" as any).insert(inserts);
     }
-    toast({ title: isBn ? "অ্যাক্সেস আপডেট হয়েছে" : "Access updated" });
+    toast({ title: "✅", description: isBn ? "ইউজারের অ্যাক্সেস ও রোল আপডেট হয়েছে" : "User access and roles updated successfully" });
     setSavingPerms(false);
     setEditPermUser(null);
     fetchUsers();
