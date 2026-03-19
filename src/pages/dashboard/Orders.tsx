@@ -134,13 +134,7 @@ const OrdersPage = () => {
     totalSpent: orders.filter(o => o.payment_status === "paid").reduce((s, o) => s + Number(o.total_bdt), 0),
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[50vh]">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <OrdersSkeleton />;
 
   return (
     <div className="space-y-6">
