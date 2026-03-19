@@ -4,7 +4,7 @@ import {
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
   ChevronRight, Home, PanelLeftClose, PanelLeft,
   CreditCard, Share2, KeyRound, Bell, Settings, Wallet,
-  ChevronDown
+  ChevronDown, Package, PlusCircle
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
