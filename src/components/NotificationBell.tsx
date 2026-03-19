@@ -17,6 +17,8 @@ interface Notification {
 const typeIcons: Record<string, string> = {
   payment_success: "✅",
   payment_failed: "❌",
+  invoice_reminder: "⏰",
+  order: "📦",
   info: "ℹ️",
 };
 
