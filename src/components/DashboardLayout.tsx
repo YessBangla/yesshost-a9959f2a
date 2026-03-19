@@ -393,7 +393,7 @@ const DashboardLayout = () => {
             <div className="relative">
               <button
                 onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-border hover:bg-muted rounded-r-lg pr-2 py-1 transition-colors"
+                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-white/20 hover:bg-white/15 rounded-r-lg pr-2 py-1 transition-colors"
               >
                 <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-primary/20 shrink-0">
                   {profile?.avatar_url ? (
