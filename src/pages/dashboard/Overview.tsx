@@ -231,7 +231,7 @@ const DashboardOverview = () => {
               <Globe className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.domains}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.domains}</p>
           <Link to="/domain-pricing" className="mt-3 flex items-center gap-1 text-xs text-blue-600 font-semibold hover:underline">
             <span>+</span> {bn ? "ডোমেইন কিনুন" : "Buy Domain"}
           </Link>
