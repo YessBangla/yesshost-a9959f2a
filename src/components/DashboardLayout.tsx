@@ -1,20 +1,21 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
-  UserCircle, LogOut, ChevronLeft, Menu, Shield, ShoppingBag,
-  Search, ChevronRight, Home, Settings, Bell
+  UserCircle, LogOut, Menu, Shield, ShoppingBag,
+  ChevronRight, Home, PanelLeftClose, PanelLeft,
+  CreditCard, Settings
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
 import { supabase } from "@/integrations/supabase/client";
 import logoWhite from "@/assets/logo-white.png";
 import NotificationBell from "@/components/NotificationBell";
-import { Link } from "react-router-dom";
 
 const breadcrumbMap: Record<string, { en: string; bn: string }> = {
-  "/dashboard": { en: "Dashboard", bn: "ড্যাশবোর্ড" },
+  "/dashboard": { en: "Overview", bn: "ওভারভিউ" },
   "/dashboard/services": { en: "Services", bn: "সার্ভিস" },
   "/dashboard/orders": { en: "Orders", bn: "অর্ডার" },
   "/dashboard/billing": { en: "Billing", bn: "বিলিং" },
@@ -35,12 +36,11 @@ const DashboardLayout = () => {
   const bn = lang === "bn";
 
   useEffect(() => {
-    if (user) {
-      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
-    }
+    if (user) supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
   }, [user]);
 
-  // Close user menu on outside click
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
   useEffect(() => {
     if (!showUserMenu) return;
     const handle = () => setShowUserMenu(false);
@@ -51,83 +51,108 @@ const DashboardLayout = () => {
   const sidebarItems = [
     { title: tr("dash.overview"), url: "/dashboard", icon: LayoutDashboard },
     { title: tr("dash.services"), url: "/dashboard/services", icon: Server },
-    { title: bn ? "অর্ডার হিস্ট্রি" : "Orders", url: "/dashboard/orders", icon: ShoppingBag },
-    { title: tr("dash.billing"), url: "/dashboard/billing", icon: FileText },
+    { title: bn ? "অর্ডার" : "Orders", url: "/dashboard/orders", icon: ShoppingBag },
+    { title: tr("dash.billing"), url: "/dashboard/billing", icon: CreditCard },
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
+  ];
+
+  const bottomItems = [
     { title: tr("dash.profile"), url: "/dashboard/profile", icon: UserCircle },
   ];
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-  };
-
+  const handleSignOut = async () => { await signOut(); navigate("/"); };
   const currentBreadcrumb = breadcrumbMap[location.pathname];
 
-  const SidebarContent = () => (
+  const SidebarInner = () => (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        <Link to="/">
-          {!collapsed && <img src={logoWhite} alt="Yess Host" className="h-8" />}
-          {collapsed && <img src={logoWhite} alt="Yess Host" className="h-6 w-6 object-contain" />}
-        </Link>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground"
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <ChevronLeft className={`w-4 h-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
-        </button>
+      {/* Logo */}
+      <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
+        {!collapsed ? (
+          <Link to="/" className="flex items-center gap-2.5">
+            <img src={logoWhite} alt="Yess Host" className="h-7" />
+          </Link>
+        ) : (
+          <Link to="/" className="flex justify-center w-full">
+            <img src={logoWhite} alt="Yess Host" className="h-5 w-5 object-contain" />
+          </Link>
+        )}
       </div>
 
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {sidebarItems.map((item) => (
+      {/* Main Nav */}
+      <nav className="flex-1 overflow-y-auto py-4 px-2.5 no-scrollbar">
+        {!collapsed && (
+          <p className="px-3 mb-2 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em]">
+            {bn ? "মেনু" : "Menu"}
+          </p>
+        )}
+        <div className="space-y-0.5">
+          {sidebarItems.map((item) => (
+            <NavLink
+              key={item.url}
+              to={item.url}
+              end={item.url === "/dashboard"}
+              className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 ${collapsed ? "justify-center px-2" : ""}`}
+              activeClassName="!bg-primary/8 !text-primary font-semibold"
+            >
+              <item.icon className="w-[18px] h-[18px] shrink-0" />
+              {!collapsed && <span className="truncate">{item.title}</span>}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+
+      {/* Bottom Section */}
+      <div className="border-t border-border/40 p-2.5 space-y-0.5 shrink-0">
+        {bottomItems.map((item) => (
           <NavLink
             key={item.url}
             to={item.url}
-            end={item.url === "/dashboard"}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
-            activeClassName="bg-primary/10 text-primary font-semibold"
-            onClick={() => setMobileOpen(false)}
+            className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all ${collapsed ? "justify-center px-2" : ""}`}
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
           >
-            <item.icon className="w-5 h-5 shrink-0" />
+            <item.icon className="w-[17px] h-[17px] shrink-0" />
             {!collapsed && <span>{item.title}</span>}
           </NavLink>
         ))}
-      </nav>
 
-      <div className="p-3 border-t border-border space-y-1">
-        {!collapsed && (
-          <>
-            <div className="px-3 py-2 mb-1">
-              <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || "User"}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-            </div>
-            <button
-              onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/60 w-full transition-all"
-            >
-              <Globe className="w-5 h-5 shrink-0" />
-              {lang === "bn" ? "English" : "বাংলা"}
-            </button>
-            {isAdmin && (
-              <NavLink
-                to="/admin"
-                className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-amber-500 hover:bg-amber-500/10 w-full transition-all"
-                activeClassName=""
-              >
-                <Shield className="w-5 h-5 shrink-0" />
-                {tr("admin.panel")}
-              </NavLink>
-            )}
-          </>
+        {!collapsed && isAdmin && (
+          <NavLink
+            to="/admin"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-amber-600 hover:bg-amber-500/8 transition-all"
+            activeClassName=""
+          >
+            <Shield className="w-[17px] h-[17px] shrink-0" />
+            <span>{tr("admin.panel")}</span>
+          </NavLink>
         )}
+
+        {/* User Card */}
+        {!collapsed && (
+          <div className="mx-0.5 mt-2 p-3 rounded-xl bg-secondary/40 border border-border/30">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary/15 shrink-0">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+                    {(profile?.full_name || "U").charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-foreground truncate">{profile?.full_name || "User"}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{profile?.company_name || user?.email}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 w-full transition-all"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 w-full transition-all ${collapsed ? "justify-center px-2" : ""}`}
         >
-          <LogOut className="w-5 h-5 shrink-0" />
+          <LogOut className="w-[17px] h-[17px] shrink-0" />
           {!collapsed && <span>{tr("dash.signOut")}</span>}
         </button>
       </div>
@@ -137,112 +162,148 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:flex flex-col glass border-r border-border transition-all duration-300 sticky top-0 h-screen ${collapsed ? "w-16" : "w-64"}`}>
-        <SidebarContent />
+      <aside
+        className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-0 h-screen z-20 ${
+          collapsed ? "w-[60px]" : "w-[250px]"
+        }`}
+      >
+        <SidebarInner />
       </aside>
 
-      {/* Mobile Sidebar */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 glass border-r border-border z-50 shadow-2xl">
-            <SidebarContent />
-          </aside>
-        </div>
-      )}
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="absolute left-0 top-0 bottom-0 w-[260px] bg-card border-r border-border shadow-2xl"
+            >
+              <SidebarInner />
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Enhanced Header */}
-        <header className="h-14 flex items-center gap-3 px-4 border-b border-border glass sticky top-0 z-30">
-          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground" aria-label="Open menu">
+        {/* Header */}
+        <header className="h-14 flex items-center gap-2 px-4 lg:px-6 border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-30">
+          <button onClick={() => setMobileOpen(true)} className="lg:hidden p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground">
             <Menu className="w-5 h-5" />
           </button>
 
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="hidden lg:flex p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors"
+          >
+            {collapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </button>
+
           {/* Breadcrumb */}
-          <div className="hidden sm:flex items-center gap-1.5 text-sm">
+          <div className="hidden sm:flex items-center gap-1.5 text-xs ml-1">
             <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
               <Home className="w-3.5 h-3.5" />
             </Link>
             {currentBreadcrumb && location.pathname !== "/dashboard" && (
               <>
-                <ChevronRight className="w-3 h-3 text-muted-foreground/50" />
-                <span className="font-medium text-foreground text-xs">
-                  {bn ? currentBreadcrumb.bn : currentBreadcrumb.en}
-                </span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
+                <span className="font-medium text-foreground">{bn ? currentBreadcrumb.bn : currentBreadcrumb.en}</span>
               </>
             )}
           </div>
 
           <div className="flex-1" />
 
-          {/* Quick Actions */}
+          {/* Quick Links */}
           <Link
             to="/"
-            className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-secondary/60"
+            className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-secondary/50"
           >
             <Home className="w-3.5 h-3.5" />
-            {bn ? "সাইট" : "Site"}
+            {bn ? "সাইট" : "Website"}
           </Link>
 
           <NotificationBell />
 
-          {/* User Menu */}
+          {/* Language */}
+          <button
+            onClick={() => setLang(lang === "bn" ? "en" : "bn")}
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-secondary/60 transition-colors text-xs font-medium text-muted-foreground"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            {lang === "bn" ? "EN" : "বাং"}
+          </button>
+
+          {/* User */}
           <div className="relative">
             <button
               onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-              className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-secondary/60 transition-colors"
+              className="flex items-center gap-2 pl-2.5 ml-1 border-l border-border/40"
             >
-              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary/20">
+              <div className="hidden md:block text-right">
+                <p className="text-xs font-semibold text-foreground leading-none">{profile?.full_name || "User"}</p>
+                <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{profile?.company_name || (bn ? "ক্লায়েন্ট" : "Client")}</p>
+              </div>
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary/15">
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold">
                     {(profile?.full_name || "U").charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
-              <div className="hidden md:block text-left">
-                <p className="text-xs font-semibold text-foreground leading-tight truncate max-w-[120px]">{profile?.full_name || "User"}</p>
-                <p className="text-[10px] text-muted-foreground leading-tight truncate max-w-[120px]">{user?.email}</p>
-              </div>
             </button>
 
-            {showUserMenu && (
-              <div className="absolute right-0 top-full mt-2 w-56 glass-card-elevated rounded-xl p-2 shadow-xl border border-border z-50">
-                <div className="px-3 py-2 border-b border-border mb-1">
-                  <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1 font-mono">ID: {user?.id?.slice(0, 8).toUpperCase()}</p>
-                </div>
-                <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
-                  <UserCircle className="w-4 h-4" /> {bn ? "প্রোফাইল" : "Profile"}
-                </Link>
-                <Link to="/dashboard/billing" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
-                  <FileText className="w-4 h-4" /> {bn ? "বিলিং" : "Billing"}
-                </Link>
-                <button
-                  onClick={() => setLang(lang === "bn" ? "en" : "bn")}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors w-full"
+            <AnimatePresence>
+              {showUserMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-56 bg-card rounded-xl p-1.5 shadow-xl border border-border z-50"
                 >
-                  <Globe className="w-4 h-4" /> {lang === "bn" ? "English" : "বাংলা"}
-                </button>
-                {isAdmin && (
-                  <Link to="/admin" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-amber-500 hover:bg-amber-500/10 transition-colors">
-                    <Shield className="w-4 h-4" /> {bn ? "অ্যাডমিন" : "Admin"}
+                  <div className="px-3 py-2.5 border-b border-border/50 mb-1">
+                    <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  </div>
+                  <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
+                    <UserCircle className="w-4 h-4" /> {bn ? "প্রোফাইল" : "Profile"}
                   </Link>
-                )}
-                <div className="border-t border-border mt-1 pt-1">
-                  <button onClick={handleSignOut} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors w-full">
-                    <LogOut className="w-4 h-4" /> {tr("dash.signOut")}
+                  <Link to="/dashboard/billing" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
+                    <CreditCard className="w-4 h-4" /> {bn ? "বিলিং" : "Billing"}
+                  </Link>
+                  <button onClick={() => setLang(lang === "bn" ? "en" : "bn")} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors w-full">
+                    <Globe className="w-4 h-4" /> {lang === "bn" ? "English" : "বাংলা"}
                   </button>
-                </div>
-              </div>
-            )}
+                  {isAdmin && (
+                    <Link to="/admin" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-amber-600 hover:bg-amber-500/8 transition-colors">
+                      <Shield className="w-4 h-4" /> {bn ? "অ্যাডমিন" : "Admin"}
+                    </Link>
+                  )}
+                  <div className="border-t border-border/50 mt-1 pt-1">
+                    <button onClick={handleSignOut} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/8 transition-colors w-full">
+                      <LogOut className="w-4 h-4" /> {tr("dash.signOut")}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-auto bg-background">
           <Outlet />
         </main>
       </div>
