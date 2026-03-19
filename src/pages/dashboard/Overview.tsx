@@ -28,6 +28,7 @@ const DashboardOverview = () => {
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
   const [stats, setStats] = useState({ services: 0, invoices: 0, tickets: 0, domains: 0, activeServices: 0, totalSpent: 0, openTickets: 0 });
+  const [loading, setLoading] = useState(true);
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
   const [recentServices, setRecentServices] = useState<any[]>([]);
