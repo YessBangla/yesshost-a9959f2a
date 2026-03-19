@@ -52,7 +52,7 @@ const DurationDropdown = ({ selected, onChange, isBn }: { selected: BillingDurat
     <div className="relative mb-3">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-secondary/40 text-xs font-semibold text-foreground hover:border-primary/40 transition-all"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg border border-border bg-secondary/40 text-sm font-semibold text-foreground hover:border-primary/40 transition-all"
       >
         <span>{isBn ? selected.labelBn : selected.labelEn}</span>
         <div className="flex items-center gap-1.5">
