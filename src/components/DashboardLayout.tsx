@@ -466,7 +466,7 @@ const DashboardLayout = () => {
       <div className="flex-1 flex min-h-0">
         {/* Desktop Sidebar */}
         <aside
-          className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-11 h-[calc(100vh-2.75rem)] z-20 ${
+          className={`hidden lg:flex flex-col bg-card border-r border-border/50 transition-all duration-300 ease-out sticky top-12 h-[calc(100vh-3rem)] z-20 ${
             collapsed ? "w-[60px]" : "w-[250px]"
           }`}
         >
