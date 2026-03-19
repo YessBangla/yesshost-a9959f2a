@@ -157,14 +157,27 @@ const AdminUsers = () => {
   const handleSavePermissions = async () => {
     if (!editPermUser) return;
     setSavingPerms(true);
-    // Delete existing
+
+    // Update roles
+    const currentRoles = editPermUser.roles;
+    const rolesToAdd = editRoles.filter(r => !currentRoles.includes(r));
+    const rolesToRemove = currentRoles.filter(r => !editRoles.includes(r));
+
+    for (const role of rolesToRemove) {
+      const { data: roleData } = await supabase.from("user_roles").select("id").eq("user_id", editPermUser.user_id).eq("role", role as any).single();
+      if (roleData) await supabase.from("user_roles").delete().eq("id", roleData.id);
+    }
+    for (const role of rolesToAdd) {
+      await supabase.from("user_roles").insert({ user_id: editPermUser.user_id, role: role as any });
+    }
+
+    // Update permissions
     await supabase.from("user_permissions" as any).delete().eq("user_id", editPermUser.user_id);
-    // Insert new
     if (editPerms.length > 0) {
       const inserts = editPerms.map(p => ({ user_id: editPermUser.user_id, permission: p }));
       await supabase.from("user_permissions" as any).insert(inserts);
     }
-    toast({ title: isBn ? "পারমিশন আপডেট হয়েছে" : "Permissions updated" });
+    toast({ title: isBn ? "অ্যাক্সেস আপডেট হয়েছে" : "Access updated" });
     setSavingPerms(false);
     setEditPermUser(null);
     fetchUsers();
