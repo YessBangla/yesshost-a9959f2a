@@ -68,19 +68,19 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
       )}
 
       <div className="p-5 sm:p-6 flex flex-col flex-1">
-        <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-        {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
+        <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
+        {plan.subtitle && <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>}
 
         {/* Duration Selector */}
         <div className="relative mt-3">
           <button
             onClick={() => setDurationOpen(!durationOpen)}
-            className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-secondary/40 text-xs font-semibold text-foreground hover:border-primary/40 transition-all"
+            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg border border-border bg-secondary/40 text-sm font-semibold text-foreground hover:border-primary/40 transition-all"
           >
             <span>{durationLabel}</span>
             <div className="flex items-center gap-1.5">
               {duration.discount > 0 && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">-{duration.discount}%</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">-{duration.discount}%</span>
               )}
               <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${durationOpen ? "rotate-180" : ""}`} />
             </div>
@@ -98,14 +98,14 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
                   <button
                     key={d.key}
                     onClick={() => { setDuration(d); setDurationOpen(false); }}
-                    className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-all ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-all ${
                       duration.key === d.key ? "bg-primary/5 text-primary font-bold" : "text-foreground hover:bg-secondary/60"
                     }`}
                   >
                     <span>{isBn ? d.labelBn : d.labelEn}</span>
                     <div className="flex items-center gap-1.5">
                       {d.discount > 0 && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
                           {isBn ? `${toBengaliNum(d.discount)}%` : `${d.discount}%`}
                         </span>
                       )}
@@ -132,23 +132,23 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
               ৳{isBn ? toBengaliNum(totalPrice) : totalPrice.toLocaleString()}
             </motion.span>
           </AnimatePresence>
-          <span className="text-xs text-muted-foreground">/{durationLabel}</span>
+          <span className="text-sm text-muted-foreground">/{durationLabel}</span>
         </div>
 
         {duration.discount > 0 && (
-          <p className="text-[11px] text-primary font-medium mb-3 px-2.5 py-1 rounded-md bg-primary/5 inline-block w-fit">
+          <p className="text-xs text-primary font-medium mb-3 px-2.5 py-1 rounded-md bg-primary/5 inline-block w-fit">
             🎉 {isBn ? `${toBengaliNum(duration.discount)}% ছাড়!` : `${duration.discount}% off!`}
           </p>
         )}
         {duration.months > 1 && (
-          <p className="text-[10px] text-muted-foreground mb-3">
+          <p className="text-xs text-muted-foreground mb-3">
             ≈ ৳{isBn ? toBengaliNum(Math.round(totalPrice / duration.months)) : Math.round(totalPrice / duration.months).toLocaleString()}/{isBn ? "মাস" : "mo"}
           </p>
         )}
 
         <ul className="space-y-2 mb-6 flex-1">
           {features.map((f: string) => (
-            <li key={f} className="flex items-start gap-2 text-[13px] text-muted-foreground">
+            <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
               <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
               {f}
             </li>
@@ -209,13 +209,13 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
         <table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-border bg-secondary/40">
-              <th className="text-left px-5 py-3 text-xs font-semibold text-foreground uppercase tracking-wider">
+              <th className="text-left px-5 py-3.5 text-sm font-semibold text-foreground uppercase tracking-wider">
                 {isBn ? "ফিচার" : "Feature"}
               </th>
               {plans.map(p => (
-                <th key={p.id} className="text-center px-3 py-3">
-                  <span className={`text-xs font-bold ${p.is_highlighted ? "text-primary" : "text-foreground"}`}>{p.name}</span>
-                  <span className="block text-[10px] text-muted-foreground mt-0.5">৳{p.price_bdt}/{isBn ? "মাস" : "mo"}</span>
+                <th key={p.id} className="text-center px-3 py-3.5">
+                  <span className={`text-sm font-bold ${p.is_highlighted ? "text-primary" : "text-foreground"}`}>{p.name}</span>
+                  <span className="block text-xs text-muted-foreground mt-0.5">৳{p.price_bdt}/{isBn ? "মাস" : "mo"}</span>
                 </th>
               ))}
             </tr>
@@ -223,7 +223,7 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
           <tbody>
             {allFeatures.map((feature, idx) => (
               <tr key={feature} className={`border-b border-border/50 last:border-0 ${idx % 2 !== 0 ? "bg-secondary/20" : ""}`}>
-                <td className="px-5 py-3 text-[13px] text-muted-foreground">{feature}</td>
+                <td className="px-5 py-3.5 text-sm text-muted-foreground">{feature}</td>
                 {plans.map(p => {
                   const has = planHasFeature(p, feature);
                   return (
@@ -322,9 +322,9 @@ const ServiceDetail = () => {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-6 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> {isBn ? "হোমপেইজ" : "Home"}
+              <ArrowLeft className="w-4 h-4" /> {isBn ? "হোমপেইজ" : "Home"}
             </Link>
 
             <div className="flex justify-center mb-5">
@@ -338,7 +338,7 @@ const ServiceDetail = () => {
             </h1>
 
             {description && (
-              <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+              <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
                 {description}
               </p>
             )}
@@ -360,7 +360,7 @@ const ServiceDetail = () => {
                   <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center mx-auto mb-1.5">
                     <h.icon className="w-4 h-4 text-primary" />
                   </div>
-                  <span className="text-[11px] font-semibold text-foreground">{h.label}</span>
+                  <span className="text-xs font-semibold text-foreground">{h.label}</span>
                 </div>
               ))}
             </motion.div>
@@ -378,13 +378,13 @@ const ServiceDetail = () => {
             transition={{ duration: 0.4, ease }}
             className="text-center mb-10"
           >
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-primary/10 text-primary mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-3">
               {isBn ? "প্ল্যান বেছে নিন" : "Choose Your Plan"}
             </span>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-extrabold tracking-tight mb-2">
               {isBn ? "আপনার জন্য পারফেক্ট প্ল্যান" : "The Perfect Plan for You"}
             </h2>
-            <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto">
+              <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
               {isBn
                 ? "সকল প্ল্যানে ফ্রি SSL, ডেইলি ব্যাকআপ ও ২৪/৭ সাপোর্ট"
                 : "All plans include free SSL, daily backups & 24/7 support"}
@@ -472,8 +472,8 @@ const ServiceDetail = () => {
                 <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center mb-3">
                   <item.icon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-sm font-bold text-foreground mb-1.5">{isBn ? item.titleBn : item.titleEn}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{isBn ? item.descBn : item.descEn}</p>
+                <h3 className="text-base font-bold text-foreground mb-1.5">{isBn ? item.titleBn : item.titleEn}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{isBn ? item.descBn : item.descEn}</p>
               </motion.div>
             ))}
           </div>
@@ -491,13 +491,13 @@ const ServiceDetail = () => {
               transition={{ duration: 0.4, ease }}
               className="text-center mb-10"
             >
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-primary/10 text-primary mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-3">
                 FAQ
               </span>
               <h2 className="text-xl sm:text-2xl font-display font-extrabold tracking-tight mb-2">
                 {isBn ? "সচরাচর জিজ্ঞাসা" : "Frequently Asked Questions"}
               </h2>
-              <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto">
+              <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
                 {isBn ? `${title} সম্পর্কে সাধারণ প্রশ্নোত্তর` : `Common questions about ${title}`}
               </p>
             </motion.div>
@@ -516,7 +516,7 @@ const ServiceDetail = () => {
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary/30 transition-colors"
                   >
-                    <span className="text-sm font-semibold text-foreground pr-4">
+                    <span className="text-base font-semibold text-foreground pr-4">
                       {isBn ? faq.question_bn : faq.question_en}
                     </span>
                     <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-colors ${
@@ -531,7 +531,7 @@ const ServiceDetail = () => {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    <p className="px-4 pb-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    <p className="px-4 pb-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
                       {isBn ? faq.answer_bn : faq.answer_en}
                     </p>
                   </motion.div>
