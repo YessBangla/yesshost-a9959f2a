@@ -17,7 +17,9 @@ const PublicLayout = ({ children, hideFooter, showOfferBanner }: PublicLayoutPro
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       {showOfferBanner && <OfferBanner />}
       <Navbar />
-      {children}
+      <main id="main-content" role="main">
+        {children}
+      </main>
       {!hideFooter && <FooterSection />}
       <MobileBottomNav />
       <LiveChatWidget />
