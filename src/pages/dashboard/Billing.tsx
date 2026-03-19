@@ -72,6 +72,8 @@ const DashboardBilling = () => {
   const [selectedPayment, setSelectedPayment] = useState("");
   const [paying, setPaying] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("invoices");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
 
   const fetchInvoices = () => {
     if (!user) return;
