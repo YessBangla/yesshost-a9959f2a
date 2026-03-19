@@ -497,7 +497,7 @@ const ServiceDetail = () => {
               <h2 className="text-xl sm:text-2xl font-display font-extrabold tracking-tight mb-2">
                 {isBn ? "সচরাচর জিজ্ঞাসা" : "Frequently Asked Questions"}
               </h2>
-              <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto">
+              <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
                 {isBn ? `${title} সম্পর্কে সাধারণ প্রশ্নোত্তর` : `Common questions about ${title}`}
               </p>
             </motion.div>
