@@ -132,6 +132,7 @@ const DashboardBilling = () => {
 
   const paidInvoices = useMemo(() => {
     return paidInvoicesAll.filter(inv => {
+      if (filterMethod !== "all" && (inv.payment_method || "") !== filterMethod) return false;
       const paidDate = inv.paid_at ? new Date(inv.paid_at) : null;
       if (!paidDate) return true;
       if (dateFrom && paidDate < dateFrom) return false;
@@ -142,7 +143,7 @@ const DashboardBilling = () => {
       }
       return true;
     });
-  }, [paidInvoicesAll, dateFrom, dateTo]);
+  }, [paidInvoicesAll, dateFrom, dateTo, filterMethod]);
 
   if (loading) return <BillingSkeleton />;
 
