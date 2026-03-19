@@ -261,6 +261,7 @@ const t: Translations = {
   "auth.resetPassword": { bn: "পাসওয়ার্ড রিসেট", en: "Reset Password" },
   "auth.resetSubtitle": { bn: "আপনার ইমেইলে রিসেট লিংক পাঠানো হবে", en: "A reset link will be sent to your email" },
   "auth.sendResetLink": { bn: "রিসেট লিংক পাঠান", en: "Send Reset Link" },
+  "auth.backToHome": { bn: "হোমে ফিরে যান", en: "Back to Home" },
   "auth.sending": { bn: "পাঠানো হচ্ছে...", en: "Sending..." },
   "auth.emailSent": { bn: "ইমেইল পাঠানো হয়েছে!", en: "Email Sent!" },
   "auth.resetLinkSent": { bn: "এ পাসওয়ার্ড রিসেট লিংক পাঠানো হয়েছে।", en: "Password reset link has been sent to" },

@@ -68,7 +68,7 @@ const Login = () => {
         </p>
         <p className="text-center text-sm text-muted-foreground mt-4">
           <Link to="/" className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
-            <ArrowLeft className="w-4 h-4" />হোমে ফিরে যান
+            <ArrowLeft className="w-4 h-4" />{tr("auth.backToHome")}
           </Link>
         </p>
       </motion.div>
