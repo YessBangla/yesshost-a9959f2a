@@ -34,6 +34,7 @@ const PaymentCancel = lazy(() => import("./pages/PaymentResult").then(m => ({ de
 const DomainPricing = lazy(() => import("./pages/DomainPricing"));
 const HostingPlans = lazy(() => import("./pages/HostingPlans"));
 const ServiceDetail = lazy(() => import("./pages/services/ServiceDetail"));
+const ResellerHosting = lazy(() => import("./pages/ResellerHosting"));
 
 const About = lazy(() => import("./pages/company/About"));
 const Contact = lazy(() => import("./pages/company/Contact"));
