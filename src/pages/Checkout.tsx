@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Building2, CheckCircle2, AlertCircle, Loader2, Server, Palette, Tag, X, MessageSquare } from "lucide-react";
+import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Building2, CheckCircle2, AlertCircle, Loader2, Server, Palette, Tag, X, MessageSquare, Wallet } from "lucide-react";
 import { useCart, CartItem } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +15,7 @@ import nagadLogo from "@/assets/partners/nagad.svg";
 import sslLogo from "@/assets/partners/ssl-wireless.png";
 
 const paymentMethods = [
+  { id: "wallet", label: "Wallet Balance", labelBn: "ওয়ালেট ব্যালেন্স", icon: Wallet, desc: "Pay from your wallet balance", descBn: "ওয়ালেট ব্যালেন্স থেকে পে করুন", ready: true },
   { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", ready: true },
   { id: "bkash", label: "bKash", labelBn: "বিকাশ", logo: bkashLogo, desc: "bKash Tokenized Payment", ready: false },
   { id: "nagad", label: "Nagad", labelBn: "নগদ", logo: nagadLogo, desc: "Nagad Digital Payment", ready: false },
@@ -61,6 +62,26 @@ const Checkout = () => {
   } | null>(null);
   const [couponError, setCouponError] = useState("");
   const [orderNote, setOrderNote] = useState("");
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletLoading, setWalletLoading] = useState(false);
+
+  // Fetch wallet balance
+  useEffect(() => {
+    if (!user) return;
+    const fetchBalance = async () => {
+      const { data } = await supabase
+        .from("wallet_transactions")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "completed");
+      const balance = (data || []).reduce((sum, t) => {
+        const isCredit = t.type === "deposit" || t.type === "refund";
+        return isCredit ? sum + Number(t.amount_bdt) : sum - Number(t.amount_bdt);
+      }, 0);
+      setWalletBalance(balance);
+    };
+    fetchBalance();
+  }, [user]);
 
   const parseBdtPrice = (price: string): number => {
     const ascii = price.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
@@ -237,7 +258,23 @@ const Checkout = () => {
       // 6. Route to payment
       const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
-      if (selectedPayment === "sslcommerz") {
+      if (selectedPayment === "wallet") {
+        if (walletBalance < totalBdt) {
+          toast({ title: bn ? "অপর্যাপ্ত ব্যালেন্স" : "Insufficient Balance", description: bn ? `আপনার ওয়ালেটে ৳${walletBalance} আছে, প্রয়োজন ৳${totalBdt}` : `Wallet has ৳${walletBalance}, need ৳${totalBdt}`, variant: "destructive" });
+          setLoading(false);
+          return;
+        }
+        const { data, error } = await supabase.functions.invoke("wallet-pay-invoice", {
+          body: { invoice_id: invoiceData.id },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        setWalletBalance(data.new_balance);
+        setPlacedOrderNumber(orderNumber);
+        setOrderPlaced(true);
+        clearCart();
+        toast({ title: bn ? "পেমেন্ট সফল!" : "Payment Successful!", description: bn ? `ওয়ালেট থেকে ৳${totalBdt} কেটে নেওয়া হয়েছে` : `৳${totalBdt} paid from wallet` });
+        return;
+      } else if (selectedPayment === "sslcommerz") {
         const { data, error } = await supabase.functions.invoke("sslcommerz-init", {
           body: {
             invoice_id: invoiceData.id,
@@ -432,6 +469,12 @@ const Checkout = () => {
                         )}
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{method.desc}</p>
+                      {method.id === "wallet" && user && (
+                        <p className={`text-[11px] mt-0.5 font-semibold ${walletBalance >= totalBdt ? "text-primary" : "text-destructive"}`}>
+                          {bn ? `ব্যালেন্স: ৳${walletBalance}` : `Balance: ৳${walletBalance}`}
+                          {walletBalance < totalBdt && (` • ${bn ? "অপর্যাপ্ত" : "Insufficient"}`)}
+                        </p>
+                      )}
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedPayment === method.id ? "border-primary bg-primary" : "border-border"}`}>
                       {selectedPayment === method.id && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
