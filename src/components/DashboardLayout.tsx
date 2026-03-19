@@ -1,4 +1,5 @@
 import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
+import LiveChatWidget from "@/components/LiveChatWidget";
 import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
