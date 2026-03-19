@@ -4,7 +4,7 @@ import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import {
   FileText, Search, DollarSign, TrendingUp, AlertTriangle, Eye,
-  CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw, Pencil, X, Save, Plus
+  CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw, Pencil, X, Save, Plus, Trash2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,6 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import InvoiceReport from "@/components/InvoiceReport";
 import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
@@ -60,6 +65,8 @@ const AdminBilling = () => {
     due_date: "",
   });
   const [creating, setCreating] = useState(false);
+  const [deleteInvoice, setDeleteInvoice] = useState<InvoiceWithUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     const [inv, prof] = await Promise.all([
@@ -118,6 +125,20 @@ const AdminBilling = () => {
     } else {
       toast({ title: "✅", description: isBn ? `ইনভয়েস "${status}" এ আপডেট হয়েছে` : `Invoice updated to "${status}"` });
     }
+    fetchData();
+  };
+
+  const handleDelete = async () => {
+    if (!deleteInvoice) return;
+    setDeleting(true);
+    const { error } = await supabase.from("invoices").delete().eq("id", deleteInvoice.id);
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: isBn ? "ইনভয়েস ডিলিট হয়েছে" : "Invoice deleted successfully" });
+    }
+    setDeleteInvoice(null);
+    setDeleting(false);
     fetchData();
   };
 
@@ -297,6 +318,13 @@ const AdminBilling = () => {
                           title={isBn ? "এডিট করুন" : "Edit"}
                         >
                           <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteInvoice(inv)}
+                          className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                          title={isBn ? "ডিলিট করুন" : "Delete"}
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                         <select
                           value={inv.status}
@@ -514,6 +542,25 @@ const AdminBilling = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteInvoice} onOpenChange={() => setDeleteInvoice(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{isBn ? "ইনভয়েস ডিলিট করুন" : "Delete Invoice"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isBn
+                ? `আপনি কি "${deleteInvoice?.invoice_number}" ইনভয়েসটি ডিলিট করতে চান? এটি পূর্বাবস্থায় ফেরানো যাবে না।`
+                : `Are you sure you want to delete invoice "${deleteInvoice?.invoice_number}"? This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{isBn ? "বাতিল" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? (isBn ? "ডিলিট হচ্ছে..." : "Deleting...") : (isBn ? "ডিলিট করুন" : "Delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <InvoiceReport
         invoice={reportInvoice}
