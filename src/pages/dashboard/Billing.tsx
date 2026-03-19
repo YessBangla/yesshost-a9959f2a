@@ -59,7 +59,7 @@ const paymentMethods = [
   { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, desc: "Manual Bank Transfer", descBn: "ম্যানুয়াল ব্যাংক ট্রান্সফার", ready: true },
 ];
 
-type TabType = "invoices" | "history";
+type TabType = "invoices" | "history" | "chart";
 
 const DashboardBilling = () => {
   const { user } = useAuth();
