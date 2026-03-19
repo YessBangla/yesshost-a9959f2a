@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { HeadphonesIcon, Plus, Send } from "lucide-react";
+import { SupportSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
