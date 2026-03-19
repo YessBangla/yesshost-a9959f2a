@@ -1,13 +1,24 @@
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 2
 
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
 Allow: /
 
 User-agent: *
@@ -16,5 +27,14 @@ Disallow: /dashboard/
 Disallow: /admin/
 Disallow: /login
 Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /checkout
+Disallow: /payment/success
+Disallow: /payment/fail
+Disallow: /payment/cancel
 
 Sitemap: https://yesshost.lovable.app/sitemap.xml
+
+# Host
+Host: https://yesshost.lovable.app

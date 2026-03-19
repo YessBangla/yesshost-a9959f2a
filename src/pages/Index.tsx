@@ -16,16 +16,43 @@ const Index = () => {
   return (
     <PublicLayout showOfferBanner>
       <SEOHead
-        title="Yess Host — Super Hosting Solution | Cloud Hosting Bangladesh"
-        description="Yess Host - Yes, It's a Super Hosting Solution! Enterprise-grade cloud hosting, VPS, domains and SSL certificates with 99.99% uptime in Bangladesh. Starting from ৳99/mo."
+        title="Yess Host — বাংলাদেশের সেরা ওয়েব হোস্টিং | Best Web Hosting Bangladesh"
+        description="ইয়েস হোস্ট (Yess Host) — বাংলাদেশের সেরা ওয়েব হোস্টিং, ডোমেইন রেজিস্ট্রেশন, VPS সার্ভার, SSL সার্টিফিকেট ও ক্লাউড হোস্টিং প্রোভাইডার। ৯৯.৯৯% আপটাইম গ্যারান্টি, NVMe SSD স্টোরেজ, ফ্রি SSL। মাত্র ৳৯৯/মাস থেকে শুরু। 24/7 বাংলা সাপোর্ট।"
         canonical="/"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          "name": "Yess Host - Super Hosting Solution",
-          "description": "Enterprise-grade cloud hosting, VPS, domains and SSL certificates with 99.99% uptime.",
-          "provider": { "@type": "Organization", "name": "Yess Host" },
-        }}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Yess Host — বাংলাদেশের সেরা ওয়েব হোস্টিং",
+            "description": "বাংলাদেশের ১ নম্বর হোস্টিং প্রোভাইডার। ক্লাউড হোস্টিং, VPS, ডোমেইন ও SSL সার্টিফিকেট ৯৯.৯৯% আপটাইমে।",
+            "provider": { "@type": "Organization", "name": "Yess Host" },
+            "inLanguage": ["bn", "en"],
+            "isPartOf": { "@type": "WebSite", "url": "https://yesshost.lovable.app" },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": "ওয়েব হোস্টিং — Web Hosting Bangladesh",
+            "description": "বাংলাদেশের সবচেয়ে দ্রুত ও নির্ভরযোগ্য ওয়েব হোস্টিং। NVMe SSD, LiteSpeed সার্ভার, ফ্রি SSL সার্টিফিকেট।",
+            "brand": { "@type": "Brand", "name": "Yess Host" },
+            "offers": {
+              "@type": "AggregateOffer",
+              "lowPrice": "99",
+              "highPrice": "4999",
+              "priceCurrency": "BDT",
+              "offerCount": "12",
+              "availability": "https://schema.org/InStock",
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.8",
+              "reviewCount": "500",
+              "bestRating": "5",
+              "worstRating": "1",
+            },
+          },
+        ]}
+        keywords="ইয়েস হোস্ট, ইয়েস হোষ্ট, Yess Host, YessHost, বাংলাদেশ হোস্টিং, best web hosting bangladesh, সেরা ওয়েব হোস্টিং, ডোমেইন কিনুন, domain buy bd, bd domain buy, cheap hosting bd, সস্তা হোস্টিং বাংলাদেশ, domain registration bangladesh, VPS server bd, SSL certificate, cloud hosting, BDIX hosting, রিসেলার হোস্টিং, dedicated server, email hosting, whois, হোস্টিং মূল্য তালিকা, hosting price bangladesh, NVMe SSD hosting, LiteSpeed hosting, cPanel hosting bd, best domain reseller bangladesh, ওয়েবসাইট তৈরি, website hosting bangladesh"
       />
       <HeroSection />
       <DomainSearch />
