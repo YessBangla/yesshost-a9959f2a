@@ -317,45 +317,62 @@ const DashboardLayout = () => {
                       setActiveTopMenu(activeTopMenu === item.label ? null : item.label);
                     }
                   }}
-                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all hover:bg-primary/10 hover:text-primary rounded ${
+                  className={`flex items-center gap-1.5 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all rounded-md ${
                     location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
                       ? "bg-primary/10 font-semibold text-primary"
-                      : "text-foreground/80"
+                      : "text-foreground/75 hover:text-foreground hover:bg-muted/60"
                   }`}
                 >
+                  <item.icon className="w-4 h-4" />
                   {item.label}
-                  {item.hasDropdown && <ChevronDown className="w-3 h-3 opacity-60" />}
+                  {item.hasDropdown && (
+                    <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeTopMenu === item.label ? "rotate-180" : ""}`} />
+                  )}
                 </Link>
 
                 {/* Dropdown */}
                 <AnimatePresence>
                   {item.hasDropdown && activeTopMenu === item.label && item.children && (
                     <motion.div
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 4 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute top-full right-0 pt-1 z-50"
+                      initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute top-full right-0 pt-1.5 z-50"
                     >
-                      <div className="glass-card py-1 min-w-[200px]">
-                        {item.children.map((child) => {
+                      <div className="bg-card rounded-xl shadow-lg border border-border/60 py-1.5 min-w-[230px] overflow-hidden">
+                        {/* Dropdown header */}
+                        <div className="px-4 py-2 border-b border-border/40 mb-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                            {item.label}
+                          </p>
+                        </div>
+                        {item.children.map((child, idx) => {
                           const Icon = child.icon;
+                          const isActive = location.pathname === child.href;
                           return (
                             <Link
                               key={child.label}
                               to={child.href}
-                              className={`flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium hover:bg-muted/60 transition-colors ${
-                                location.pathname === child.href ? "text-primary bg-primary/5" : "text-foreground"
+                              className={`group flex items-center gap-3 mx-1.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 ${
+                                isActive 
+                                  ? "text-primary bg-primary/8" 
+                                  : "text-foreground/80 hover:text-foreground hover:bg-muted/50"
                               }`}
                               onClick={() => setActiveTopMenu(null)}
                             >
-                              <Icon className="w-4 h-4 opacity-60" />
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                                isActive ? "bg-primary/15 text-primary" : "bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                              }`}>
+                                <Icon className="w-4 h-4" />
+                              </div>
                               <span className="flex-1">{child.label}</span>
                               {child.badge !== undefined && child.badge > 0 && (
-                                <span className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center">
+                                <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center shadow-sm">
                                   {child.badge}
                                 </span>
                               )}
+                              <ChevronRight className={`w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-all ${isActive ? "text-primary/40" : ""}`} />
                             </Link>
                           );
                         })}
