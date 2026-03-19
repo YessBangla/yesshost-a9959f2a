@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import {
   FileText, Search, DollarSign, TrendingUp, AlertTriangle, Eye,
-  CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw
+  CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw, Pencil, X, Save
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import InvoiceReport from "@/components/InvoiceReport";
 import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
@@ -35,6 +37,16 @@ const AdminBilling = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [reportInvoice, setReportInvoice] = useState<InvoiceWithUser | null>(null);
+  const [editInvoice, setEditInvoice] = useState<InvoiceWithUser | null>(null);
+  const [editForm, setEditForm] = useState({
+    invoice_number: "",
+    description: "",
+    amount_bdt: "",
+    status: "unpaid" as string,
+    payment_method: "",
+    due_date: "",
+  });
+  const [saving, setSaving] = useState(false);
 
   const fetchData = async () => {
     const [inv, prof] = await Promise.all([
@@ -60,6 +72,43 @@ const AdminBilling = () => {
     } else {
       toast({ title: "✅", description: isBn ? `ইনভয়েস "${status}" এ আপডেট হয়েছে` : `Invoice updated to "${status}"` });
     }
+    fetchData();
+  };
+
+  const openEdit = (inv: InvoiceWithUser) => {
+    setEditInvoice(inv);
+    setEditForm({
+      invoice_number: inv.invoice_number,
+      description: inv.description || "",
+      amount_bdt: String(inv.amount_bdt),
+      status: inv.status,
+      payment_method: inv.payment_method || "",
+      due_date: inv.due_date ? inv.due_date.split("T")[0] : "",
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editInvoice) return;
+    setSaving(true);
+    const update: any = {
+      invoice_number: editForm.invoice_number,
+      description: editForm.description || null,
+      amount_bdt: Number(editForm.amount_bdt),
+      status: editForm.status,
+      payment_method: editForm.payment_method || null,
+      due_date: editForm.due_date ? new Date(editForm.due_date).toISOString() : null,
+    };
+    if (editForm.status === "paid" && editInvoice.status !== "paid") {
+      update.paid_at = new Date().toISOString();
+    }
+    const { error } = await supabase.from("invoices").update(update).eq("id", editInvoice.id);
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: isBn ? "ইনভয়েস আপডেট হয়েছে" : "Invoice updated successfully" });
+      setEditInvoice(null);
+    }
+    setSaving(false);
     fetchData();
   };
 
@@ -189,6 +238,13 @@ const AdminBilling = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
+                        <button
+                          onClick={() => openEdit(inv)}
+                          className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors"
+                          title={isBn ? "এডিট করুন" : "Edit"}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
                         <select
                           value={inv.status}
                           onChange={e => updateStatus(inv.id, e.target.value)}
@@ -219,6 +275,84 @@ const AdminBilling = () => {
           </p>
         </div>
       </div>
+
+      {/* Edit Invoice Dialog */}
+      <Dialog open={!!editInvoice} onOpenChange={() => setEditInvoice(null)}>
+        <DialogContent className="max-w-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-foreground">{isBn ? "ইনভয়েস এডিট করুন" : "Edit Invoice"}</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "ইনভয়েস নম্বর" : "Invoice Number"}</label>
+              <input
+                value={editForm.invoice_number}
+                onChange={e => setEditForm({ ...editForm, invoice_number: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "বিবরণ" : "Description"}</label>
+              <input
+                value={editForm.description}
+                onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                placeholder={isBn ? "সার্ভিসের বিবরণ" : "Service description"}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "পরিমাণ (৳)" : "Amount (৳)"}</label>
+                <input
+                  type="number"
+                  value={editForm.amount_bdt}
+                  onChange={e => setEditForm({ ...editForm, amount_bdt: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "স্ট্যাটাস" : "Status"}</label>
+                <select
+                  value={editForm.status}
+                  onChange={e => setEditForm({ ...editForm, status: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  {invoiceStatuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "পেমেন্ট মেথড" : "Payment Method"}</label>
+                <input
+                  value={editForm.payment_method}
+                  onChange={e => setEditForm({ ...editForm, payment_method: e.target.value })}
+                  placeholder="bKash, Nagad, Bank..."
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "ডিউ তারিখ" : "Due Date"}</label>
+                <input
+                  type="date"
+                  value={editForm.due_date}
+                  onChange={e => setEditForm({ ...editForm, due_date: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button onClick={handleSaveEdit} disabled={saving} className="flex-1 gap-2">
+                <Save className="w-4 h-4" />
+                {saving ? (isBn ? "সেভ হচ্ছে..." : "Saving...") : (isBn ? "সেভ করুন" : "Save Changes")}
+              </Button>
+              <Button variant="outline" onClick={() => setEditInvoice(null)}>
+                {isBn ? "বাতিল" : "Cancel"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <InvoiceReport
         invoice={reportInvoice}
