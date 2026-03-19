@@ -290,7 +290,7 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* ===== TOP MENUBAR ===== */}
-      <div className="w-full bg-card text-foreground sticky top-0 z-40 border-b border-border shadow-sm">
+      <div className="w-full bg-primary text-primary-foreground sticky top-0 z-40 shadow-md">
         <div className="flex items-center justify-between h-12 px-3 sm:px-4 lg:px-6 max-w-full">
           {/* Left: Logo + Menu Items */}
           <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
