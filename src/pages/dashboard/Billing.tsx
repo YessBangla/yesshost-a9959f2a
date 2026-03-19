@@ -335,6 +335,18 @@ const DashboardBilling = () => {
                 {paidInvoices.length}/{paidInvoicesAll.length} {isBn ? "টি ফলাফল" : "results"}
               </span>
             )}
+            {/* Download PDF */}
+            {paidInvoices.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5 ml-auto"
+                onClick={() => downloadHistoryPdf()}
+              >
+                <Download className="w-3.5 h-3.5" />
+                {isBn ? "PDF ডাউনলোড" : "Download PDF"}
+              </Button>
+            )}
           </div>
 
           {paidInvoices.length === 0 ? (
