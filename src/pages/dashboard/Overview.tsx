@@ -4,7 +4,7 @@ import { OverviewSkeleton } from "@/components/DashboardSkeleton";
 import {
   Server, FileText, HeadphonesIcon, Globe, AlertCircle,
   Bell, Clock, TrendingUp, Zap, ChevronRight, CreditCard, Activity,
-  Sun, Moon, CloudSun, Sunrise, Copy, RefreshCw, ShoppingBag,
+  Copy, RefreshCw, ShoppingBag,
   CheckCircle2, Calendar, MapPin, Mail, User, LogIn, Wallet,
   AlertTriangle, ChevronDown, ChevronUp
 } from "lucide-react";
@@ -14,10 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { formatAmount } from "@/lib/formatPrice";
 import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
 const DashboardOverview = () => {
   const { user, profile } = useAuth();
@@ -35,7 +32,6 @@ const DashboardOverview = () => {
   const [expiringDomains, setExpiringDomains] = useState<any[]>([]);
   const [clientActivitiesOpen, setClientActivitiesOpen] = useState(true);
 
-  // Support PIN (random 6-digit tied to user id)
   const supportPin = useMemo(() => {
     if (!user?.id) return "000000";
     let hash = 0;
@@ -89,7 +85,6 @@ const DashboardOverview = () => {
         walletBalance,
       });
 
-      // Expiring services (within 30 days)
       const { data: allServices } = await supabase
         .from("services").select("*").eq("user_id", user.id)
         .neq("service_type", "domain").eq("status", "active");
@@ -99,7 +94,6 @@ const DashboardOverview = () => {
         s.expiry_date && new Date(s.expiry_date) <= in30 && new Date(s.expiry_date) >= now
       ));
 
-      // Expiring domains
       const { data: allDomains } = await supabase
         .from("services").select("*").eq("user_id", user.id)
         .eq("service_type", "domain").eq("status", "active");
@@ -115,7 +109,6 @@ const DashboardOverview = () => {
     };
     fetchData();
 
-    // Realtime wallet balance updates
     const walletChannel = supabase
       .channel('overview-wallet')
       .on(
@@ -166,9 +159,140 @@ const DashboardOverview = () => {
   if (loading) return <OverviewSkeleton />;
 
   return (
-    <div className="space-y-5">
-      {/* Top Row: Welcome + Support PIN */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5">
+      {/* ===== LEFT SIDEBAR ===== */}
+      <div className="space-y-4 order-2 lg:order-1">
+        {/* Support PIN Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="rounded-xl border border-border bg-card overflow-hidden"
+        >
+          <div className="bg-primary px-4 py-2.5">
+            <div className="flex items-center gap-2">
+              <HeadphonesIcon className="w-4 h-4 text-primary-foreground" />
+              <span className="text-sm font-bold text-primary-foreground">
+                {bn ? "সাপোর্ট পিন" : "Support PIN"}
+              </span>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                {bn ? "আইডেন্টিটি পিন" : "IDENTITY PIN"}
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                {bn ? "সক্রিয়" : "Active"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-extrabold text-foreground tracking-wider tabular-nums">
+                {supportPin}
+              </span>
+              <button onClick={() => {
+                const newPin = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
+                toast.success(bn ? "পিন রিফ্রেশ হয়েছে" : "PIN refreshed");
+              }} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Refresh">
+                <RefreshCw className="w-4 h-4" />
+              </button>
+              <button onClick={copyPin} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Copy">
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Client Activities */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="rounded-xl border border-border bg-card overflow-hidden"
+        >
+          <button
+            onClick={() => setClientActivitiesOpen(!clientActivitiesOpen)}
+            className="w-full bg-primary px-4 py-2.5 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-primary-foreground" />
+              <span className="text-sm font-bold text-primary-foreground">
+                {bn ? "ক্লায়েন্ট তথ্য" : "Client Activities"}
+              </span>
+            </div>
+            {clientActivitiesOpen ? (
+              <ChevronUp className="w-4 h-4 text-primary-foreground" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-primary-foreground" />
+            )}
+          </button>
+          {clientActivitiesOpen && (
+            <div className="p-4 space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{bn ? "স্ট্যাটাস" : "Status"}</span>
+                <span className="text-emerald-600 font-semibold">{bn ? "সক্রিয়" : "Active"}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{bn ? "নিবন্ধন" : "Registered"}</span>
+                <span className="text-foreground font-medium">
+                  {user?.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{bn ? "ক্লায়েন্ট" : "Client for"}</span>
+                <span className="text-foreground font-medium">{clientFor || "—"}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{bn ? "আইপি এড্রেস" : "IP Address"}</span>
+                <span className="text-foreground font-medium text-xs">—</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{bn ? "ইমেইল যাচাই" : "Email Verified"}</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold">
+                  {bn ? "যাচাইকৃত" : "Verified"}
+                </span>
+              </div>
+
+              {/* Last Login */}
+              <div className="mt-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold text-center">
+                <LogIn className="w-3.5 h-3.5 inline mr-1.5" />
+                {bn ? "শেষ লগইন:" : "Last Login:"} {user?.last_sign_in_at
+                  ? format(new Date(user.last_sign_in_at), "dd MMM yyyy, hh:mm a")
+                  : "—"}
+              </div>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          className="rounded-xl border border-border bg-card p-4 space-y-1"
+        >
+          {[
+            { to: "/hosting-plans", icon: ShoppingBag, label: bn ? "নতুন সার্ভিস অর্ডার" : "Order New Services" },
+            { to: "/domain-pricing", icon: Globe, label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain" },
+            { to: "/dashboard/wallet", icon: Wallet, label: bn ? "ফান্ড যোগ করুন" : "Add Fund" },
+            { to: "/dashboard/support", icon: HeadphonesIcon, label: bn ? "সাপোর্ট টিকেট" : "Support Ticket" },
+          ].map((action) => (
+            <Link
+              key={action.to}
+              to={action.to}
+              className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-secondary/60 transition-colors group"
+            >
+              <action.icon className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-sm font-medium text-foreground">{action.label}</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Link>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* ===== RIGHT MAIN CONTENT ===== */}
+      <div className="space-y-5 order-1 lg:order-2">
         {/* Welcome */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -185,221 +309,86 @@ const DashboardOverview = () => {
           <div className="h-1 w-16 bg-primary rounded-full mt-3" />
         </motion.div>
 
-        {/* Support PIN Card */}
+        {/* Stat Cards */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
-          className="rounded-xl border border-border bg-card overflow-hidden"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
         >
-          <div className="bg-primary px-4 py-2.5">
-            <div className="flex items-center gap-2">
-              <HeadphonesIcon className="w-4 h-4 text-primary-foreground" />
-              <span className="text-sm font-bold text-primary-foreground">
-                {bn ? "সাপোর্ট পিন" : "Support PIN"}
-              </span>
+          {/* Active Services */}
+          <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-primary">{bn ? "সক্রিয় সার্ভিস" : "Active Services"}</span>
+              <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                <Server className="w-5 h-5 text-emerald-600" />
+              </div>
             </div>
+            <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.activeServices}</p>
+            <Link to="/hosting-plans" className="mt-3 flex items-center gap-1 text-xs text-emerald-600 font-semibold hover:underline">
+              <span>+</span> {bn ? "নতুন সার্ভিস অর্ডার" : "Order New Service"}
+            </Link>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500 rounded-b-xl" />
           </div>
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-                {bn ? "আইডেন্টিটি পিন" : "IDENTITY PIN"}
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/10 text-success font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-success" />
-                {bn ? "সক্রিয়" : "Active"}
-              </span>
+
+          {/* Total Domains */}
+          <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-primary">{bn ? "মোট ডোমেইন" : "Total Domains"}</span>
+              <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-blue-600" />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold text-foreground tracking-wider tabular-nums">
-                {supportPin}
-              </span>
-              <button onClick={copyPin} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Copy">
-                <Copy className="w-4 h-4" />
-              </button>
+            <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.domains}</p>
+            <Link to="/domain-pricing" className="mt-3 flex items-center gap-1 text-xs text-blue-600 font-semibold hover:underline">
+              <span>+</span> {bn ? "ডোমেইন কিনুন" : "Buy Domain"}
+            </Link>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-b-xl" />
+          </div>
+
+          {/* Unpaid Invoices */}
+          <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-primary">{bn ? "বকেয়া ইনভয়েস" : "Unpaid Invoices"}</span>
+              <div className="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-red-600" />
+              </div>
             </div>
+            <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.unpaidCount}</p>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-[10px] text-destructive font-medium">
+                {bn ? "ওভারডিউ:" : "Overdue:"} ৳{formatAmount(stats.overdueTotal, lang)}
+              </p>
+              <p className="text-[10px] text-amber-600 font-medium">
+                {bn ? "বকেয়া:" : "Unpaid:"} ৳{formatAmount(stats.unpaidTotal, lang)}
+              </p>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-500 rounded-b-xl" />
+          </div>
+
+          {/* Active Tickets */}
+          <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-primary">{bn ? "ওপেন টিকেট" : "Active Tickets"}</span>
+              <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+                <HeadphonesIcon className="w-5 h-5 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.openTickets}</p>
+            <Link to="/dashboard/support" className="mt-3 flex items-center gap-1 text-xs text-purple-600 font-semibold hover:underline">
+              <span>+</span> {bn ? "টিকেট খুলুন" : "Open Ticket"}
+            </Link>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-purple-500 rounded-b-xl" />
           </div>
         </motion.div>
-      </div>
 
-      {/* Stat Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: 0.4 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
-      >
-        {/* Active Services */}
-        <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-primary">{bn ? "সক্রিয় সার্ভিস" : "Active Services"}</span>
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
-              <Server className="w-5 h-5 text-emerald-600" />
-            </div>
-          </div>
-          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.activeServices}</p>
-          <Link to="/hosting-plans" className="mt-3 flex items-center gap-1 text-xs text-emerald-600 font-semibold hover:underline">
-            <span>+</span> {bn ? "নতুন সার্ভিস অর্ডার" : "Order New Service"}
-          </Link>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500 rounded-b-xl" />
-        </div>
-
-        {/* Total Domains */}
-        <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-primary">{bn ? "মোট ডোমেইন" : "Total Domains"}</span>
-            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-              <Globe className="w-5 h-5 text-blue-600" />
-            </div>
-          </div>
-          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.domains}</p>
-          <Link to="/domain-pricing" className="mt-3 flex items-center gap-1 text-xs text-blue-600 font-semibold hover:underline">
-            <span>+</span> {bn ? "ডোমেইন কিনুন" : "Buy Domain"}
-          </Link>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-b-xl" />
-        </div>
-
-        {/* Unpaid Invoices */}
-        <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-primary">{bn ? "বকেয়া ইনভয়েস" : "Unpaid Invoices"}</span>
-            <div className="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-red-600" />
-            </div>
-          </div>
-          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.unpaidCount}</p>
-          <div className="mt-1 space-y-0.5">
-            <p className="text-[10px] text-destructive font-medium">
-              {bn ? "ওভারডিউ:" : "Overdue:"} ৳{formatAmount(stats.overdueTotal, lang)}
-            </p>
-            <p className="text-[10px] text-warning font-medium">
-              {bn ? "বকেয়া:" : "Unpaid:"} ৳{formatAmount(stats.unpaidTotal, lang)}
-            </p>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-500 rounded-b-xl" />
-        </div>
-
-        {/* Active Tickets */}
-        <div className="rounded-xl border border-border bg-card p-4 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-primary">{bn ? "ওপেন টিকেট" : "Active Tickets"}</span>
-            <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
-              <HeadphonesIcon className="w-5 h-5 text-purple-600" />
-            </div>
-          </div>
-          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.openTickets}</p>
-          <Link to="/dashboard/support" className="mt-3 flex items-center gap-1 text-xs text-purple-600 font-semibold hover:underline">
-            <span>+</span> {bn ? "টিকেট খুলুন" : "Open Ticket"}
-          </Link>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-purple-500 rounded-b-xl" />
-        </div>
-      </motion.div>
-
-      {/* Middle Section: Client Activities + Expiring sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5">
-        {/* Left Column: Client Activities + Quick Actions */}
-        <div className="space-y-4">
-          {/* Client Activities */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            className="rounded-xl border border-border bg-card overflow-hidden"
-          >
-            <button
-              onClick={() => setClientActivitiesOpen(!clientActivitiesOpen)}
-              className="w-full bg-primary px-4 py-2.5 flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-primary-foreground" />
-                <span className="text-sm font-bold text-primary-foreground">
-                  {bn ? "ক্লায়েন্ট তথ্য" : "Client Activities"}
-                </span>
-              </div>
-              {clientActivitiesOpen ? (
-                <ChevronUp className="w-4 h-4 text-primary-foreground" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-primary-foreground" />
-              )}
-            </button>
-            {clientActivitiesOpen && (
-              <div className="p-4 space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{bn ? "স্ট্যাটাস" : "Status"}</span>
-                  <span className="text-success font-semibold">{bn ? "সক্রিয়" : "Active"}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{bn ? "নিবন্ধন" : "Registered"}</span>
-                  <span className="text-foreground font-medium">
-                    {user?.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : "—"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{bn ? "ক্লায়েন্ট" : "Client for"}</span>
-                  <span className="text-foreground font-medium">{clientFor || "—"}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{bn ? "ইমেইল যাচাই" : "Email Verified"}</span>
-                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-success/10 text-success font-semibold">
-                    {bn ? "যাচাইকৃত" : "Verified"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{bn ? "ওয়ালেট" : "Wallet"}</span>
-                  <span className="text-foreground font-bold">৳{formatAmount(stats.walletBalance, lang)}</span>
-                </div>
-                <Link
-                  to="/dashboard/wallet"
-                  className="mt-1 flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors"
-                >
-                  <Wallet className="w-3.5 h-3.5" />
-                  {bn ? "ফান্ড যোগ করুন" : "Add Fund"}
-                </Link>
-
-                {/* Last Login */}
-                <div className="mt-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold text-center">
-                  <LogIn className="w-3.5 h-3.5 inline mr-1.5" />
-                  {bn ? "শেষ লগইন:" : "Last Login:"} {user?.last_sign_in_at
-                    ? format(new Date(user.last_sign_in_at), "dd MMM yyyy, hh:mm a")
-                    : "—"}
-                </div>
-              </div>
-            )}
-          </motion.div>
-
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.4 }}
-            className="rounded-xl border border-border bg-card p-4 space-y-1"
-          >
-            {[
-              { to: "/hosting-plans", icon: ShoppingBag, label: bn ? "নতুন সার্ভিস অর্ডার" : "Order New Services" },
-              { to: "/domain-pricing", icon: Globe, label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain" },
-              { to: "/dashboard/wallet", icon: Wallet, label: bn ? "ফান্ড যোগ করুন" : "Add Fund" },
-              { to: "/dashboard/support", icon: HeadphonesIcon, label: bn ? "সাপোর্ট টিকেট" : "Support Ticket" },
-            ].map((action) => (
-              <Link
-                key={action.to}
-                to={action.to}
-                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-secondary/60 transition-colors group"
-              >
-                <action.icon className="w-4 h-4 text-primary shrink-0" />
-                <span className="text-sm font-medium text-foreground">{action.label}</span>
-                <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-              </Link>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Right Column: Expiring Services + Domains */}
+        {/* Expiring Services + Domains */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Services Expiring Soon */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.4 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
             className="rounded-xl border border-border bg-card overflow-hidden"
           >
             <div className="px-4 py-3 border-b border-border flex items-center justify-between">
@@ -436,7 +425,7 @@ const DashboardOverview = () => {
                             {format(new Date(s.expiry_date), "dd/MM/yyyy")}
                           </p>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-                            days <= 7 ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"
+                            days <= 7 ? "bg-destructive/10 text-destructive" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                           }`}>
                             {days} {bn ? "দিন" : "days"}
                           </span>
@@ -453,7 +442,7 @@ const DashboardOverview = () => {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
             className="rounded-xl border border-border bg-card overflow-hidden"
           >
             <div className="px-4 py-3 border-b border-border flex items-center justify-between">
@@ -489,7 +478,7 @@ const DashboardOverview = () => {
                             {format(new Date(d.expiry_date), "dd/MM/yyyy")}
                           </p>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-                            days <= 7 ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"
+                            days <= 7 ? "bg-destructive/10 text-destructive" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                           }`}>
                             {days} {bn ? "দিন" : "days"}
                           </span>
@@ -502,44 +491,44 @@ const DashboardOverview = () => {
             </div>
           </motion.div>
         </div>
-      </div>
 
-      {/* Notifications */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35, duration: 0.4 }}
-        className="rounded-xl border border-border bg-card p-5"
-      >
-        <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-          <Bell className="w-4 h-4 text-primary" />
-          {bn ? "সাম্প্রতিক নোটিফিকেশন" : "Recent Notifications"}
-        </h3>
-        {recentNotifications.length === 0 ? (
-          <div className="text-center py-8">
-            <Bell className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">{bn ? "কোনো নোটিফিকেশন নেই" : "No notifications yet"}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {recentNotifications.map((n: any) => {
-              const icon = n.type === "payment_success" ? "✅" : n.type === "payment_failed" ? "❌" : "📢";
-              return (
-                <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${!n.is_read ? "bg-primary/5 border border-primary/10" : "bg-secondary/30"}`}>
-                  <span className="text-base mt-0.5">{icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-foreground leading-tight">{n.title}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{n.message}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-1 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {ago(n.created_at)}
-                    </p>
+        {/* Notifications */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="rounded-xl border border-border bg-card p-5"
+        >
+          <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+            <Bell className="w-4 h-4 text-primary" />
+            {bn ? "সাম্প্রতিক নোটিফিকেশন" : "Recent Notifications"}
+          </h3>
+          {recentNotifications.length === 0 ? (
+            <div className="text-center py-8">
+              <Bell className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">{bn ? "কোনো নোটিফিকেশন নেই" : "No notifications yet"}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {recentNotifications.map((n: any) => {
+                const icon = n.type === "payment_success" ? "✅" : n.type === "payment_failed" ? "❌" : "📢";
+                return (
+                  <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${!n.is_read ? "bg-primary/5 border border-primary/10" : "bg-secondary/30"}`}>
+                    <span className="text-base mt-0.5">{icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground leading-tight">{n.title}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{n.message}</p>
+                      <p className="text-[10px] text-muted-foreground/60 mt-1 flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {ago(n.created_at)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 };
