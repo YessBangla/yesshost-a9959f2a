@@ -282,7 +282,7 @@ const PricingSection = () => {
 
                   <ul className="space-y-2 mb-6">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <div className="w-4 h-4 rounded-full bg-primary/8 flex items-center justify-center shrink-0">
                           <Check className="w-2.5 h-2.5 text-primary" />
                         </div>
