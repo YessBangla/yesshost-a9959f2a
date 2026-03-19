@@ -315,9 +315,6 @@ const DashboardLayout = () => {
                 onMouseEnter={() => item.hasDropdown && setActiveTopMenu(item.label)}
                 onMouseLeave={() => setActiveTopMenu(null)}
               >
-                {index > 0 && (
-                  <span className="text-border mx-0 hidden sm:inline-block">|</span>
-                )}
                 <Link
                   to={item.href}
                   onClick={(e) => {
@@ -326,10 +323,10 @@ const DashboardLayout = () => {
                       setActiveTopMenu(activeTopMenu === item.label ? null : item.label);
                     }
                   }}
-                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-all hover:text-primary ${
+                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all hover:bg-white/15 rounded ${
                     location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
-                      ? "text-primary font-semibold"
-                      : "text-muted-foreground"
+                      ? "bg-white/15 font-semibold text-primary-foreground"
+                      : "text-primary-foreground/90"
                   }`}
                 >
                   {item.label}
