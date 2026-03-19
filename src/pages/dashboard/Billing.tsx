@@ -262,6 +262,30 @@ const DashboardBilling = () => {
         </div>
       </div>
 
+      {/* Due Soon Alert */}
+      {(() => {
+        const dueSoon = invoices.filter(i => {
+          if (i.status !== "unpaid" && i.status !== "overdue") return false;
+          if (!i.due_date) return false;
+          const diff = Math.ceil((new Date(i.due_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          return diff <= 3;
+        });
+        if (dueSoon.length === 0) return null;
+        return (
+          <div className="mb-5 p-3 rounded-xl border border-warning/30 bg-warning/5 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {isBn ? `${dueSoon.length}টি ইনভয়েস শীঘ্রই পরিশোধযোগ্য!` : `${dueSoon.length} invoice(s) due soon!`}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isBn ? "বিলম্ব ফি এড়াতে অনুগ্রহ করে এখনই পরিশোধ করুন" : "Please pay now to avoid late fees"}
+              </p>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Tabs */}
       <div className="flex gap-1 p-1 rounded-xl bg-secondary/40 border border-border/50 mb-5 w-fit">
         {tabs.map(tab => (
