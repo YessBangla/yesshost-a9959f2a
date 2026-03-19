@@ -38,6 +38,7 @@ import AdminLiveChat from "./pages/admin/LiveChat";
 import AdminChatRooms from "./pages/admin/ChatRooms";
 import AdminContactMessages from "./pages/admin/ContactMessages";
 import AdminKnowledgeBase from "./pages/admin/KnowledgeBase";
+import AdminWHM from "./pages/admin/WHM";
 import ServiceDetail from "./pages/services/ServiceDetail";
 import About from "./pages/company/About";
 import Contact from "./pages/company/Contact";
@@ -150,6 +151,7 @@ const App = () => (
               <Route path="chat-rooms" element={<AdminChatRooms />} />
               <Route path="contact-messages" element={<AdminContactMessages />} />
               <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
+              <Route path="whm" element={<AdminWHM />} />
             </Route>
             <Route
               path="/call-center"
