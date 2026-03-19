@@ -327,6 +327,13 @@ const DashboardOverview = () => {
                   <span className="text-muted-foreground">{bn ? "ওয়ালেট" : "Wallet"}</span>
                   <span className="text-foreground font-bold">৳{formatAmount(stats.walletBalance, lang)}</span>
                 </div>
+                <Link
+                  to="/dashboard/wallet"
+                  className="mt-1 flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors"
+                >
+                  <Wallet className="w-3.5 h-3.5" />
+                  {bn ? "ফান্ড যোগ করুন" : "Add Fund"}
+                </Link>
 
                 {/* Last Login */}
                 <div className="mt-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold text-center">
