@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ServicesSkeleton } from "@/components/DashboardSkeleton";
 import { Server, ExternalLink, Search, Filter, ChevronDown, ChevronUp, Clock, Globe, Cpu, HardDrive, Wifi, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";

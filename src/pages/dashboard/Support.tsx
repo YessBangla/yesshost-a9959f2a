@@ -138,12 +138,13 @@ const DashboardSupport = () => {
       </div>
 
       {tickets.length === 0 ? (
-        <div className="glass-card p-12 text-center">
-          <HeadphonesIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-foreground mb-2">{tr("dash.noTickets")}</h3>
-          <p className="text-sm text-muted-foreground mb-4">{tr("dash.noTicketsDesc")}</p>
-          <button onClick={() => setShowCreate(true)} className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold">{tr("dash.openTicket")}</button>
-        </div>
+        <EmptyState
+          icon={HeadphonesIcon}
+          title={tr("dash.noTickets")}
+          description={tr("dash.noTicketsDesc")}
+          actionLabel={tr("dash.openTicket")}
+          onAction={() => setShowCreate(true)}
+        />
       ) : (
         <div className="space-y-3">
           {tickets.map(ticket => (

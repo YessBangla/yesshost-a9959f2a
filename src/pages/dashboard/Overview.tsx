@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import { OverviewSkeleton } from "@/components/DashboardSkeleton";
 import {
   Server, FileText, HeadphonesIcon, Globe, ArrowUpRight, AlertCircle,
   Bell, Clock, TrendingUp, Zap, ChevronRight, CreditCard, Activity,

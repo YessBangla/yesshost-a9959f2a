@@ -57,11 +57,11 @@ const DashboardBilling = () => {
       </div>
 
       {invoices.length === 0 ? (
-        <div className="glass-card p-12 text-center">
-          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-foreground mb-2">{tr("dash.noInvoicesTitle")}</h3>
-          <p className="text-sm text-muted-foreground">{tr("dash.noInvoicesDesc")}</p>
-        </div>
+        <EmptyState
+          icon={FileText}
+          title={tr("dash.noInvoicesTitle")}
+          description={tr("dash.noInvoicesDesc")}
+        />
       ) : (
         <div className="glass-card overflow-hidden">
           <div className="overflow-x-auto">

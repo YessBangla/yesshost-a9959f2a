@@ -173,10 +173,13 @@ const OrdersPage = () => {
 
       {/* Orders list */}
       {orders.length === 0 ? (
-        <div className="glass-card rounded-xl p-12 text-center">
-          <ShoppingBag className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground">{bn ? "কোনো অর্ডার পাওয়া যায়নি" : "No orders found"}</p>
-        </div>
+        <EmptyState
+          icon={ShoppingBag}
+          title={bn ? "কোনো অর্ডার নেই" : "No Orders Yet"}
+          description={bn ? "আপনার প্রথম অর্ডার দিন এবং এখানে ট্র্যাক করুন" : "Place your first order and track it here"}
+          actionLabel={bn ? "প্ল্যান দেখুন" : "Browse Plans"}
+          actionTo="/#pricing"
+        />
       ) : (
         <div className="space-y-4">
           {orders.map((order, i) => {
