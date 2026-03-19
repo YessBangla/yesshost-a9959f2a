@@ -145,10 +145,9 @@ const AdminBilling = () => {
       status: editForm.status,
       payment_method: editForm.payment_method || null,
       due_date: editForm.due_date ? new Date(editForm.due_date).toISOString() : null,
+      user_id: editForm.user_id,
+      paid_at: editForm.paid_at ? new Date(editForm.paid_at).toISOString() : (editForm.status === "paid" && editInvoice.status !== "paid" ? new Date().toISOString() : null),
     };
-    if (editForm.status === "paid" && editInvoice.status !== "paid") {
-      update.paid_at = new Date().toISOString();
-    }
     const { error } = await supabase.from("invoices").update(update).eq("id", editInvoice.id);
     if (error) {
       toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
