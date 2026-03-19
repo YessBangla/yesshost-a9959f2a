@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X, Filter, Download } from "lucide-react";
+import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X, Filter, Download, Wallet } from "lucide-react";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,6 +55,7 @@ const paymentMethodLabels: Record<string, { bn: string; en: string }> = {
 };
 
 const paymentMethods = [
+  { id: "wallet", label: "Wallet", labelBn: "ওয়ালেট", icon: Wallet, desc: "Pay from your wallet balance", descBn: "ওয়ালেট ব্যালেন্স থেকে পে করুন", ready: true },
   { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", descBn: "ভিসা, মাস্টার, বিকাশ, নগদ, মোবাইল ব্যাংকিং", ready: true },
   { id: "bkash", label: "bKash", labelBn: "বিকাশ", logo: bkashLogo, desc: "bKash Tokenized Payment", descBn: "বিকাশ টোকেনাইজড পেমেন্ট", ready: false },
   { id: "nagad", label: "Nagad", labelBn: "নগদ", logo: nagadLogo, desc: "Nagad Digital Payment", descBn: "নগদ ডিজিটাল পেমেন্ট", ready: false },
@@ -78,16 +79,71 @@ const DashboardBilling = () => {
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [filterMethod, setFilterMethod] = useState<string>("all");
+  const [walletBalance, setWalletBalance] = useState(0);
+
+  const fetchWalletBalance = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("wallet_transactions").select("*")
+      .eq("user_id", user.id).eq("status", "completed");
+    const balance = (data || []).reduce((sum: number, t: any) => {
+      const isCredit = t.type === "deposit" || t.type === "refund";
+      return isCredit ? sum + Number(t.amount_bdt) : sum - Number(t.amount_bdt);
+    }, 0);
+    setWalletBalance(balance);
+  };
 
   const fetchInvoices = () => {
     if (!user) return;
     supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => { setInvoices(data || []); setLoading(false); });
   };
 
-  useEffect(() => { fetchInvoices(); }, [user]);
+  useEffect(() => { fetchInvoices(); fetchWalletBalance(); }, [user]);
 
   const handlePay = async () => {
     if (!payInvoice || !selectedPayment) return;
+
+    if (selectedPayment === "wallet") {
+      const amount = Number(payInvoice.amount_bdt);
+      if (walletBalance < amount) {
+        toast({
+          title: isBn ? "অপর্যাপ্ত ব্যালেন্স" : "Insufficient Balance",
+          description: isBn
+            ? `আপনার ওয়ালেটে ৳${formatAmount(walletBalance, lang)} আছে, কিন্তু ৳${formatAmount(amount, lang)} প্রয়োজন।`
+            : `Your wallet has ৳${formatAmount(walletBalance, lang)}, but ৳${formatAmount(amount, lang)} is required.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      setPaying(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("wallet-pay-invoice", {
+          body: { invoice_id: payInvoice.id },
+        });
+        if (error || !data?.success) {
+          toast({
+            title: isBn ? "ত্রুটি" : "Error",
+            description: data?.error || (isBn ? "পেমেন্ট ব্যর্থ হয়েছে" : "Payment failed"),
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: isBn ? "সফল!" : "Success!",
+            description: isBn
+              ? `৳${formatAmount(amount, lang)} ওয়ালেট থেকে পরিশোধ করা হয়েছে`
+              : `৳${formatAmount(amount, lang)} paid from wallet`,
+          });
+          setPayInvoice(null);
+          setSelectedPayment("");
+          fetchInvoices();
+          fetchWalletBalance();
+        }
+      } catch {
+        toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট প্রসেসিং এ সমস্যা" : "Payment processing error", variant: "destructive" });
+      }
+      setPaying(false);
+      return;
+    }
 
     if (selectedPayment === "bank") {
       toast({
@@ -635,6 +691,29 @@ const DashboardBilling = () => {
                   );
                 })}
               </div>
+
+              {/* Wallet balance indicator */}
+              {selectedPayment === "wallet" && (
+                <div className={`mt-2 p-3 rounded-lg border ${
+                  walletBalance >= Number(payInvoice?.amount_bdt || 0)
+                    ? "border-success/30 bg-success/5"
+                    : "border-destructive/30 bg-destructive/5"
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">{isBn ? "ওয়ালেট ব্যালেন্স" : "Wallet Balance"}</span>
+                    <span className={`text-sm font-bold ${
+                      walletBalance >= Number(payInvoice?.amount_bdt || 0) ? "text-success" : "text-destructive"
+                    }`}>
+                      ৳{formatAmount(walletBalance, lang)}
+                    </span>
+                  </div>
+                  {walletBalance < Number(payInvoice?.amount_bdt || 0) && (
+                    <p className="text-[10px] text-destructive mt-1">
+                      {isBn ? "অপর্যাপ্ত ব্যালেন্স। অনুগ্রহ করে প্রথমে ফান্ড যোগ করুন।" : "Insufficient balance. Please add funds first."}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2 pt-1">
