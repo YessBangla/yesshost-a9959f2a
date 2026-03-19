@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { FileText, Eye } from "lucide-react";
+import { BillingSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
