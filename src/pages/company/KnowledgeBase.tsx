@@ -104,10 +104,10 @@ const KnowledgeBase = () => {
                   <ul className="space-y-2">
                     {cat.articles.map((a: any, j: number) => (
                       <li key={j}>
-                        <a href="#" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors py-1.5">
+                        <Link to={`/knowledge-base/${toSlug(a.en)}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors py-1.5">
                           <HelpCircle className="w-4 h-4 shrink-0" />
                           {bn ? a.bn : a.en}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>

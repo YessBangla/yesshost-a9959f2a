@@ -87,6 +87,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/knowledge-base" element={<KnowledgeBase />} />
+            <Route path="/knowledge-base/:slug" element={<KnowledgeBaseArticle />} />
             <Route path="/affiliate" element={<Affiliate />} />
 
             {/* Theme pages */}
