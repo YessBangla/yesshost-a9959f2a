@@ -9,6 +9,8 @@ import { CartProvider } from "@/contexts/CartContext";
 import CartDrawer from "@/components/CartDrawer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
+import CallCenterRoute from "@/components/CallCenterRoute";
+import CallCenterLayout from "@/components/CallCenterLayout";
 import DashboardLayout from "@/components/DashboardLayout";
 import AdminLayout from "@/components/AdminLayout";
 import Index from "./pages/Index";
