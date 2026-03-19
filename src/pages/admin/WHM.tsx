@@ -46,13 +46,19 @@ const AdminWHM = () => {
   const [selectedPkg, setSelectedPkg] = useState<ResellerPkg | null>(null);
   const [showAssign, setShowAssign] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [assignForm, setAssignForm] = useState({
     user_id: "", package_name: "Reseller Package",
     max_accounts: 25, max_disk_mb: 50000, max_bandwidth_mb: 500000,
     whm_server_host: "", whm_username: "",
   });
+  const [editForm, setEditForm] = useState({
+    id: "", package_name: "", max_accounts: 25, max_disk_mb: 50000, max_bandwidth_mb: 500000,
+    whm_server_host: "", whm_username: "",
+  });
   const [assigning, setAssigning] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   // Stats
   const [stats, setStats] = useState({
