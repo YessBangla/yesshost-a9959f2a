@@ -2,9 +2,11 @@ import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
   LogOut, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
-  Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown, Share2
+  Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown, Share2,
+  UserCircle, Package, Receipt, TicketCheck, Loader2
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
