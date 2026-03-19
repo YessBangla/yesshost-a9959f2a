@@ -531,7 +531,7 @@ const ServiceDetail = () => {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    <p className="px-4 pb-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    <p className="px-4 pb-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
                       {isBn ? faq.answer_bn : faq.answer_en}
                     </p>
                   </motion.div>
