@@ -3,8 +3,8 @@ import { Helmet } from "react-helmet-async";
 // =============================================
 // 🔧 আপনার ট্র্যাকিং আইডি এখানে বসান:
 // =============================================
-const GA_MEASUREMENT_ID = "G-XXXXXXXXXX"; // Google Analytics 4 Measurement ID
-const FB_PIXEL_ID = "000000000000000";     // Facebook Pixel ID
+const GA_MEASUREMENT_ID = "G-XXXXXXX"; // Google Analytics 4 Measurement ID
+const FB_PIXEL_ID = "XXXXXXX";           // Facebook Pixel ID
 // =============================================
 
 const isEnabled = (id: string, placeholder: string) => id && id !== placeholder;
