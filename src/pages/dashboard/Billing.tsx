@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X, Filter } from "lucide-react";
+import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X, Filter, Download } from "lucide-react";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
