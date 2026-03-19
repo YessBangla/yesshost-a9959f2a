@@ -100,7 +100,7 @@ const AdminUsers = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: isBn ? "মোট ইউজার" : "Total Users", value: stats.total, color: "text-primary" },
           { label: isBn ? "অ্যাডমিন" : "Admins", value: stats.admins, color: "text-destructive" },
