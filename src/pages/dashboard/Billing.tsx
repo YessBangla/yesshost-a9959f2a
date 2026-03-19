@@ -202,13 +202,6 @@ const DashboardBilling = () => {
 
     doc.save(`payment-history-${format(new Date(), "yyyy-MM-dd")}.pdf`);
   };
-
-  if (loading) return <BillingSkeleton />;
-
-  const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
-  const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
-  const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
-
   const monthlyData = useMemo(() => {
     const map = new Map<string, number>();
     const now = new Date();
