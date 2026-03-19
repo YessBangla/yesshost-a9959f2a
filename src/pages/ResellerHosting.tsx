@@ -72,7 +72,7 @@ const ResellerHosting = () => {
 
   const handleAddToCart = (plan: Plan) => {
     const price = calcDurationPrice(plan.price_bdt, plan.annual_price_bdt, duration);
-    addItem({ id: `hosting-${plan.id}-${duration.key}`, name: plan.name, type: "hosting", price, billing_cycle: duration.key, plan_id: plan.slug, hosting_category: "reseller" });
+    addItem({ id: `hosting-${plan.id}-${duration.key}`, name: plan.name, type: "hosting", price_bdt: String(price), billing_cycle: duration.key, plan_id: plan.slug, category: "reseller" });
   };
 
   return (
