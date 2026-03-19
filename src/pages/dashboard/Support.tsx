@@ -13,7 +13,7 @@ const priorityColors: Record<string, string> = { low: "bg-muted text-muted-foreg
 
 const DashboardSupport = () => {
   const { user } = useAuth();
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
   const { toast } = useToast();
   const [tickets, setTickets] = useState<Tables<"support_tickets">[]>([]);
   const [replies, setReplies] = useState<Tables<"ticket_replies">[]>([]);
