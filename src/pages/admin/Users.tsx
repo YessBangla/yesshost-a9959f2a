@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users as UsersIcon, Search, Shield, ShieldOff, Eye, X,
-  Mail, Phone, MapPin, Building2, Calendar, Globe, Filter, Headphones
+  Mail, Phone, MapPin, Building2, Calendar, Globe, Filter, Headphones,
+  UserPlus, Check, Lock
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,7 +13,40 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import type { Tables } from "@/integrations/supabase/types";
 
-type UserWithRoles = Tables<"profiles"> & { roles: string[]; services_count?: number; invoices_total?: number };
+type UserWithRoles = Tables<"profiles"> & { roles: string[]; permissions: string[]; services_count?: number; invoices_total?: number };
+
+// Permission definitions
+const ALL_PERMISSIONS = [
+  { key: "orders.view", labelBn: "অর্ডার দেখা", labelEn: "View Orders", group: "orders" },
+  { key: "orders.approve", labelBn: "অর্ডার এপ্রুভ/রিজেক্ট", labelEn: "Approve/Reject Orders", group: "orders" },
+  { key: "services.view", labelBn: "সার্ভিস দেখা", labelEn: "View Services", group: "services" },
+  { key: "services.manage", labelBn: "সার্ভিস ম্যানেজ", labelEn: "Manage Services", group: "services" },
+  { key: "billing.view", labelBn: "বিলিং দেখা", labelEn: "View Billing", group: "billing" },
+  { key: "billing.manage", labelBn: "বিলিং ম্যানেজ", labelEn: "Manage Billing", group: "billing" },
+  { key: "chat.view", labelBn: "লাইভ চ্যাট দেখা", labelEn: "View Live Chat", group: "chat" },
+  { key: "chat.reply", labelBn: "চ্যাটে উত্তর দেওয়া", labelEn: "Reply to Chat", group: "chat" },
+  { key: "tickets.view", labelBn: "সাপোর্ট টিকেট দেখা", labelEn: "View Support Tickets", group: "tickets" },
+  { key: "tickets.reply", labelBn: "টিকেটে উত্তর দেওয়া", labelEn: "Reply to Tickets", group: "tickets" },
+  { key: "users.view", labelBn: "ইউজার দেখা", labelEn: "View Users", group: "users" },
+  { key: "themes.view", labelBn: "থিম দেখা", labelEn: "View Themes", group: "themes" },
+  { key: "themes.manage", labelBn: "থিম ম্যানেজ", labelEn: "Manage Themes", group: "themes" },
+  { key: "cms.manage", labelBn: "CMS ম্যানেজ", labelEn: "Manage CMS", group: "cms" },
+  { key: "kb.manage", labelBn: "নলেজ বেস ম্যানেজ", labelEn: "Manage Knowledge Base", group: "kb" },
+  { key: "coupons.manage", labelBn: "কুপন ম্যানেজ", labelEn: "Manage Coupons", group: "coupons" },
+];
+
+const PERMISSION_GROUPS = [
+  { key: "orders", labelBn: "অর্ডার", labelEn: "Orders" },
+  { key: "services", labelBn: "সার্ভিস", labelEn: "Services" },
+  { key: "billing", labelBn: "বিলিং", labelEn: "Billing" },
+  { key: "chat", labelBn: "লাইভ চ্যাট", labelEn: "Live Chat" },
+  { key: "tickets", labelBn: "সাপোর্ট টিকেট", labelEn: "Support Tickets" },
+  { key: "users", labelBn: "ইউজার", labelEn: "Users" },
+  { key: "themes", labelBn: "থিম", labelEn: "Themes" },
+  { key: "cms", labelBn: "CMS", labelEn: "CMS" },
+  { key: "kb", labelBn: "নলেজ বেস", labelEn: "Knowledge Base" },
+  { key: "coupons", labelBn: "কুপন", labelEn: "Coupons" },
+];
 
 const AdminUsers = () => {
   const { lang } = useLanguage();
@@ -24,17 +58,33 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
 
+  // Create user dialog
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    email: "", password: "", full_name: "", phone: "",
+    roles: ["user"] as string[],
+    permissions: [] as string[],
+  });
+  const [creating, setCreating] = useState(false);
+
+  // Edit permissions dialog
+  const [editPermUser, setEditPermUser] = useState<UserWithRoles | null>(null);
+  const [editPerms, setEditPerms] = useState<string[]>([]);
+  const [savingPerms, setSavingPerms] = useState(false);
+
   const fetchUsers = async () => {
-    const [profiles, roles, services, invoices] = await Promise.all([
+    const [profiles, roles, services, invoices, perms] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
       supabase.from("services").select("user_id, id"),
       supabase.from("invoices").select("user_id, amount_bdt, status"),
+      supabase.from("user_permissions" as any).select("*"),
     ]);
 
     const usersWithRoles: UserWithRoles[] = (profiles.data || []).map(p => ({
       ...p,
       roles: (roles.data || []).filter(r => r.user_id === p.user_id).map(r => r.role),
+      permissions: ((perms.data || []) as any[]).filter((pm: any) => pm.user_id === p.user_id).map((pm: any) => pm.permission),
       services_count: (services.data || []).filter(s => s.user_id === p.user_id).length,
       invoices_total: (invoices.data || []).filter(i => i.user_id === p.user_id && i.status === "paid").reduce((sum, i) => sum + Number(i.amount_bdt), 0),
     }));
@@ -66,6 +116,77 @@ const AdminUsers = () => {
     fetchUsers();
   };
 
+  // Create user
+  const handleCreateUser = async () => {
+    if (!createForm.email || !createForm.password) {
+      toast({ title: isBn ? "ইমেইল ও পাসওয়ার্ড দিন" : "Email and password required", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-create-user", {
+        body: {
+          email: createForm.email,
+          password: createForm.password,
+          full_name: createForm.full_name,
+          phone: createForm.phone,
+          roles: createForm.roles,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      // Save permissions
+      if (createForm.permissions.length > 0 && data?.user_id) {
+        const permInserts = createForm.permissions.map(p => ({ user_id: data.user_id, permission: p }));
+        await supabase.from("user_permissions" as any).insert(permInserts);
+      }
+
+      toast({ title: isBn ? "ইউজার তৈরি হয়েছে!" : "User created!" });
+      setShowCreate(false);
+      setCreateForm({ email: "", password: "", full_name: "", phone: "", roles: ["user"], permissions: [] });
+      fetchUsers();
+    } catch (err: any) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: err.message, variant: "destructive" });
+    }
+    setCreating(false);
+  };
+
+  // Save permissions for existing user
+  const handleSavePermissions = async () => {
+    if (!editPermUser) return;
+    setSavingPerms(true);
+    // Delete existing
+    await supabase.from("user_permissions" as any).delete().eq("user_id", editPermUser.user_id);
+    // Insert new
+    if (editPerms.length > 0) {
+      const inserts = editPerms.map(p => ({ user_id: editPermUser.user_id, permission: p }));
+      await supabase.from("user_permissions" as any).insert(inserts);
+    }
+    toast({ title: isBn ? "পারমিশন আপডেট হয়েছে" : "Permissions updated" });
+    setSavingPerms(false);
+    setEditPermUser(null);
+    fetchUsers();
+  };
+
+  const togglePermission = (perm: string, perms: string[], setPerms: (p: string[]) => void) => {
+    setPerms(perms.includes(perm) ? perms.filter(p => p !== perm) : [...perms, perm]);
+  };
+
+  const toggleRole = (role: string) => {
+    setCreateForm(prev => ({
+      ...prev,
+      roles: prev.roles.includes(role) ? prev.roles.filter(r => r !== role) : [...prev.roles, role],
+    }));
+  };
+
+  const selectAllPerms = (perms: string[], setPerms: (p: string[]) => void) => {
+    setPerms(ALL_PERMISSIONS.map(p => p.key));
+  };
+  const deselectAllPerms = (perms: string[], setPerms: (p: string[]) => void) => {
+    setPerms([]);
+  };
+
   const filtered = users.filter(u => {
     const matchSearch = !search ||
       (u.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -91,12 +212,61 @@ const AdminUsers = () => {
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
+  // Permission checklist component
+  const PermissionChecklist = ({ perms, setPerms }: { perms: string[]; setPerms: (p: string[]) => void }) => (
+    <div className="space-y-3">
+      <div className="flex gap-2 mb-2">
+        <button type="button" onClick={() => selectAllPerms(perms, setPerms)} className="text-[11px] text-primary hover:underline">
+          {isBn ? "সব সিলেক্ট" : "Select All"}
+        </button>
+        <span className="text-muted-foreground">•</span>
+        <button type="button" onClick={() => deselectAllPerms(perms, setPerms)} className="text-[11px] text-muted-foreground hover:underline">
+          {isBn ? "সব আনসিলেক্ট" : "Deselect All"}
+        </button>
+      </div>
+      {PERMISSION_GROUPS.map(group => {
+        const groupPerms = ALL_PERMISSIONS.filter(p => p.group === group.key);
+        return (
+          <div key={group.key} className="rounded-xl bg-secondary/20 p-3">
+            <p className="text-xs font-semibold text-foreground mb-2">{isBn ? group.labelBn : group.labelEn}</p>
+            <div className="space-y-1.5">
+              {groupPerms.map(p => (
+                <label key={p.key} className="flex items-center gap-2.5 cursor-pointer group">
+                  <div
+                    onClick={() => togglePermission(p.key, perms, setPerms)}
+                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                      perms.includes(p.key)
+                        ? "bg-primary border-primary"
+                        : "border-border group-hover:border-primary/50"
+                    }`}
+                  >
+                    {perms.includes(p.key) && <Check className="w-3 h-3 text-primary-foreground" />}
+                  </div>
+                  <span className="text-sm text-foreground">{isBn ? p.labelBn : p.labelEn}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{isBn ? "ইউজার ম্যানেজমেন্ট" : "User Management"}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ক্লায়েন্ট ও অ্যাডমিন পরিচালনা করুন" : "Manage all clients and administrators"}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{isBn ? "ইউজার ম্যানেজমেন্ট" : "User Management"}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ক্লায়েন্ট ও অ্যাডমিন পরিচালনা করুন" : "Manage all clients and administrators"}</p>
+        </div>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+        >
+          <UserPlus className="w-4 h-4" />
+          {isBn ? "ইউজার তৈরি" : "Create User"}
+        </button>
       </div>
 
       {/* Stats */}
@@ -180,9 +350,12 @@ const AdminUsers = () => {
                     <td className="px-4 py-3.5">
                       <div className="flex gap-1 flex-wrap">
                         {isAdmin && <Badge variant="destructive" className="text-[10px]">Admin</Badge>}
-                        {u.roles.includes("call_center") && <Badge className="text-[10px] bg-blue-500/10 text-blue-500 border-0">CC</Badge>}
+                        {u.roles.includes("call_center") && <Badge className="text-[10px] bg-accent/15 text-accent-foreground border-0">CC</Badge>}
                         {u.roles.includes("moderator") && <Badge variant="outline" className="text-[10px]">Mod</Badge>}
                         {!isAdmin && !u.roles.includes("call_center") && <Badge variant="secondary" className="text-[10px]">User</Badge>}
+                        {u.permissions.length > 0 && (
+                          <Badge variant="outline" className="text-[10px]">{u.permissions.length} {isBn ? "পারমিশন" : "perms"}</Badge>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
@@ -195,6 +368,13 @@ const AdminUsers = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => { setEditPermUser(u); setEditPerms([...u.permissions]); }}
+                          className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors"
+                          title={isBn ? "পারমিশন সম্পাদনা" : "Edit Permissions"}
+                        >
+                          <Lock className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => toggleAdminRole(u.user_id, isAdmin)}
                           className={`p-2 rounded-lg transition-colors ${isAdmin ? "hover:bg-destructive/10 text-destructive" : "hover:bg-secondary/60 text-muted-foreground"}`}
                           title={isAdmin ? (isBn ? "অ্যাডমিন সরান" : "Remove Admin") : (isBn ? "অ্যাডমিন করুন" : "Make Admin")}
@@ -203,7 +383,7 @@ const AdminUsers = () => {
                         </button>
                         <button
                           onClick={() => toggleCallCenterRole(u.user_id, u.roles.includes("call_center"))}
-                          className={`p-2 rounded-lg transition-colors ${u.roles.includes("call_center") ? "hover:bg-blue-500/10 text-blue-500" : "hover:bg-secondary/60 text-muted-foreground"}`}
+                          className={`p-2 rounded-lg transition-colors ${u.roles.includes("call_center") ? "hover:bg-primary/10 text-primary" : "hover:bg-secondary/60 text-muted-foreground"}`}
                           title={u.roles.includes("call_center") ? (isBn ? "কল সেন্টার সরান" : "Remove Call Center") : (isBn ? "কল সেন্টার করুন" : "Make Call Center")}
                         >
                           <Headphones className="w-4 h-4" />
@@ -219,7 +399,6 @@ const AdminUsers = () => {
             </tbody>
           </table>
         </div>
-        {/* Result count */}
         <div className="px-4 py-3 border-t border-border/30 bg-secondary/10">
           <p className="text-xs text-muted-foreground">
             {isBn ? `${filtered.length} জন ইউজার দেখাচ্ছে` : `Showing ${filtered.length} users`}
@@ -227,6 +406,112 @@ const AdminUsers = () => {
           </p>
         </div>
       </div>
+
+      {/* Create User Dialog */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              {isBn ? "নতুন ইউজার তৈরি করুন" : "Create New User"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            {/* Basic info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "পূর্ণ নাম" : "Full Name"}</label>
+                <input value={createForm.full_name} onChange={e => setCreateForm(prev => ({ ...prev, full_name: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" placeholder={isBn ? "নাম লিখুন" : "Enter name"} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "ফোন" : "Phone"}</label>
+                <input value={createForm.phone} onChange={e => setCreateForm(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" placeholder="01XXXXXXXXX" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "ইমেইল" : "Email"} *</label>
+              <input type="email" value={createForm.email} onChange={e => setCreateForm(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" placeholder="user@example.com" required />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "পাসওয়ার্ড" : "Password"} *</label>
+              <input type="password" value={createForm.password} onChange={e => setCreateForm(prev => ({ ...prev, password: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" placeholder="••••••••" required />
+            </div>
+
+            {/* Role selection */}
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-2">{isBn ? "রোল নির্ধারণ" : "Assign Roles"}</label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: "user", label: isBn ? "ইউজার" : "User", color: "bg-secondary/60 text-foreground" },
+                  { key: "admin", label: isBn ? "অ্যাডমিন" : "Admin", color: "bg-destructive/10 text-destructive" },
+                  { key: "call_center", label: isBn ? "কল সেন্টার" : "Call Center", color: "bg-primary/10 text-primary" },
+                  { key: "moderator", label: isBn ? "মডারেটর" : "Moderator", color: "bg-accent/15 text-accent-foreground" },
+                ].map(r => (
+                  <button
+                    key={r.key}
+                    type="button"
+                    onClick={() => toggleRole(r.key)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                      createForm.roles.includes(r.key)
+                        ? `${r.color} border-current`
+                        : "bg-secondary/20 text-muted-foreground border-border/50 hover:border-primary/30"
+                    }`}
+                  >
+                    {createForm.roles.includes(r.key) && <Check className="w-3 h-3" />}
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Permissions checklist */}
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-2">{isBn ? "পারমিশন তালিকা" : "Permissions Checklist"}</label>
+              <PermissionChecklist perms={createForm.permissions} setPerms={(p) => setCreateForm(prev => ({ ...prev, permissions: p }))} />
+            </div>
+
+            {/* Submit */}
+            <button
+              onClick={handleCreateUser}
+              disabled={creating}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+            >
+              {creating ? <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <><UserPlus className="w-4 h-4" /> {isBn ? "ইউজার তৈরি করুন" : "Create User"}</>}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Permissions Dialog */}
+      <Dialog open={!!editPermUser} onOpenChange={() => setEditPermUser(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-primary" />
+              {isBn ? "পারমিশন সম্পাদনা" : "Edit Permissions"} — {editPermUser?.full_name || "User"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="flex gap-1.5 flex-wrap">
+              {editPermUser?.roles.map(r => (
+                <Badge key={r} variant={r === "admin" ? "destructive" : "secondary"} className="text-xs">{r}</Badge>
+              ))}
+            </div>
+            <PermissionChecklist perms={editPerms} setPerms={setEditPerms} />
+            <button
+              onClick={handleSavePermissions}
+              disabled={savingPerms}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+            >
+              {savingPerms ? <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <><Check className="w-4 h-4" /> {isBn ? "সংরক্ষণ করুন" : "Save Permissions"}</>}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* User Detail Dialog */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
@@ -236,7 +521,6 @@ const AdminUsers = () => {
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-5">
-              {/* User header */}
               <div className="flex items-center gap-4">
                 <div className={`w-14 h-14 rounded-2xl ${selectedUser.roles.includes("admin") ? "bg-destructive/15 text-destructive" : "bg-primary/10 text-primary"} flex items-center justify-center text-xl font-bold`}>
                   {(selectedUser.full_name || "U").charAt(0).toUpperCase()}
@@ -252,7 +536,19 @@ const AdminUsers = () => {
                 </div>
               </div>
 
-              {/* Stats */}
+              {/* Permissions */}
+              {selectedUser.permissions.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-foreground mb-2">{isBn ? "পারমিশনসমূহ" : "Permissions"}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedUser.permissions.map(p => {
+                      const pm = ALL_PERMISSIONS.find(ap => ap.key === p);
+                      return <Badge key={p} variant="outline" className="text-[10px]">{pm ? (isBn ? pm.labelBn : pm.labelEn) : p}</Badge>;
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-xl bg-secondary/30 p-3 text-center">
                   <p className="text-xl font-bold text-foreground">{selectedUser.services_count || 0}</p>
@@ -268,7 +564,6 @@ const AdminUsers = () => {
                 </div>
               </div>
 
-              {/* Details */}
               <div className="space-y-3">
                 {[
                   { icon: Phone, label: isBn ? "ফোন" : "Phone", value: selectedUser.phone },
