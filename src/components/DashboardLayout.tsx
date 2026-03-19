@@ -329,7 +329,7 @@ const DashboardLayout = () => {
               className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/15 transition-colors text-[12px] font-semibold whitespace-nowrap border border-primary-foreground/15"
             >
               <Wallet className="w-3.5 h-3.5" />
-              <span>TK {formatAmount(walletBalance)} BDT</span>
+              <span>TK {formatAmount(walletBalance, lang)} BDT</span>
             </Link>
 
             {/* Notification Bell */}
