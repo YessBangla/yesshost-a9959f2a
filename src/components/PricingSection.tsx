@@ -196,7 +196,7 @@ const PricingSection = () => {
 
           {/* Quick Duration Shortcuts */}
           <div className="flex items-center gap-2 justify-center flex-wrap">
-            <span className="text-[11px] text-muted-foreground">{isBn ? "মেয়াদ:" : "Duration:"}</span>
+            <span className="text-xs text-muted-foreground">{isBn ? "মেয়াদ:" : "Duration:"}</span>
             {quickDurations.map((d) => (
               <button
                 key={d.key}
