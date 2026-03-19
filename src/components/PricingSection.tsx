@@ -312,7 +312,7 @@ const PricingSection = () => {
                           });
                         }
                       }}
-                      className={`w-full py-2.5 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-xs ${
+                      className={`w-full py-2.5 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-sm ${
                         plan.highlighted
                           ? "gradient-primary text-primary-foreground shadow-sm shadow-primary/15 hover:opacity-90"
                           : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
