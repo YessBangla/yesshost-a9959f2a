@@ -196,17 +196,38 @@ const ResellerHosting = () => {
             </p>
 
             {/* Duration Selector */}
-            <div className="inline-flex items-center gap-1 p-1 bg-secondary/60 rounded-xl flex-wrap justify-center">
-              {BILLING_DURATIONS.map(d => (
-                <button key={d.key} onClick={() => setDuration(d)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    duration.key === d.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}>
-                  {bn ? d.labelBn : d.labelEn}
-                  {d.discount > 0 && <span className="ml-1 text-primary text-[9px]">-{d.discount}%</span>}
-                </button>
-              ))}
-            </div>
+            {(() => {
+              const mobileKeys = ["1m", "3m", "6m", "1y", "2y"];
+              const mobileDurations = BILLING_DURATIONS.filter(d => mobileKeys.includes(d.key));
+              return (
+                <>
+                  {/* Mobile: 5 popular options */}
+                  <div className="flex items-center gap-1 p-1 bg-secondary/60 rounded-xl sm:hidden overflow-x-auto scrollbar-hide">
+                    {mobileDurations.map(d => (
+                      <button key={d.key} onClick={() => setDuration(d)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
+                          duration.key === d.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                        }`}>
+                        {bn ? d.shortBn : d.shortEn}
+                        {d.discount > 0 && <span className="ml-0.5 text-primary text-[9px]">-{d.discount}%</span>}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Desktop: all options */}
+                  <div className="hidden sm:inline-flex items-center gap-1 p-1 bg-secondary/60 rounded-xl flex-wrap justify-center">
+                    {BILLING_DURATIONS.map(d => (
+                      <button key={d.key} onClick={() => setDuration(d)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                          duration.key === d.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                        }`}>
+                        {bn ? d.labelBn : d.labelEn}
+                        {d.discount > 0 && <span className="ml-1 text-primary text-[9px]">-{d.discount}%</span>}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           {loading ? (
