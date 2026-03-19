@@ -112,10 +112,11 @@ const AdminUsers = () => {
     if (hasCC) {
       const { data: roleData } = await supabase.from("user_roles").select("id").eq("user_id", userId).eq("role", "call_center" as any).single();
       if (roleData) await supabase.from("user_roles").delete().eq("id", roleData.id);
+      toast({ title: "✅", description: isBn ? "কল সেন্টার রোল সরানো হয়েছে" : "Call center role removed" });
     } else {
       await supabase.from("user_roles").insert({ user_id: userId, role: "call_center" as any });
+      toast({ title: "✅", description: isBn ? "কল সেন্টার রোল যুক্ত হয়েছে" : "Call center role granted" });
     }
-    toast({ title: isBn ? "কল সেন্টার রোল আপডেট হয়েছে" : "Call center role updated" });
     fetchUsers();
   };
 
