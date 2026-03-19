@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X } from "lucide-react";
+import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X, Filter } from "lucide-react";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,6 +74,7 @@ const DashboardBilling = () => {
   const [activeTab, setActiveTab] = useState<TabType>("invoices");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [filterMethod, setFilterMethod] = useState<string>("all");
 
   const fetchInvoices = () => {
     if (!user) return;
@@ -131,6 +132,7 @@ const DashboardBilling = () => {
 
   const paidInvoices = useMemo(() => {
     return paidInvoicesAll.filter(inv => {
+      if (filterMethod !== "all" && (inv.payment_method || "") !== filterMethod) return false;
       const paidDate = inv.paid_at ? new Date(inv.paid_at) : null;
       if (!paidDate) return true;
       if (dateFrom && paidDate < dateFrom) return false;
@@ -141,7 +143,7 @@ const DashboardBilling = () => {
       }
       return true;
     });
-  }, [paidInvoicesAll, dateFrom, dateTo]);
+  }, [paidInvoicesAll, dateFrom, dateTo, filterMethod]);
 
   if (loading) return <BillingSkeleton />;
 
@@ -305,13 +307,29 @@ const DashboardBilling = () => {
                 <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className={cn("p-3 pointer-events-auto")} />
               </PopoverContent>
             </Popover>
-            {(dateFrom || dateTo) && (
-              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs gap-1" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+            {/* Payment Method Filter */}
+            <div className="flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+              <select
+                value={filterMethod}
+                onChange={(e) => setFilterMethod(e.target.value)}
+                className="h-8 text-xs rounded-lg border border-border bg-secondary/20 px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="all">{isBn ? "সব মেথড" : "All Methods"}</option>
+                <option value="sslcommerz">SSLCommerz</option>
+                <option value="bkash">{isBn ? "বিকাশ" : "bKash"}</option>
+                <option value="nagad">{isBn ? "নগদ" : "Nagad"}</option>
+                <option value="bank">{isBn ? "ব্যাংক ট্রান্সফার" : "Bank Transfer"}</option>
+              </select>
+            </div>
+
+            {(dateFrom || dateTo || filterMethod !== "all") && (
+              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs gap-1" onClick={() => { setDateFrom(undefined); setDateTo(undefined); setFilterMethod("all"); }}>
                 <X className="w-3 h-3" />
                 {isBn ? "রিসেট" : "Reset"}
               </Button>
             )}
-            {(dateFrom || dateTo) && (
+            {(dateFrom || dateTo || filterMethod !== "all") && (
               <span className="text-[11px] text-muted-foreground ml-1">
                 {paidInvoices.length}/{paidInvoicesAll.length} {isBn ? "টি ফলাফল" : "results"}
               </span>
