@@ -55,6 +55,17 @@ const AdminUsers = () => {
     fetchUsers();
   };
 
+  const toggleCallCenterRole = async (userId: string, hasCC: boolean) => {
+    if (hasCC) {
+      const { data: roleData } = await supabase.from("user_roles").select("id").eq("user_id", userId).eq("role", "call_center" as any).single();
+      if (roleData) await supabase.from("user_roles").delete().eq("id", roleData.id);
+    } else {
+      await supabase.from("user_roles").insert({ user_id: userId, role: "call_center" as any });
+    }
+    toast({ title: isBn ? "কল সেন্টার রোল আপডেট হয়েছে" : "Call center role updated" });
+    fetchUsers();
+  };
+
   const filtered = users.filter(u => {
     const matchSearch = !search ||
       (u.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
