@@ -95,9 +95,10 @@ const DashboardLayout = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [{ data: txns }, { count }] = await Promise.all([
+      const [{ data: txns }, { count }, { count: dCount }] = await Promise.all([
         supabase.from("wallet_transactions").select("amount_bdt, type").eq("user_id", user.id).eq("status", "completed"),
         supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("service_type", "domain"),
       ]);
       if (txns) {
         const balance = txns.reduce((acc, t) => {
