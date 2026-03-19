@@ -34,6 +34,11 @@ const LiveChatWidget = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
 
+  // Persist open state
+  useEffect(() => {
+    localStorage.setItem(CHAT_OPEN_KEY, open ? "true" : "false");
+  }, [open]);
+
   // Restore chat from localStorage
   useEffect(() => {
     const savedId = localStorage.getItem(CHAT_STORAGE_KEY);
