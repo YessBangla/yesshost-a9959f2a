@@ -209,9 +209,31 @@ const DashboardBilling = () => {
   const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
   const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
 
-  const tabs: { id: TabType; label: string; icon: typeof FileText; count: number }[] = [
+  const monthlyData = useMemo(() => {
+    const map = new Map<string, number>();
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      map.set(key, 0);
+    }
+    paidInvoicesAll.forEach(inv => {
+      if (!inv.paid_at) return;
+      const d = new Date(inv.paid_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (map.has(key)) map.set(key, (map.get(key) || 0) + Number(inv.amount_bdt));
+    });
+    return Array.from(map.entries()).map(([month, amount]) => {
+      const [y, m] = month.split("-");
+      const label = new Date(Number(y), Number(m) - 1).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short" });
+      return { month: label, amount };
+    });
+  }, [paidInvoicesAll, isBn]);
+
+  const tabs: { id: TabType; label: string; icon: typeof FileText; count?: number }[] = [
     { id: "invoices", label: isBn ? "ইনভয়েস" : "Invoices", icon: FileText, count: invoices.length },
     { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoicesAll.length },
+    { id: "chart", label: isBn ? "মাসিক সামারি" : "Monthly Summary", icon: BarChart3 },
   ];
 
   return (
