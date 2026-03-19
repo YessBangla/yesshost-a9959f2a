@@ -347,7 +347,7 @@ const DashboardLayout = () => {
                     </Link>
                   )}
                   <div className="border-t border-border/50 mt-1 pt-1">
-                    <button onClick={handleSignOut} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-destructive hover:bg-destructive/8 active:bg-destructive/15 transition-colors w-full">
+                    <button onClick={() => { setShowUserMenu(false); setSignOutOpen(true); }} className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] rounded-lg text-sm text-destructive hover:bg-destructive/8 active:bg-destructive/15 transition-colors w-full">
                       <LogOut className="w-4 h-4" /> {tr("dash.signOut")}
                     </button>
                   </div>
