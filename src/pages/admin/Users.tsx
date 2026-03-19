@@ -81,6 +81,7 @@ const AdminUsers = () => {
   const stats = {
     total: users.length,
     admins: users.filter(u => u.roles.includes("admin")).length,
+    callCenter: users.filter(u => u.roles.includes("call_center")).length,
     thisMonth: users.filter(u => {
       const d = new Date(u.created_at);
       const now = new Date();
