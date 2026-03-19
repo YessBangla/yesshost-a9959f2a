@@ -385,7 +385,7 @@ const DashboardLayout = () => {
             </Link>
 
             {/* Notification Bell */}
-            <div className="[&_button]:text-muted-foreground [&_button]:hover:bg-muted [&_button]:hover:text-foreground">
+            <div className="[&_button]:text-primary-foreground [&_button]:hover:bg-white/15">
               <NotificationBell />
             </div>
 
