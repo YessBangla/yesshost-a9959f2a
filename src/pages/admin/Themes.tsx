@@ -313,8 +313,8 @@ const AdminThemes = () => {
         {filtered.length === 0 && (
           <EmptyState
             icon={Palette}
-            title={isBn ? "কোনো থিম পাওয়া যায়নি" : "No themes found"}
-            description={isBn ? "নতুন থিম যোগ করুন অথবা সার্চ ফিল্টার পরিবর্তন করুন" : "Add a new theme or adjust your search filters"}
+            title={lang === "bn" ? "কোনো থিম পাওয়া যায়নি" : "No themes found"}
+            description={lang === "bn" ? "নতুন থিম যোগ করুন অথবা সার্চ ফিল্টার পরিবর্তন করুন" : "Add a new theme or adjust your search filters"}
           />
         )}
       </div>
