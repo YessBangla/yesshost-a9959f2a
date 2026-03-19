@@ -148,7 +148,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
 
         <ul className="space-y-2 mb-6 flex-1">
           {features.map((f: string) => (
-            <li key={f} className="flex items-start gap-2 text-[13px] text-muted-foreground">
+            <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
               <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
               {f}
             </li>
