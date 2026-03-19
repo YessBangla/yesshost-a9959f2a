@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Check, X, ArrowLeft, Star, Server, Globe, Shield, Zap, Clock,
   Headphones, ShoppingCart, ChevronDown, ArrowRight,
@@ -12,9 +12,15 @@ import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { formatPrice } from "@/lib/formatPrice";
+import { BILLING_DURATIONS, calcDurationPrice, toBengaliNum, type BillingDuration } from "@/lib/billingDurations";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
+
+const normalizeFeature = (f: any): string => {
+  if (typeof f === "string") return f;
+  return f.label || String(f);
+};
 
 /* ─── Plan Card ─── */
 const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
