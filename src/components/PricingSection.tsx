@@ -272,7 +272,7 @@ const PricingSection = () => {
                           </p>
                         )}
                         {duration.months > 1 && (
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             ≈ ৳{isBn ? toBengaliNum(Math.round(totalPrice / duration.months)) : Math.round(totalPrice / duration.months).toLocaleString()}/{isBn ? "মাস" : "mo"}
                           </p>
                         )}
