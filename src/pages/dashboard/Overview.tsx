@@ -246,7 +246,7 @@ const DashboardOverview = () => {
               <FileText className="w-5 h-5 text-red-600" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.unpaidCount}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.unpaidCount}</p>
           <div className="mt-1 space-y-0.5">
             <p className="text-[10px] text-destructive font-medium">
               {bn ? "ওভারডিউ:" : "Overdue:"} ৳{formatAmount(stats.overdueTotal, lang)}
