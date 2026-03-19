@@ -75,7 +75,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
         <div className="relative mt-3">
           <button
             onClick={() => setDurationOpen(!durationOpen)}
-            className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-secondary/40 text-xs font-semibold text-foreground hover:border-primary/40 transition-all"
+            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg border border-border bg-secondary/40 text-sm font-semibold text-foreground hover:border-primary/40 transition-all"
           >
             <span>{durationLabel}</span>
             <div className="flex items-center gap-1.5">
