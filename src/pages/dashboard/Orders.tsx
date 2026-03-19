@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { OrdersSkeleton } from "@/components/DashboardSkeleton";
+import EmptyState from "@/components/EmptyState";
 import { ShoppingBag, Package, Clock, CheckCircle2, XCircle, Truck, CreditCard, Eye, ChevronDown, ChevronUp, Globe, Server, Palette } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
