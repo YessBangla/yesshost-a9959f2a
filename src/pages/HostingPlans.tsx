@@ -180,9 +180,15 @@ const HostingPlans = () => {
                 <div className="p-4 md:p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {cat.plans.map((plan, i) => {
-                      const allFeatures = Array.isArray(plan.features) ? plan.features : [];
-                      const includedFeatures = allFeatures.filter((f: any) => f.included !== false);
-                      const excludedFeatures = allFeatures.filter((f: any) => f.included === false);
+                      const rawFeatures = Array.isArray(plan.features) ? plan.features : [];
+                      // Features can be strings or objects {label, label_bn, included}
+                      const normalizeFeature = (f: any) => {
+                        if (typeof f === "string") return { label: f, included: true };
+                        return { label: f.label || f, label_bn: f.label_bn, included: f.included !== false };
+                      };
+                      const allFeatures = rawFeatures.map(normalizeFeature);
+                      const includedFeatures = allFeatures.filter((f) => f.included);
+                      const excludedFeatures = allFeatures.filter((f) => !f.included);
 
                       return (
                         <div
@@ -214,10 +220,9 @@ const HostingPlans = () => {
                             )}
                           </div>
 
-                          {/* All included features */}
                           {includedFeatures.length > 0 && (
                             <ul className="space-y-1.5 mb-3 flex-1">
-                              {includedFeatures.map((f: any, j: number) => (
+                              {includedFeatures.map((f, j) => (
                                 <li key={j} className="flex items-center gap-2 text-xs text-foreground/80">
                                   <div className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
                                     <Check className="w-2.5 h-2.5 text-emerald-500" />
@@ -228,10 +233,9 @@ const HostingPlans = () => {
                             </ul>
                           )}
 
-                          {/* Excluded / not-included features */}
                           {excludedFeatures.length > 0 && (
                             <ul className="space-y-1.5 mb-4 border-t border-border/50 pt-2">
-                              {excludedFeatures.map((f: any, j: number) => (
+                              {excludedFeatures.map((f, j) => (
                                 <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground/60 line-through">
                                   <div className="w-4 h-4 rounded-full bg-muted/50 flex items-center justify-center shrink-0">
                                     <span className="text-[9px]">✕</span>
