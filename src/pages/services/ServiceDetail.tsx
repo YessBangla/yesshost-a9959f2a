@@ -516,7 +516,7 @@ const ServiceDetail = () => {
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary/30 transition-colors"
                   >
-                    <span className="text-sm font-semibold text-foreground pr-4">
+                    <span className="text-base font-semibold text-foreground pr-4">
                       {isBn ? faq.question_bn : faq.question_en}
                     </span>
                     <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-colors ${
