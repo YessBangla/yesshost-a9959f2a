@@ -43,6 +43,7 @@ import Privacy from "./pages/legal/Privacy";
 import Refund from "./pages/legal/Refund";
 import ThemeStore from "./pages/themes/ThemeStore";
 import ThemeDetail from "./pages/themes/ThemeDetail";
+import ThemeDemo from "./pages/themes/ThemeDemo";
 import NotFound from "./pages/NotFound";
 import ChatRooms from "./pages/ChatRooms";
 import DomainPricing from "./pages/DomainPricing";
