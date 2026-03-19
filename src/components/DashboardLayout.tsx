@@ -4,7 +4,7 @@ import {
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
   ChevronRight, Home, PanelLeftClose, PanelLeft,
   CreditCard, Share2, KeyRound, Bell, Settings, Wallet,
-  ChevronDown
+  ChevronDown, Package, PlusCircle
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -36,12 +36,19 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
 };
 
+interface TopMenuChild {
+  label: string;
+  href: string;
+  icon: typeof Server;
+  badge?: number;
+}
+
 interface TopMenuItem {
   label: string;
   href: string;
   icon: typeof Server;
   hasDropdown?: boolean;
-  children?: { label: string; href: string; icon: typeof Server }[];
+  children?: TopMenuChild[];
 }
 
 const DashboardLayout = () => {
@@ -50,6 +57,7 @@ const DashboardLayout = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [activeTopMenu, setActiveTopMenu] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState(0);
+  const [serviceCount, setServiceCount] = useState(0);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
@@ -82,25 +90,25 @@ const DashboardLayout = () => {
     checkAccess();
   }, [user]);
 
-  // Fetch wallet balance
+  // Fetch wallet balance & service count
   useEffect(() => {
     if (!user) return;
-    const fetchBalance = async () => {
-      const { data } = await supabase
-        .from("wallet_transactions")
-        .select("amount_bdt, type")
-        .eq("user_id", user.id)
-        .eq("status", "completed");
-      if (data) {
-        const balance = data.reduce((acc, t) => {
+    const fetchData = async () => {
+      const [{ data: txns }, { count }] = await Promise.all([
+        supabase.from("wallet_transactions").select("amount_bdt, type").eq("user_id", user.id).eq("status", "completed"),
+        supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      if (txns) {
+        const balance = txns.reduce((acc, t) => {
           return t.type === "deposit" || t.type === "refund"
             ? acc + Number(t.amount_bdt)
             : acc - Number(t.amount_bdt);
         }, 0);
         setWalletBalance(Math.max(0, balance));
       }
+      setServiceCount(count || 0);
     };
-    fetchBalance();
+    fetchData();
   }, [user]);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
@@ -119,8 +127,9 @@ const DashboardLayout = () => {
       icon: Server,
       hasDropdown: true,
       children: [
-        { label: bn ? "আমার সার্ভিস" : "My Services", href: "/dashboard/services", icon: Server },
-        { label: bn ? "অর্ডার" : "Orders", href: "/dashboard/orders", icon: ShoppingBag },
+        { label: bn ? "আমার সকল সার্ভিস" : "My All Services", href: "/dashboard/services", icon: Server, badge: serviceCount },
+        { label: bn ? "নতুন সার্ভিস অর্ডার" : "Order New Services", href: "/services/basic-hosting", icon: PlusCircle },
+        { label: bn ? "এভেইলেবল অ্যাডঅন দেখুন" : "View Available Addons", href: "/dashboard/orders", icon: Package },
       ],
     },
     {
@@ -309,7 +318,12 @@ const DashboardLayout = () => {
                               onClick={() => setActiveTopMenu(null)}
                             >
                               <Icon className="w-4 h-4 opacity-60" />
-                              {child.label}
+                              <span className="flex-1">{child.label}</span>
+                              {child.badge !== undefined && child.badge > 0 && (
+                                <span className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center">
+                                  {child.badge}
+                                </span>
+                              )}
                             </Link>
                           );
                         })}
