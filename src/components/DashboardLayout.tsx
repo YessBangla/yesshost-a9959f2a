@@ -90,25 +90,25 @@ const DashboardLayout = () => {
     checkAccess();
   }, [user]);
 
-  // Fetch wallet balance
+  // Fetch wallet balance & service count
   useEffect(() => {
     if (!user) return;
-    const fetchBalance = async () => {
-      const { data } = await supabase
-        .from("wallet_transactions")
-        .select("amount_bdt, type")
-        .eq("user_id", user.id)
-        .eq("status", "completed");
-      if (data) {
-        const balance = data.reduce((acc, t) => {
+    const fetchData = async () => {
+      const [{ data: txns }, { count }] = await Promise.all([
+        supabase.from("wallet_transactions").select("amount_bdt, type").eq("user_id", user.id).eq("status", "completed"),
+        supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      if (txns) {
+        const balance = txns.reduce((acc, t) => {
           return t.type === "deposit" || t.type === "refund"
             ? acc + Number(t.amount_bdt)
             : acc - Number(t.amount_bdt);
         }, 0);
         setWalletBalance(Math.max(0, balance));
       }
+      setServiceCount(count || 0);
     };
-    fetchBalance();
+    fetchData();
   }, [user]);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
