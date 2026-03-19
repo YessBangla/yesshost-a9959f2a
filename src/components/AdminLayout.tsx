@@ -150,20 +150,6 @@ const AdminLayout = () => {
           </NavLink>
         )}
 
-        {/* User Card */}
-        {!collapsed && (
-          <div className="mx-1 mt-2 p-3 rounded-xl bg-secondary/40 border border-border/30">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive text-xs font-bold shrink-0">
-                {(profile?.full_name || "A").charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-foreground truncate">{profile?.full_name || "Admin"}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
-              </div>
-            </div>
-          </div>
-        )}
 
 
 
