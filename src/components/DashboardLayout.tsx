@@ -25,6 +25,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/support": { en: "Support", bn: "সাপোর্ট" },
   "/dashboard/domains": { en: "Domains", bn: "ডোমেইন" },
   "/dashboard/profile": { en: "Profile", bn: "প্রোফাইল" },
+  "/dashboard/reseller": { en: "Reseller", bn: "রিসেলার" },
 };
 
 const DashboardLayout = () => {
