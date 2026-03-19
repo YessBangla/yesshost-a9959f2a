@@ -395,19 +395,19 @@ const DashboardLayout = () => {
                 onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
                 className="flex items-center gap-2 pl-2 ml-0.5 border-l border-white/20 hover:bg-white/15 rounded-r-lg pr-2 py-1 transition-colors"
               >
-                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-primary/20 shrink-0">
+                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile?.full_name || "User"} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-[11px] font-bold">
+                    <div className="w-full h-full bg-white/20 flex items-center justify-center text-primary-foreground text-[11px] font-bold">
                       {(profile?.full_name || "U").charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-foreground">
+                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-primary-foreground">
                   {profile?.full_name || "User"}
                 </span>
-                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-muted-foreground" />
+                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-primary-foreground/70" />
               </button>
 
               {/* User Dropdown */}
