@@ -29,6 +29,7 @@ const ResellerDashboard = () => {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [accountsLoading, setAccountsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -43,28 +44,62 @@ const ResellerDashboard = () => {
   useEffect(() => { fetchPackages(); }, [user]);
 
   const fetchPackages = async () => {
-    if (!user) return;
+    if (!user) {
+      setPackages([]);
+      setSelectedPkg(null);
+      setAccounts([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setLoadError(null);
+
     const { data, error } = await supabase
       .from("reseller_packages")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-    console.log("Reseller packages fetch:", { data, error, userId: user.id });
-    setPackages(data || []);
-    setLoading(false);
-    if (data && data.length > 0 && !selectedPkg) {
-      setSelectedPkg(data[0]);
-      fetchAccounts(data[0].id);
+
+    if (error) {
+      setPackages([]);
+      setSelectedPkg(null);
+      setAccounts([]);
+      setLoadError(error.message);
+      setLoading(false);
+      return;
     }
+
+    const nextPackages = data || [];
+    setPackages(nextPackages);
+
+    if (nextPackages.length === 0) {
+      setSelectedPkg(null);
+      setAccounts([]);
+      setLoading(false);
+      return;
+    }
+
+    const nextSelected = nextPackages.find((pkg) => pkg.id === selectedPkg?.id) || nextPackages[0];
+    setSelectedPkg(nextSelected);
+    await fetchAccounts(nextSelected.id);
+    setLoading(false);
   };
 
   const fetchAccounts = async (pkgId: string) => {
     setAccountsLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("reseller_accounts")
       .select("*")
       .eq("reseller_package_id", pkgId)
       .order("created_at", { ascending: false });
+
+    if (error) {
+      setAccounts([]);
+      setAccountsLoading(false);
+      return;
+    }
+
     setAccounts(data || []);
     setAccountsLoading(false);
   };
