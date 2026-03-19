@@ -173,7 +173,7 @@ const PricingSection = () => {
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {tr("pricing.title")}
           </h2>
-          <p className="text-muted-foreground text-sm max-w-lg mx-auto mb-6">
+          <p className="text-muted-foreground text-base max-w-lg mx-auto mb-6">
             {tr("pricing.subtitle")}
           </p>
 
