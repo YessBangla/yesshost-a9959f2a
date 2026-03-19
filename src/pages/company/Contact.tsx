@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Send, Loader2, CheckCircle } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
+import { toast } from "sonner";
 
 const iconMap: Record<string, typeof Mail> = { Mail, Phone, MapPin, Clock };
 
