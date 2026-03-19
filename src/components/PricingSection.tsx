@@ -1,10 +1,10 @@
-import { motion } from "framer-motion";
-import { Check, Star, ShoppingCart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Star, ShoppingCart, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPrice } from "@/lib/formatPrice";
+import { BILLING_DURATIONS, calcDurationPrice, toBengaliNum, type BillingDuration } from "@/lib/billingDurations";
 
 type Plan = {
   id?: string;
@@ -45,13 +45,65 @@ const staticPlans: Record<string, Plan[]> = {
   ],
 };
 
+/* ─── Duration Dropdown ─── */
+const DurationDropdown = ({ selected, onChange, isBn }: { selected: BillingDuration; onChange: (d: BillingDuration) => void; isBn: boolean }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative mb-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-secondary/40 text-xs font-semibold text-foreground hover:border-primary/40 transition-all"
+      >
+        <span>{isBn ? selected.labelBn : selected.labelEn}</span>
+        <div className="flex items-center gap-1.5">
+          {selected.discount > 0 && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">-{selected.discount}%</span>
+          )}
+          <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+        </div>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.12 }}
+            className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg z-30 overflow-hidden max-h-56 overflow-y-auto"
+          >
+            {BILLING_DURATIONS.map((d) => (
+              <button
+                key={d.key}
+                onClick={() => { onChange(d); setOpen(false); }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-all ${
+                  selected.key === d.key ? "bg-primary/5 text-primary font-bold" : "text-foreground hover:bg-secondary/60"
+                }`}
+              >
+                <span>{isBn ? d.labelBn : d.labelEn}</span>
+                <div className="flex items-center gap-1.5">
+                  {d.discount > 0 && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                      {isBn ? `${toBengaliNum(d.discount)}%` : `${d.discount}%`}
+                    </span>
+                  )}
+                  {selected.key === d.key && <Check className="w-3 h-3 text-primary" />}
+                </div>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const PricingSection = () => {
   const [activeTab, setActiveTab] = useState("web");
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const { tr, lang } = useLanguage();
   const isBn = lang === "bn";
   const { addItem, isInCart } = useCart();
   const [dbPlans, setDbPlans] = useState<any[]>([]);
+  const [planDurations, setPlanDurations] = useState<Record<string, BillingDuration>>({});
 
   useEffect(() => {
     supabase.from("pricing_plans").select("*").eq("is_active", true).order("sort_order")
@@ -75,7 +127,9 @@ const PricingSection = () => {
         price: p.price_bdt,
         annual: p.annual_price_bdt || undefined,
         subtitle: p.subtitle || undefined,
-        features: Array.isArray(p.features) ? p.features : [],
+        features: Array.isArray(p.features)
+          ? p.features.map((f: any) => typeof f === "string" ? f : (isBn ? (f.label_bn || f.label) : f.label))
+          : [],
         highlighted: p.is_highlighted,
         category,
       }));
@@ -84,6 +138,24 @@ const PricingSection = () => {
   };
 
   const currentPlans = getPlans(activeTab);
+
+  const getDuration = (planKey: string) => planDurations[planKey] || BILLING_DURATIONS[0];
+  const setDuration = (planKey: string, d: BillingDuration) => setPlanDurations(prev => ({ ...prev, [planKey]: d }));
+
+  // Quick duration shortcuts
+  const quickDurations = [
+    BILLING_DURATIONS[0],  // 1m
+    BILLING_DURATIONS[3],  // 6m
+    BILLING_DURATIONS[4],  // 1y
+    BILLING_DURATIONS[6],  // 3y
+    BILLING_DURATIONS[8],  // 5y
+  ];
+
+  const setAllDurations = (d: BillingDuration) => {
+    const updated: Record<string, BillingDuration> = {};
+    currentPlans.forEach((p) => { updated[`${activeTab}-${p.name}`] = d; });
+    setPlanDurations(prev => ({ ...prev, ...updated }));
+  };
 
   return (
     <section id="pricing" className="py-10 md:py-20 bg-secondary/30">
@@ -122,107 +194,120 @@ const PricingSection = () => {
             ))}
           </div>
 
-          {/* Billing toggle */}
-          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-card border border-border">
-            <button
-              onClick={() => setBillingCycle("monthly")}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                billingCycle === "monthly"
-                  ? "gradient-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {isBn ? "মাসিক" : "Monthly"}
-            </button>
-            <button
-              onClick={() => setBillingCycle("yearly")}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                billingCycle === "yearly"
-                  ? "gradient-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {isBn ? "বাৎসরিক" : "Yearly"}
-              <span className="ml-1 text-[10px] opacity-80">{isBn ? "সেভ" : "Save"}</span>
-            </button>
+          {/* Quick Duration Shortcuts */}
+          <div className="flex items-center gap-2 justify-center flex-wrap">
+            <span className="text-[11px] text-muted-foreground">{isBn ? "মেয়াদ:" : "Duration:"}</span>
+            {quickDurations.map((d) => (
+              <button
+                key={d.key}
+                onClick={() => setAllDurations(d)}
+                className="px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
+              >
+                {isBn ? d.shortBn : d.shortEn}
+                {d.discount > 0 && <span className="ml-1 text-primary">-{d.discount}%</span>}
+              </button>
+            ))}
           </div>
         </motion.div>
 
         {/* Plan cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
-          {currentPlans.map((plan, i) => (
-            <motion.div
-              key={`${activeTab}-${plan.name}`}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
-              className={`relative rounded-xl overflow-hidden bg-card border ${
-                plan.highlighted ? "border-primary/30 shadow-md shadow-primary/5" : "border-border"
-              } hover:border-primary/25 transition-all`}
-            >
-              {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-0.5 gradient-primary" />}
-              {plan.highlighted && (
-                <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 gradient-primary text-primary-foreground text-[10px] font-bold rounded-b-lg">
-                  <Star className="w-3 h-3 fill-current" /> {tr("pricing.popular")}
-                </div>
-              )}
+          {currentPlans.map((plan, i) => {
+            const planKey = `${activeTab}-${plan.name}`;
+            const duration = getDuration(planKey);
+            const totalPrice = calcDurationPrice(plan.price, plan.annual || null, duration);
+            const cartId = plan.id ? `hosting-${plan.id}-${duration.key}` : "";
+            const inCart = cartId ? isInCart(cartId) : false;
+            const durationLabel = isBn ? duration.labelBn : duration.labelEn;
 
-              <div className="p-4 sm:p-6">
-                <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-                {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
-
-                <div className="flex items-baseline gap-1 my-3">
-                  <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold tabular-nums text-foreground">
-                    ৳{formatPrice(billingCycle === "yearly" && plan.annual ? plan.annual : plan.price, lang)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {billingCycle === "yearly" ? (isBn ? "/বছর" : "/yr") : tr("pricing.mo")}
-                  </span>
-                </div>
-
-                {billingCycle === "monthly" && plan.annual && (
-                  <p className="text-[11px] text-primary font-medium mb-3">
-                    💰 {isBn ? `বাৎসরিকে ৳${formatPrice(plan.annual, lang)}` : `৳${formatPrice(plan.annual, lang)} if billed yearly`}
-                  </p>
+            return (
+              <motion.div
+                key={planKey}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className={`relative rounded-xl overflow-hidden bg-card border ${
+                  plan.highlighted ? "border-primary/30 shadow-md shadow-primary/5" : "border-border"
+                } hover:border-primary/25 transition-all`}
+              >
+                {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-0.5 gradient-primary" />}
+                {plan.highlighted && (
+                  <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 gradient-primary text-primary-foreground text-[10px] font-bold rounded-b-lg">
+                    <Star className="w-3 h-3 fill-current" /> {tr("pricing.popular")}
+                  </div>
                 )}
 
-                <ul className="space-y-2 mb-6">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <div className="w-4 h-4 rounded-full bg-primary/8 flex items-center justify-center shrink-0">
-                        <Check className="w-2.5 h-2.5 text-primary" />
-                      </div>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                <div className="p-4 sm:p-6">
+                  <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
+                  {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
 
-                {(() => {
-                  const cartId = plan.id ? `hosting-${plan.id}-${billingCycle}` : "";
-                  const inCart = cartId ? isInCart(cartId) : false;
-                  
-                  if (inCart) {
-                    return (
-                      <div className="w-full py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-xs">
-                        <Check className="w-3.5 h-3.5 text-primary" />
-                        {isBn ? "কার্টে আছে" : "In Cart"}
-                      </div>
-                    );
-                  }
-                  
-                  return (
+                  {/* Duration Selector per plan */}
+                  <div className="mt-3">
+                    <DurationDropdown
+                      selected={duration}
+                      onChange={(d) => setDuration(planKey, d)}
+                      isBn={isBn}
+                    />
+                  </div>
+
+                  {/* Price */}
+                  <div className="mb-3">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={`${planKey}-${duration.key}`}
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-2xl sm:text-3xl font-extrabold tabular-nums text-foreground">
+                            ৳{isBn ? toBengaliNum(totalPrice) : totalPrice.toLocaleString()}
+                          </span>
+                          <span className="text-xs text-muted-foreground">/{durationLabel}</span>
+                        </div>
+                        {duration.discount > 0 && (
+                          <p className="text-[11px] text-primary font-medium mt-1">
+                            🎉 {isBn ? `${toBengaliNum(duration.discount)}% ছাড়!` : `${duration.discount}% off!`}
+                          </p>
+                        )}
+                        {duration.months > 1 && (
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            ≈ ৳{isBn ? toBengaliNum(Math.round(totalPrice / duration.months)) : Math.round(totalPrice / duration.months).toLocaleString()}/{isBn ? "মাস" : "mo"}
+                          </p>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+
+                  <ul className="space-y-2 mb-6">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="w-4 h-4 rounded-full bg-primary/8 flex items-center justify-center shrink-0">
+                          <Check className="w-2.5 h-2.5 text-primary" />
+                        </div>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {inCart ? (
+                    <div className="w-full py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-xs">
+                      <Check className="w-3.5 h-3.5 text-primary" />
+                      {isBn ? "কার্টে আছে" : "In Cart"}
+                    </div>
+                  ) : (
                     <button
                       onClick={() => {
                         if (plan.id) {
-                          const price = billingCycle === "yearly" && plan.annual ? plan.annual : plan.price;
                           addItem({
                             id: cartId,
                             type: "hosting",
                             name: plan.name,
-                            description: `${plan.subtitle || plan.name} • ${billingCycle === "yearly" ? (isBn ? "বাৎসরিক" : "Yearly") : (isBn ? "মাসিক" : "Monthly")}`,
-                            price_bdt: price,
+                            description: `${plan.subtitle || plan.name} • ${durationLabel}`,
+                            price_bdt: totalPrice.toString(),
                             plan_id: plan.id,
-                            billing_cycle: billingCycle,
+                            billing_cycle: duration.key,
                             category: plan.category || activeTab,
                           });
                         }
@@ -236,11 +321,11 @@ const PricingSection = () => {
                       <ShoppingCart className="w-3.5 h-3.5" />
                       {isBn ? "কার্টে যোগ করুন" : "Add to Cart"}
                     </button>
-                  );
-                })()}
-              </div>
-            </motion.div>
-          ))}
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
