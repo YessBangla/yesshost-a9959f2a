@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X } from "lucide-react";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,10 @@ import { formatAmount } from "@/lib/formatPrice";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
@@ -68,6 +72,8 @@ const DashboardBilling = () => {
   const [selectedPayment, setSelectedPayment] = useState("");
   const [paying, setPaying] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("invoices");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
 
   const fetchInvoices = () => {
     if (!user) return;
@@ -121,16 +127,31 @@ const DashboardBilling = () => {
     });
   };
 
+  const paidInvoicesAll = useMemo(() => invoices.filter(i => i.status === "paid" || i.status === "refunded"), [invoices]);
+
+  const paidInvoices = useMemo(() => {
+    return paidInvoicesAll.filter(inv => {
+      const paidDate = inv.paid_at ? new Date(inv.paid_at) : null;
+      if (!paidDate) return true;
+      if (dateFrom && paidDate < dateFrom) return false;
+      if (dateTo) {
+        const endOfDay = new Date(dateTo);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (paidDate > endOfDay) return false;
+      }
+      return true;
+    });
+  }, [paidInvoicesAll, dateFrom, dateTo]);
+
   if (loading) return <BillingSkeleton />;
 
   const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
   const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
-  const paidInvoices = invoices.filter(i => i.status === "paid" || i.status === "refunded");
   const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
 
   const tabs: { id: TabType; label: string; icon: typeof FileText; count: number }[] = [
     { id: "invoices", label: isBn ? "ইনভয়েস" : "Invoices", icon: FileText, count: invoices.length },
-    { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoices.length },
+    { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoicesAll.length },
   ];
 
   return (
@@ -259,6 +280,44 @@ const DashboardBilling = () => {
       {/* Payment History Tab */}
       {activeTab === "history" && (
         <>
+          {/* Date Filter */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs h-8", !dateFrom && "text-muted-foreground")}>
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                  {dateFrom ? format(dateFrom, "dd MMM yyyy") : (isBn ? "শুরুর তারিখ" : "From")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className={cn("p-3 pointer-events-auto")} />
+              </PopoverContent>
+            </Popover>
+            <span className="text-xs text-muted-foreground">—</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs h-8", !dateTo && "text-muted-foreground")}>
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                  {dateTo ? format(dateTo, "dd MMM yyyy") : (isBn ? "শেষ তারিখ" : "To")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className={cn("p-3 pointer-events-auto")} />
+              </PopoverContent>
+            </Popover>
+            {(dateFrom || dateTo) && (
+              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs gap-1" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                <X className="w-3 h-3" />
+                {isBn ? "রিসেট" : "Reset"}
+              </Button>
+            )}
+            {(dateFrom || dateTo) && (
+              <span className="text-[11px] text-muted-foreground ml-1">
+                {paidInvoices.length}/{paidInvoicesAll.length} {isBn ? "টি ফলাফল" : "results"}
+              </span>
+            )}
+          </div>
+
           {paidInvoices.length === 0 ? (
             <EmptyState
               icon={History}
