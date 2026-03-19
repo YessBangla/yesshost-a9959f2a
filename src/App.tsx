@@ -56,6 +56,11 @@ import HostingPlans from "./pages/HostingPlans";
 import Checkout from "./pages/Checkout";
 import PaymentMethods from "./pages/PaymentMethods";
 import { PaymentSuccess, PaymentFail, PaymentCancel } from "./pages/PaymentResult";
+import AdminLogin from "./pages/AdminLogin";
+import CallCenterDashboard from "./pages/callcenter/Dashboard";
+import CallCenterOrders from "./pages/callcenter/Orders";
+import CallCenterLiveChat from "./pages/callcenter/LiveChat";
+import CallCenterTickets from "./pages/callcenter/Tickets";
 
 const queryClient = new QueryClient();
 
