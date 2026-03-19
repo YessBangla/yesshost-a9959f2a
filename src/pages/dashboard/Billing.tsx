@@ -79,13 +79,26 @@ const DashboardBilling = () => {
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [filterMethod, setFilterMethod] = useState<string>("all");
+  const [walletBalance, setWalletBalance] = useState(0);
+
+  const fetchWalletBalance = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("wallet_transactions").select("*")
+      .eq("user_id", user.id).eq("status", "completed");
+    const balance = (data || []).reduce((sum: number, t: any) => {
+      const isCredit = t.type === "deposit" || t.type === "refund";
+      return isCredit ? sum + Number(t.amount_bdt) : sum - Number(t.amount_bdt);
+    }, 0);
+    setWalletBalance(balance);
+  };
 
   const fetchInvoices = () => {
     if (!user) return;
     supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => { setInvoices(data || []); setLoading(false); });
   };
 
-  useEffect(() => { fetchInvoices(); }, [user]);
+  useEffect(() => { fetchInvoices(); fetchWalletBalance(); }, [user]);
 
   const handlePay = async () => {
     if (!payInvoice || !selectedPayment) return;
