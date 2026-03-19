@@ -85,10 +85,10 @@ const DashboardBilling = () => {
             customer_email: user?.email || "",
           },
         });
-        if (error || !data?.url) {
+        if (error || !data?.gateway_url) {
           toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট সেশন শুরু করা যায়নি" : "Failed to initiate payment", variant: "destructive" });
         } else {
-          window.location.href = data.url;
+          window.location.href = data.gateway_url;
         }
       } catch {
         toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট প্রসেসিং এ সমস্যা হয়েছে" : "Payment processing error", variant: "destructive" });

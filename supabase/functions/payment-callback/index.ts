@@ -97,7 +97,7 @@ async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
     }
 
     if (invoiceId) {
-      // Get the invoice to find user_id
+      // Get the invoice to find user_id and linked order
       const { data: invoice } = await supabase
         .from("invoices")
         .select("user_id, amount_bdt")
@@ -111,6 +111,25 @@ async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
       }).eq("id", invoiceId);
 
       if (verified) {
+        // Update linked order status to paid/active
+        const { data: linkedOrders } = await supabase
+          .from("orders")
+          .select("id")
+          .eq("invoice_id", invoiceId)
+          .in("status", ["pending", "confirmed"]);
+
+        if (linkedOrders && linkedOrders.length > 0) {
+          for (const order of linkedOrders) {
+            await supabase.from("orders").update({
+              payment_status: "paid",
+              paid_at: new Date().toISOString(),
+              payment_method: "sslcommerz",
+              status: "processing",
+            }).eq("id", order.id);
+          }
+        }
+
+        // Activate pending services linked to this invoice
         await supabase.from("services").update({
           status: "active",
           start_date: new Date().toISOString(),
