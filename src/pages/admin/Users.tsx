@@ -201,6 +201,13 @@ const AdminUsers = () => {
                         >
                           {isAdmin ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
                         </button>
+                        <button
+                          onClick={() => toggleCallCenterRole(u.user_id, u.roles.includes("call_center"))}
+                          className={`p-2 rounded-lg transition-colors ${u.roles.includes("call_center") ? "hover:bg-blue-500/10 text-blue-500" : "hover:bg-secondary/60 text-muted-foreground"}`}
+                          title={u.roles.includes("call_center") ? (isBn ? "কল সেন্টার সরান" : "Remove Call Center") : (isBn ? "কল সেন্টার করুন" : "Make Call Center")}
+                        >
+                          <Headphones className="w-4 h-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
