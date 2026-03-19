@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import {
-  Users as UsersIcon, Search, Shield, ShieldOff, Eye, X,
+  Users as UsersIcon, Search, Shield, ShieldOff, Eye, X, Edit3, Save,
   Mail, Phone, MapPin, Building2, Calendar, Globe, Filter, Headphones,
   UserPlus, Check, Lock, LayoutDashboard, Settings2
 } from "lucide-react";
