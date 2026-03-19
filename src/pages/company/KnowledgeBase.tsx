@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import { Search, BookOpen, Server, Globe, Mail, Shield, HelpCircle } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
+import { toSlug } from "./KnowledgeBaseArticle";
 
 const iconMap: Record<string, any> = { Server, Globe, Mail, Shield, BookOpen };
 
@@ -102,10 +104,10 @@ const KnowledgeBase = () => {
                   <ul className="space-y-2">
                     {cat.articles.map((a: any, j: number) => (
                       <li key={j}>
-                        <a href="#" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors py-1.5">
+                        <Link to={`/knowledge-base/${toSlug(a.en)}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors py-1.5">
                           <HelpCircle className="w-4 h-4 shrink-0" />
                           {bn ? a.bn : a.en}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>

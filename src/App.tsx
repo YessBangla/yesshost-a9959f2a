@@ -39,6 +39,7 @@ import About from "./pages/company/About";
 import Contact from "./pages/company/Contact";
 import KnowledgeBase from "./pages/company/KnowledgeBase";
 import Affiliate from "./pages/company/Affiliate";
+import KnowledgeBaseArticle from "./pages/company/KnowledgeBaseArticle";
 import Terms from "./pages/legal/Terms";
 import Privacy from "./pages/legal/Privacy";
 import Refund from "./pages/legal/Refund";
@@ -86,6 +87,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/knowledge-base" element={<KnowledgeBase />} />
+            <Route path="/knowledge-base/:slug" element={<KnowledgeBaseArticle />} />
             <Route path="/affiliate" element={<Affiliate />} />
 
             {/* Theme pages */}
