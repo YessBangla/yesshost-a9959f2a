@@ -33,6 +33,7 @@ import AdminThemes from "./pages/admin/Themes";
 import AdminCoupons from "./pages/admin/Coupons";
 import AdminLiveChat from "./pages/admin/LiveChat";
 import AdminChatRooms from "./pages/admin/ChatRooms";
+import AdminContactMessages from "./pages/admin/ContactMessages";
 import ServiceDetail from "./pages/services/ServiceDetail";
 import About from "./pages/company/About";
 import Contact from "./pages/company/Contact";
@@ -132,6 +133,7 @@ const App = () => (
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="live-chat" element={<AdminLiveChat />} />
               <Route path="chat-rooms" element={<AdminChatRooms />} />
+              <Route path="contact-messages" element={<AdminContactMessages />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

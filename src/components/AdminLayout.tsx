@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
-  LogOut, ChevronLeft, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle,
+  LogOut, ChevronLeft, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail,
   Bell, Search, ChevronRight
 } from "lucide-react";
 import { useState } from "react";
@@ -30,6 +30,7 @@ const AdminLayout = () => {
     { title: isBn ? "কুপন" : "Coupons", url: "/admin/coupons", icon: Tag },
     { title: isBn ? "লাইভ চ্যাট" : "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
     { title: isBn ? "চ্যাট রুম" : "Chat Rooms", url: "/admin/chat-rooms", icon: Users },
+    { title: isBn ? "কন্টাক্ট মেসেজ" : "Contact Messages", url: "/admin/contact-messages", icon: Mail },
     { title: "CMS", url: "/admin/cms", icon: Layers },
   ];
 
