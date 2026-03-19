@@ -36,12 +36,19 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
 };
 
+interface TopMenuChild {
+  label: string;
+  href: string;
+  icon: typeof Server;
+  badge?: number;
+}
+
 interface TopMenuItem {
   label: string;
   href: string;
   icon: typeof Server;
   hasDropdown?: boolean;
-  children?: { label: string; href: string; icon: typeof Server }[];
+  children?: TopMenuChild[];
 }
 
 const DashboardLayout = () => {
