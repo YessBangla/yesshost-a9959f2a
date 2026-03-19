@@ -1,10 +1,12 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, X } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 type InvoiceData = {
   id: string;
@@ -30,6 +32,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
   const { lang } = useLanguage();
   const isBn = lang === "bn";
   const printRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
 
   if (!invoice) return null;
 
@@ -102,6 +105,28 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
     setTimeout(() => { win.print(); win.close(); }, 500);
   };
 
+  const handleDownloadPDF = async () => {
+    const content = printRef.current;
+    if (!content) return;
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(content, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Invoice-${invoice.invoice_number}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    }
+    setDownloading(false);
+  };
+
   const statusClass = isPaid ? "status-paid" : isOverdue ? "status-overdue" : invoice.status === "cancelled" ? "status-cancelled" : invoice.status === "refunded" ? "status-refunded" : "status-unpaid";
   const statusLabel = isPaid
     ? (isBn ? "পরিশোধিত" : "PAID")
@@ -122,6 +147,10 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
             {isBn ? "ইনভয়েস রিপোর্ট" : "Invoice Report"}
           </h2>
           <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={handleDownloadPDF} disabled={downloading} className="gap-2">
+              <Download className="w-4 h-4" />
+              {downloading ? (isBn ? "ডাউনলোড হচ্ছে..." : "Downloading...") : "PDF"}
+            </Button>
             <Button size="sm" variant="outline" onClick={handlePrint} className="gap-2">
               <Printer className="w-4 h-4" />
               {isBn ? "প্রিন্ট" : "Print"}
