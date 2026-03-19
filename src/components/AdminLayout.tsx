@@ -49,6 +49,24 @@ const AdminLayout = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // ⌘K shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+        setSearchQuery("");
+      }
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen) setTimeout(() => searchInputRef.current?.focus(), 100);
+  }, [searchOpen]);
+
   const menuSections = [
     {
       label: bn ? "প্রধান" : "Main",
