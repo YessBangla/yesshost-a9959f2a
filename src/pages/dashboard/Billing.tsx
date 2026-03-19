@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X, Filter } from "lucide-react";
+import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X, Filter, Download } from "lucide-react";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import InvoiceReport from "@/components/InvoiceReport";
 import { formatAmount } from "@/lib/formatPrice";
+import jsPDF from "jspdf";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -144,6 +145,61 @@ const DashboardBilling = () => {
       return true;
     });
   }, [paidInvoicesAll, dateFrom, dateTo, filterMethod]);
+
+
+  const downloadHistoryPdf = () => {
+    const doc = new jsPDF();
+    const title = isBn ? "Payment History Report" : "Payment History Report";
+    doc.setFontSize(18);
+    doc.text(title, 14, 20);
+
+    doc.setFontSize(10);
+    const filterInfo: string[] = [];
+    if (dateFrom) filterInfo.push(`From: ${format(dateFrom, "dd MMM yyyy")}`);
+    if (dateTo) filterInfo.push(`To: ${format(dateTo, "dd MMM yyyy")}`);
+    if (filterMethod !== "all") {
+      const ml = paymentMethodLabels[filterMethod];
+      filterInfo.push(`Method: ${ml ? (isBn ? ml.bn : ml.en) : filterMethod}`);
+    }
+    if (filterInfo.length > 0) {
+      doc.text(filterInfo.join("  |  "), 14, 28);
+    }
+
+    doc.setFontSize(9);
+    const startY = filterInfo.length > 0 ? 36 : 30;
+    const headers = ["Invoice", "Amount (BDT)", "Method", "Status", "Date"];
+    const colX = [14, 50, 90, 130, 160];
+
+    doc.setFont("helvetica", "bold");
+    headers.forEach((h, i) => doc.text(h, colX[i], startY));
+    doc.setFont("helvetica", "normal");
+
+    let y = startY + 6;
+    paidInvoices.forEach((inv) => {
+      if (y > 275) { doc.addPage(); y = 20; }
+      const pmLabel = inv.payment_method
+        ? (paymentMethodLabels[inv.payment_method]?.[isBn ? "bn" : "en"] || inv.payment_method)
+        : "-";
+      const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
+      const dateStr = inv.paid_at
+        ? new Date(inv.paid_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+        : "-";
+
+      doc.text(inv.invoice_number, colX[0], y);
+      doc.text(`${Number(inv.amount_bdt).toLocaleString()}`, colX[1], y);
+      doc.text(pmLabel, colX[2], y);
+      doc.text(isBn ? sl.bn : sl.en, colX[3], y);
+      doc.text(dateStr, colX[4], y);
+      y += 6;
+    });
+
+    y += 4;
+    doc.setFont("helvetica", "bold");
+    const total = paidInvoices.reduce((s, i) => s + Number(i.amount_bdt), 0);
+    doc.text(`Total: ${total.toLocaleString()} BDT`, 14, y);
+
+    doc.save(`payment-history-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+  };
 
   if (loading) return <BillingSkeleton />;
 
@@ -333,6 +389,18 @@ const DashboardBilling = () => {
               <span className="text-[11px] text-muted-foreground ml-1">
                 {paidInvoices.length}/{paidInvoicesAll.length} {isBn ? "টি ফলাফল" : "results"}
               </span>
+            )}
+            {/* Download PDF */}
+            {paidInvoices.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5 ml-auto"
+                onClick={() => downloadHistoryPdf()}
+              >
+                <Download className="w-3.5 h-3.5" />
+                {isBn ? "PDF ডাউনলোড" : "Download PDF"}
+              </Button>
             )}
           </div>
 
