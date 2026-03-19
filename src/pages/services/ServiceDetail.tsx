@@ -98,7 +98,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
                   <button
                     key={d.key}
                     onClick={() => { setDuration(d); setDurationOpen(false); }}
-                    className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-all ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-all ${
                       duration.key === d.key ? "bg-primary/5 text-primary font-bold" : "text-foreground hover:bg-secondary/60"
                     }`}
                   >
