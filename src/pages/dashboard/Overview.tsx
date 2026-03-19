@@ -216,7 +216,7 @@ const DashboardOverview = () => {
               <Server className="w-5 h-5 text-emerald-600" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.activeServices}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.activeServices}</p>
           <Link to="/hosting-plans" className="mt-3 flex items-center gap-1 text-xs text-emerald-600 font-semibold hover:underline">
             <span>+</span> {bn ? "নতুন সার্ভিস অর্ডার" : "Order New Service"}
           </Link>
@@ -231,7 +231,7 @@ const DashboardOverview = () => {
               <Globe className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.domains}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.domains}</p>
           <Link to="/domain-pricing" className="mt-3 flex items-center gap-1 text-xs text-blue-600 font-semibold hover:underline">
             <span>+</span> {bn ? "ডোমেইন কিনুন" : "Buy Domain"}
           </Link>
@@ -246,7 +246,7 @@ const DashboardOverview = () => {
               <FileText className="w-5 h-5 text-red-600" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.unpaidCount}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.unpaidCount}</p>
           <div className="mt-1 space-y-0.5">
             <p className="text-[10px] text-destructive font-medium">
               {bn ? "ওভারডিউ:" : "Overdue:"} ৳{formatAmount(stats.overdueTotal, lang)}
@@ -266,7 +266,7 @@ const DashboardOverview = () => {
               <HeadphonesIcon className="w-5 h-5 text-purple-600" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.openTickets}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.openTickets}</p>
           <Link to="/dashboard/support" className="mt-3 flex items-center gap-1 text-xs text-purple-600 font-semibold hover:underline">
             <span>+</span> {bn ? "টিকেট খুলুন" : "Open Ticket"}
           </Link>
