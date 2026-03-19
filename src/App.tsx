@@ -85,7 +85,15 @@ const CallCenterOrders = lazy(() => import("./pages/callcenter/Orders"));
 const CallCenterLiveChat = lazy(() => import("./pages/callcenter/LiveChat"));
 const CallCenterTickets = lazy(() => import("./pages/callcenter/Tickets"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Minimal loading fallback
 const PageLoader = () => (
