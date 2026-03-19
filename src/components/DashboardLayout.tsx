@@ -395,6 +395,15 @@ const DashboardLayout = () => {
               <span>TK {formatAmount(walletBalance, lang)} BDT</span>
             </Link>
 
+            {/* Language Switch */}
+            <button
+              onClick={() => setLang(lang === "bn" ? "en" : "bn")}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-[12px] font-semibold text-foreground border border-border"
+            >
+              <Globe className="w-3.5 h-3.5 text-primary" />
+              <span>{lang === "bn" ? "EN" : "বাং"}</span>
+            </button>
+
             {/* Notification Bell */}
             <div className="[&_button]:text-foreground [&_button]:hover:bg-primary/10">
               <NotificationBell />
