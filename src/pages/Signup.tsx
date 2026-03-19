@@ -17,7 +17,8 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const bn = lang === "bn";
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
