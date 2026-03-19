@@ -52,12 +52,12 @@ const DurationDropdown = ({ selected, onChange, isBn }: { selected: BillingDurat
     <div className="relative mb-3">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-secondary/40 text-xs font-semibold text-foreground hover:border-primary/40 transition-all"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg border border-border bg-secondary/40 text-sm font-semibold text-foreground hover:border-primary/40 transition-all"
       >
         <span>{isBn ? selected.labelBn : selected.labelEn}</span>
         <div className="flex items-center gap-1.5">
           {selected.discount > 0 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">-{selected.discount}%</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">-{selected.discount}%</span>
           )}
           <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
         </div>
@@ -75,14 +75,14 @@ const DurationDropdown = ({ selected, onChange, isBn }: { selected: BillingDurat
               <button
                 key={d.key}
                 onClick={() => { onChange(d); setOpen(false); }}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-all ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-all ${
                   selected.key === d.key ? "bg-primary/5 text-primary font-bold" : "text-foreground hover:bg-secondary/60"
                 }`}
               >
                 <span>{isBn ? d.labelBn : d.labelEn}</span>
                 <div className="flex items-center gap-1.5">
                   {d.discount > 0 && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
                       {isBn ? `${toBengaliNum(d.discount)}%` : `${d.discount}%`}
                     </span>
                   )}
@@ -167,13 +167,13 @@ const PricingSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-6 md:mb-10"
         >
-          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold gradient-primary text-primary-foreground mb-3">
             Pricing
           </span>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {tr("pricing.title")}
           </h2>
-          <p className="text-muted-foreground text-sm max-w-lg mx-auto mb-6">
+          <p className="text-muted-foreground text-base max-w-lg mx-auto mb-6">
             {tr("pricing.subtitle")}
           </p>
 
@@ -183,7 +183,7 @@ const PricingSection = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-3 md:px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                className={`px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
                   activeTab === tab.key
                     ? "gradient-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -196,12 +196,12 @@ const PricingSection = () => {
 
           {/* Quick Duration Shortcuts */}
           <div className="flex items-center gap-2 justify-center flex-wrap">
-            <span className="text-[11px] text-muted-foreground">{isBn ? "মেয়াদ:" : "Duration:"}</span>
+            <span className="text-xs text-muted-foreground">{isBn ? "মেয়াদ:" : "Duration:"}</span>
             {quickDurations.map((d) => (
               <button
                 key={d.key}
                 onClick={() => setAllDurations(d)}
-                className="px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
               >
                 {isBn ? d.shortBn : d.shortEn}
                 {d.discount > 0 && <span className="ml-1 text-primary">-{d.discount}%</span>}
@@ -232,14 +232,14 @@ const PricingSection = () => {
               >
                 {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-0.5 gradient-primary" />}
                 {plan.highlighted && (
-                  <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 gradient-primary text-primary-foreground text-[10px] font-bold rounded-b-lg">
+                  <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 gradient-primary text-primary-foreground text-xs font-bold rounded-b-lg">
                     <Star className="w-3 h-3 fill-current" /> {tr("pricing.popular")}
                   </div>
                 )}
 
                 <div className="p-4 sm:p-6">
-                  <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-                  {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
+                  <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
+                  {plan.subtitle && <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>}
 
                   {/* Duration Selector per plan */}
                   <div className="mt-3">
@@ -264,15 +264,15 @@ const PricingSection = () => {
                           <span className="text-2xl sm:text-3xl font-extrabold tabular-nums text-foreground">
                             ৳{isBn ? toBengaliNum(totalPrice) : totalPrice.toLocaleString()}
                           </span>
-                          <span className="text-xs text-muted-foreground">/{durationLabel}</span>
+                          <span className="text-sm text-muted-foreground">/{durationLabel}</span>
                         </div>
                         {duration.discount > 0 && (
-                          <p className="text-[11px] text-primary font-medium mt-1">
+                          <p className="text-xs text-primary font-medium mt-1">
                             🎉 {isBn ? `${toBengaliNum(duration.discount)}% ছাড়!` : `${duration.discount}% off!`}
                           </p>
                         )}
                         {duration.months > 1 && (
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             ≈ ৳{isBn ? toBengaliNum(Math.round(totalPrice / duration.months)) : Math.round(totalPrice / duration.months).toLocaleString()}/{isBn ? "মাস" : "mo"}
                           </p>
                         )}
@@ -282,7 +282,7 @@ const PricingSection = () => {
 
                   <ul className="space-y-2 mb-6">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <div className="w-4 h-4 rounded-full bg-primary/8 flex items-center justify-center shrink-0">
                           <Check className="w-2.5 h-2.5 text-primary" />
                         </div>
@@ -292,7 +292,7 @@ const PricingSection = () => {
                   </ul>
 
                   {inCart ? (
-                    <div className="w-full py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-xs">
+                    <div className="w-full py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 bg-secondary text-foreground border border-border text-sm">
                       <Check className="w-3.5 h-3.5 text-primary" />
                       {isBn ? "কার্টে আছে" : "In Cart"}
                     </div>
@@ -312,7 +312,7 @@ const PricingSection = () => {
                           });
                         }
                       }}
-                      className={`w-full py-2.5 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-xs ${
+                      className={`w-full py-2.5 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-sm ${
                         plan.highlighted
                           ? "gradient-primary text-primary-foreground shadow-sm shadow-primary/15 hover:opacity-90"
                           : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
