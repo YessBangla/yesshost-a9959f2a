@@ -372,14 +372,14 @@ const DashboardLayout = () => {
             {/* Wallet Balance */}
             <Link
               to="/dashboard/wallet"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition-colors text-[12px] font-semibold whitespace-nowrap text-primary-foreground border border-white/20"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors text-[12px] font-semibold whitespace-nowrap text-foreground border border-border"
             >
-              <Wallet className="w-3.5 h-3.5" />
+              <Wallet className="w-3.5 h-3.5 text-primary" />
               <span>TK {formatAmount(walletBalance, lang)} BDT</span>
             </Link>
 
             {/* Notification Bell */}
-            <div className="[&_button]:text-primary-foreground [&_button]:hover:bg-white/15">
+            <div className="[&_button]:text-foreground [&_button]:hover:bg-primary/10">
               <NotificationBell />
             </div>
 
@@ -387,21 +387,21 @@ const DashboardLayout = () => {
             <div className="relative">
               <button
                 onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-white/20 hover:bg-white/15 rounded-r-lg pr-2 py-1 transition-colors"
+                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-border hover:bg-primary/10 rounded-r-lg pr-2 py-1 transition-colors"
               >
-                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
+                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-border shrink-0">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile?.full_name || "User"} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-white/20 flex items-center justify-center text-primary-foreground text-[11px] font-bold">
+                    <div className="w-full h-full bg-primary/15 flex items-center justify-center text-primary text-[11px] font-bold">
                       {(profile?.full_name || "U").charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-primary-foreground">
+                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-foreground">
                   {profile?.full_name || "User"}
                 </span>
-                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-primary-foreground/70" />
+                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-muted-foreground" />
               </button>
 
               {/* User Dropdown */}
