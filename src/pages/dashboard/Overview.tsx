@@ -216,7 +216,7 @@ const DashboardOverview = () => {
               <Server className="w-5 h-5 text-emerald-600" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{stats.activeServices}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums">{stats.activeServices}</p>
           <Link to="/hosting-plans" className="mt-3 flex items-center gap-1 text-xs text-emerald-600 font-semibold hover:underline">
             <span>+</span> {bn ? "নতুন সার্ভিস অর্ডার" : "Order New Service"}
           </Link>
