@@ -44,10 +44,19 @@ const DashboardSupport = () => {
     fetchTickets();
   };
 
+  const [sendingReply, setSendingReply] = useState(false);
+
   const sendReply = async () => {
     if (!user || !selectedTicket || !replyMsg.trim()) return;
-    await supabase.from("ticket_replies").insert({ ticket_id: selectedTicket, user_id: user.id, message: replyMsg });
+    setSendingReply(true);
+    const { error } = await supabase.from("ticket_replies").insert({ ticket_id: selectedTicket, user_id: user.id, message: replyMsg });
+    if (error) {
+      toast({ title: "❌", description: tr("dash.replyError") || (lang === "bn" ? "রিপ্লাই পাঠাতে সমস্যা হয়েছে" : "Failed to send reply"), variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: lang === "bn" ? "রিপ্লাই পাঠানো হয়েছে" : "Reply sent successfully" });
+    }
     setReplyMsg(""); fetchReplies(selectedTicket);
+    setSendingReply(false);
   };
 
   if (loading) return <SupportSkeleton />;
