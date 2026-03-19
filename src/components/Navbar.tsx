@@ -72,9 +72,10 @@ const Navbar = () => {
     },
     {
       label: tr("nav.reseller"),
-      href: "/services/linux-reseller",
-      cta: { label: isBn ? "রিসেলার প্ল্যান দেখুন" : "View Reseller Plans", href: "/services/linux-reseller" },
+      href: "/reseller-hosting",
+      cta: { label: isBn ? "রিসেলার প্ল্যান দেখুন" : "View Reseller Plans", href: "/reseller-hosting" },
       children: [
+        { label: isBn ? "রিসেলার হোস্টিং" : "Reseller Hosting", href: "/reseller-hosting", icon: Crown, desc: isBn ? "রিসেলার হোস্টিং প্ল্যান ও মূল্য" : "Reseller hosting plans & pricing" },
         { label: tr("nav.linuxReseller"), href: "/services/linux-reseller", icon: Users, desc: isBn ? "নিজের হোস্টিং ব্যবসা শুরু করুন" : "Start your hosting business" },
         { label: tr("nav.bdixReseller"), href: "/services/bdix-reseller", icon: WifiHigh, desc: isBn ? "বিডিআইএক্স রিসেলার প্যাকেজ" : "BDIX reseller packages" },
       ],
