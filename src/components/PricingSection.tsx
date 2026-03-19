@@ -232,7 +232,7 @@ const PricingSection = () => {
               >
                 {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-0.5 gradient-primary" />}
                 {plan.highlighted && (
-                  <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 gradient-primary text-primary-foreground text-[10px] font-bold rounded-b-lg">
+                  <div className="absolute -top-0 right-3 flex items-center gap-1 px-2.5 py-1 gradient-primary text-primary-foreground text-xs font-bold rounded-b-lg">
                     <Star className="w-3 h-3 fill-current" /> {tr("pricing.popular")}
                   </div>
                 )}
