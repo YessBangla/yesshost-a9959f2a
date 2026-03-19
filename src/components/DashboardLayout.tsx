@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
   ChevronRight, Home, PanelLeftClose, PanelLeft,
-  CreditCard, Share2, KeyRound, Bell, Settings
+  CreditCard, Share2, KeyRound, Bell, Settings, Wallet
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -31,6 +31,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/domains": { en: "Domains", bn: "ডোমেইন" },
   "/dashboard/profile": { en: "Profile", bn: "প্রোফাইল" },
   "/dashboard/reseller": { en: "Reseller", bn: "রিসেলার" },
+  "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
 };
 
 const DashboardLayout = () => {
@@ -83,6 +84,7 @@ const DashboardLayout = () => {
     { title: tr("dash.services"), url: "/dashboard/services", icon: Server },
     { title: bn ? "অর্ডার" : "Orders", url: "/dashboard/orders", icon: ShoppingBag },
     { title: tr("dash.billing"), url: "/dashboard/billing", icon: CreditCard },
+    { title: bn ? "ওয়ালেট" : "Wallet", url: "/dashboard/wallet", icon: Wallet },
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
     ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),

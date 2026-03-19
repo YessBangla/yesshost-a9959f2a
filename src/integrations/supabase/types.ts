@@ -1225,6 +1225,45 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount_bdt: number
+          created_at: string
+          description: string | null
+          id: string
+          payment_method: string | null
+          status: string
+          transaction_id: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_bdt?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          status?: string
+          transaction_id?: string | null
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_bdt?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          status?: string
+          transaction_id?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
