@@ -114,6 +114,27 @@ const DashboardOverview = () => {
       setLoading(false);
     };
     fetchData();
+
+    // Realtime wallet balance updates
+    const walletChannel = supabase
+      .channel('overview-wallet')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'wallet_transactions', filter: `user_id=eq.${user.id}` },
+        async () => {
+          const { data } = await supabase
+            .from("wallet_transactions").select("*")
+            .eq("user_id", user.id).eq("status", "completed");
+          const balance = (data || []).reduce((sum: number, t: any) => {
+            const isCredit = t.type === "deposit" || t.type === "refund";
+            return isCredit ? sum + Number(t.amount_bdt) : sum - Number(t.amount_bdt);
+          }, 0);
+          setStats(prev => ({ ...prev, walletBalance: balance }));
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(walletChannel); };
   }, [user]);
 
   const daysUntil = (date: string) => {
