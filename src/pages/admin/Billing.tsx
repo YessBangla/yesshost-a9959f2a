@@ -54,8 +54,12 @@ const AdminBilling = () => {
   const updateStatus = async (id: string, status: string) => {
     const update: any = { status };
     if (status === "paid") update.paid_at = new Date().toISOString();
-    await supabase.from("invoices").update(update).eq("id", id);
-    toast({ title: isBn ? "স্ট্যাটাস আপডেট হয়েছে" : "Status updated" });
+    const { error } = await supabase.from("invoices").update(update).eq("id", id);
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: isBn ? `ইনভয়েস "${status}" এ আপডেট হয়েছে` : `Invoice updated to "${status}"` });
+    }
     fetchData();
   };
 

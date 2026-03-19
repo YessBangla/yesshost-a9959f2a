@@ -13,7 +13,7 @@ const priorityColors: Record<string, string> = { low: "bg-muted text-muted-foreg
 
 const DashboardSupport = () => {
   const { user } = useAuth();
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
   const { toast } = useToast();
   const [tickets, setTickets] = useState<Tables<"support_tickets">[]>([]);
   const [replies, setReplies] = useState<Tables<"ticket_replies">[]>([]);
@@ -44,10 +44,19 @@ const DashboardSupport = () => {
     fetchTickets();
   };
 
+  const [sendingReply, setSendingReply] = useState(false);
+
   const sendReply = async () => {
     if (!user || !selectedTicket || !replyMsg.trim()) return;
-    await supabase.from("ticket_replies").insert({ ticket_id: selectedTicket, user_id: user.id, message: replyMsg });
+    setSendingReply(true);
+    const { error } = await supabase.from("ticket_replies").insert({ ticket_id: selectedTicket, user_id: user.id, message: replyMsg });
+    if (error) {
+      toast({ title: "❌", description: tr("dash.replyError") || (lang === "bn" ? "রিপ্লাই পাঠাতে সমস্যা হয়েছে" : "Failed to send reply"), variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: lang === "bn" ? "রিপ্লাই পাঠানো হয়েছে" : "Reply sent successfully" });
+    }
     setReplyMsg(""); fetchReplies(selectedTicket);
+    setSendingReply(false);
   };
 
   if (loading) return <SupportSkeleton />;
@@ -117,8 +126,10 @@ const DashboardSupport = () => {
             ))}
           </div>
           <div className="flex gap-2">
-            <input value={replyMsg} onChange={e => setReplyMsg(e.target.value)} placeholder={tr("dash.replyPlaceholder")} className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none text-sm" onKeyDown={e => e.key === "Enter" && sendReply()} />
-            <button onClick={sendReply} className="gradient-primary text-primary-foreground px-4 py-3 rounded-xl hover:opacity-90 transition-all"><Send className="w-4 h-4" /></button>
+            <input value={replyMsg} onChange={e => setReplyMsg(e.target.value)} placeholder={tr("dash.replyPlaceholder")} className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none text-sm" onKeyDown={e => e.key === "Enter" && !sendingReply && sendReply()} />
+            <button onClick={sendReply} disabled={sendingReply || !replyMsg.trim()} className="gradient-primary text-primary-foreground px-4 py-3 rounded-xl hover:opacity-90 transition-all disabled:opacity-50">
+              {sendingReply ? <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
           </div>
         </div>
       </div>

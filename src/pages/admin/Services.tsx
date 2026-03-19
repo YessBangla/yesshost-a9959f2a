@@ -53,8 +53,12 @@ const AdminServices = () => {
   useEffect(() => { fetchData(); }, []);
 
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from("services").update({ status: status as any }).eq("id", id);
-    toast({ title: isBn ? "স্ট্যাটাস আপডেট হয়েছে" : "Status updated" });
+    const { error } = await supabase.from("services").update({ status: status as any }).eq("id", id);
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: isBn ? `সার্ভিস "${status}" এ আপডেট হয়েছে` : `Service updated to "${status}"` });
+    }
     fetchData();
   };
 

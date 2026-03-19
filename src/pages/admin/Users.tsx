@@ -100,10 +100,11 @@ const AdminUsers = () => {
     if (hasAdmin) {
       const { data: roleData } = await supabase.from("user_roles").select("id").eq("user_id", userId).eq("role", "admin").single();
       if (roleData) await supabase.from("user_roles").delete().eq("id", roleData.id);
+      toast({ title: "✅", description: isBn ? "অ্যাডমিন রোল সরানো হয়েছে" : "Admin role removed" });
     } else {
       await supabase.from("user_roles").insert({ user_id: userId, role: "admin" });
+      toast({ title: "✅", description: isBn ? "অ্যাডমিন রোল যুক্ত হয়েছে" : "Admin role granted" });
     }
-    toast({ title: isBn ? "রোল আপডেট হয়েছে" : "Role updated" });
     fetchUsers();
   };
 
@@ -111,10 +112,11 @@ const AdminUsers = () => {
     if (hasCC) {
       const { data: roleData } = await supabase.from("user_roles").select("id").eq("user_id", userId).eq("role", "call_center" as any).single();
       if (roleData) await supabase.from("user_roles").delete().eq("id", roleData.id);
+      toast({ title: "✅", description: isBn ? "কল সেন্টার রোল সরানো হয়েছে" : "Call center role removed" });
     } else {
       await supabase.from("user_roles").insert({ user_id: userId, role: "call_center" as any });
+      toast({ title: "✅", description: isBn ? "কল সেন্টার রোল যুক্ত হয়েছে" : "Call center role granted" });
     }
-    toast({ title: isBn ? "কল সেন্টার রোল আপডেট হয়েছে" : "Call center role updated" });
     fetchUsers();
   };
 
@@ -144,7 +146,7 @@ const AdminUsers = () => {
         await supabase.from("user_permissions" as any).insert(permInserts);
       }
 
-      toast({ title: isBn ? "ইউজার তৈরি হয়েছে!" : "User created!" });
+      toast({ title: "✅ " + (isBn ? "সফল!" : "Success!"), description: isBn ? "নতুন ইউজার তৈরি হয়েছে" : "New user has been created" });
       setShowCreate(false);
       setCreateForm({ email: "", password: "", full_name: "", phone: "", roles: ["user"], permissions: [] });
       fetchUsers();
@@ -178,7 +180,7 @@ const AdminUsers = () => {
       const inserts = editPerms.map(p => ({ user_id: editPermUser.user_id, permission: p }));
       await supabase.from("user_permissions" as any).insert(inserts);
     }
-    toast({ title: isBn ? "অ্যাক্সেস আপডেট হয়েছে" : "Access updated" });
+    toast({ title: "✅", description: isBn ? "ইউজারের অ্যাক্সেস ও রোল আপডেট হয়েছে" : "User access and roles updated successfully" });
     setSavingPerms(false);
     setEditPermUser(null);
     fetchUsers();

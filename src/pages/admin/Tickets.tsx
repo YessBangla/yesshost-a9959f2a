@@ -69,8 +69,13 @@ const AdminTickets = () => {
   };
 
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from("support_tickets").update({ status: status as any }).eq("id", id);
-    toast({ title: isBn ? "স্ট্যাটাস আপডেট হয়েছে" : "Status updated" });
+    const { error } = await supabase.from("support_tickets").update({ status: status as any }).eq("id", id);
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      const sc = statusConfig[status];
+      toast({ title: "✅", description: isBn ? `টিকেট "${sc?.label_bn || status}" এ আপডেট হয়েছে` : `Ticket updated to "${sc?.label_en || status}"` });
+    }
     fetchData();
     if (selectedTicket?.id === id) setSelectedTicket({ ...selectedTicket, status: status as any });
   };
@@ -78,12 +83,23 @@ const AdminTickets = () => {
   const sendReply = async () => {
     if (!replyMsg.trim() || !selectedTicket || !user) return;
     setSending(true);
-    await supabase.from("ticket_replies").insert({
+    const { error } = await supabase.from("ticket_replies").insert({
       ticket_id: selectedTicket.id,
       user_id: user.id,
       message: replyMsg,
       is_staff: true,
     });
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: isBn ? "স্টাফ রিপ্লাই পাঠানো হয়েছে" : "Staff reply sent" });
+      // Auto-update ticket status to in_progress if it was open
+      if (selectedTicket.status === "open") {
+        await supabase.from("support_tickets").update({ status: "in_progress" as any }).eq("id", selectedTicket.id);
+        setSelectedTicket({ ...selectedTicket, status: "in_progress" as any });
+        fetchData();
+      }
+    }
     setReplyMsg("");
     const { data } = await supabase.from("ticket_replies").select("*").eq("ticket_id", selectedTicket.id).order("created_at");
     setReplies(data || []);

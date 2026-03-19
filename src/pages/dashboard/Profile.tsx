@@ -7,7 +7,7 @@ import { Save, Camera, User, Mail, Phone, MapPin, Building2, Globe, FileText } f
 
 const DashboardProfile = () => {
   const { user, profile, refreshProfile } = useAuth();
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -76,9 +76,9 @@ const DashboardProfile = () => {
     }).eq("user_id", user.id);
 
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "❌", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "✅", description: tr("dash.profileUpdated") });
+      toast({ title: "✅ " + (lang === "bn" ? "সফল!" : "Saved!"), description: tr("dash.profileUpdated") || (lang === "bn" ? "প্রোফাইল আপডেট হয়েছে" : "Profile updated successfully") });
       await refreshProfile();
     }
     setLoading(false);
