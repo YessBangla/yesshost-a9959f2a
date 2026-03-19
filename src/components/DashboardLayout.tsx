@@ -290,26 +290,34 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* ===== TOP MENUBAR ===== */}
-      <div className="w-full bg-primary text-primary-foreground sticky top-0 z-40">
-        <div className="flex items-center justify-between h-11 px-3 sm:px-4 lg:px-6 max-w-full">
-          {/* Left: Logo (mobile) + Menu Items */}
-          <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar">
+      <div className="w-full bg-card text-foreground sticky top-0 z-40 border-b border-border shadow-sm">
+        <div className="flex items-center justify-between h-12 px-3 sm:px-4 lg:px-6 max-w-full">
+          {/* Left: Logo + Menu Items */}
+          <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-primary-foreground/10 transition-colors mr-1"
+              className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors mr-2"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-5 h-5 text-foreground" />
             </button>
 
-            {/* Top menu items */}
-            {topMenuItems.map((item) => (
+            {/* Logo */}
+            <Link to="/dashboard" className="hidden lg:flex items-center mr-4 shrink-0">
+              <img src={logoWhite} alt="Yess Host" className="h-7 brightness-0 dark:brightness-100" />
+            </Link>
+
+            {/* Top menu items with pipe separators */}
+            {topMenuItems.map((item, index) => (
               <div
                 key={item.label}
-                className="relative"
+                className="relative flex items-center"
                 onMouseEnter={() => item.hasDropdown && setActiveTopMenu(item.label)}
                 onMouseLeave={() => setActiveTopMenu(null)}
               >
+                {index > 0 && (
+                  <span className="text-border mx-0 hidden sm:inline-block">|</span>
+                )}
                 <Link
                   to={item.href}
                   onClick={(e) => {
@@ -318,14 +326,14 @@ const DashboardLayout = () => {
                       setActiveTopMenu(activeTopMenu === item.label ? null : item.label);
                     }
                   }}
-                  className={`flex items-center gap-1 px-2.5 lg:px-3 py-1.5 rounded-md text-[13px] font-medium whitespace-nowrap transition-all hover:bg-primary-foreground/10 ${
+                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-all hover:text-primary ${
                     location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
-                      ? "bg-primary-foreground/15"
-                      : ""
+                      ? "text-primary font-semibold"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {item.label}
-                  {item.hasDropdown && <ChevronDown className="w-3 h-3 opacity-70" />}
+                  {item.hasDropdown && <ChevronDown className="w-3 h-3 opacity-60" />}
                 </Link>
 
                 {/* Dropdown */}
@@ -338,7 +346,7 @@ const DashboardLayout = () => {
                       transition={{ duration: 0.15 }}
                       className="absolute top-full left-0 pt-1 z-50"
                     >
-                      <div className="bg-card text-card-foreground rounded-lg shadow-xl border border-border/60 py-1 min-w-[180px]">
+                      <div className="bg-card text-card-foreground rounded-lg shadow-xl border border-border/60 py-1 min-w-[200px]">
                         {item.children.map((child) => {
                           const Icon = child.icon;
                           return (
@@ -369,18 +377,18 @@ const DashboardLayout = () => {
           </div>
 
           {/* Right: Wallet + Bell + User */}
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-2">
             {/* Wallet Balance */}
             <Link
               to="/dashboard/wallet"
-              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/15 transition-colors text-[12px] font-semibold whitespace-nowrap border border-primary-foreground/15"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors text-[12px] font-semibold whitespace-nowrap text-primary border border-primary/20"
             >
               <Wallet className="w-3.5 h-3.5" />
               <span>TK {formatAmount(walletBalance, lang)} BDT</span>
             </Link>
 
             {/* Notification Bell */}
-            <div className="[&_button]:text-primary-foreground [&_button]:hover:bg-primary-foreground/10">
+            <div className="[&_button]:text-muted-foreground [&_button]:hover:bg-muted [&_button]:hover:text-foreground">
               <NotificationBell />
             </div>
 
@@ -388,21 +396,21 @@ const DashboardLayout = () => {
             <div className="relative">
               <button
                 onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-primary-foreground/20 hover:bg-primary-foreground/10 rounded-r-lg pr-2 py-1 transition-colors"
+                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-border hover:bg-muted rounded-r-lg pr-2 py-1 transition-colors"
               >
-                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-primary-foreground/25 shrink-0">
+                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-primary/20 shrink-0">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile?.full_name || "User"} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-primary-foreground/20 flex items-center justify-center text-primary-foreground text-[11px] font-bold">
+                    <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-[11px] font-bold">
                       {(profile?.full_name || "U").charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate">
+                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-foreground">
                   {profile?.full_name || "User"}
                 </span>
-                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block" />
+                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-muted-foreground" />
               </button>
 
               {/* User Dropdown */}
