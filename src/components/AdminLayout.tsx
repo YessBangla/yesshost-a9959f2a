@@ -112,7 +112,7 @@ const AdminLayout = () => {
         { title: tr("admin.billing"), url: "/admin/billing", icon: FileText },
         { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
         { title: bn ? "WHM সার্ভার" : "WHM Server", url: "/admin/whm", icon: HardDrive },
-        { title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 },
+        
       ],
     },
     {
