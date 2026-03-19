@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const CHAT_STORAGE_KEY = "yesshost_live_chat_id";
+const CHAT_OPEN_KEY = "yesshost_live_chat_open";
 
 type Message = {
   id: string;
