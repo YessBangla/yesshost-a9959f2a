@@ -338,7 +338,7 @@ const ServiceDetail = () => {
             </h1>
 
             {description && (
-              <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+              <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
                 {description}
               </p>
             )}
