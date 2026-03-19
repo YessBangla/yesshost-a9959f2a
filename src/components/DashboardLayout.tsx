@@ -179,8 +179,16 @@ const DashboardLayout = () => {
     },
     {
       label: bn ? "অ্যাফিলিয়েট" : "Affiliate",
-      href: "/company/affiliate",
+      href: "/affiliate",
       icon: Share2,
+      hasDropdown: true,
+      children: [
+        { label: bn ? "অ্যাফিলিয়েট অ্যাকাউন্ট" : "Affiliate Account", href: "/affiliate", icon: Users },
+        { label: bn ? "রেফারেল লিংক" : "Referral Link", href: "/affiliate", icon: Share2 },
+        { label: bn ? "আমার কমিশন" : "My Commissions", href: "/affiliate", icon: DollarSign },
+        { label: bn ? "পেমেন্ট রিকোয়েস্ট" : "Payment Requests", href: "/affiliate", icon: CreditCard },
+        { label: bn ? "রেফারেল ক্লিক" : "Referral Clicks", href: "/affiliate", icon: MousePointer },
+      ],
     },
   ];
 
