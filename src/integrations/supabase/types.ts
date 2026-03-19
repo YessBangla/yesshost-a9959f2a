@@ -729,6 +729,127 @@ export type Database = {
         }
         Relationships: []
       }
+      reseller_accounts: {
+        Row: {
+          bandwidth_mb: number
+          cpanel_created: boolean
+          created_at: string
+          disk_quota_mb: number
+          domain: string
+          email: string | null
+          id: string
+          plan_name: string
+          reseller_package_id: string
+          reseller_user_id: string
+          status: string
+          suspended_at: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          bandwidth_mb?: number
+          cpanel_created?: boolean
+          created_at?: string
+          disk_quota_mb?: number
+          domain: string
+          email?: string | null
+          id?: string
+          plan_name?: string
+          reseller_package_id: string
+          reseller_user_id: string
+          status?: string
+          suspended_at?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          bandwidth_mb?: number
+          cpanel_created?: boolean
+          created_at?: string
+          disk_quota_mb?: number
+          domain?: string
+          email?: string | null
+          id?: string
+          plan_name?: string
+          reseller_package_id?: string
+          reseller_user_id?: string
+          status?: string
+          suspended_at?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reseller_accounts_reseller_package_id_fkey"
+            columns: ["reseller_package_id"]
+            isOneToOne: false
+            referencedRelation: "reseller_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reseller_packages: {
+        Row: {
+          created_at: string
+          id: string
+          max_accounts: number
+          max_bandwidth_mb: number
+          max_disk_mb: number
+          package_name: string
+          service_id: string | null
+          status: string
+          updated_at: string
+          used_accounts: number
+          used_bandwidth_mb: number
+          used_disk_mb: number
+          user_id: string
+          whm_server_host: string | null
+          whm_username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_accounts?: number
+          max_bandwidth_mb?: number
+          max_disk_mb?: number
+          package_name?: string
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+          used_accounts?: number
+          used_bandwidth_mb?: number
+          used_disk_mb?: number
+          user_id: string
+          whm_server_host?: string | null
+          whm_username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_accounts?: number
+          max_bandwidth_mb?: number
+          max_disk_mb?: number
+          package_name?: string
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+          used_accounts?: number
+          used_bandwidth_mb?: number
+          used_disk_mb?: number
+          user_id?: string
+          whm_server_host?: string | null
+          whm_username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reseller_packages_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           billing_cycle: string | null
@@ -1123,7 +1244,7 @@ export type Database = {
       provision_order: { Args: { _order_id: string }; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user" | "call_center"
+      app_role: "admin" | "moderator" | "user" | "call_center" | "reseller"
       discount_type: "percentage" | "fixed"
       invoice_status: "paid" | "unpaid" | "overdue" | "cancelled" | "refunded"
       order_status:
@@ -1294,7 +1415,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user", "call_center"],
+      app_role: ["admin", "moderator", "user", "call_center", "reseller"],
       discount_type: ["percentage", "fixed"],
       invoice_status: ["paid", "unpaid", "overdue", "cancelled", "refunded"],
       order_status: [
