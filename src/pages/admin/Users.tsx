@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   Users as UsersIcon, Search, Shield, ShieldOff, Eye, X,
   Mail, Phone, MapPin, Building2, Calendar, Globe, Filter, Headphones,
-  UserPlus, Check, Lock
+  UserPlus, Check, Lock, LayoutDashboard, Settings2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -70,6 +70,7 @@ const AdminUsers = () => {
   // Edit permissions dialog
   const [editPermUser, setEditPermUser] = useState<UserWithRoles | null>(null);
   const [editPerms, setEditPerms] = useState<string[]>([]);
+  const [editRoles, setEditRoles] = useState<string[]>([]);
   const [savingPerms, setSavingPerms] = useState(false);
 
   const fetchUsers = async () => {
@@ -156,14 +157,27 @@ const AdminUsers = () => {
   const handleSavePermissions = async () => {
     if (!editPermUser) return;
     setSavingPerms(true);
-    // Delete existing
+
+    // Update roles
+    const currentRoles = editPermUser.roles;
+    const rolesToAdd = editRoles.filter(r => !currentRoles.includes(r));
+    const rolesToRemove = currentRoles.filter(r => !editRoles.includes(r));
+
+    for (const role of rolesToRemove) {
+      const { data: roleData } = await supabase.from("user_roles").select("id").eq("user_id", editPermUser.user_id).eq("role", role as any).single();
+      if (roleData) await supabase.from("user_roles").delete().eq("id", roleData.id);
+    }
+    for (const role of rolesToAdd) {
+      await supabase.from("user_roles").insert({ user_id: editPermUser.user_id, role: role as any });
+    }
+
+    // Update permissions
     await supabase.from("user_permissions" as any).delete().eq("user_id", editPermUser.user_id);
-    // Insert new
     if (editPerms.length > 0) {
       const inserts = editPerms.map(p => ({ user_id: editPermUser.user_id, permission: p }));
       await supabase.from("user_permissions" as any).insert(inserts);
     }
-    toast({ title: isBn ? "পারমিশন আপডেট হয়েছে" : "Permissions updated" });
+    toast({ title: isBn ? "অ্যাক্সেস আপডেট হয়েছে" : "Access updated" });
     setSavingPerms(false);
     setEditPermUser(null);
     fetchUsers();
@@ -368,25 +382,11 @@ const AdminUsers = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => { setEditPermUser(u); setEditPerms([...u.permissions]); }}
-                          className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors"
-                          title={isBn ? "পারমিশন সম্পাদনা" : "Edit Permissions"}
+                          onClick={() => { setEditPermUser(u); setEditPerms([...u.permissions]); setEditRoles([...u.roles]); }}
+                          className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
+                          title={isBn ? "অ্যাক্সেস ম্যানেজ করুন" : "Manage Access"}
                         >
-                          <Lock className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => toggleAdminRole(u.user_id, isAdmin)}
-                          className={`p-2 rounded-lg transition-colors ${isAdmin ? "hover:bg-destructive/10 text-destructive" : "hover:bg-secondary/60 text-muted-foreground"}`}
-                          title={isAdmin ? (isBn ? "অ্যাডমিন সরান" : "Remove Admin") : (isBn ? "অ্যাডমিন করুন" : "Make Admin")}
-                        >
-                          {isAdmin ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
-                        </button>
-                        <button
-                          onClick={() => toggleCallCenterRole(u.user_id, u.roles.includes("call_center"))}
-                          className={`p-2 rounded-lg transition-colors ${u.roles.includes("call_center") ? "hover:bg-primary/10 text-primary" : "hover:bg-secondary/60 text-muted-foreground"}`}
-                          title={u.roles.includes("call_center") ? (isBn ? "কল সেন্টার সরান" : "Remove Call Center") : (isBn ? "কল সেন্টার করুন" : "Make Call Center")}
-                        >
-                          <Headphones className="w-4 h-4" />
+                          <Settings2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -486,28 +486,106 @@ const AdminUsers = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Permissions Dialog */}
       <Dialog open={!!editPermUser} onOpenChange={() => setEditPermUser(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-primary" />
-              {isBn ? "পারমিশন সম্পাদনা" : "Edit Permissions"} — {editPermUser?.full_name || "User"}
+              <Settings2 className="w-5 h-5 text-primary" />
+              {isBn ? "অ্যাক্সেস ম্যানেজমেন্ট" : "Access Management"} — {editPermUser?.full_name || "User"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-2">
-            <div className="flex gap-1.5 flex-wrap">
-              {editPermUser?.roles.map(r => (
-                <Badge key={r} variant={r === "admin" ? "destructive" : "secondary"} className="text-xs">{r}</Badge>
-              ))}
+          <div className="space-y-5 mt-2">
+            {/* Panel Access / Role Toggles */}
+            <div>
+              <p className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wider">{isBn ? "প্যানেল অ্যাক্সেস" : "Panel Access"}</p>
+              <div className="space-y-2">
+                {[
+                  {
+                    role: "user",
+                    label: isBn ? "ক্লায়েন্ট ড্যাশবোর্ড" : "Client Dashboard",
+                    desc: isBn ? "/dashboard — সার্ভিস, বিলিং, সাপোর্ট, অর্ডার" : "/dashboard — Services, Billing, Support, Orders",
+                    icon: LayoutDashboard,
+                    color: "bg-primary/10 text-primary border-primary/30",
+                    activeColor: "bg-primary/15 border-primary/50",
+                    always: true,
+                  },
+                  {
+                    role: "call_center",
+                    label: isBn ? "কল সেন্টার প্যানেল" : "Call Center Panel",
+                    desc: isBn ? "/call-center — অর্ডার, লাইভ চ্যাট, টিকেট" : "/call-center — Orders, Live Chat, Tickets",
+                    icon: Headphones,
+                    color: "bg-blue-500/10 text-blue-600 border-blue-500/30",
+                    activeColor: "bg-blue-500/15 border-blue-500/50",
+                  },
+                  {
+                    role: "moderator",
+                    label: isBn ? "মডারেটর অ্যাক্সেস" : "Moderator Access",
+                    desc: isBn ? "কন্টেন্ট মডারেশন ও চ্যাট রুম" : "Content moderation & chat rooms",
+                    icon: Shield,
+                    color: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+                    activeColor: "bg-amber-500/15 border-amber-500/50",
+                  },
+                  {
+                    role: "admin",
+                    label: isBn ? "অ্যাডমিন প্যানেল" : "Admin Panel",
+                    desc: isBn ? "/admin — সম্পূর্ণ সিস্টেম কন্ট্রোল" : "/admin — Full system control",
+                    icon: Shield,
+                    color: "bg-destructive/10 text-destructive border-destructive/30",
+                    activeColor: "bg-destructive/15 border-destructive/50",
+                  },
+                ].map(panel => {
+                  const isActive = panel.always || editRoles.includes(panel.role);
+                  return (
+                    <div
+                      key={panel.role}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                        isActive ? panel.activeColor : "bg-secondary/20 border-border/40"
+                      }`}
+                    >
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isActive ? panel.color : "bg-secondary/40 text-muted-foreground"}`}>
+                        <panel.icon className="w-4.5 h-4.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{panel.label}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{panel.desc}</p>
+                      </div>
+                      {panel.always ? (
+                        <Badge variant="secondary" className="text-[10px] shrink-0">{isBn ? "সবসময়" : "Always"}</Badge>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditRoles(prev =>
+                              prev.includes(panel.role) ? prev.filter(r => r !== panel.role) : [...prev, panel.role]
+                            );
+                          }}
+                          className={`shrink-0 w-12 h-7 rounded-full transition-all relative ${
+                            isActive ? "bg-primary" : "bg-secondary/60 border border-border/50"
+                          }`}
+                        >
+                          <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
+                            isActive ? "left-6" : "left-1"
+                          }`} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <PermissionChecklist perms={editPerms} setPerms={setEditPerms} />
+
+            {/* Granular Permissions */}
+            <div>
+              <p className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wider">{isBn ? "বিস্তারিত পারমিশন" : "Granular Permissions"}</p>
+              <PermissionChecklist perms={editPerms} setPerms={setEditPerms} />
+            </div>
+
             <button
               onClick={handleSavePermissions}
               disabled={savingPerms}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
             >
-              {savingPerms ? <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <><Check className="w-4 h-4" /> {isBn ? "সংরক্ষণ করুন" : "Save Permissions"}</>}
+              {savingPerms ? <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <><Check className="w-4 h-4" /> {isBn ? "সংরক্ষণ করুন" : "Save Access"}</>}
             </button>
           </div>
         </DialogContent>
