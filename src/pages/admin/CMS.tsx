@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { CMSSkeleton } from "@/components/DashboardSkeleton";
 import {
   Plus, Pencil, Trash2, Save, X, FileText, MessageSquare,
   HelpCircle, Layout, Eye, EyeOff, GripVertical, Search, Globe
