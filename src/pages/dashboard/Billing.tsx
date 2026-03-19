@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Eye } from "lucide-react";
+import { FileText, Eye, CreditCard, Building2, Loader2 } from "lucide-react";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import InvoiceReport from "@/components/InvoiceReport";
 import { formatAmount } from "@/lib/formatPrice";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+
+import bkashLogo from "@/assets/partners/bkash.svg";
+import nagadLogo from "@/assets/partners/nagad.svg";
+import sslLogo from "@/assets/partners/ssl-wireless.png";
 
 const statusColors: Record<string, string> = {
   paid: "bg-success/10 text-success",
@@ -17,18 +24,84 @@ const statusColors: Record<string, string> = {
   refunded: "bg-info/10 text-info",
 };
 
+const statusLabels: Record<string, { bn: string; en: string }> = {
+  paid: { bn: "পরিশোধিত", en: "Paid" },
+  unpaid: { bn: "অপরিশোধিত", en: "Unpaid" },
+  overdue: { bn: "মেয়াদোত্তীর্ণ", en: "Overdue" },
+  cancelled: { bn: "বাতিল", en: "Cancelled" },
+  refunded: { bn: "ফেরত", en: "Refunded" },
+};
+
+const paymentMethods = [
+  { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", descBn: "ভিসা, মাস্টার, বিকাশ, নগদ, মোবাইল ব্যাংকিং", ready: true },
+  { id: "bkash", label: "bKash", labelBn: "বিকাশ", logo: bkashLogo, desc: "bKash Tokenized Payment", descBn: "বিকাশ টোকেনাইজড পেমেন্ট", ready: false },
+  { id: "nagad", label: "Nagad", labelBn: "নগদ", logo: nagadLogo, desc: "Nagad Digital Payment", descBn: "নগদ ডিজিটাল পেমেন্ট", ready: false },
+  { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, desc: "Manual Bank Transfer", descBn: "ম্যানুয়াল ব্যাংক ট্রান্সফার", ready: true },
+];
+
 const DashboardBilling = () => {
   const { user } = useAuth();
   const { tr, lang } = useLanguage();
   const isBn = lang === "bn";
+  const { toast } = useToast();
   const [invoices, setInvoices] = useState<Tables<"invoices">[]>([]);
   const [loading, setLoading] = useState(true);
   const [reportInvoice, setReportInvoice] = useState<Tables<"invoices"> | null>(null);
+  const [payInvoice, setPayInvoice] = useState<Tables<"invoices"> | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState("");
+  const [paying, setPaying] = useState(false);
 
-  useEffect(() => {
+  const fetchInvoices = () => {
     if (!user) return;
     supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => { setInvoices(data || []); setLoading(false); });
-  }, [user]);
+  };
+
+  useEffect(() => { fetchInvoices(); }, [user]);
+
+  const handlePay = async () => {
+    if (!payInvoice || !selectedPayment) return;
+
+    if (selectedPayment === "bank") {
+      toast({
+        title: isBn ? "ব্যাংক ট্রান্সফার" : "Bank Transfer",
+        description: isBn
+          ? `৳${formatAmount(Number(payInvoice.amount_bdt), lang)} ব্যাংক ট্রান্সফার করুন এবং রেফারেন্সে "${payInvoice.invoice_number}" উল্লেখ করুন। পেমেন্ট নিশ্চিত হলে আমরা আপনাকে জানাবো।`
+          : `Please transfer ৳${formatAmount(Number(payInvoice.amount_bdt), lang)} and mention "${payInvoice.invoice_number}" as reference. We'll confirm once payment is verified.`,
+      });
+      setPayInvoice(null);
+      setSelectedPayment("");
+      return;
+    }
+
+    if (selectedPayment === "sslcommerz") {
+      setPaying(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("sslcommerz-init", {
+          body: {
+            amount: Number(payInvoice.amount_bdt),
+            invoice_number: payInvoice.invoice_number,
+            invoice_id: payInvoice.id,
+            customer_name: user?.user_metadata?.full_name || "Customer",
+            customer_email: user?.email || "",
+          },
+        });
+        if (error || !data?.url) {
+          toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট সেশন শুরু করা যায়নি" : "Failed to initiate payment", variant: "destructive" });
+        } else {
+          window.location.href = data.url;
+        }
+      } catch {
+        toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট প্রসেসিং এ সমস্যা হয়েছে" : "Payment processing error", variant: "destructive" });
+      }
+      setPaying(false);
+      return;
+    }
+
+    toast({
+      title: isBn ? "শীঘ্রই আসছে" : "Coming Soon",
+      description: isBn ? "এই পেমেন্ট মেথড শীঘ্রই চালু হবে" : "This payment method will be available soon",
+    });
+  };
 
   if (loading) return <BillingSkeleton />;
 
@@ -69,37 +142,142 @@ const DashboardBilling = () => {
               <thead>
                 <tr className="border-b border-border bg-secondary/30">
                   <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.invoiceNo")}</th>
-                  <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.description")}</th>
+                  <th className="text-left p-4 font-semibold text-muted-foreground hidden md:table-cell">{tr("dash.description")}</th>
                   <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.amount")}</th>
                   <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.status")}</th>
-                  <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.dueDate")}</th>
-                  <th className="text-left p-4 font-semibold text-muted-foreground">{isBn ? "রিপোর্ট" : "Report"}</th>
+                  <th className="text-left p-4 font-semibold text-muted-foreground hidden sm:table-cell">{tr("dash.dueDate")}</th>
+                  <th className="text-right p-4 font-semibold text-muted-foreground">{isBn ? "অ্যাকশন" : "Actions"}</th>
                 </tr>
               </thead>
               <tbody>
-                {invoices.map((inv) => (
-                  <tr key={inv.id} className="border-b border-border/50 hover:bg-secondary/10 transition-colors">
-                    <td className="p-4 font-medium text-foreground">{inv.invoice_number}</td>
-                    <td className="p-4 text-muted-foreground">{inv.description || "-"}</td>
-                    <td className="p-4 font-bold text-foreground">৳{formatAmount(Number(inv.amount_bdt), lang)}</td>
-                    <td className="p-4"><span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[inv.status]}`}>{inv.status}</span></td>
-                    <td className="p-4 text-muted-foreground">{inv.due_date ? new Date(inv.due_date).toLocaleDateString("bn-BD") : "-"}</td>
-                    <td className="p-4">
-                      <button
-                        onClick={() => setReportInvoice(inv)}
-                        className="p-1.5 rounded-lg hover:bg-secondary/60 text-primary hover:text-primary/80 transition-colors"
-                        title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {invoices.map((inv) => {
+                  const canPay = inv.status === "unpaid" || inv.status === "overdue";
+                  const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
+                  return (
+                    <tr key={inv.id} className="border-b border-border/50 hover:bg-secondary/10 transition-colors">
+                      <td className="p-4">
+                        <p className="font-mono text-xs text-primary font-semibold">{inv.invoice_number}</p>
+                        <p className="text-[11px] text-muted-foreground md:hidden mt-0.5">{inv.description || "-"}</p>
+                      </td>
+                      <td className="p-4 text-muted-foreground hidden md:table-cell">{inv.description || "-"}</td>
+                      <td className="p-4 font-bold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</td>
+                      <td className="p-4">
+                        <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[inv.status]}`}>
+                          {isBn ? sl.bn : sl.en}
+                        </span>
+                      </td>
+                      <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{inv.due_date ? new Date(inv.due_date).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}</td>
+                      <td className="p-4">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {canPay && (
+                            <Button
+                              size="sm"
+                              onClick={() => { setPayInvoice(inv); setSelectedPayment(""); }}
+                              className="gap-1.5 text-xs h-8"
+                            >
+                              <CreditCard className="w-3.5 h-3.5" />
+                              {isBn ? "পে করুন" : "Pay Now"}
+                            </Button>
+                          )}
+                          <button
+                            onClick={() => setReportInvoice(inv)}
+                            className="p-1.5 rounded-lg hover:bg-secondary/60 text-primary hover:text-primary/80 transition-colors"
+                            title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       )}
+
+      {/* Payment Dialog */}
+      <Dialog open={!!payInvoice} onOpenChange={() => { setPayInvoice(null); setSelectedPayment(""); }}>
+        <DialogContent className="max-w-md">
+          <div className="space-y-5">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">{isBn ? "ইনভয়েস পেমেন্ট" : "Invoice Payment"}</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {isBn ? "ইনভয়েস" : "Invoice"}: <span className="font-mono text-primary font-semibold">{payInvoice?.invoice_number}</span>
+              </p>
+            </div>
+
+            <div className="glass-card rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">{isBn ? "পরিশোধযোগ্য পরিমাণ" : "Amount Due"}</p>
+                <p className="text-2xl font-bold text-foreground">৳{formatAmount(Number(payInvoice?.amount_bdt || 0), lang)}</p>
+              </div>
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[payInvoice?.status || "unpaid"]}`}>
+                {isBn ? statusLabels[payInvoice?.status || "unpaid"].bn : statusLabels[payInvoice?.status || "unpaid"].en}
+              </div>
+            </div>
+
+            {payInvoice?.description && (
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">{isBn ? "বিবরণ:" : "Description:"}</span> {payInvoice.description}
+              </p>
+            )}
+
+            <div>
+              <p className="text-sm font-semibold text-foreground mb-3">{isBn ? "পেমেন্ট মেথড নির্বাচন করুন" : "Select Payment Method"}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {paymentMethods.map((pm) => {
+                  const Icon = pm.icon;
+                  return (
+                    <button
+                      key={pm.id}
+                      onClick={() => setSelectedPayment(pm.id)}
+                      disabled={!pm.ready}
+                      className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedPayment === pm.id
+                          ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                          : "border-border/50 hover:border-border bg-secondary/20 hover:bg-secondary/40"
+                      } ${!pm.ready ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      {pm.logo ? (
+                        <img src={pm.logo} alt={pm.label} className="h-7 object-contain" />
+                      ) : Icon ? (
+                        <Icon className="w-7 h-7 text-muted-foreground" />
+                      ) : null}
+                      <div className="text-center">
+                        <p className="text-xs font-semibold text-foreground">{isBn ? pm.labelBn : pm.label}</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{isBn ? pm.descBn : pm.desc}</p>
+                      </div>
+                      {!pm.ready && (
+                        <span className="absolute top-1.5 right-1.5 text-[9px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full font-medium">
+                          {isBn ? "শীঘ্রই" : "Soon"}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <Button
+                onClick={handlePay}
+                disabled={!selectedPayment || paying}
+                className="flex-1 gap-2"
+              >
+                {paying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+                {paying
+                  ? (isBn ? "প্রসেসিং..." : "Processing...")
+                  : (isBn ? "পেমেন্ট করুন" : "Proceed to Pay")}
+              </Button>
+              <Button variant="outline" onClick={() => { setPayInvoice(null); setSelectedPayment(""); }}>
+                {isBn ? "বাতিল" : "Cancel"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <InvoiceReport
         invoice={reportInvoice}
