@@ -112,6 +112,7 @@ const DashboardLayout = () => {
       }
       setServiceCount(count || 0);
       setDomainCount(dCount || 0);
+      setUnpaidInvoiceCount(invCount || 0);
     };
     fetchData();
   }, [user]);
