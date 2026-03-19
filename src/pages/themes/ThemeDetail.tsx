@@ -126,9 +126,9 @@ const ThemeDetail = () => {
               <div className="relative rounded-2xl overflow-hidden border border-border">
                 <img src={theme.thumbnail_url} alt={theme.name} className="w-full h-auto object-cover" />
                 {theme.preview_url && (
-                  <a href={theme.preview_url} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 right-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-lg">
+                  <Link to={`/themes/${theme.slug}/demo`} className="absolute bottom-4 right-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-lg">
                     <Eye className="w-4 h-4" /> {bn ? "লাইভ প্রিভিউ" : "Live Preview"}
-                  </a>
+                  </Link>
                 )}
               </div>
               <div className="glass-card p-6">
