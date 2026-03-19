@@ -128,6 +128,20 @@ const AdminBilling = () => {
     fetchData();
   };
 
+  const handleDelete = async () => {
+    if (!deleteInvoice) return;
+    setDeleting(true);
+    const { error } = await supabase.from("invoices").delete().eq("id", deleteInvoice.id);
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: isBn ? "ইনভয়েস ডিলিট হয়েছে" : "Invoice deleted successfully" });
+    }
+    setDeleteInvoice(null);
+    setDeleting(false);
+    fetchData();
+  };
+
   const openEdit = (inv: InvoiceWithUser) => {
     setEditInvoice(inv);
     setEditForm({
