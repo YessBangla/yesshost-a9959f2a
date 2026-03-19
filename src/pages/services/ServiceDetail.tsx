@@ -472,8 +472,8 @@ const ServiceDetail = () => {
                 <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center mb-3">
                   <item.icon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-sm font-bold text-foreground mb-1.5">{isBn ? item.titleBn : item.titleEn}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{isBn ? item.descBn : item.descEn}</p>
+                <h3 className="text-base font-bold text-foreground mb-1.5">{isBn ? item.titleBn : item.titleEn}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{isBn ? item.descBn : item.descEn}</p>
               </motion.div>
             ))}
           </div>
