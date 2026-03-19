@@ -2,9 +2,11 @@ import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
   LogOut, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
-  Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown, Share2
+  Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown, Share2,
+  UserCircle, Package, Receipt, TicketCheck, Loader2
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -25,6 +27,9 @@ const AdminLayout = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [dbResults, setDbResults] = useState<{ users: any[]; services: any[]; orders: any[]; tickets: any[]; invoices: any[] }>({ users: [], services: [], orders: [], tickets: [], invoices: [] });
+  const [dbSearching, setDbSearching] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, profile, signOut } = useAuth();
@@ -65,7 +70,37 @@ const AdminLayout = () => {
 
   useEffect(() => {
     if (searchOpen) setTimeout(() => searchInputRef.current?.focus(), 100);
+    if (!searchOpen) { setDbResults({ users: [], services: [], orders: [], tickets: [], invoices: [] }); setSearchQuery(""); }
   }, [searchOpen]);
+
+  // Debounced database search
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    if (!searchQuery || searchQuery.length < 2) {
+      setDbResults({ users: [], services: [], orders: [], tickets: [], invoices: [] });
+      return;
+    }
+    setDbSearching(true);
+    searchTimerRef.current = setTimeout(async () => {
+      const q = searchQuery.toLowerCase();
+      const [usersRes, servicesRes, ordersRes, ticketsRes, invoicesRes] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name, phone, company_name").or(`full_name.ilike.%${q}%,phone.ilike.%${q}%,company_name.ilike.%${q}%`).limit(5),
+        supabase.from("services").select("id, name, domain, status, service_type").or(`name.ilike.%${q}%,domain.ilike.%${q}%`).limit(5),
+        supabase.from("orders").select("id, order_number, status, total_bdt").ilike("order_number", `%${q}%`).limit(5),
+        supabase.from("support_tickets").select("id, ticket_number, subject, status").or(`ticket_number.ilike.%${q}%,subject.ilike.%${q}%`).limit(5),
+        supabase.from("invoices").select("id, invoice_number, status, amount_bdt").ilike("invoice_number", `%${q}%`).limit(5),
+      ]);
+      setDbResults({
+        users: usersRes.data || [],
+        services: servicesRes.data || [],
+        orders: ordersRes.data || [],
+        tickets: ticketsRes.data || [],
+        invoices: invoicesRes.data || [],
+      });
+      setDbSearching(false);
+    }, 300);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [searchQuery]);
 
   const menuSections = [
     {
@@ -382,6 +417,7 @@ const AdminLayout = () => {
 
                 {/* Results */}
                 <div className="max-h-[50vh] overflow-y-auto py-2">
+                  {/* Menu/Page results */}
                   {menuSections.map((section) => {
                     const filtered = section.items.filter(item =>
                       !searchQuery ||
@@ -420,14 +456,162 @@ const AdminLayout = () => {
                     );
                   })}
 
+                  {/* Database results */}
+                  {searchQuery && searchQuery.length >= 2 && (
+                    <>
+                      {dbSearching && (
+                        <div className="flex items-center justify-center gap-2 py-4 text-muted-foreground">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-xs">{bn ? "খুঁজছে..." : "Searching..."}</span>
+                        </div>
+                      )}
+
+                      {/* Users */}
+                      {dbResults.users.length > 0 && (
+                        <div>
+                          <p className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                            {bn ? "ক্লায়েন্ট" : "Clients"}
+                          </p>
+                          {dbResults.users.map((u) => (
+                            <button
+                              key={u.user_id}
+                              onClick={() => { navigate("/admin/users"); setSearchOpen(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground/80 hover:bg-muted/50 hover:text-foreground transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-blue-500/10 text-blue-500">
+                                <UserCircle className="w-4 h-4" />
+                              </div>
+                              <div className="text-left min-w-0">
+                                <span className="font-medium block truncate">{u.full_name || "Unknown"}</span>
+                                <span className="text-[11px] text-muted-foreground truncate block">{u.phone} {u.company_name ? `· ${u.company_name}` : ""}</span>
+                              </div>
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 ml-auto shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Services */}
+                      {dbResults.services.length > 0 && (
+                        <div>
+                          <p className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                            {bn ? "সার্ভিস" : "Services"}
+                          </p>
+                          {dbResults.services.map((s) => (
+                            <button
+                              key={s.id}
+                              onClick={() => { navigate("/admin/services"); setSearchOpen(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground/80 hover:bg-muted/50 hover:text-foreground transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-green-500/10 text-green-500">
+                                <Package className="w-4 h-4" />
+                              </div>
+                              <div className="text-left min-w-0">
+                                <span className="font-medium block truncate">{s.name}</span>
+                                <span className="text-[11px] text-muted-foreground truncate block">{s.domain || s.service_type} · {s.status}</span>
+                              </div>
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 ml-auto shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Orders */}
+                      {dbResults.orders.length > 0 && (
+                        <div>
+                          <p className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                            {bn ? "অর্ডার" : "Orders"}
+                          </p>
+                          {dbResults.orders.map((o) => (
+                            <button
+                              key={o.id}
+                              onClick={() => { navigate("/admin/billing"); setSearchOpen(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground/80 hover:bg-muted/50 hover:text-foreground transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-orange-500/10 text-orange-500">
+                                <Receipt className="w-4 h-4" />
+                              </div>
+                              <div className="text-left min-w-0">
+                                <span className="font-medium block truncate">#{o.order_number}</span>
+                                <span className="text-[11px] text-muted-foreground truncate block">৳{o.total_bdt} · {o.status}</span>
+                              </div>
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 ml-auto shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Tickets */}
+                      {dbResults.tickets.length > 0 && (
+                        <div>
+                          <p className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                            {bn ? "টিকেট" : "Tickets"}
+                          </p>
+                          {dbResults.tickets.map((t) => (
+                            <button
+                              key={t.id}
+                              onClick={() => { navigate("/admin/tickets"); setSearchOpen(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground/80 hover:bg-muted/50 hover:text-foreground transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-purple-500/10 text-purple-500">
+                                <TicketCheck className="w-4 h-4" />
+                              </div>
+                              <div className="text-left min-w-0">
+                                <span className="font-medium block truncate">#{t.ticket_number}</span>
+                                <span className="text-[11px] text-muted-foreground truncate block">{t.subject} · {t.status}</span>
+                              </div>
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 ml-auto shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Invoices */}
+                      {dbResults.invoices.length > 0 && (
+                        <div>
+                          <p className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                            {bn ? "ইনভয়েস" : "Invoices"}
+                          </p>
+                          {dbResults.invoices.map((inv) => (
+                            <button
+                              key={inv.id}
+                              onClick={() => { navigate("/admin/billing"); setSearchOpen(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground/80 hover:bg-muted/50 hover:text-foreground transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-amber-500/10 text-amber-500">
+                                <FileText className="w-4 h-4" />
+                              </div>
+                              <div className="text-left min-w-0">
+                                <span className="font-medium block truncate">#{inv.invoice_number}</span>
+                                <span className="text-[11px] text-muted-foreground truncate block">৳{inv.amount_bdt} · {inv.status}</span>
+                              </div>
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 ml-auto shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+
                   {/* No results */}
-                  {searchQuery && menuSections.every(s => s.items.every(i =>
-                    !i.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                    !i.url.toLowerCase().includes(searchQuery.toLowerCase())
-                  )) && (
+                  {searchQuery && searchQuery.length >= 2 && !dbSearching && 
+                    menuSections.every(s => s.items.every(i =>
+                      !i.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                      !i.url.toLowerCase().includes(searchQuery.toLowerCase())
+                    )) &&
+                    dbResults.users.length === 0 && dbResults.services.length === 0 &&
+                    dbResults.orders.length === 0 && dbResults.tickets.length === 0 &&
+                    dbResults.invoices.length === 0 && (
                     <div className="py-8 text-center">
                       <Search className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                       <p className="text-sm text-muted-foreground">{bn ? "কিছু পাওয়া যায়নি" : "No results found"}</p>
+                    </div>
+                  )}
+
+                  {/* Hint when empty */}
+                  {(!searchQuery || searchQuery.length < 2) && (
+                    <div className="py-6 text-center">
+                      <p className="text-xs text-muted-foreground/60">{bn ? "ক্লায়েন্ট, সার্ভিস, অর্ডার, টিকেট বা ইনভয়েস সার্চ করুন" : "Search clients, services, orders, tickets or invoices"}</p>
                     </div>
                   )}
                 </div>
