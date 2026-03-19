@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import InvoiceReport from "@/components/InvoiceReport";
 import { formatAmount } from "@/lib/formatPrice";
+import jsPDF from "jspdf";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
