@@ -49,7 +49,7 @@ const CTASection = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
-                href={`tel:${contacts.phone || "+8809638205205"}`}
+                href={`tel:${contacts.phone || "+8801805464343"}`}
                 className="flex items-center gap-2 bg-white text-foreground px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl font-bold text-sm hover:bg-white/90 transition-all shadow-md"
               >
                 <Phone className="w-4 h-4" />
