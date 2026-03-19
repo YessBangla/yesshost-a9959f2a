@@ -290,21 +290,21 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* ===== TOP MENUBAR ===== */}
-      <div className="w-full bg-card text-foreground sticky top-0 z-40 border-b border-border shadow-sm">
+      <div className="w-full bg-primary text-primary-foreground sticky top-0 z-40 shadow-md">
         <div className="flex items-center justify-between h-12 px-3 sm:px-4 lg:px-6 max-w-full">
           {/* Left: Logo + Menu Items */}
           <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors mr-2"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors mr-2"
             >
-              <Menu className="w-5 h-5 text-foreground" />
+              <Menu className="w-5 h-5 text-primary-foreground" />
             </button>
 
             {/* Logo */}
             <Link to="/dashboard" className="hidden lg:flex items-center mr-4 shrink-0">
-              <img src={logoWhite} alt="Yess Host" className="h-7 brightness-0 dark:brightness-100" />
+              <img src={logoWhite} alt="Yess Host" className="h-7" />
             </Link>
 
             {/* Top menu items with pipe separators */}
@@ -315,9 +315,6 @@ const DashboardLayout = () => {
                 onMouseEnter={() => item.hasDropdown && setActiveTopMenu(item.label)}
                 onMouseLeave={() => setActiveTopMenu(null)}
               >
-                {index > 0 && (
-                  <span className="text-border mx-0 hidden sm:inline-block">|</span>
-                )}
                 <Link
                   to={item.href}
                   onClick={(e) => {
@@ -326,10 +323,10 @@ const DashboardLayout = () => {
                       setActiveTopMenu(activeTopMenu === item.label ? null : item.label);
                     }
                   }}
-                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-all hover:text-primary ${
+                  className={`flex items-center gap-1 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all hover:bg-white/15 rounded ${
                     location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
-                      ? "text-primary font-semibold"
-                      : "text-muted-foreground"
+                      ? "bg-white/15 font-semibold text-primary-foreground"
+                      : "text-primary-foreground/90"
                   }`}
                 >
                   {item.label}
@@ -381,14 +378,14 @@ const DashboardLayout = () => {
             {/* Wallet Balance */}
             <Link
               to="/dashboard/wallet"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors text-[12px] font-semibold whitespace-nowrap text-primary border border-primary/20"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition-colors text-[12px] font-semibold whitespace-nowrap text-primary-foreground border border-white/20"
             >
               <Wallet className="w-3.5 h-3.5" />
               <span>TK {formatAmount(walletBalance, lang)} BDT</span>
             </Link>
 
             {/* Notification Bell */}
-            <div className="[&_button]:text-muted-foreground [&_button]:hover:bg-muted [&_button]:hover:text-foreground">
+            <div className="[&_button]:text-primary-foreground [&_button]:hover:bg-white/15">
               <NotificationBell />
             </div>
 
@@ -396,21 +393,21 @@ const DashboardLayout = () => {
             <div className="relative">
               <button
                 onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-border hover:bg-muted rounded-r-lg pr-2 py-1 transition-colors"
+                className="flex items-center gap-2 pl-2 ml-0.5 border-l border-white/20 hover:bg-white/15 rounded-r-lg pr-2 py-1 transition-colors"
               >
-                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-primary/20 shrink-0">
+                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile?.full_name || "User"} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-[11px] font-bold">
+                    <div className="w-full h-full bg-white/20 flex items-center justify-center text-primary-foreground text-[11px] font-bold">
                       {(profile?.full_name || "U").charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-foreground">
+                <span className="hidden md:block text-[12px] font-semibold whitespace-nowrap max-w-[120px] truncate text-primary-foreground">
                   {profile?.full_name || "User"}
                 </span>
-                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-muted-foreground" />
+                <ChevronDown className="w-3 h-3 opacity-70 hidden md:block text-primary-foreground/70" />
               </button>
 
               {/* User Dropdown */}
