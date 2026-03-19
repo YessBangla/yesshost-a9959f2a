@@ -322,7 +322,7 @@ const ServiceDetail = () => {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-6 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> {isBn ? "হোমপেইজ" : "Home"}
             </Link>
