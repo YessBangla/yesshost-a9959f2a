@@ -123,12 +123,12 @@ const HostingPlans = () => {
 
         {/* Category Filter Buttons */}
         {!loading && grouped.length > 0 && (
-          <section className="container mx-auto px-4 mb-8">
+          <div className="sticky top-16 z-30 bg-background/90 backdrop-blur-md border-b border-border/50 py-3 mb-8 -mx-4 px-4">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.4, ease }}
-              className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto"
+              className="flex overflow-x-auto gap-2 max-w-4xl mx-auto no-scrollbar justify-start md:justify-center"
             >
               {grouped.map((cat) => {
                 const label = categoryLabels[cat.key];
@@ -139,7 +139,7 @@ const HostingPlans = () => {
                     onClick={() => {
                       document.getElementById(`cat-${cat.key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-xs font-semibold text-foreground hover:border-primary/40 hover:shadow-sm transition-all`}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-card text-xs font-semibold text-foreground hover:border-primary/40 hover:shadow-sm transition-all whitespace-nowrap shrink-0"
                   >
                     <Icon className="w-3.5 h-3.5 text-primary" />
                     {bn ? label.bn : label.en}
@@ -148,7 +148,7 @@ const HostingPlans = () => {
                 );
               })}
             </motion.div>
-          </section>
+          </div>
         )}
 
         {/* Loading */}
