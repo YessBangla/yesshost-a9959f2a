@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
   UserCircle, LogOut, Menu, Shield, ShoppingBag,
   ChevronRight, Home, PanelLeftClose, PanelLeft,
-  CreditCard
+  CreditCard, Share2
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
@@ -25,6 +25,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/support": { en: "Support", bn: "সাপোর্ট" },
   "/dashboard/domains": { en: "Domains", bn: "ডোমেইন" },
   "/dashboard/profile": { en: "Profile", bn: "প্রোফাইল" },
+  "/dashboard/reseller": { en: "Reseller", bn: "রিসেলার" },
 };
 
 const DashboardLayout = () => {
@@ -36,13 +37,17 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isReseller, setIsReseller] = useState(false);
   const bn = lang === "bn";
   const dragX = useMotionValue(0);
   const sidebarX = useTransform(dragX, [0, -SIDEBAR_W], [0, -SIDEBAR_W]);
   const overlayOpacity = useTransform(dragX, [0, -SIDEBAR_W], [1, 0]);
 
   useEffect(() => {
-    if (user) supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
+    if (user) {
+      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
+      supabase.from("reseller_packages").select("id").eq("user_id", user.id).limit(1).then(({ data }) => setIsReseller(!!(data && data.length > 0)));
+    }
   }, [user]);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
@@ -61,6 +66,7 @@ const DashboardLayout = () => {
     { title: tr("dash.billing"), url: "/dashboard/billing", icon: CreditCard },
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
+    ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),
   ];
 
   const bottomItems = [
