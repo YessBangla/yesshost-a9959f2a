@@ -209,7 +209,7 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
         <table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-border bg-secondary/40">
-              <th className="text-left px-5 py-3 text-xs font-semibold text-foreground uppercase tracking-wider">
+              <th className="text-left px-5 py-3.5 text-sm font-semibold text-foreground uppercase tracking-wider">
                 {isBn ? "ফিচার" : "Feature"}
               </th>
               {plans.map(p => (
