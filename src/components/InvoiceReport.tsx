@@ -1,10 +1,12 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, X } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 type InvoiceData = {
   id: string;
