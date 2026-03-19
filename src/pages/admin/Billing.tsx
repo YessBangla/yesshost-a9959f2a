@@ -4,7 +4,7 @@ import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import {
   FileText, Search, DollarSign, TrendingUp, AlertTriangle, Eye,
-  CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw, Pencil, X, Save
+  CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw, Pencil, X, Save, Plus
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -47,6 +47,17 @@ const AdminBilling = () => {
     due_date: "",
   });
   const [saving, setSaving] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [allProfiles, setAllProfiles] = useState<Tables<"profiles">[]>([]);
+  const [createForm, setCreateForm] = useState({
+    user_id: "",
+    description: "",
+    amount_bdt: "",
+    status: "unpaid" as string,
+    payment_method: "",
+    due_date: "",
+  });
+  const [creating, setCreating] = useState(false);
 
   const fetchData = async () => {
     const [inv, prof] = await Promise.all([
@@ -58,10 +69,43 @@ const AdminBilling = () => {
       profiles: (prof.data || []).find(p => p.user_id === i.user_id) || null,
     }));
     setInvoices(invoicesWithUser);
+    setAllProfiles(prof.data || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const generateInvoiceNumber = () => {
+    const now = new Date();
+    return `INV-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  };
+
+  const handleCreate = async () => {
+    if (!createForm.user_id || !createForm.amount_bdt) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "ক্লায়েন্ট এবং পরিমাণ আবশ্যক" : "Client and amount are required", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const { error } = await supabase.from("invoices").insert({
+      user_id: createForm.user_id,
+      invoice_number: generateInvoiceNumber(),
+      description: createForm.description || null,
+      amount_bdt: Number(createForm.amount_bdt),
+      status: createForm.status as any,
+      payment_method: createForm.payment_method || null,
+      due_date: createForm.due_date ? new Date(createForm.due_date).toISOString() : null,
+      paid_at: createForm.status === "paid" ? new Date().toISOString() : null,
+    });
+    if (error) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✅", description: isBn ? "নতুন ইনভয়েস তৈরি হয়েছে" : "Invoice created successfully" });
+      setShowCreate(false);
+      setCreateForm({ user_id: "", description: "", amount_bdt: "", status: "unpaid", payment_method: "", due_date: "" });
+    }
+    setCreating(false);
+    fetchData();
+  };
 
   const updateStatus = async (id: string, status: string) => {
     const update: any = { status };
@@ -135,9 +179,15 @@ const AdminBilling = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{isBn ? "বিলিং ম্যানেজমেন্ট" : "Billing Management"}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ইনভয়েস ও পেমেন্ট পরিচালনা" : "Manage all invoices and payments"}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{isBn ? "বিলিং ম্যানেজমেন্ট" : "Billing Management"}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ইনভয়েস ও পেমেন্ট পরিচালনা" : "Manage all invoices and payments"}</p>
+        </div>
+        <Button onClick={() => setShowCreate(true)} className="gap-2">
+          <Plus className="w-4 h-4" />
+          {isBn ? "নতুন ইনভয়েস" : "New Invoice"}
+        </Button>
       </div>
 
       {/* Stats */}
@@ -347,6 +397,90 @@ const AdminBilling = () => {
                 {saving ? (isBn ? "সেভ হচ্ছে..." : "Saving...") : (isBn ? "সেভ করুন" : "Save Changes")}
               </Button>
               <Button variant="outline" onClick={() => setEditInvoice(null)}>
+                {isBn ? "বাতিল" : "Cancel"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Invoice Dialog */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent className="max-w-lg">
+          <h2 className="text-lg font-bold text-foreground mb-4">{isBn ? "নতুন ইনভয়েস তৈরি করুন" : "Create New Invoice"}</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "ক্লায়েন্ট নির্বাচন করুন" : "Select Client"}</label>
+              <select
+                value={createForm.user_id}
+                onChange={e => setCreateForm({ ...createForm, user_id: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                <option value="">{isBn ? "— ক্লায়েন্ট বাছুন —" : "— Choose client —"}</option>
+                {allProfiles.map(p => (
+                  <option key={p.user_id} value={p.user_id}>
+                    {p.full_name || p.user_id} {p.phone ? `(${p.phone})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "বিবরণ" : "Description"}</label>
+              <input
+                value={createForm.description}
+                onChange={e => setCreateForm({ ...createForm, description: e.target.value })}
+                placeholder={isBn ? "সার্ভিসের বিবরণ" : "Service description"}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "পরিমাণ (৳)" : "Amount (৳)"}</label>
+                <input
+                  type="number"
+                  value={createForm.amount_bdt}
+                  onChange={e => setCreateForm({ ...createForm, amount_bdt: e.target.value })}
+                  placeholder="0"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "স্ট্যাটাস" : "Status"}</label>
+                <select
+                  value={createForm.status}
+                  onChange={e => setCreateForm({ ...createForm, status: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  {invoiceStatuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "পেমেন্ট মেথড" : "Payment Method"}</label>
+                <input
+                  value={createForm.payment_method}
+                  onChange={e => setCreateForm({ ...createForm, payment_method: e.target.value })}
+                  placeholder="bKash, Nagad, Bank..."
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{isBn ? "ডিউ তারিখ" : "Due Date"}</label>
+                <input
+                  type="date"
+                  value={createForm.due_date}
+                  onChange={e => setCreateForm({ ...createForm, due_date: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button onClick={handleCreate} disabled={creating} className="flex-1 gap-2">
+                <Plus className="w-4 h-4" />
+                {creating ? (isBn ? "তৈরি হচ্ছে..." : "Creating...") : (isBn ? "ইনভয়েস তৈরি করুন" : "Create Invoice")}
+              </Button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>
                 {isBn ? "বাতিল" : "Cancel"}
               </Button>
             </div>
