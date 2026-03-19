@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
   LogOut, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
-  Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive
+  Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
@@ -17,6 +17,8 @@ const SWIPE_THRESHOLD = 80;
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
@@ -27,6 +29,17 @@ const AdminLayout = () => {
   const overlayOpacity = useTransform(dragX, [0, -SIDEBAR_W], [1, 0]);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const menuSections = [
     {
@@ -250,15 +263,65 @@ const AdminLayout = () => {
             {lang === "bn" ? "EN" : "বাং"}
           </button>
 
-          {/* User Avatar */}
-          <div className="flex items-center gap-2.5 pl-2 ml-1 border-l border-border/40">
-            <div className="hidden sm:block text-right">
-              <p className="text-xs font-semibold text-foreground leading-none">{profile?.full_name || "Admin"}</p>
-              <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{bn ? "সুপার অ্যাডমিন" : "Super Admin"}</p>
-            </div>
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-destructive/20 to-destructive/10 flex items-center justify-center text-destructive text-xs font-bold border border-destructive/20">
-              {(profile?.full_name || "A").charAt(0).toUpperCase()}
-            </div>
+          {/* User Menu Dropdown */}
+          <div className="relative pl-2 ml-1 border-l border-border/40" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+            >
+              <div className="hidden sm:block text-right">
+                <p className="text-xs font-semibold text-foreground leading-none">{profile?.full_name || "Admin"}</p>
+                <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{bn ? "সুপার অ্যাডমিন" : "Super Admin"}</p>
+              </div>
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-destructive/20 to-destructive/10 flex items-center justify-center text-destructive text-xs font-bold border border-destructive/20">
+                {(profile?.full_name || "A").charAt(0).toUpperCase()}
+              </div>
+              <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform hidden sm:block ${userMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            <AnimatePresence>
+              {userMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-56 bg-card border border-border/60 rounded-xl shadow-xl shadow-black/10 py-1.5 z-50"
+                >
+                  <div className="px-3 py-2.5 border-b border-border/40">
+                    <p className="text-sm font-semibold text-foreground">{profile?.full_name || "Admin"}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
+                  </div>
+                  <div className="py-1">
+                    <Link
+                      to="/dashboard/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/8 transition-colors"
+                    >
+                      <User className="w-4 h-4" />
+                      {bn ? "প্রোফাইল" : "Profile"}
+                    </Link>
+                    <Link
+                      to="/dashboard/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/8 transition-colors"
+                    >
+                      <KeyRound className="w-4 h-4" />
+                      {bn ? "পাসওয়ার্ড পরিবর্তন" : "Change Password"}
+                    </Link>
+                  </div>
+                  <div className="border-t border-border/40 pt-1">
+                    <button
+                      onClick={() => { setUserMenuOpen(false); handleSignOut(); }}
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-destructive hover:bg-destructive/8 w-full transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      {bn ? "সাইন আউট" : "Sign Out"}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </header>
 
