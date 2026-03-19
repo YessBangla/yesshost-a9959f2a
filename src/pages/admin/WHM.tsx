@@ -1,0 +1,519 @@
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Server, Users, HardDrive, Wifi, Plus, Settings, Eye, Trash2,
+  Shield, Activity, Globe, Package, AlertTriangle, Check, X,
+  Search, ChevronDown, BarChart3, Cpu, Zap, Clock
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface ResellerPkg {
+  id: string;
+  user_id: string;
+  package_name: string;
+  max_accounts: number;
+  used_accounts: number;
+  max_disk_mb: number;
+  used_disk_mb: number;
+  max_bandwidth_mb: number;
+  used_bandwidth_mb: number;
+  status: string;
+  whm_server_host: string | null;
+  whm_username: string | null;
+  service_id: string | null;
+  created_at: string;
+  profile?: { full_name: string | null; phone: string | null } | null;
+  account_count?: number;
+}
+
+const formatSize = (mb: number) => mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${mb} MB`;
+
+const AdminWHM = () => {
+  const { lang } = useLanguage();
+  const { toast } = useToast();
+  const bn = lang === "bn";
+
+  const [packages, setPackages] = useState<ResellerPkg[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPkg, setSelectedPkg] = useState<ResellerPkg | null>(null);
+  const [showAssign, setShowAssign] = useState(false);
+  const [showAccounts, setShowAccounts] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [assignForm, setAssignForm] = useState({
+    user_id: "", package_name: "Reseller Package",
+    max_accounts: 25, max_disk_mb: 50000, max_bandwidth_mb: 500000,
+    whm_server_host: "", whm_username: "",
+  });
+  const [assigning, setAssigning] = useState(false);
+
+  // Stats
+  const [stats, setStats] = useState({
+    total_packages: 0, active_packages: 0, total_accounts: 0, total_disk_used: 0, total_disk_max: 0
+  });
+
+  useEffect(() => { fetchAll(); }, []);
+
+  const fetchAll = async () => {
+    setLoading(true);
+    // Fetch packages with profile join
+    const { data: pkgs } = await supabase
+      .from("reseller_packages")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    const pkgList = pkgs || [];
+
+    // Fetch profiles for each user
+    const userIds = [...new Set(pkgList.map(p => p.user_id))];
+    let profileMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, phone")
+        .in("user_id", userIds);
+      (profiles || []).forEach(p => { profileMap[p.user_id] = p; });
+    }
+
+    // Fetch account counts per package
+    const { data: accs } = await supabase
+      .from("reseller_accounts")
+      .select("reseller_package_id");
+
+    const countMap: Record<string, number> = {};
+    (accs || []).forEach(a => {
+      countMap[a.reseller_package_id] = (countMap[a.reseller_package_id] || 0) + 1;
+    });
+
+    const enriched = pkgList.map(p => ({
+      ...p,
+      profile: profileMap[p.user_id] || null,
+      account_count: countMap[p.id] || 0,
+    }));
+
+    setPackages(enriched);
+    setStats({
+      total_packages: enriched.length,
+      active_packages: enriched.filter(p => p.status === "active").length,
+      total_accounts: (accs || []).length,
+      total_disk_used: enriched.reduce((s, p) => s + p.used_disk_mb, 0),
+      total_disk_max: enriched.reduce((s, p) => s + p.max_disk_mb, 0),
+    });
+    setLoading(false);
+  };
+
+  const fetchUsers = async () => {
+    const { data } = await supabase.from("profiles").select("user_id, full_name, phone").limit(100);
+    setUsers(data || []);
+  };
+
+  const handleAssign = async () => {
+    if (!assignForm.user_id) {
+      toast({ title: bn ? "ইউজার সিলেক্ট করুন" : "Select a user", variant: "destructive" });
+      return;
+    }
+    setAssigning(true);
+    const { error } = await supabase.from("reseller_packages").insert({
+      user_id: assignForm.user_id,
+      package_name: assignForm.package_name,
+      max_accounts: assignForm.max_accounts,
+      max_disk_mb: assignForm.max_disk_mb,
+      max_bandwidth_mb: assignForm.max_bandwidth_mb,
+      whm_server_host: assignForm.whm_server_host || null,
+      whm_username: assignForm.whm_username || null,
+    });
+    if (error) {
+      toast({ title: bn ? "ত্রুটি" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: bn ? "রিসেলার প্যাকেজ অ্যাসাইন হয়েছে!" : "Reseller package assigned!" });
+      setShowAssign(false);
+      setAssignForm({ user_id: "", package_name: "Reseller Package", max_accounts: 25, max_disk_mb: 50000, max_bandwidth_mb: 500000, whm_server_host: "", whm_username: "" });
+      fetchAll();
+    }
+    setAssigning(false);
+  };
+
+  const handleViewAccounts = async (pkg: ResellerPkg) => {
+    setSelectedPkg(pkg);
+    const { data } = await supabase
+      .from("reseller_accounts")
+      .select("*")
+      .eq("reseller_package_id", pkg.id)
+      .order("created_at", { ascending: false });
+    setAccounts(data || []);
+    setShowAccounts(true);
+  };
+
+  const handleDeletePkg = async (pkgId: string) => {
+    if (!confirm(bn ? "এই প্যাকেজটি মুছে ফেলতে চান?" : "Delete this package?")) return;
+    // Delete accounts first, then package
+    await supabase.from("reseller_accounts").delete().eq("reseller_package_id", pkgId);
+    await supabase.from("reseller_packages").delete().eq("id", pkgId);
+    toast({ title: bn ? "মুছে ফেলা হয়েছে" : "Deleted" });
+    fetchAll();
+  };
+
+  const handleToggleStatus = async (pkg: ResellerPkg) => {
+    const newStatus = pkg.status === "active" ? "suspended" : "active";
+    await supabase.from("reseller_packages").update({ status: newStatus }).eq("id", pkg.id);
+    toast({ title: bn ? "স্ট্যাটাস আপডেট হয়েছে" : "Status updated" });
+    fetchAll();
+  };
+
+  const filtered = packages.filter(p => {
+    const term = searchTerm.toLowerCase();
+    return !term || (p.profile?.full_name || "").toLowerCase().includes(term)
+      || p.package_name.toLowerCase().includes(term)
+      || (p.whm_server_host || "").toLowerCase().includes(term);
+  });
+
+  const diskPct = stats.total_disk_max > 0 ? (stats.total_disk_used / stats.total_disk_max * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Server className="w-6 h-6 text-primary" />
+            {bn ? "WHM সার্ভার ম্যানেজমেন্ট" : "WHM Server Management"}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {bn ? "রিসেলার প্যাকেজ, সার্ভার কনফিগারেশন ও মনিটরিং" : "Reseller packages, server configuration & monitoring"}
+          </p>
+        </div>
+        <button
+          onClick={() => { setShowAssign(true); fetchUsers(); }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+        >
+          <Plus className="w-4 h-4" />
+          {bn ? "প্যাকেজ অ্যাসাইন করুন" : "Assign Package"}
+        </button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: bn ? "মোট প্যাকেজ" : "Total Packages", value: stats.total_packages, icon: Package, color: "text-primary", bg: "bg-primary/10" },
+          { label: bn ? "সক্রিয় প্যাকেজ" : "Active Packages", value: stats.active_packages, icon: Check, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+          { label: bn ? "মোট অ্যাকাউন্ট" : "Total Accounts", value: stats.total_accounts, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+          { label: bn ? "ডিস্ক ব্যবহার" : "Disk Usage", value: `${diskPct.toFixed(0)}%`, icon: HardDrive, color: "text-amber-500", bg: "bg-amber-500/10" },
+        ].map((s, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="glass-card p-4 rounded-xl"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-8 h-8 rounded-lg ${s.bg} flex items-center justify-center`}>
+                <s.icon className={`w-4 h-4 ${s.color}`} />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{s.value}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{s.label}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50">
+        <Search className="w-4 h-4 text-muted-foreground" />
+        <input
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          placeholder={bn ? "ইউজার, প্যাকেজ বা সার্ভার খুঁজুন..." : "Search by user, package or server..."}
+          className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
+        />
+      </div>
+
+      {/* Packages Table */}
+      <div className="glass-card rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-border/30 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">{bn ? "রিসেলার প্যাকেজ তালিকা" : "Reseller Packages"}</h3>
+          <Badge variant="secondary" className="text-[10px]">{filtered.length} {bn ? "টি" : "total"}</Badge>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="px-4 py-12 text-center text-muted-foreground">
+            <Package className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
+            <p className="text-sm">{bn ? "কোনো রিসেলার প্যাকেজ নেই" : "No reseller packages found"}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-secondary/20">
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{bn ? "ক্লায়েন্ট" : "Client"}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden sm:table-cell">{bn ? "প্যাকেজ" : "Package"}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">{bn ? "অ্যাকাউন্ট" : "Accounts"}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">{bn ? "ডিস্ক" : "Disk"}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">{bn ? "সার্ভার" : "Server"}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{bn ? "স্ট্যাটাস" : "Status"}</th>
+                  <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{bn ? "অ্যাকশন" : "Actions"}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((pkg, i) => {
+                  const diskPct = pkg.max_disk_mb > 0 ? (pkg.used_disk_mb / pkg.max_disk_mb * 100) : 0;
+                  return (
+                    <motion.tr
+                      key={pkg.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.02 }}
+                      className="border-b border-border/30 hover:bg-secondary/10 transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-bold text-primary">
+                              {(pkg.profile?.full_name || "?").charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-foreground truncate text-sm">{pkg.profile?.full_name || "Unknown"}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">{pkg.profile?.phone || ""}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 hidden sm:table-cell">
+                        <span className="text-sm text-foreground">{pkg.package_name}</span>
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <span className="text-sm font-medium text-foreground">{pkg.used_accounts}/{pkg.max_accounts}</span>
+                      </td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <div className="w-24">
+                          <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                            <span>{formatSize(pkg.used_disk_mb)}</span>
+                            <span>{formatSize(pkg.max_disk_mb)}</span>
+                          </div>
+                          <Progress value={diskPct} className="h-1.5" />
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <span className="text-xs text-muted-foreground font-mono">{pkg.whm_server_host || "—"}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant={pkg.status === "active" ? "default" : "destructive"} className="text-[10px]">
+                          {pkg.status === "active" ? (bn ? "সক্রিয়" : "Active") : (bn ? "স্থগিত" : "Suspended")}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => handleViewAccounts(pkg)}
+                            className="p-1.5 rounded-lg hover:bg-primary/10 text-primary transition-colors"
+                            title={bn ? "অ্যাকাউন্ট দেখুন" : "View Accounts"}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleToggleStatus(pkg)}
+                            className={`p-1.5 rounded-lg transition-colors ${pkg.status === "active" ? "hover:bg-amber-500/10 text-amber-500" : "hover:bg-emerald-500/10 text-emerald-500"}`}
+                            title={pkg.status === "active" ? (bn ? "স্থগিত" : "Suspend") : (bn ? "সক্রিয়" : "Activate")}
+                          >
+                            {pkg.status === "active" ? <Shield className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            onClick={() => handleDeletePkg(pkg.id)}
+                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+                            title={bn ? "মুছুন" : "Delete"}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Assign Package Dialog */}
+      <Dialog open={showAssign} onOpenChange={setShowAssign}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-primary" />
+              {bn ? "রিসেলার প্যাকেজ অ্যাসাইন করুন" : "Assign Reseller Package"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            {/* User Selection */}
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ক্লায়েন্ট সিলেক্ট করুন" : "Select Client"} *</label>
+              <select
+                value={assignForm.user_id}
+                onChange={e => setAssignForm(p => ({ ...p, user_id: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                <option value="">{bn ? "-- ইউজার বাছুন --" : "-- Select user --"}</option>
+                {users.map(u => (
+                  <option key={u.user_id} value={u.user_id}>{u.full_name || u.user_id} {u.phone ? `(${u.phone})` : ""}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "প্যাকেজ নাম" : "Package Name"}</label>
+              <input
+                value={assignForm.package_name}
+                onChange={e => setAssignForm(p => ({ ...p, package_name: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "সর্বোচ্চ অ্যাকাউন্ট" : "Max Accounts"}</label>
+                <input
+                  type="number"
+                  value={assignForm.max_accounts}
+                  onChange={e => setAssignForm(p => ({ ...p, max_accounts: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ডিস্ক (MB)" : "Disk (MB)"}</label>
+                <input
+                  type="number"
+                  value={assignForm.max_disk_mb}
+                  onChange={e => setAssignForm(p => ({ ...p, max_disk_mb: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ব্যান্ডউইথ (MB)" : "BW (MB)"}</label>
+                <input
+                  type="number"
+                  value={assignForm.max_bandwidth_mb}
+                  onChange={e => setAssignForm(p => ({ ...p, max_bandwidth_mb: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-border/30">
+              <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                {bn ? "WHM সার্ভার কনফিগারেশন (ঐচ্ছিক)" : "WHM Server Config (Optional)"}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "সার্ভার হোস্ট" : "Server Host"}</label>
+                  <input
+                    value={assignForm.whm_server_host}
+                    onChange={e => setAssignForm(p => ({ ...p, whm_server_host: e.target.value }))}
+                    placeholder="server1.yesshost.com"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "WHM ইউজারনেম" : "WHM Username"}</label>
+                  <input
+                    value={assignForm.whm_username}
+                    onChange={e => setAssignForm(p => ({ ...p, whm_username: e.target.value }))}
+                    placeholder="root"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleAssign}
+              disabled={assigning}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+            >
+              {assigning ? (bn ? "অ্যাসাইন হচ্ছে..." : "Assigning...") : (bn ? "প্যাকেজ অ্যাসাইন করুন" : "Assign Package")}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Accounts Dialog */}
+      <Dialog open={showAccounts} onOpenChange={setShowAccounts}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              {selectedPkg?.profile?.full_name || "Client"} — {bn ? "অ্যাকাউন্ট তালিকা" : "Account List"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedPkg && (
+            <div className="space-y-4 mt-2">
+              {/* Package Summary */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: bn ? "অ্যাকাউন্ট" : "Accounts", value: `${selectedPkg.used_accounts}/${selectedPkg.max_accounts}`, pct: selectedPkg.max_accounts > 0 ? (selectedPkg.used_accounts / selectedPkg.max_accounts * 100) : 0 },
+                  { label: bn ? "ডিস্ক" : "Disk", value: `${formatSize(selectedPkg.used_disk_mb)} / ${formatSize(selectedPkg.max_disk_mb)}`, pct: selectedPkg.max_disk_mb > 0 ? (selectedPkg.used_disk_mb / selectedPkg.max_disk_mb * 100) : 0 },
+                  { label: bn ? "ব্যান্ডউইথ" : "Bandwidth", value: `${formatSize(selectedPkg.used_bandwidth_mb)} / ${formatSize(selectedPkg.max_bandwidth_mb)}`, pct: selectedPkg.max_bandwidth_mb > 0 ? (selectedPkg.used_bandwidth_mb / selectedPkg.max_bandwidth_mb * 100) : 0 },
+                ].map((q, i) => (
+                  <div key={i} className="p-3 rounded-xl bg-secondary/30 border border-border/30">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">{q.label}</p>
+                    <p className="text-xs font-semibold text-foreground">{q.value}</p>
+                    <Progress value={q.pct} className="h-1 mt-1.5" />
+                  </div>
+                ))}
+              </div>
+
+              {/* Account List */}
+              {accounts.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <Server className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                  <p className="text-sm">{bn ? "কোনো অ্যাকাউন্ট নেই" : "No accounts"}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {accounts.map(acc => (
+                    <div key={acc.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 border border-border/30">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Globe className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{acc.domain}</p>
+                          <p className="text-[10px] text-muted-foreground">{acc.username} · {formatSize(acc.disk_quota_mb)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={acc.status === "active" ? "default" : "destructive"} className="text-[10px]">
+                          {acc.status === "active" ? (bn ? "সক্রিয়" : "Active") : (bn ? "স্থগিত" : "Suspended")}
+                        </Badge>
+                        {acc.cpanel_created && <Badge variant="outline" className="text-[10px]">cPanel</Badge>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default AdminWHM;
