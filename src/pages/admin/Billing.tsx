@@ -529,6 +529,25 @@ const AdminBilling = () => {
         </DialogContent>
       </Dialog>
 
+      <AlertDialog open={!!deleteInvoice} onOpenChange={() => setDeleteInvoice(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{isBn ? "ইনভয়েস ডিলিট করুন" : "Delete Invoice"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isBn
+                ? `আপনি কি "${deleteInvoice?.invoice_number}" ইনভয়েসটি ডিলিট করতে চান? এটি পূর্বাবস্থায় ফেরানো যাবে না।`
+                : `Are you sure you want to delete invoice "${deleteInvoice?.invoice_number}"? This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{isBn ? "বাতিল" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? (isBn ? "ডিলিট হচ্ছে..." : "Deleting...") : (isBn ? "ডিলিট করুন" : "Delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <InvoiceReport
         invoice={reportInvoice}
         open={!!reportInvoice}
