@@ -358,6 +358,13 @@ const AdminWHM = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <button
+                            onClick={() => openEditDialog(pkg)}
+                            className="p-1.5 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-colors"
+                            title={bn ? "এডিট করুন" : "Edit"}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
                             onClick={() => handleViewAccounts(pkg)}
                             className="p-1.5 rounded-lg hover:bg-primary/10 text-primary transition-colors"
                             title={bn ? "অ্যাকাউন্ট দেখুন" : "View Accounts"}
