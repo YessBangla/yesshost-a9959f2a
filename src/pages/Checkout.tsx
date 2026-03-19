@@ -90,7 +90,7 @@ const Checkout = () => {
         .select("*")
         .eq("code", code)
         .eq("is_active", true)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         setCouponError(bn ? "কুপন কোড ভুল বা মেয়াদ শেষ" : "Invalid or expired coupon code");
