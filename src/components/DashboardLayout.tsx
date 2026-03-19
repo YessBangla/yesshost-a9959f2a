@@ -343,7 +343,7 @@ const DashboardLayout = () => {
                           const Icon = child.icon;
                           return (
                             <Link
-                              key={child.href}
+                              key={child.label}
                               to={child.href}
                               className={`flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium hover:bg-muted/60 transition-colors ${
                                 location.pathname === child.href ? "text-primary bg-primary/5" : "text-foreground"
