@@ -368,25 +368,11 @@ const AdminUsers = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => { setEditPermUser(u); setEditPerms([...u.permissions]); }}
-                          className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors"
-                          title={isBn ? "পারমিশন সম্পাদনা" : "Edit Permissions"}
+                          onClick={() => { setEditPermUser(u); setEditPerms([...u.permissions]); setEditRoles([...u.roles]); }}
+                          className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
+                          title={isBn ? "অ্যাক্সেস ম্যানেজ করুন" : "Manage Access"}
                         >
-                          <Lock className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => toggleAdminRole(u.user_id, isAdmin)}
-                          className={`p-2 rounded-lg transition-colors ${isAdmin ? "hover:bg-destructive/10 text-destructive" : "hover:bg-secondary/60 text-muted-foreground"}`}
-                          title={isAdmin ? (isBn ? "অ্যাডমিন সরান" : "Remove Admin") : (isBn ? "অ্যাডমিন করুন" : "Make Admin")}
-                        >
-                          {isAdmin ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
-                        </button>
-                        <button
-                          onClick={() => toggleCallCenterRole(u.user_id, u.roles.includes("call_center"))}
-                          className={`p-2 rounded-lg transition-colors ${u.roles.includes("call_center") ? "hover:bg-primary/10 text-primary" : "hover:bg-secondary/60 text-muted-foreground"}`}
-                          title={u.roles.includes("call_center") ? (isBn ? "কল সেন্টার সরান" : "Remove Call Center") : (isBn ? "কল সেন্টার করুন" : "Make Call Center")}
-                        >
-                          <Headphones className="w-4 h-4" />
+                          <Settings2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
