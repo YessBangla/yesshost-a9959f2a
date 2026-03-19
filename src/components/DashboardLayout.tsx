@@ -379,44 +379,49 @@ const DashboardLayout = () => {
     <div className="min-h-screen flex flex-col bg-background">
       {/* ===== TOP MENUBAR ===== */}
       <div className="w-full glass-surface sticky top-0 z-40">
-        <div className="flex items-center justify-end h-11 px-3 sm:px-4 lg:px-6 max-w-full">
+        <div className="flex items-center h-11 px-2 sm:px-4 lg:px-6 max-w-full">
           {/* Mobile hamburger (left) */}
           <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-primary/10 transition-colors mr-auto"
+            className="lg:hidden p-2 rounded-lg hover:bg-primary/10 transition-colors shrink-0"
           >
             <Menu className="w-5 h-5 text-foreground" />
           </button>
 
-          {/* Right-aligned menu items */}
-          <div className="hidden lg:flex items-center gap-0 overflow-x-auto no-scrollbar">
+          {/* Menu items - visible on all screen sizes */}
+          <div className="flex items-center gap-0 overflow-x-auto no-scrollbar flex-1 ml-1 lg:ml-0 lg:justify-end">
             {topMenuItems.map((item) => (
               <div
                 key={item.label}
                 className="relative flex items-center"
-                onMouseEnter={() => item.hasDropdown && setActiveTopMenu(item.label)}
-                onMouseLeave={() => setActiveTopMenu(null)}
+                onMouseEnter={() => {
+                  if (window.innerWidth >= 1024 && item.hasDropdown) setActiveTopMenu(item.label);
+                }}
+                onMouseLeave={() => {
+                  if (window.innerWidth >= 1024) setActiveTopMenu(null);
+                }}
               >
-                <Link
-                  to={item.href}
+                <button
                   onClick={(e) => {
+                    e.stopPropagation();
                     if (item.hasDropdown) {
-                      e.stopPropagation();
                       setActiveTopMenu(activeTopMenu === item.label ? null : item.label);
+                    } else {
+                      navigate(item.href);
                     }
                   }}
-                  className={`flex items-center gap-1.5 px-3 lg:px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition-all rounded-md ${
+                  className={`flex items-center gap-1 px-2 sm:px-3 lg:px-3.5 py-2 text-[12px] sm:text-[13px] font-medium whitespace-nowrap transition-all rounded-md ${
                     location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
                       ? "bg-primary/10 font-semibold text-primary"
                       : "text-foreground/75 hover:text-foreground hover:bg-muted/60"
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
-                  {item.label}
+                  <span className="hidden sm:inline">{item.label}</span>
                   {item.hasDropdown && (
                     <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeTopMenu === item.label ? "rotate-180" : ""}`} />
                   )}
-                </Link>
+                </button>
 
                 {/* Dropdown */}
                 <AnimatePresence>
@@ -426,7 +431,7 @@ const DashboardLayout = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.97 }}
                       transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                      className="absolute top-full right-0 pt-1.5 z-50"
+                      className="absolute top-full left-0 sm:left-auto sm:right-0 pt-1.5 z-50"
                     >
                       <div className="bg-card rounded-xl shadow-lg border border-border/60 py-1.5 min-w-[230px] overflow-hidden">
                         {/* Dropdown header */}
@@ -435,7 +440,7 @@ const DashboardLayout = () => {
                             {item.label}
                           </p>
                         </div>
-                        {item.children.map((child, idx) => {
+                        {item.children.map((child) => {
                           const Icon = child.icon;
                           const isActive = location.pathname === child.href;
                           return (
