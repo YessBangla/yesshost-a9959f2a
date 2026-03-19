@@ -132,7 +132,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
               ৳{isBn ? toBengaliNum(totalPrice) : totalPrice.toLocaleString()}
             </motion.span>
           </AnimatePresence>
-          <span className="text-xs text-muted-foreground">/{durationLabel}</span>
+          <span className="text-sm text-muted-foreground">/{durationLabel}</span>
         </div>
 
         {duration.discount > 0 && (
