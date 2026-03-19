@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
   LogOut, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
-  Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown
+  Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown, Share2
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -56,6 +56,7 @@ const AdminLayout = () => {
         { title: tr("admin.billing"), url: "/admin/billing", icon: FileText },
         { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
         { title: bn ? "WHM সার্ভার" : "WHM Server", url: "/admin/whm", icon: HardDrive },
+        { title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 },
       ],
     },
     {
