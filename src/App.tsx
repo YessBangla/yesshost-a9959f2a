@@ -151,6 +151,7 @@ const App = () => (
               <Route path="chat-rooms" element={<AdminChatRooms />} />
               <Route path="contact-messages" element={<AdminContactMessages />} />
               <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
+              <Route path="whm" element={<AdminWHM />} />
             </Route>
             <Route
               path="/call-center"
