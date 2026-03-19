@@ -7,7 +7,7 @@ import { Save, Camera, User, Mail, Phone, MapPin, Building2, Globe, FileText } f
 
 const DashboardProfile = () => {
   const { user, profile, refreshProfile } = useAuth();
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
