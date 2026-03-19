@@ -213,9 +213,9 @@ const ComparisonTable = ({ plans, isBn }: { plans: any[]; isBn: boolean }) => {
                 {isBn ? "ফিচার" : "Feature"}
               </th>
               {plans.map(p => (
-                <th key={p.id} className="text-center px-3 py-3">
-                  <span className={`text-xs font-bold ${p.is_highlighted ? "text-primary" : "text-foreground"}`}>{p.name}</span>
-                  <span className="block text-[10px] text-muted-foreground mt-0.5">৳{p.price_bdt}/{isBn ? "মাস" : "mo"}</span>
+                <th key={p.id} className="text-center px-3 py-3.5">
+                  <span className={`text-sm font-bold ${p.is_highlighted ? "text-primary" : "text-foreground"}`}>{p.name}</span>
+                  <span className="block text-xs text-muted-foreground mt-0.5">৳{p.price_bdt}/{isBn ? "মাস" : "mo"}</span>
                 </th>
               ))}
             </tr>
