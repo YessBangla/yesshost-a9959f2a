@@ -80,6 +80,7 @@ const App = () => (
 
             {/* Domain pricing */}
             <Route path="/domain-pricing" element={<DomainPricing />} />
+            <Route path="/hosting-plans" element={<HostingPlans />} />
 
             {/* Service detail pages */}
             <Route path="/services/:slug" element={<ServiceDetail />} />
