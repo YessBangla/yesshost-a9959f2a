@@ -169,7 +169,7 @@ const DashboardLayout = () => {
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary/15 shrink-0">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                  <img src={profile.avatar_url} alt={profile?.full_name || "User avatar"} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold">
                     {(profile?.full_name || "U").charAt(0).toUpperCase()}
