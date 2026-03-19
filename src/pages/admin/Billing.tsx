@@ -77,7 +77,7 @@ const AdminBilling = () => {
     return matchSearch && matchStatus;
   });
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <AdminTableSkeleton columns={7} rows={6} statsCount={4} />;
 
   return (
     <div className="space-y-6">
