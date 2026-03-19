@@ -13,6 +13,8 @@ const Contact = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const [content, setContent] = useState<any[]>([]);
 
   useEffect(() => {
