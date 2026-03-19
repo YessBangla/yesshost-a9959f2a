@@ -70,6 +70,7 @@ const AdminUsers = () => {
   // Edit permissions dialog
   const [editPermUser, setEditPermUser] = useState<UserWithRoles | null>(null);
   const [editPerms, setEditPerms] = useState<string[]>([]);
+  const [editRoles, setEditRoles] = useState<string[]>([]);
   const [savingPerms, setSavingPerms] = useState(false);
 
   const fetchUsers = async () => {
