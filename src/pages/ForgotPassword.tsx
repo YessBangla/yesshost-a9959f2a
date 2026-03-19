@@ -30,7 +30,7 @@ const ForgotPassword = () => {
           <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-10 mx-auto mb-6" /></Link>
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            হোমে ফিরে যান
+            {tr("auth.backToHome")}
           </Link>
           <h1 className="text-2xl font-bold text-foreground">{tr("auth.resetPassword")}</h1>
           <p className="text-sm text-muted-foreground mt-1">{tr("auth.resetSubtitle")}</p>
