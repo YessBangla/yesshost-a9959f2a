@@ -171,26 +171,6 @@ const DashboardLayout = () => {
           </NavLink>
         )}
 
-        {/* User Card */}
-        {!collapsed && (
-          <div className="mx-0.5 mt-2 p-3 rounded-xl bg-secondary/40 border border-border/30">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary/15 shrink-0">
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt={profile?.full_name || "User avatar"} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                    {(profile?.full_name || "U").charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-foreground truncate">{profile?.full_name || "User"}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{profile?.company_name || user?.email}</p>
-              </div>
-            </div>
-          </div>
-        )}
 
 
       </div>

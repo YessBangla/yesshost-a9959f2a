@@ -48,11 +48,23 @@ Deno.serve(async (req) => {
     // Create user with service role
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Check duplicate phone
+    if (phone && phone.trim()) {
+      const { data: existingPhone } = await adminClient
+        .from("profiles")
+        .select("id")
+        .eq("phone", phone.trim())
+        .maybeSingle();
+      if (existingPhone) {
+        return new Response(JSON.stringify({ error: "এই ফোন নাম্বার দিয়ে ইতোমধ্যে একটি অ্যাকাউন্ট আছে / Phone number already in use" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name, phone },
+      user_metadata: { full_name, phone: phone?.trim() },
     });
 
     if (createError) {
