@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Eye, CreditCard, Building2, Loader2 } from "lucide-react";
+import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle } from "lucide-react";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,12 +32,29 @@ const statusLabels: Record<string, { bn: string; en: string }> = {
   refunded: { bn: "ফেরত", en: "Refunded" },
 };
 
+const statusIcons: Record<string, typeof CheckCircle2> = {
+  paid: CheckCircle2,
+  unpaid: Clock,
+  overdue: AlertTriangle,
+  cancelled: XCircle,
+  refunded: RotateCcw,
+};
+
+const paymentMethodLabels: Record<string, { bn: string; en: string }> = {
+  sslcommerz: { bn: "SSLCommerz", en: "SSLCommerz" },
+  bkash: { bn: "বিকাশ", en: "bKash" },
+  nagad: { bn: "নগদ", en: "Nagad" },
+  bank: { bn: "ব্যাংক ট্রান্সফার", en: "Bank Transfer" },
+};
+
 const paymentMethods = [
   { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", descBn: "ভিসা, মাস্টার, বিকাশ, নগদ, মোবাইল ব্যাংকিং", ready: true },
   { id: "bkash", label: "bKash", labelBn: "বিকাশ", logo: bkashLogo, desc: "bKash Tokenized Payment", descBn: "বিকাশ টোকেনাইজড পেমেন্ট", ready: false },
   { id: "nagad", label: "Nagad", labelBn: "নগদ", logo: nagadLogo, desc: "Nagad Digital Payment", descBn: "নগদ ডিজিটাল পেমেন্ট", ready: false },
   { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, desc: "Manual Bank Transfer", descBn: "ম্যানুয়াল ব্যাংক ট্রান্সফার", ready: true },
 ];
+
+type TabType = "invoices" | "history";
 
 const DashboardBilling = () => {
   const { user } = useAuth();
@@ -50,6 +67,7 @@ const DashboardBilling = () => {
   const [payInvoice, setPayInvoice] = useState<Tables<"invoices"> | null>(null);
   const [selectedPayment, setSelectedPayment] = useState("");
   const [paying, setPaying] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>("invoices");
 
   const fetchInvoices = () => {
     if (!user) return;
@@ -106,6 +124,14 @@ const DashboardBilling = () => {
   if (loading) return <BillingSkeleton />;
 
   const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
+  const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
+  const paidInvoices = invoices.filter(i => i.status === "paid" || i.status === "refunded");
+  const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
+
+  const tabs: { id: TabType; label: string; icon: typeof FileText; count: number }[] = [
+    { id: "invoices", label: isBn ? "ইনভয়েস" : "Invoices", icon: FileText, count: invoices.length },
+    { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoices.length },
+  ];
 
   return (
     <div>
@@ -114,87 +140,214 @@ const DashboardBilling = () => {
         <p className="text-sm text-muted-foreground">{tr("dash.billingSubtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="glass-card p-5">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
+        <div className="glass-card p-4">
           <p className="text-xs text-muted-foreground mb-1">{tr("dash.totalInvoices")}</p>
           <p className="text-2xl font-bold text-foreground">{invoices.length}</p>
         </div>
-        <div className="glass-card p-5">
+        <div className="glass-card p-4">
+          <p className="text-xs text-muted-foreground mb-1">{isBn ? "বকেয়া ইনভয়েস" : "Unpaid"}</p>
+          <p className="text-2xl font-bold text-warning">{unpaidInvoices.length}</p>
+        </div>
+        <div className="glass-card p-4">
           <p className="text-xs text-muted-foreground mb-1">{tr("dash.totalDue")}</p>
           <p className="text-2xl font-bold text-warning">৳{formatAmount(totalDue, lang)}</p>
         </div>
-        <div className="glass-card p-5">
+        <div className="glass-card p-4">
           <p className="text-xs text-muted-foreground mb-1">{tr("dash.totalPaid")}</p>
-          <p className="text-2xl font-bold text-success">৳{formatAmount(invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0), lang)}</p>
+          <p className="text-2xl font-bold text-success">৳{formatAmount(totalPaid, lang)}</p>
         </div>
       </div>
 
-      {invoices.length === 0 ? (
-        <EmptyState
-          icon={FileText}
-          title={tr("dash.noInvoicesTitle")}
-          description={tr("dash.noInvoicesDesc")}
-        />
-      ) : (
-        <div className="glass-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-secondary/30">
-                  <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.invoiceNo")}</th>
-                  <th className="text-left p-4 font-semibold text-muted-foreground hidden md:table-cell">{tr("dash.description")}</th>
-                  <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.amount")}</th>
-                  <th className="text-left p-4 font-semibold text-muted-foreground">{tr("dash.status")}</th>
-                  <th className="text-left p-4 font-semibold text-muted-foreground hidden sm:table-cell">{tr("dash.dueDate")}</th>
-                  <th className="text-right p-4 font-semibold text-muted-foreground">{isBn ? "অ্যাকশন" : "Actions"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((inv) => {
-                  const canPay = inv.status === "unpaid" || inv.status === "overdue";
-                  const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
-                  return (
-                    <tr key={inv.id} className="border-b border-border/50 hover:bg-secondary/10 transition-colors">
-                      <td className="p-4">
-                        <p className="font-mono text-xs text-primary font-semibold">{inv.invoice_number}</p>
-                        <p className="text-[11px] text-muted-foreground md:hidden mt-0.5">{inv.description || "-"}</p>
-                      </td>
-                      <td className="p-4 text-muted-foreground hidden md:table-cell">{inv.description || "-"}</td>
-                      <td className="p-4 font-bold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</td>
-                      <td className="p-4">
-                        <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[inv.status]}`}>
-                          {isBn ? sl.bn : sl.en}
-                        </span>
-                      </td>
-                      <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{inv.due_date ? new Date(inv.due_date).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}</td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {canPay && (
-                            <Button
-                              size="sm"
-                              onClick={() => { setPayInvoice(inv); setSelectedPayment(""); }}
-                              className="gap-1.5 text-xs h-8"
-                            >
-                              <CreditCard className="w-3.5 h-3.5" />
-                              {isBn ? "পে করুন" : "Pay Now"}
-                            </Button>
-                          )}
-                          <button
-                            onClick={() => setReportInvoice(inv)}
-                            className="p-1.5 rounded-lg hover:bg-secondary/60 text-primary hover:text-primary/80 transition-colors"
-                            title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 rounded-xl bg-secondary/40 border border-border/50 mb-5 w-fit">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.id
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+              activeTab === tab.id ? "bg-primary-foreground/20" : "bg-secondary"
+            }`}>
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Invoices Tab */}
+      {activeTab === "invoices" && (
+        <>
+          {invoices.length === 0 ? (
+            <EmptyState
+              icon={FileText}
+              title={tr("dash.noInvoicesTitle")}
+              description={tr("dash.noInvoicesDesc")}
+            />
+          ) : (
+            <div className="glass-card overflow-hidden rounded-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-secondary/20">
+                      <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{tr("dash.invoiceNo")}</th>
+                      <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">{tr("dash.description")}</th>
+                      <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{tr("dash.amount")}</th>
+                      <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{tr("dash.status")}</th>
+                      <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden sm:table-cell">{tr("dash.dueDate")}</th>
+                      <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{isBn ? "অ্যাকশন" : "Actions"}</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                  </thead>
+                  <tbody>
+                    {invoices.map((inv) => {
+                      const canPay = inv.status === "unpaid" || inv.status === "overdue";
+                      const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
+                      return (
+                        <tr key={inv.id} className="border-b border-border/30 hover:bg-secondary/10 transition-colors">
+                          <td className="px-4 py-3.5">
+                            <p className="font-mono text-xs text-primary font-semibold">{inv.invoice_number}</p>
+                            <p className="text-[11px] text-muted-foreground md:hidden mt-0.5">{inv.description || "-"}</p>
+                          </td>
+                          <td className="px-4 py-3.5 text-muted-foreground hidden md:table-cell max-w-[200px] truncate">{inv.description || "-"}</td>
+                          <td className="px-4 py-3.5 font-bold text-foreground tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</td>
+                          <td className="px-4 py-3.5">
+                            <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[inv.status]}`}>
+                              {isBn ? sl.bn : sl.en}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5 text-muted-foreground text-sm hidden sm:table-cell">{inv.due_date ? new Date(inv.due_date).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}</td>
+                          <td className="px-4 py-3.5">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {canPay && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => { setPayInvoice(inv); setSelectedPayment(""); }}
+                                  className="gap-1.5 text-xs h-8"
+                                >
+                                  <CreditCard className="w-3.5 h-3.5" />
+                                  {isBn ? "পে করুন" : "Pay Now"}
+                                </Button>
+                              )}
+                              <button
+                                onClick={() => setReportInvoice(inv)}
+                                className="p-1.5 rounded-lg hover:bg-secondary/60 text-primary hover:text-primary/80 transition-colors"
+                                title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Payment History Tab */}
+      {activeTab === "history" && (
+        <>
+          {paidInvoices.length === 0 ? (
+            <EmptyState
+              icon={History}
+              title={isBn ? "কোনো পেমেন্ট হিস্ট্রি নেই" : "No Payment History"}
+              description={isBn ? "আপনার এখনো কোনো সম্পন্ন পেমেন্ট নেই" : "You don't have any completed payments yet"}
+            />
+          ) : (
+            <div className="space-y-3">
+              {paidInvoices.map((inv) => {
+                const StatusIcon = statusIcons[inv.status] || CheckCircle2;
+                const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
+                const pmLabel = inv.payment_method
+                  ? (paymentMethodLabels[inv.payment_method]?.[isBn ? "bn" : "en"] || inv.payment_method)
+                  : (isBn ? "অনির্ধারিত" : "Unknown");
+
+                // Extract TXN ID from description if available
+                const txnMatch = inv.description?.match(/TXN:\s*(TXN-[^\s|]+)/);
+                const txnId = txnMatch?.[1] || null;
+
+                return (
+                  <div key={inv.id} className="glass-card rounded-xl p-4 hover:bg-secondary/5 transition-colors">
+                    <div className="flex items-start gap-3">
+                      {/* Icon */}
+                      <div className={`p-2 rounded-lg shrink-0 ${statusColors[inv.status]}`}>
+                        <StatusIcon className="w-5 h-5" />
+                      </div>
+
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <p className="text-sm font-semibold text-foreground">
+                            ৳{formatAmount(Number(inv.amount_bdt), lang)}
+                          </p>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[inv.status]}`}>
+                            {isBn ? sl.bn : sl.en}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-muted-foreground truncate">
+                          {inv.description?.replace(/\s*\|\s*TXN:.*$/, "") || (isBn ? "ইনভয়েস পেমেন্ট" : "Invoice Payment")}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+                          <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                            <Receipt className="w-3 h-3" />
+                            {inv.invoice_number}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                            <CreditCard className="w-3 h-3" />
+                            {pmLabel}
+                          </span>
+                          {inv.paid_at && (
+                            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {new Date(inv.paid_at).toLocaleDateString(isBn ? "bn-BD" : "en-US", {
+                                year: "numeric", month: "short", day: "numeric",
+                              })}
+                              {" "}
+                              {new Date(inv.paid_at).toLocaleTimeString(isBn ? "bn-BD" : "en-US", {
+                                hour: "2-digit", minute: "2-digit",
+                              })}
+                            </span>
+                          )}
+                        </div>
+
+                        {txnId && (
+                          <div className="mt-2 px-2 py-1 rounded-md bg-secondary/40 inline-block">
+                            <p className="text-[10px] font-mono text-muted-foreground">
+                              TXN: {txnId}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Report Button */}
+                      <button
+                        onClick={() => setReportInvoice(inv)}
+                        className="p-2 rounded-lg hover:bg-secondary/60 text-primary hover:text-primary/80 transition-colors shrink-0"
+                        title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       {/* Payment Dialog */}
