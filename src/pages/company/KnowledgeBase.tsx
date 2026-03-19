@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import { Search, BookOpen, Server, Globe, Mail, Shield, HelpCircle } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
+import { toSlug } from "./KnowledgeBaseArticle";
 
 const iconMap: Record<string, any> = { Server, Globe, Mail, Shield, BookOpen };
 
