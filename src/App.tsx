@@ -39,6 +39,7 @@ import About from "./pages/company/About";
 import Contact from "./pages/company/Contact";
 import KnowledgeBase from "./pages/company/KnowledgeBase";
 import Affiliate from "./pages/company/Affiliate";
+import KnowledgeBaseArticle from "./pages/company/KnowledgeBaseArticle";
 import Terms from "./pages/legal/Terms";
 import Privacy from "./pages/legal/Privacy";
 import Refund from "./pages/legal/Refund";
