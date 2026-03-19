@@ -66,6 +66,7 @@ const DashboardLayout = () => {
     { title: tr("dash.billing"), url: "/dashboard/billing", icon: CreditCard },
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
+    ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),
   ];
 
   const bottomItems = [
