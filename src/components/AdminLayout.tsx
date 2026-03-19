@@ -17,6 +17,8 @@ const SWIPE_THRESHOLD = 80;
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, profile, signOut } = useAuth();
   const { tr, lang, setLang } = useLanguage();
   const navigate = useNavigate();
