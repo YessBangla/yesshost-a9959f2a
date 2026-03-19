@@ -146,7 +146,7 @@ const AdminUsers = () => {
         await supabase.from("user_permissions" as any).insert(permInserts);
       }
 
-      toast({ title: isBn ? "ইউজার তৈরি হয়েছে!" : "User created!" });
+      toast({ title: "✅ " + (isBn ? "সফল!" : "Success!"), description: isBn ? "নতুন ইউজার তৈরি হয়েছে" : "New user has been created" });
       setShowCreate(false);
       setCreateForm({ email: "", password: "", full_name: "", phone: "", roles: ["user"], permissions: [] });
       fetchUsers();
