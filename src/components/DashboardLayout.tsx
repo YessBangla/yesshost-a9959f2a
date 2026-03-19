@@ -157,8 +157,9 @@ const DashboardLayout = () => {
       icon: CreditCard,
       hasDropdown: true,
       children: [
-        { label: bn ? "ইনভয়েস" : "Invoices", href: "/dashboard/billing", icon: FileText },
-        { label: bn ? "ওয়ালেট" : "Wallet", href: "/dashboard/wallet", icon: Wallet },
+        { label: bn ? "আমার ইনভয়েস" : "My Invoice", href: "/dashboard/billing", icon: FileText, badge: unpaidInvoiceCount },
+        { label: bn ? "ম্যাস পেমেন্ট" : "Mass Payment", href: "/dashboard/billing", icon: Layers },
+        { label: bn ? "ফান্ড যোগ করুন" : "Add Funds", href: "/dashboard/wallet", icon: PlusCircle },
       ],
     },
     {
