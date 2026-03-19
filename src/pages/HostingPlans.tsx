@@ -121,6 +121,36 @@ const HostingPlans = () => {
           </motion.div>
         </section>
 
+        {/* Category Filter Buttons */}
+        {!loading && grouped.length > 0 && (
+          <section className="container mx-auto px-4 mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.4, ease }}
+              className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto"
+            >
+              {grouped.map((cat) => {
+                const label = categoryLabels[cat.key];
+                const Icon = cat.icon;
+                return (
+                  <button
+                    key={cat.key}
+                    onClick={() => {
+                      document.getElementById(`cat-${cat.key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-xs font-semibold text-foreground hover:border-primary/40 hover:shadow-sm transition-all`}
+                  >
+                    <Icon className="w-3.5 h-3.5 text-primary" />
+                    {bn ? label.bn : label.en}
+                    <span className="text-[10px] text-muted-foreground">({cat.allPlans.length})</span>
+                  </button>
+                );
+              })}
+            </motion.div>
+          </section>
+        )}
+
         {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center h-40">
