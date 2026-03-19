@@ -44,10 +44,24 @@ const DashboardLayout = () => {
   const overlayOpacity = useTransform(dragX, [0, -SIDEBAR_W], [1, 0]);
 
   useEffect(() => {
-    if (user) {
-      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
-      supabase.from("reseller_packages").select("id").eq("user_id", user.id).limit(1).then(({ data }) => setIsReseller(!!(data && data.length > 0)));
-    }
+    const checkAccess = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        setIsReseller(false);
+        return;
+      }
+
+      const [{ data: adminRole }, { data: resellerRole }, { data: resellerPackages }] = await Promise.all([
+        supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }),
+        supabase.rpc("has_role", { _user_id: user.id, _role: "reseller" }),
+        supabase.from("reseller_packages").select("id").eq("user_id", user.id).limit(1),
+      ]);
+
+      setIsAdmin(!!adminRole);
+      setIsReseller(!!resellerRole || !!(resellerPackages && resellerPackages.length > 0));
+    };
+
+    checkAccess();
   }, [user]);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);

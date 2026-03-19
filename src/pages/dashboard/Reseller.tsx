@@ -29,6 +29,7 @@ const ResellerDashboard = () => {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [accountsLoading, setAccountsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -43,28 +44,62 @@ const ResellerDashboard = () => {
   useEffect(() => { fetchPackages(); }, [user]);
 
   const fetchPackages = async () => {
-    if (!user) return;
+    if (!user) {
+      setPackages([]);
+      setSelectedPkg(null);
+      setAccounts([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setLoadError(null);
+
     const { data, error } = await supabase
       .from("reseller_packages")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-    console.log("Reseller packages fetch:", { data, error, userId: user.id });
-    setPackages(data || []);
-    setLoading(false);
-    if (data && data.length > 0 && !selectedPkg) {
-      setSelectedPkg(data[0]);
-      fetchAccounts(data[0].id);
+
+    if (error) {
+      setPackages([]);
+      setSelectedPkg(null);
+      setAccounts([]);
+      setLoadError(error.message);
+      setLoading(false);
+      return;
     }
+
+    const nextPackages = data || [];
+    setPackages(nextPackages);
+
+    if (nextPackages.length === 0) {
+      setSelectedPkg(null);
+      setAccounts([]);
+      setLoading(false);
+      return;
+    }
+
+    const nextSelected = nextPackages.find((pkg) => pkg.id === selectedPkg?.id) || nextPackages[0];
+    setSelectedPkg(nextSelected);
+    await fetchAccounts(nextSelected.id);
+    setLoading(false);
   };
 
   const fetchAccounts = async (pkgId: string) => {
     setAccountsLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("reseller_accounts")
       .select("*")
       .eq("reseller_package_id", pkgId)
       .order("created_at", { ascending: false });
+
+    if (error) {
+      setAccounts([]);
+      setAccountsLoading(false);
+      return;
+    }
+
     setAccounts(data || []);
     setAccountsLoading(false);
   };
@@ -148,11 +183,24 @@ const ResellerDashboard = () => {
           <Server className="w-10 h-10 text-muted-foreground/30" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground">{bn ? "রিসেলার প্যাকেজ নেই" : "No Reseller Package"}</h2>
+          <h2 className="text-xl font-bold text-foreground">
+            {loadError ? (bn ? "প্যাকেজ লোড করা যায়নি" : "Failed to load reseller package") : (bn ? "রিসেলার প্যাকেজ নেই" : "No Reseller Package")}
+          </h2>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-            {bn ? "রিসেলার হোস্টিং ক্রয় করলে এখানে আপনার প্যাকেজ দেখা যাবে এবং ক্লায়েন্ট অ্যাকাউন্ট পরিচালনা করতে পারবেন।" : "Purchase a reseller hosting plan to manage client accounts here."}
+            {loadError
+              ? (bn ? "আপনার ডেটা পড়তে সমস্যা হয়েছে। আবার চেষ্টা করুন।" : "There was a problem reading your data. Please retry.")
+              : (bn ? "রিসেলার হোস্টিং ক্রয় করলে এখানে আপনার প্যাকেজ দেখা যাবে এবং ক্লায়েন্ট অ্যাকাউন্ট পরিচালনা করতে পারবেন।" : "Purchase a reseller hosting plan to manage client accounts here.")}
           </p>
         </div>
+        {loadError && (
+          <button
+            onClick={fetchPackages}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+          >
+            <RefreshCw className="w-4 h-4" />
+            {bn ? "আবার চেষ্টা করুন" : "Try again"}
+          </button>
+        )}
       </div>
     );
   }
