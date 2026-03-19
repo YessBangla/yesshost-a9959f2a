@@ -492,6 +492,147 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          billing_cycle: string | null
+          created_at: string
+          domain_ext: string | null
+          domain_name: string | null
+          hosting_category: string | null
+          id: string
+          include_hosting: boolean | null
+          item_description: string | null
+          item_name: string
+          item_type: string
+          order_id: string
+          plan_id: string | null
+          price_bdt: number
+          provisioned_at: string | null
+          service_id: string | null
+          theme_id: string | null
+          theme_slug: string | null
+        }
+        Insert: {
+          billing_cycle?: string | null
+          created_at?: string
+          domain_ext?: string | null
+          domain_name?: string | null
+          hosting_category?: string | null
+          id?: string
+          include_hosting?: boolean | null
+          item_description?: string | null
+          item_name: string
+          item_type: string
+          order_id: string
+          plan_id?: string | null
+          price_bdt?: number
+          provisioned_at?: string | null
+          service_id?: string | null
+          theme_id?: string | null
+          theme_slug?: string | null
+        }
+        Update: {
+          billing_cycle?: string | null
+          created_at?: string
+          domain_ext?: string | null
+          domain_name?: string | null
+          hosting_category?: string | null
+          id?: string
+          include_hosting?: boolean | null
+          item_description?: string | null
+          item_name?: string
+          item_type?: string
+          order_id?: string
+          plan_id?: string | null
+          price_bdt?: number
+          provisioned_at?: string | null
+          service_id?: string | null
+          theme_id?: string | null
+          theme_slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          cancelled_at: string | null
+          completed_at: string | null
+          confirmed_at: string | null
+          coupon_code: string | null
+          created_at: string
+          discount_bdt: number
+          id: string
+          invoice_id: string | null
+          order_note: string | null
+          order_number: string
+          paid_at: string | null
+          payment_method: string | null
+          payment_status: string
+          processed_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal_bdt: number
+          total_bdt: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          coupon_code?: string | null
+          created_at?: string
+          discount_bdt?: number
+          id?: string
+          invoice_id?: string | null
+          order_note?: string | null
+          order_number: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal_bdt?: number
+          total_bdt?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          coupon_code?: string | null
+          created_at?: string
+          discount_bdt?: number
+          id?: string
+          invoice_id?: string | null
+          order_note?: string | null
+          order_number?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal_bdt?: number
+          total_bdt?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pricing_plans: {
         Row: {
           annual_price_bdt: string | null
@@ -979,11 +1120,21 @@ export type Database = {
         Args: { coupon_id: string }
         Returns: undefined
       }
+      provision_order: { Args: { _order_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "call_center"
       discount_type: "percentage" | "fixed"
       invoice_status: "paid" | "unpaid" | "overdue" | "cancelled" | "refunded"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "processing"
+        | "provisioning"
+        | "active"
+        | "completed"
+        | "cancelled"
+        | "refunded"
       room_member_status: "pending" | "approved" | "rejected"
       service_status:
         | "active"
@@ -1146,6 +1297,16 @@ export const Constants = {
       app_role: ["admin", "moderator", "user", "call_center"],
       discount_type: ["percentage", "fixed"],
       invoice_status: ["paid", "unpaid", "overdue", "cancelled", "refunded"],
+      order_status: [
+        "pending",
+        "confirmed",
+        "processing",
+        "provisioning",
+        "active",
+        "completed",
+        "cancelled",
+        "refunded",
+      ],
       room_member_status: ["pending", "approved", "rejected"],
       service_status: [
         "active",
