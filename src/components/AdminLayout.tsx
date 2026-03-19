@@ -31,6 +31,7 @@ const AdminLayout = () => {
     { title: isBn ? "লাইভ চ্যাট" : "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
     { title: isBn ? "চ্যাট রুম" : "Chat Rooms", url: "/admin/chat-rooms", icon: Users },
     { title: isBn ? "কন্টাক্ট মেসেজ" : "Contact Messages", url: "/admin/contact-messages", icon: Mail },
+    { title: isBn ? "নলেজ বেস" : "Knowledge Base", url: "/admin/knowledge-base", icon: BookOpen },
     { title: "CMS", url: "/admin/cms", icon: Layers },
   ];
 
