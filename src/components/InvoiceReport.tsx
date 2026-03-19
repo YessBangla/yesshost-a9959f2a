@@ -32,6 +32,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
   const { lang } = useLanguage();
   const isBn = lang === "bn";
   const printRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
 
   if (!invoice) return null;
 
