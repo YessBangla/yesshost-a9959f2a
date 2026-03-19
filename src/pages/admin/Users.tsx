@@ -421,6 +421,25 @@ const AdminUsers = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => {
+                            setEditProfileUser(u);
+                            setEditProfileForm({
+                              full_name: u.full_name || "",
+                              phone: u.phone || "",
+                              company_name: u.company_name || "",
+                              company_website: u.company_website || "",
+                              address: u.address || "",
+                              city: u.city || "",
+                              country: u.country || "",
+                              vat_id: u.vat_id || "",
+                            });
+                          }}
+                          className="p-2 rounded-lg hover:bg-amber-500/10 text-amber-600 transition-colors"
+                          title={isBn ? "প্রোফাইল এডিট" : "Edit Profile"}
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => { setEditPermUser(u); setEditPerms([...u.permissions]); setEditRoles([...u.roles]); }}
                           className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
                           title={isBn ? "অ্যাক্সেস ম্যানেজ করুন" : "Manage Access"}
