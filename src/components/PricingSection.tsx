@@ -238,8 +238,8 @@ const PricingSection = () => {
                 )}
 
                 <div className="p-4 sm:p-6">
-                  <h3 className="text-xs font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
-                  {plan.subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{plan.subtitle}</p>}
+                  <h3 className="text-sm font-bold text-primary uppercase tracking-wider">{plan.name}</h3>
+                  {plan.subtitle && <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>}
 
                   {/* Duration Selector per plan */}
                   <div className="mt-3">
