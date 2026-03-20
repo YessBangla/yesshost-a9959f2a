@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      call_history: {
+        Row: {
+          caller_role: string
+          chat_id: string
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          caller_role?: string
+          chat_id: string
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          caller_role?: string
+          chat_id?: string
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_history_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "live_chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_room_members: {
         Row: {
           created_at: string

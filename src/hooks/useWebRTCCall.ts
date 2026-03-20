@@ -17,6 +17,8 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const callRecordIdRef = useRef<string | null>(null);
+  const callStartTimeRef = useRef<string | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -37,6 +39,30 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     localStreamRef.current = null;
     setDuration(0);
     setIsMuted(false);
+  }, []);
+
+  // Save call record to database
+  const saveCallStart = useCallback(async () => {
+    if (!chatId) return;
+    callStartTimeRef.current = new Date().toISOString();
+    const { data } = await supabase.from("call_history").insert({
+      chat_id: chatId,
+      caller_role: role,
+      started_at: callStartTimeRef.current,
+      status: "ringing",
+    }).select("id").single();
+    if (data) callRecordIdRef.current = data.id;
+  }, [chatId, role]);
+
+  const saveCallEnd = useCallback(async (finalStatus: string, finalDuration: number) => {
+    if (!callRecordIdRef.current) return;
+    await supabase.from("call_history").update({
+      ended_at: new Date().toISOString(),
+      duration_seconds: finalDuration,
+      status: finalStatus,
+    }).eq("id", callRecordIdRef.current);
+    callRecordIdRef.current = null;
+    callStartTimeRef.current = null;
   }, []);
 
   // Create peer connection
@@ -141,6 +167,7 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     if (!chatId || !channelRef.current) return;
     try {
       setCallStatus("requesting");
+      await saveCallStart();
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       localStreamRef.current = stream;
@@ -184,13 +211,18 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
   // Accept call (admin accepts)
   const acceptCall = useCallback(async () => {
     if (!chatId || !channelRef.current) return;
-    // The offer handler above will handle the rest
     createPC();
     setCallStatus("connected");
+    // Update record status to connected
+    if (callRecordIdRef.current) {
+      await supabase.from("call_history").update({ status: "connected" }).eq("id", callRecordIdRef.current);
+    }
   }, [chatId, createPC]);
 
   // End call
   const endCall = useCallback(() => {
+    const finalDuration = duration;
+    const finalStatus = callStatus === "connected" ? "completed" : "missed";
     channelRef.current?.send({
       type: "broadcast",
       event: "webrtc",
@@ -198,8 +230,9 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     });
     setCallStatus("ended");
     cleanup();
+    saveCallEnd(finalStatus, finalDuration);
     setTimeout(() => setCallStatus("idle"), 2000);
-  }, [role, cleanup]);
+  }, [role, cleanup, duration, callStatus, saveCallEnd]);
 
   // Toggle mute
   const toggleMute = useCallback(() => {
