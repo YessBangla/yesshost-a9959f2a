@@ -128,6 +128,7 @@ const AdminLayout = () => {
       label: bn ? "যোগাযোগ" : "Communication",
       items: [
         { title: bn ? "লাইভ চ্যাট" : "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
+        { title: bn ? "কল হিস্ট্রি" : "Call History", url: "/admin/call-history", icon: History },
         { title: bn ? "চ্যাট রুম" : "Chat Rooms", url: "/admin/chat-rooms", icon: Users },
         { title: bn ? "কন্টাক্ট" : "Contact", url: "/admin/contact-messages", icon: Mail },
       ],
