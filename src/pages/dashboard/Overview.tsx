@@ -493,6 +493,9 @@ const DashboardOverview = () => {
           </motion.div>
         </div>
 
+        {/* Chat & Call Summary */}
+        <ChatCallSummaryWidget userId={user?.id} bn={bn} />
+
         {/* Notifications */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
