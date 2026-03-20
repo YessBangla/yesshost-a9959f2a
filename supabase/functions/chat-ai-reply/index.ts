@@ -158,6 +158,8 @@ serve(async (req) => {
       messages.push({ role: "user", content: message });
     }
 
+    console.log("Sending to AI, messages count:", messages.length, "system prompt length:", systemPrompt.length);
+
     // Call Lovable AI
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -166,12 +168,14 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
         messages,
         temperature: 0.7,
-        max_tokens: 400,
+        max_tokens: 300,
       }),
     });
+
+    console.log("AI response status:", aiResponse.status);
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
