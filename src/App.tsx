@@ -86,6 +86,7 @@ const CallCenterDashboard = lazy(() => import("./pages/callcenter/Dashboard"));
 const CallCenterOrders = lazy(() => import("./pages/callcenter/Orders"));
 const CallCenterLiveChat = lazy(() => import("./pages/callcenter/LiveChat"));
 const CallCenterTickets = lazy(() => import("./pages/callcenter/Tickets"));
+const CallCenterCallHistory = lazy(() => import("./pages/callcenter/CallHistory"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
