@@ -167,6 +167,7 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     if (!chatId || !channelRef.current) return;
     try {
       setCallStatus("requesting");
+      await saveCallStart();
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       localStreamRef.current = stream;
