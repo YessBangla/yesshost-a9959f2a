@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useWebRTCCall } from "@/hooks/useWebRTCCall";
+import { useRingtone } from "@/hooks/useRingtone";
 import type { Tables } from "@/integrations/supabase/types";
 
 const CallCenterLiveChat = () => {
@@ -17,7 +18,8 @@ const CallCenterLiveChat = () => {
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(true);
   const msgEnd = useRef<HTMLDivElement>(null);
-  const ringtoneRef = useRef<HTMLAudioElement | null>(null);
+
+  const { startRingtone, stopRingtone } = useRingtone();
 
   const {
     callStatus,
@@ -28,15 +30,18 @@ const CallCenterLiveChat = () => {
     toggleMute,
   } = useWebRTCCall({ chatId: selectedChat, role: "admin" });
 
-  // Play ringtone sound on ringing
+  // Play/stop ringtone on ringing
   useEffect(() => {
     if (callStatus === "ringing") {
+      startRingtone();
       toast({
         title: bn ? "ইনকামিং কল!" : "Incoming Call!",
         description: bn
           ? `${chats.find(c => c.id === selectedChat)?.visitor_name || "ভিজিটর"} কল করছেন`
           : `${chats.find(c => c.id === selectedChat)?.visitor_name || "Visitor"} is calling`,
       });
+    } else {
+      stopRingtone();
     }
   }, [callStatus]);
 
