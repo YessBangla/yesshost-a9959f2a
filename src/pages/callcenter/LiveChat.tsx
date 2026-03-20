@@ -18,7 +18,8 @@ const CallCenterLiveChat = () => {
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(true);
   const msgEnd = useRef<HTMLDivElement>(null);
-  const ringtoneRef = useRef<HTMLAudioElement | null>(null);
+
+  const { startRingtone, stopRingtone } = useRingtone();
 
   const {
     callStatus,
