@@ -30,15 +30,18 @@ const CallCenterLiveChat = () => {
     toggleMute,
   } = useWebRTCCall({ chatId: selectedChat, role: "admin" });
 
-  // Play ringtone sound on ringing
+  // Play/stop ringtone on ringing
   useEffect(() => {
     if (callStatus === "ringing") {
+      startRingtone();
       toast({
         title: bn ? "ইনকামিং কল!" : "Incoming Call!",
         description: bn
           ? `${chats.find(c => c.id === selectedChat)?.visitor_name || "ভিজিটর"} কল করছেন`
           : `${chats.find(c => c.id === selectedChat)?.visitor_name || "Visitor"} is calling`,
       });
+    } else {
+      stopRingtone();
     }
   }, [callStatus]);
 
