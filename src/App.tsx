@@ -81,6 +81,7 @@ const AdminContactMessages = lazy(() => import("./pages/admin/ContactMessages"))
 const AdminKnowledgeBase = lazy(() => import("./pages/admin/KnowledgeBase"));
 const AdminWHM = lazy(() => import("./pages/admin/WHM"));
 const AdminCallHistory = lazy(() => import("./pages/callcenter/CallHistory"));
+const AdminCommunicationConfig = lazy(() => import("./pages/admin/CommunicationConfig"));
 
 // Call center pages
 const CallCenterDashboard = lazy(() => import("./pages/callcenter/Dashboard"));
@@ -199,6 +200,7 @@ const App = () => (
                   <Route path="coupons" element={<AdminCoupons />} />
                   <Route path="live-chat" element={<AdminLiveChat />} />
                   <Route path="call-history" element={<AdminCallHistory />} />
+                  <Route path="communication-config" element={<AdminCommunicationConfig />} />
                   <Route path="chat-rooms" element={<AdminChatRooms />} />
                   <Route path="contact-messages" element={<AdminContactMessages />} />
                   <Route path="knowledge-base" element={<AdminKnowledgeBase />} />

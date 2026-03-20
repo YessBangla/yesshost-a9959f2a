@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
   LogOut, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
   Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown, Share2,
-  UserCircle, Package, Receipt, TicketCheck, Loader2, History
+  UserCircle, Package, Receipt, TicketCheck, Loader2, History, Settings
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -131,6 +131,7 @@ const AdminLayout = () => {
         { title: bn ? "কল হিস্ট্রি" : "Call History", url: "/admin/call-history", icon: History },
         { title: bn ? "চ্যাট রুম" : "Chat Rooms", url: "/admin/chat-rooms", icon: Users },
         { title: bn ? "কন্টাক্ট" : "Contact", url: "/admin/contact-messages", icon: Mail },
+        { title: bn ? "কমিউনিকেশন সেটিংস" : "Comm. Config", url: "/admin/communication-config", icon: Settings },
       ],
     },
   ];
