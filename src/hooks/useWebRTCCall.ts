@@ -221,6 +221,8 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
 
   // End call
   const endCall = useCallback(() => {
+    const finalDuration = duration;
+    const finalStatus = callStatus === "connected" ? "completed" : "missed";
     channelRef.current?.send({
       type: "broadcast",
       event: "webrtc",
@@ -228,8 +230,9 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     });
     setCallStatus("ended");
     cleanup();
+    saveCallEnd(finalStatus, finalDuration);
     setTimeout(() => setCallStatus("idle"), 2000);
-  }, [role, cleanup]);
+  }, [role, cleanup, duration, callStatus, saveCallEnd]);
 
   // Toggle mute
   const toggleMute = useCallback(() => {
