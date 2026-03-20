@@ -41,6 +41,30 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     setIsMuted(false);
   }, []);
 
+  // Save call record to database
+  const saveCallStart = useCallback(async () => {
+    if (!chatId) return;
+    callStartTimeRef.current = new Date().toISOString();
+    const { data } = await supabase.from("call_history").insert({
+      chat_id: chatId,
+      caller_role: role,
+      started_at: callStartTimeRef.current,
+      status: "ringing",
+    }).select("id").single();
+    if (data) callRecordIdRef.current = data.id;
+  }, [chatId, role]);
+
+  const saveCallEnd = useCallback(async (finalStatus: string, finalDuration: number) => {
+    if (!callRecordIdRef.current) return;
+    await supabase.from("call_history").update({
+      ended_at: new Date().toISOString(),
+      duration_seconds: finalDuration,
+      status: finalStatus,
+    }).eq("id", callRecordIdRef.current);
+    callRecordIdRef.current = null;
+    callStartTimeRef.current = null;
+  }, []);
+
   // Create peer connection
   const createPC = useCallback(() => {
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
