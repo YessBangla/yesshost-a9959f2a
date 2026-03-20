@@ -154,7 +154,11 @@ serve(async (req) => {
           content: msg.message,
         });
       }
-    } else {
+    }
+
+    // Always ensure the latest user message is at the end
+    const lastMsg = messages[messages.length - 1];
+    if (!lastMsg || lastMsg.role !== "user" || lastMsg.content !== message) {
       messages.push({ role: "user", content: message });
     }
 
