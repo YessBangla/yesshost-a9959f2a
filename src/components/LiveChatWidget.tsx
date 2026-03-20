@@ -132,6 +132,18 @@ const LiveChatWidget = () => {
       message: msg,
     });
     setSending(false);
+
+    // Trigger AI auto-reply
+    setAdminTyping(true);
+    try {
+      await supabase.functions.invoke("chat-ai-reply", {
+        body: { chat_id: chatId, message: msg, lang },
+      });
+    } catch (err) {
+      console.error("AI reply error:", err);
+    } finally {
+      setAdminTyping(false);
+    }
   };
 
   const endChat = () => {
