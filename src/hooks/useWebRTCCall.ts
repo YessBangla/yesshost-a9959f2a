@@ -211,9 +211,12 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
   // Accept call (admin accepts)
   const acceptCall = useCallback(async () => {
     if (!chatId || !channelRef.current) return;
-    // The offer handler above will handle the rest
     createPC();
     setCallStatus("connected");
+    // Update record status to connected
+    if (callRecordIdRef.current) {
+      await supabase.from("call_history").update({ status: "connected" }).eq("id", callRecordIdRef.current);
+    }
   }, [chatId, createPC]);
 
   // End call
