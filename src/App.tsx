@@ -86,6 +86,7 @@ const CallCenterDashboard = lazy(() => import("./pages/callcenter/Dashboard"));
 const CallCenterOrders = lazy(() => import("./pages/callcenter/Orders"));
 const CallCenterLiveChat = lazy(() => import("./pages/callcenter/LiveChat"));
 const CallCenterTickets = lazy(() => import("./pages/callcenter/Tickets"));
+const CallCenterCallHistory = lazy(() => import("./pages/callcenter/CallHistory"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -213,6 +214,7 @@ const App = () => (
                   <Route path="orders" element={<CallCenterOrders />} />
                   <Route path="live-chat" element={<CallCenterLiveChat />} />
                   <Route path="tickets" element={<CallCenterTickets />} />
+                  <Route path="call-history" element={<CallCenterCallHistory />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
