@@ -131,6 +131,7 @@ const AdminLayout = () => {
         { title: bn ? "কল হিস্ট্রি" : "Call History", url: "/admin/call-history", icon: History },
         { title: bn ? "চ্যাট রুম" : "Chat Rooms", url: "/admin/chat-rooms", icon: Users },
         { title: bn ? "কন্টাক্ট" : "Contact", url: "/admin/contact-messages", icon: Mail },
+        { title: bn ? "কমিউনিকেশন সেটিংস" : "Comm. Config", url: "/admin/communication-config", icon: Settings },
       ],
     },
   ];
