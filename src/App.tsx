@@ -80,6 +80,7 @@ const AdminChatRooms = lazy(() => import("./pages/admin/ChatRooms"));
 const AdminContactMessages = lazy(() => import("./pages/admin/ContactMessages"));
 const AdminKnowledgeBase = lazy(() => import("./pages/admin/KnowledgeBase"));
 const AdminWHM = lazy(() => import("./pages/admin/WHM"));
+const AdminCallHistory = lazy(() => import("./pages/callcenter/CallHistory"));
 
 // Call center pages
 const CallCenterDashboard = lazy(() => import("./pages/callcenter/Dashboard"));
