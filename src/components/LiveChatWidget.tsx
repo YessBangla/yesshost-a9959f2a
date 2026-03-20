@@ -36,6 +36,15 @@ const LiveChatWidget = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
 
+  const {
+    callStatus,
+    formattedDuration,
+    isMuted,
+    startCall,
+    endCall: endWebRTCCall,
+    toggleMute,
+  } = useWebRTCCall({ chatId, role: "visitor" });
+
   // Persist open state
   useEffect(() => {
     localStorage.setItem(CHAT_OPEN_KEY, open ? "true" : "false");
