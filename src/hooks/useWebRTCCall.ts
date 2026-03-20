@@ -17,6 +17,8 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const callRecordIdRef = useRef<string | null>(null);
+  const callStartTimeRef = useRef<string | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
