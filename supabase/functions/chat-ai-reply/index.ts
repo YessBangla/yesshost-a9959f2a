@@ -7,22 +7,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are a friendly and professional customer support AI assistant for "Yess Host" — a Bangladeshi web hosting company.
-
-Your knowledge:
-- Services: Shared Hosting, Cloud Hosting, VPS, WordPress Hosting, Reseller Hosting, Domain Registration, SSL Certificates, Email Hosting
-- Payment methods: bKash, Nagad, SSLCommerz, Bank Transfer
-- Support: 24/7 live chat, ticket system, knowledge base
-- Website: yesshost.lovable.app
-
-Guidelines:
-- Be concise, helpful, and friendly. Use emojis sparingly.
-- If the user writes in Bangla, reply in Bangla. If in English, reply in English.
-- For billing/account-specific questions, suggest contacting a live agent or creating a support ticket.
-- Never make up pricing — say "Please check our pricing page or contact our team for the latest rates."
-- If you don't know something, say so honestly and offer to connect them with a human agent.
-- Keep responses under 150 words.`;
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -50,30 +34,65 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch recent conversation history (last 20 messages)
-    const { data: history } = await supabase
-      .from("live_chat_messages")
-      .select("sender_type, message")
-      .eq("chat_id", chat_id)
-      .order("created_at", { ascending: true })
-      .limit(20);
+    // Fetch data context + conversation history in parallel
+    const [plansResult, domainsResult, historyResult] = await Promise.all([
+      supabase.from("pricing_plans").select("name, category, price_bdt, annual_price_bdt").eq("is_active", true).order("sort_order").limit(15),
+      supabase.from("domain_pricing").select("ext, registration_bdt, renewal_bdt").eq("is_active", true).order("sort_order").limit(10),
+      supabase.from("live_chat_messages").select("sender_type, message").eq("chat_id", chat_id).order("created_at", { ascending: true }).limit(10),
+    ]);
 
-    const messages: { role: string; content: string }[] = [
-      { role: "system", content: SYSTEM_PROMPT },
+    // Build compact context
+    let context = "";
+    if (plansResult.data?.length) {
+      context += "HOSTING PLANS:\n";
+      for (const p of plansResult.data) {
+        context += `${p.name} (${p.category}): ৳${p.price_bdt}/mo${p.annual_price_bdt ? `, ৳${p.annual_price_bdt}/yr` : ""}\n`;
+      }
+    }
+    if (domainsResult.data?.length) {
+      context += "\nDOMAIN PRICES:\n";
+      for (const d of domainsResult.data) {
+        context += `${d.ext}: Reg ৳${d.registration_bdt}, Renew ৳${d.renewal_bdt}\n`;
+      }
+    }
+
+    const systemPrompt = `You are a customer support AI for "Yess Host", a Bangladeshi web hosting company.
+
+REAL PRICING DATA:
+${context || "Check yesshost.lovable.app for pricing."}
+
+RULES:
+- Reply in the same language the user writes (Bangla or English)
+- Use the exact prices above when asked about pricing
+- For account-specific questions, suggest creating a support ticket
+- Be concise and friendly, keep replies under 120 words
+- Payment methods: bKash, Nagad, SSLCommerz, Bank Transfer
+- Support: 24/7 chat, tickets, knowledge base`;
+
+    // Build messages array
+    const aiMessages: { role: string; content: string }[] = [
+      { role: "system", content: systemPrompt },
     ];
 
-    if (history && history.length > 0) {
-      for (const msg of history) {
-        messages.push({
+    const history = historyResult.data;
+    if (history?.length) {
+      // Only include last 6 messages for context
+      const recent = history.slice(-6);
+      for (const msg of recent) {
+        aiMessages.push({
           role: msg.sender_type === "visitor" ? "user" : "assistant",
           content: msg.message,
         });
       }
-    } else {
-      messages.push({ role: "user", content: message });
     }
 
-    // Call Lovable AI
+    // Ensure current message is the last user message
+    const last = aiMessages[aiMessages.length - 1];
+    if (!last || last.role !== "user" || last.content !== message) {
+      aiMessages.push({ role: "user", content: message });
+    }
+
+    // Call AI
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -81,69 +100,50 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages,
+        model: "google/gemini-2.5-flash",
+        messages: aiMessages,
         temperature: 0.7,
-        max_tokens: 300,
+        max_tokens: 250,
       }),
     });
 
     if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limited, please try again shortly" }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      const status = aiResponse.status;
+      console.error("AI gateway error:", status);
+      if (status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limited" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      if (aiResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI service temporarily unavailable" }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      if (status === 402) {
+        return new Response(JSON.stringify({ error: "AI credits exhausted" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      console.error("AI error:", aiResponse.status);
-      return new Response(
-        JSON.stringify({ error: "AI service error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "AI error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const aiData = await aiResponse.json();
     const reply = aiData.choices?.[0]?.message?.content?.trim();
 
     if (!reply) {
-      return new Response(
-        JSON.stringify({ error: "No reply generated" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error("Empty AI reply:", JSON.stringify(aiData).slice(0, 300));
+      // Fallback response
+      const fallback = lang === "bn"
+        ? "দুঃখিত, এই মুহূর্তে উত্তর দিতে পারছি না। অনুগ্রহ করে একটি সাপোর্ট টিকেট তৈরি করুন অথবা আমাদের সাথে যোগাযোগ করুন।"
+        : "Sorry, I couldn't process your request right now. Please create a support ticket or contact us directly.";
+      
+      await supabase.from("live_chat_messages").insert({ chat_id, sender_type: "admin", message: fallback });
+      return new Response(JSON.stringify({ reply: fallback }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Save AI reply as admin message
-    const { error: insertError } = await supabase
-      .from("live_chat_messages")
-      .insert({
-        chat_id,
-        sender_type: "admin",
-        message: reply,
-      });
+    // Save reply
+    const { error: insertError } = await supabase.from("live_chat_messages").insert({ chat_id, sender_type: "admin", message: reply });
 
     if (insertError) {
       console.error("Insert error:", insertError);
-      return new Response(
-        JSON.stringify({ error: "Failed to save reply" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Failed to save reply" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    return new Response(
-      JSON.stringify({ reply }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ reply }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Chat AI error:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
