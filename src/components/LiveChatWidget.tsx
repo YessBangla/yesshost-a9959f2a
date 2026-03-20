@@ -226,6 +226,15 @@ const LiveChatWidget = () => {
                 </p>
               </div>
               <div className="flex items-center gap-1">
+                {started && callStatus === "idle" && (
+                  <button
+                    onClick={startCall}
+                    className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground transition-colors"
+                    title={bn ? "ভয়েস কল" : "Voice Call"}
+                  >
+                    <PhoneCall className="w-4 h-4" />
+                  </button>
+                )}
                 {started && (
                   <button onClick={endChat} className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground/70 text-[10px] font-medium transition-colors">
                     {bn ? "শেষ" : "End"}
@@ -236,6 +245,19 @@ const LiveChatWidget = () => {
                 </button>
               </div>
             </div>
+
+            {/* Call UI */}
+            {started && (
+              <LiveChatCallUI
+                callStatus={callStatus}
+                formattedDuration={formattedDuration}
+                isMuted={isMuted}
+                onStartCall={startCall}
+                onEndCall={endWebRTCCall}
+                onToggleMute={toggleMute}
+                bn={bn}
+              />
+            )}
 
             {!started ? (
               /* Pre-chat form */
