@@ -214,6 +214,7 @@ const App = () => (
                   <Route path="orders" element={<CallCenterOrders />} />
                   <Route path="live-chat" element={<CallCenterLiveChat />} />
                   <Route path="tickets" element={<CallCenterTickets />} />
+                  <Route path="call-history" element={<CallCenterCallHistory />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

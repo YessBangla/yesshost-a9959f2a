@@ -34,6 +34,7 @@ const CallCenterLayout = () => {
     { title: bn ? "অর্ডার" : "Orders", url: "/call-center/orders", icon: ShoppingCart },
     { title: bn ? "লাইভ চ্যাট" : "Live Chat", url: "/call-center/live-chat", icon: MessageCircle },
     { title: bn ? "টিকেট" : "Tickets", url: "/call-center/tickets", icon: HeadphonesIcon },
+    { title: bn ? "কল হিস্ট্রি" : "Call History", url: "/call-center/call-history", icon: History },
   ];
 
   const currentPage = sidebarItems.find(i =>
