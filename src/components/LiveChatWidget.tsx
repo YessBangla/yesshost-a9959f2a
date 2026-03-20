@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2, Smile, Phone, Mail } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Smile, Phone, PhoneCall, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useWebRTCCall } from "@/hooks/useWebRTCCall";
+import LiveChatCallUI from "@/components/LiveChatCallUI";
 
 const CHAT_STORAGE_KEY = "yesshost_live_chat_id";
 const CHAT_OPEN_KEY = "yesshost_live_chat_open";
@@ -33,6 +35,15 @@ const LiveChatWidget = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { lang } = useLanguage();
   const bn = lang === "bn";
+
+  const {
+    callStatus,
+    formattedDuration,
+    isMuted,
+    startCall,
+    endCall: endWebRTCCall,
+    toggleMute,
+  } = useWebRTCCall({ chatId, role: "visitor" });
 
   // Persist open state
   useEffect(() => {
@@ -215,6 +226,15 @@ const LiveChatWidget = () => {
                 </p>
               </div>
               <div className="flex items-center gap-1">
+                {started && callStatus === "idle" && (
+                  <button
+                    onClick={startCall}
+                    className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground transition-colors"
+                    title={bn ? "ভয়েস কল" : "Voice Call"}
+                  >
+                    <PhoneCall className="w-4 h-4" />
+                  </button>
+                )}
                 {started && (
                   <button onClick={endChat} className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground/70 text-[10px] font-medium transition-colors">
                     {bn ? "শেষ" : "End"}
@@ -225,6 +245,19 @@ const LiveChatWidget = () => {
                 </button>
               </div>
             </div>
+
+            {/* Call UI */}
+            {started && (
+              <LiveChatCallUI
+                callStatus={callStatus}
+                formattedDuration={formattedDuration}
+                isMuted={isMuted}
+                onStartCall={startCall}
+                onEndCall={endWebRTCCall}
+                onToggleMute={toggleMute}
+                bn={bn}
+              />
+            )}
 
             {!started ? (
               /* Pre-chat form */
