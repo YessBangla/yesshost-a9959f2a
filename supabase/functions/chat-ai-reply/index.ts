@@ -197,6 +197,7 @@ serve(async (req) => {
     const reply = aiData.choices?.[0]?.message?.content?.trim();
 
     if (!reply) {
+      console.error("AI response data:", JSON.stringify(aiData).slice(0, 500));
       return new Response(
         JSON.stringify({ error: "No reply generated" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
