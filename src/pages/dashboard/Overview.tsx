@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { OverviewSkeleton } from "@/components/DashboardSkeleton";
+import ChatCallSummaryWidget from "@/components/ChatCallSummaryWidget";
 import {
   Server, FileText, HeadphonesIcon, Globe, AlertCircle,
   Bell, Clock, TrendingUp, Zap, ChevronRight, CreditCard, Activity,
@@ -491,6 +492,9 @@ const DashboardOverview = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* Chat & Call Summary */}
+        <ChatCallSummaryWidget userId={user?.id} bn={bn} />
 
         {/* Notifications */}
         <motion.div
