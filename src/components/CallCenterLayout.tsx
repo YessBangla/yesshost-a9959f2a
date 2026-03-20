@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, LogOut, Menu, Globe, Headphones,
   ShoppingCart, MessageCircle, HeadphonesIcon, ChevronRight,
-  PanelLeftClose, PanelLeft, Phone
+  PanelLeftClose, PanelLeft, Phone, History
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
