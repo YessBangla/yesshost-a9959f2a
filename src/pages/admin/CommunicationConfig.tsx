@@ -168,6 +168,81 @@ const CommunicationConfig = () => {
         </p>
       </div>
 
+      {/* Live delivery test */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base flex items-center gap-2">
+            <PlayCircle className="w-4 h-4" />
+            {bn ? "লাইভ ডেলিভারি টেস্ট" : "Live Delivery Test"}
+          </CardTitle>
+          <CardDescription className="text-xs mt-1">
+            {bn
+              ? "আপনার সেভ করা সেটিংস দিয়ে সত্যিকারের ইমেইল ও OTP পাঠিয়ে পুরো প্রক্রিয়া যাচাই করুন"
+              : "Send a real email and OTP with your saved settings to verify the full flow end to end"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs">{bn ? "টেস্ট ইমেইল ঠিকানা" : "Test email address"}</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={testTarget}
+                  onChange={e => setTestTarget(e.target.value)}
+                  placeholder="you@example.com"
+                  className="text-sm"
+                />
+                <Button size="sm" onClick={() => runTest("full")} disabled={!!testing} className="gap-1.5 shrink-0">
+                  {testing === "full" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
+                  {bn ? "পুরো টেস্ট" : "Full test"}
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {bn ? "কনফিগ যাচাই → টেস্ট ইমেইল → OTP ইমেইল → OTP ভেরিফাই" : "Config check → test email → OTP email → OTP verify"}
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">{bn ? "টেস্ট মোবাইল নম্বর" : "Test phone number"}</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={testSmsTarget}
+                  onChange={e => setTestSmsTarget(e.target.value)}
+                  placeholder="+8801XXXXXXXXX"
+                  className="text-sm"
+                />
+                <Button size="sm" variant="outline" onClick={() => runTest("sms")} disabled={!!testing} className="gap-1.5 shrink-0">
+                  {testing === "sms" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Phone className="w-3.5 h-3.5" />}
+                  {bn ? "SMS টেস্ট" : "SMS test"}
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {bn ? "SMS প্রোভাইডার সক্রিয় থাকলে কাজ করবে" : "Requires an active SMS provider"}
+              </p>
+            </div>
+          </div>
+
+          {(testSteps || testError) && (
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+              {(testSteps || []).map((s, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs">
+                  {s.ok
+                    ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                    : <XCircle className="w-3.5 h-3.5 text-destructive mt-0.5 shrink-0" />}
+                  <div className="min-w-0">
+                    <span className="font-medium">{s.name}</span>
+                    {s.detail && <span className="block text-muted-foreground break-words">{s.detail}</span>}
+                  </div>
+                </div>
+              ))}
+              {testError && (
+                <p className="text-xs text-destructive break-words pt-1 border-t">{testError}</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="smtp" className="space-y-4">
         <TabsList className="grid grid-cols-2 lg:grid-cols-4 h-auto gap-1 bg-muted/50 p-1">
           <TabsTrigger value="smtp" className="text-xs gap-1.5 data-[state=active]:bg-background">
