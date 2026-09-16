@@ -180,11 +180,11 @@ const AdminAffiliates = () => {
         <div className="px-4 py-3 border-b border-border/30">
           <h3 className="text-xs font-semibold text-foreground">{bn ? "কমিশন" : "Commissions"}</h3>
         </div>
-        {commissions.length === 0 ? (
+        {filteredCommissions.length === 0 ? (
           <p className="px-4 py-8 text-center text-xs text-muted-foreground">{bn ? "কোনো কমিশন নেই" : "No commissions"}</p>
         ) : (
           <div className="divide-y divide-border/20">
-            {commissions.map(c => (
+            {filteredCommissions.map(c => (
               <div key={c.id} className="flex flex-col sm:flex-row sm:items-center gap-2 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-foreground">{fmtBDT(c.amount_bdt, bn)}</p>
