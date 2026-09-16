@@ -214,6 +214,19 @@ const OrdersPage = () => {
         ))}
       </div>
 
+      {orders.length > 0 && (
+        <DataToolbar
+          search={search}
+          onSearch={setSearch}
+          placeholder={bn ? "অর্ডার নম্বর, প্ল্যান বা ডোমেইন খুঁজুন..." : "Search order no., plan or domain..."}
+          filters={orderFilters}
+          activeFilter={statusFilter}
+          onFilter={setStatusFilter}
+          onExport={exportOrders}
+          resultCount={filteredOrders.length}
+        />
+      )}
+
       {/* Orders list */}
       {orders.length === 0 ? (
         <EmptyState
@@ -223,9 +236,13 @@ const OrdersPage = () => {
           actionLabel={bn ? "প্ল্যান দেখুন" : "Browse Plans"}
           actionTo="/#pricing"
         />
+      ) : filteredOrders.length === 0 ? (
+        <div className="glass-card rounded-xl p-8 text-center text-sm text-muted-foreground">
+          {bn ? "এই ফিল্টারে কোনো অর্ডার পাওয়া যায়নি" : "No orders match this filter"}
+        </div>
       ) : (
         <div className="space-y-4">
-          {orders.map((order, i) => {
+          {filteredOrders.map((order, i) => {
             const sc = statusConfig[order.status] || statusConfig.pending;
             const isExpanded = expandedOrder === order.id;
             const items = orderItems[order.id] || [];
