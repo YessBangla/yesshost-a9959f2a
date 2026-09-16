@@ -4,8 +4,9 @@ import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import {
   Server, Search, AlertTriangle, CheckCircle2, Clock, XCircle, Ban,
-  Globe, Calendar, CreditCard
+  Globe, Calendar, CreditCard, Download
 } from "lucide-react";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";

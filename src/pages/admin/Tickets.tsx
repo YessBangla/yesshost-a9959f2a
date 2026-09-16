@@ -4,8 +4,9 @@ import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import {
   HeadphonesIcon, Search, Send, ArrowLeft, MessageSquare,
-  Clock, CheckCircle2, AlertTriangle, Inbox, Filter, User
+  Clock, CheckCircle2, AlertTriangle, Inbox, Filter, User, Download
 } from "lucide-react";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
