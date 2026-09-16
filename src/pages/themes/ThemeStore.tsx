@@ -121,10 +121,11 @@ const ThemeStore = () => {
           <div className="container mx-auto px-0 md:px-4 py-2.5 md:py-0">
             <div className="relative">
               {/* edge fades (mobile only) */}
-              <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-background to-transparent md:hidden z-10" />
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-background to-transparent md:hidden z-10" />
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent z-10" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent z-10" />
 
-              <div className="flex md:flex-wrap md:justify-center gap-2 overflow-x-auto no-scrollbar px-4 md:px-0 snap-x snap-mandatory">
+              <div className="flex flex-nowrap md:justify-start gap-2 overflow-x-auto no-scrollbar px-4 md:px-2 py-1 snap-x snap-mandatory scroll-smooth">
+
                 {[
                   { key: "all", label: bn ? "সকল" : "All", count: themes.length },
                   ...Object.entries(categoryLabels).map(([key, label]) => ({
