@@ -153,8 +153,10 @@ const AdminWHM = () => {
     setAssigning(false);
   };
 
-  const handleViewAccounts = async (pkg: ResellerPkg) => {
+  const handleViewAccounts = async (pkg: ResellerPkg, hostMode = false) => {
     setSelectedPkg(pkg);
+    setConnResult(null);
+    setHostMode(hostMode);
     const { data } = await supabase
       .from("reseller_accounts")
       .select("*")
@@ -162,6 +164,10 @@ const AdminWHM = () => {
       .order("created_at", { ascending: false });
     setAccounts(data || []);
     setShowAccounts(true);
+    if (hostMode) {
+      setTimeout(() => createRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+      if (pkg.whm_server_host) handleTestConnection(pkg);
+    }
   };
 
   const handleTestConnection = async (pkg: ResellerPkg) => {
