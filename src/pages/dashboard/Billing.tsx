@@ -402,12 +402,30 @@ const DashboardBilling = () => {
       {/* Invoices Tab */}
       {activeTab === "invoices" && (
         <>
+          {invoices.length > 0 && (
+            <div className="mb-4">
+              <DataToolbar
+                search={invSearch}
+                onSearch={setInvSearch}
+                placeholder={isBn ? "ইনভয়েস নম্বর বা বিবরণ খুঁজুন..." : "Search invoice no. or description..."}
+                filters={invoiceFilters}
+                activeFilter={invStatus}
+                onFilter={setInvStatus}
+                onExport={exportInvoices}
+                resultCount={filteredInvoices.length}
+              />
+            </div>
+          )}
           {invoices.length === 0 ? (
             <EmptyState
               icon={FileText}
               title={tr("dash.noInvoicesTitle")}
               description={tr("dash.noInvoicesDesc")}
             />
+          ) : filteredInvoices.length === 0 ? (
+            <div className="glass-card rounded-xl p-8 text-center text-sm text-muted-foreground">
+              {isBn ? "এই ফিল্টারে কোনো ইনভয়েস নেই" : "No invoices match this filter"}
+            </div>
           ) : (
             <div className="glass-card overflow-hidden rounded-xl">
               <div className="overflow-x-auto">
@@ -423,7 +441,7 @@ const DashboardBilling = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoices.map((inv) => {
+                    {filteredInvoices.map((inv) => {
                       const canPay = inv.status === "unpaid" || inv.status === "overdue";
                       const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
                       return (
