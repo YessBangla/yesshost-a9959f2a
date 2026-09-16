@@ -66,6 +66,7 @@ const DashboardOrders = lazy(() => import("./pages/dashboard/Orders"));
 const DashboardReseller = lazy(() => import("./pages/dashboard/Reseller"));
 const DashboardWallet = lazy(() => import("./pages/dashboard/Wallet"));
 const DashboardAffiliate = lazy(() => import("./pages/dashboard/AffiliateDashboard"));
+const DashboardThemeSeller = lazy(() => import("./pages/dashboard/ThemeSeller"));
 const AdminAffiliates = lazy(() => import("./pages/admin/Affiliates"));
 
 // Admin pages
@@ -187,6 +188,7 @@ const App = () => (
                   <Route path="reseller" element={<DashboardReseller />} />
                   <Route path="affiliate" element={<DashboardAffiliate />} />
                   <Route path="wallet" element={<DashboardWallet />} />
+                  <Route path="theme-seller" element={<DashboardThemeSeller />} />
                   <Route path="profile" element={<DashboardProfile />} />
                 </Route>
                 <Route

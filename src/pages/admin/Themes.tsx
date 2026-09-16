@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2, Power, Monitor, ExternalLink, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2, Power, Monitor, ExternalLink, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import { ThemesSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,15 +50,49 @@ const AdminThemes = () => {
   const [previewTheme, setPreviewTheme] = useState<any>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [sellerPayouts, setSellerPayouts] = useState<any[]>([]);
 
   const fetchThemes = async () => {
     setLoading(true);
-    const { data } = await supabase.from("themes").select("*").order("sort_order").order("created_at", { ascending: false });
+    const [{ data }, { data: po }] = await Promise.all([
+      supabase.from("themes").select("*").order("sort_order").order("created_at", { ascending: false }),
+      supabase.from("theme_seller_payouts").select("*").order("created_at", { ascending: false }),
+    ]);
     setThemes(data || []);
+    setSellerPayouts(po || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchThemes(); }, []);
+
+  const setApproval = async (theme: any, status: "approved" | "rejected") => {
+    let note: string | null = null;
+    if (status === "rejected") {
+      note = window.prompt(lang === "bn" ? "বাতিলের কারণ লিখুন (বিক্রেতা দেখতে পাবেন)" : "Reason for rejection (visible to the seller)") || null;
+    }
+    setApprovingId(theme.id);
+    const { error } = await supabase.from("themes")
+      .update({ approval_status: status, approval_note: note, is_active: status === "approved" } as any)
+      .eq("id", theme.id);
+    setApprovingId(null);
+    if (error) { toast({ title: lang === "bn" ? "সেভ হয়নি" : "Could not save", description: error.message, variant: "destructive" }); return; }
+    toast({
+      title: status === "approved"
+        ? (lang === "bn" ? `"${theme.name}" অনুমোদিত ও মার্কেটপ্লেসে লাইভ` : `"${theme.name}" approved and live`)
+        : (lang === "bn" ? `"${theme.name}" বাতিল করা হয়েছে` : `"${theme.name}" rejected`),
+    });
+    fetchThemes();
+  };
+
+  const setPayoutStatus = async (payout: any, status: "approved" | "paid" | "rejected") => {
+    const { error } = await supabase.from("theme_seller_payouts")
+      .update({ status, processed_at: status === "paid" ? new Date().toISOString() : null })
+      .eq("id", payout.id);
+    if (error) { toast({ title: lang === "bn" ? "সেভ হয়নি" : "Could not save", description: error.message, variant: "destructive" }); return; }
+    toast({ title: lang === "bn" ? "অবস্থা আপডেট হয়েছে" : "Status updated" });
+    fetchThemes();
+  };
 
   const parseJson = (val: any) => {
     if (typeof val === "string") { try { return JSON.parse(val); } catch { return []; } }
@@ -497,6 +531,16 @@ const AdminThemes = () => {
                       {!theme.is_active && (
                         <EyeOff className="w-3 h-3 text-destructive shrink-0" />
                       )}
+                      {(theme as any).seller_user_id && (
+                        <span className={`text-[10px] px-1.5 py-px rounded font-medium shrink-0 ${
+                          (theme as any).approval_status === "approved" ? "bg-success/10 text-success"
+                          : (theme as any).approval_status === "rejected" ? "bg-destructive/10 text-destructive"
+                          : "bg-warning/10 text-warning"}`}>
+                          {(theme as any).approval_status === "approved" ? (lang === "bn" ? "বিক্রেতা · অনুমোদিত" : "Seller · Approved")
+                            : (theme as any).approval_status === "rejected" ? (lang === "bn" ? "বিক্রেতা · বাতিল" : "Seller · Rejected")
+                            : (lang === "bn" ? "বিক্রেতা · পর্যালোচনায়" : "Seller · In review")}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground truncate">
                       <span className="tabular-nums">
@@ -509,6 +553,24 @@ const AdminThemes = () => {
 
                   {/* Actions */}
                   <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                    {(theme as any).seller_user_id && (theme as any).approval_status !== "approved" && (
+                      <button
+                        onClick={() => setApproval(theme, "approved")}
+                        disabled={approvingId === theme.id}
+                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-success/10 text-success hover:bg-success/20">
+                        {approvingId === theme.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                        {lang === "bn" ? "অনুমোদন" : "Approve"}
+                      </button>
+                    )}
+                    {(theme as any).seller_user_id && (theme as any).approval_status !== "rejected" && (
+                      <button
+                        onClick={() => setApproval(theme, "rejected")}
+                        disabled={approvingId === theme.id}
+                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20">
+                        <XCircle className="w-3 h-3" />
+                        {lang === "bn" ? "বাতিল" : "Reject"}
+                      </button>
+                    )}
                     <button
                       onClick={() => setPreviewTheme(theme)}
                       title={lang === "bn" ? "লাইভ প্রিভিউ (প্রয়োগ ছাড়াই)" : "Live preview (without applying)"}
@@ -547,6 +609,52 @@ const AdminThemes = () => {
           </div>
         )}
       </div>
+
+      {/* Seller payout requests */}
+      {sellerPayouts.length > 0 && (
+        <div>
+          <h2 className="text-base font-semibold text-foreground mb-3">
+            {lang === "bn" ? "বিক্রেতার আয় উত্তোলনের অনুরোধ" : "Seller Payout Requests"}
+          </h2>
+          <div className="space-y-2">
+            {sellerPayouts.map(p => (
+              <div key={p.id} className="glass-card rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">৳{formatPrice(Number(p.amount_bdt), lang)} · {p.method}</p>
+                  <p className="text-xs text-muted-foreground truncate">{p.account_details} · {new Date(p.created_at).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US")}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[11px] px-2 py-1 rounded-md font-semibold ${
+                    p.status === "paid" ? "bg-success/10 text-success"
+                    : p.status === "rejected" ? "bg-destructive/10 text-destructive"
+                    : "bg-warning/10 text-warning"}`}>
+                    {p.status}
+                  </span>
+                  {p.status !== "paid" && (
+                    <>
+                      {p.status === "requested" && (
+                        <button onClick={() => setPayoutStatus(p, "approved")} className="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20">
+                          {lang === "bn" ? "অনুমোদন" : "Approve"}
+                        </button>
+                      )}
+                      <button onClick={() => setPayoutStatus(p, "paid")} className="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-success/10 text-success hover:bg-success/20">
+                        {lang === "bn" ? "পরিশোধিত" : "Mark paid"}
+                      </button>
+                      {p.status !== "rejected" && (
+                        <button onClick={() => setPayoutStatus(p, "rejected")} className="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20">
+                          {lang === "bn" ? "বাতিল" : "Reject"}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
 
       {/* Live preview (does not apply the theme) */}
       {previewTheme && (
