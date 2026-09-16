@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Share2, Check, X, RefreshCw, DollarSign, Send, Users } from "lucide-react";
+import DataToolbar from "@/components/DataToolbar";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 
 const fmtBDT = (v: number, bn: boolean) => `৳${Number(v || 0).toLocaleString(bn ? "bn-BD" : "en-US")}`;
 
@@ -14,6 +16,8 @@ const AdminAffiliates = () => {
   const [commissions, setCommissions] = useState<any[]>([]);
   const [payouts, setPayouts] = useState<any[]>([]);
   const [acting, setActing] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,6 +58,37 @@ const AdminAffiliates = () => {
     totalPaid: payouts.filter(p => p.status === "paid").reduce((s, p) => s + Number(p.amount_bdt), 0),
   }), [commissions, payouts]);
 
+  const match = (row: any) => {
+    const q = search.trim().toLowerCase();
+    const okSearch = !q || [row.user?.full_name, row.method, row.account_details, row.description, row.status, String(row.amount_bdt)]
+      .filter(Boolean).some((v: string) => String(v).toLowerCase().includes(q));
+    const okStatus = status === "all" || row.status === status;
+    return okSearch && okStatus;
+  };
+
+  const filteredPayouts = useMemo(() => payouts.filter(match), [payouts, search, status]);
+  const filteredCommissions = useMemo(() => commissions.filter(match), [commissions, search, status]);
+
+  const statusFilters = useMemo(() => ([
+    { value: "all", label: bn ? "সব" : "All" },
+    { value: "requested", label: bn ? "রিকোয়েস্ট" : "Requested" },
+    { value: "pending", label: bn ? "অপেক্ষমাণ" : "Pending" },
+    { value: "approved", label: bn ? "অনুমোদিত" : "Approved" },
+    { value: "paid", label: bn ? "পরিশোধিত" : "Paid" },
+    { value: "rejected", label: bn ? "বাতিল" : "Rejected" },
+  ]), [bn]);
+
+  const exportCsv = () => {
+    downloadCsv(
+      "yesshost-affiliates",
+      ["type", "user", "amount_bdt", "status", "method", "details", "date"],
+      [
+        ...filteredPayouts.map(p => ["payout", p.user?.full_name || "", p.amount_bdt, p.status, p.method || "", p.account_details || "", csvDate(p.created_at)]),
+        ...filteredCommissions.map(c => ["commission", c.user?.full_name || "", c.amount_bdt, c.status, "", c.description || "", csvDate(c.created_at)]),
+      ],
+    );
+  };
+
   const badge = (s: string) => {
     const map: Record<string, string> = {
       pending: "bg-amber-500/10 text-amber-600", approved: "bg-emerald-500/10 text-emerald-600",
@@ -89,16 +124,29 @@ const AdminAffiliates = () => {
         ))}
       </div>
 
+      <DataToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder={bn ? "নাম, মাধ্যম বা পরিমাণ খুঁজুন..." : "Search name, method or amount..."}
+        filters={statusFilters}
+        activeFilter={status}
+        onFilter={setStatus}
+        onExport={exportCsv}
+        onRefresh={load}
+        refreshing={loading}
+        resultCount={filteredPayouts.length + filteredCommissions.length}
+      />
+
       {/* Payout requests */}
       <div className="glass-card rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-border/30">
           <h3 className="text-xs font-semibold text-foreground">{bn ? "পেআউট রিকোয়েস্ট" : "Payout Requests"}</h3>
         </div>
-        {payouts.length === 0 ? (
+        {filteredPayouts.length === 0 ? (
           <p className="px-4 py-8 text-center text-xs text-muted-foreground">{bn ? "কোনো রিকোয়েস্ট নেই" : "No requests"}</p>
         ) : (
           <div className="divide-y divide-border/20">
-            {payouts.map(p => (
+            {filteredPayouts.map(p => (
               <div key={p.id} className="flex flex-col sm:flex-row sm:items-center gap-2 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-foreground">{fmtBDT(p.amount_bdt, bn)} <span className="text-[10px] font-normal text-muted-foreground uppercase">· {p.method}</span></p>
@@ -132,11 +180,11 @@ const AdminAffiliates = () => {
         <div className="px-4 py-3 border-b border-border/30">
           <h3 className="text-xs font-semibold text-foreground">{bn ? "কমিশন" : "Commissions"}</h3>
         </div>
-        {commissions.length === 0 ? (
+        {filteredCommissions.length === 0 ? (
           <p className="px-4 py-8 text-center text-xs text-muted-foreground">{bn ? "কোনো কমিশন নেই" : "No commissions"}</p>
         ) : (
           <div className="divide-y divide-border/20">
-            {commissions.map(c => (
+            {filteredCommissions.map(c => (
               <div key={c.id} className="flex flex-col sm:flex-row sm:items-center gap-2 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-foreground">{fmtBDT(c.amount_bdt, bn)}</p>

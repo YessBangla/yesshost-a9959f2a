@@ -4,8 +4,9 @@ import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import {
   Server, Search, AlertTriangle, CheckCircle2, Clock, XCircle, Ban,
-  Globe, Calendar, CreditCard
+  Globe, Calendar, CreditCard, Download
 } from "lucide-react";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -89,9 +90,19 @@ const AdminServices = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{isBn ? "সার্ভিস ম্যানেজমেন্ট" : "Service Management"}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ক্লায়েন্ট সার্ভিস পরিচালনা ও মনিটরিং" : "Manage and monitor all client services"}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{isBn ? "সার্ভিস ম্যানেজমেন্ট" : "Service Management"}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ক্লায়েন্ট সার্ভিস পরিচালনা ও মনিটরিং" : "Manage and monitor all client services"}</p>
+        </div>
+        <button
+          onClick={() => downloadCsv("yesshost-services", ["name", "type", "domain", "client", "status", "price_bdt", "expires"],
+            filtered.map((s: any) => [s.name, s.service_type, s.domain || "", s.profiles?.full_name || "", s.status, s.price_bdt ?? "", csvDate(s.expires_at)]))}
+          className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary shrink-0"
+        >
+          <Download className="w-4 h-4" />
+          <span className="hidden sm:inline">CSV</span>
+        </button>
       </div>
 
       {/* Stats */}

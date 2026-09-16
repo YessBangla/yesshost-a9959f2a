@@ -10,6 +10,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import EmptyState from "@/components/EmptyState";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
+import DataToolbar from "@/components/DataToolbar";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
@@ -63,6 +65,8 @@ const DashboardWallet = () => {
   const [amount, setAmount] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [txnSearch, setTxnSearch] = useState("");
+  const [txnType, setTxnType] = useState("all");
 
   const fetchTransactions = async () => {
     if (!user) return;
@@ -109,6 +113,33 @@ const DashboardWallet = () => {
     transactions.filter(t => t.status === "completed" && t.type === "payment").reduce((s, t) => s + Number(t.amount_bdt), 0),
     [transactions]
   );
+
+  const filteredTxns = useMemo(() => {
+    const q = txnSearch.trim().toLowerCase();
+    return transactions.filter(t => {
+      const okSearch = !q || [t.description, t.type, t.status, t.payment_method, String(t.amount_bdt)]
+        .filter(Boolean).some(v => String(v).toLowerCase().includes(q));
+      const okType = txnType === "all" || t.type === txnType;
+      return okSearch && okType;
+    });
+  }, [transactions, txnSearch, txnType]);
+
+  const txnFilters = useMemo(() => ([
+    { value: "all", label: isBn ? "সব" : "All", count: transactions.length },
+    { value: "deposit", label: isBn ? "জমা" : "Deposit", count: transactions.filter(t => t.type === "deposit").length },
+    { value: "payment", label: isBn ? "পেমেন্ট" : "Payment", count: transactions.filter(t => t.type === "payment").length },
+    { value: "refund", label: isBn ? "ফেরত" : "Refund", count: transactions.filter(t => t.type === "refund").length },
+  ]), [transactions, isBn]);
+
+  const exportTransactions = () => {
+    downloadCsv(
+      "yesshost-wallet",
+      ["date", "type", "status", "description", "payment_method", "amount_bdt"],
+      filteredTxns.map(t => [csvDate(t.created_at), t.type, t.status, t.description || "", (t as any).payment_method || "", t.amount_bdt]),
+    );
+  };
+
+
 
   const handleAddFund = async () => {
     const numAmount = Number(amount);
@@ -223,15 +254,33 @@ const DashboardWallet = () => {
 
       {/* Transaction History */}
       <h2 className="text-base font-semibold text-foreground mb-3">{isBn ? "লেনদেনের ইতিহাস" : "Transaction History"}</h2>
+      {transactions.length > 0 && (
+        <div className="mb-4">
+          <DataToolbar
+            search={txnSearch}
+            onSearch={setTxnSearch}
+            placeholder={isBn ? "বিবরণ, ধরন বা পরিমাণ খুঁজুন..." : "Search description, type or amount..."}
+            filters={txnFilters}
+            activeFilter={txnType}
+            onFilter={setTxnType}
+            onExport={exportTransactions}
+            resultCount={filteredTxns.length}
+          />
+        </div>
+      )}
       {transactions.length === 0 ? (
         <EmptyState
           icon={Wallet}
           title={isBn ? "কোনো লেনদেন নেই" : "No Transactions"}
           description={isBn ? "আপনার ওয়ালেটে এখনো কোনো লেনদেন হয়নি" : "Your wallet has no transactions yet"}
         />
+      ) : filteredTxns.length === 0 ? (
+        <div className="glass-card rounded-xl p-8 text-center text-sm text-muted-foreground">
+          {isBn ? "এই ফিল্টারে কোনো লেনদেন নেই" : "No transactions match this filter"}
+        </div>
       ) : (
         <div className="space-y-2.5">
-          {transactions.map(txn => {
+          {filteredTxns.map(txn => {
             const sc = statusConfig[txn.status] || statusConfig.pending;
             const tl = typeLabels[txn.type] || typeLabels.deposit;
             const TypeIcon = tl.icon;

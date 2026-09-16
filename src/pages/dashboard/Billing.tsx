@@ -18,6 +18,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import DataToolbar from "@/components/DataToolbar";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
@@ -80,6 +82,8 @@ const DashboardBilling = () => {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [filterMethod, setFilterMethod] = useState<string>("all");
   const [walletBalance, setWalletBalance] = useState(0);
+  const [invSearch, setInvSearch] = useState("");
+  const [invStatus, setInvStatus] = useState("all");
 
   const fetchWalletBalance = async () => {
     if (!user) return;
@@ -285,6 +289,36 @@ const DashboardBilling = () => {
   const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
   const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
 
+  const filteredInvoices = useMemo(() => {
+    const q = invSearch.trim().toLowerCase();
+    return invoices.filter(i => {
+      const okSearch = !q || [i.invoice_number, i.description, i.status, i.payment_method, String(i.amount_bdt)]
+        .filter(Boolean).some(v => String(v).toLowerCase().includes(q));
+      const okStatus = invStatus === "all" || i.status === invStatus;
+      return okSearch && okStatus;
+    });
+  }, [invoices, invSearch, invStatus]);
+
+  const invoiceFilters = useMemo(() => ([
+    { value: "all", label: isBn ? "সব" : "All", count: invoices.length },
+    { value: "unpaid", label: isBn ? "অপরিশোধিত" : "Unpaid", count: invoices.filter(i => i.status === "unpaid").length },
+    { value: "overdue", label: isBn ? "মেয়াদোত্তীর্ণ" : "Overdue", count: invoices.filter(i => i.status === "overdue").length },
+    { value: "paid", label: isBn ? "পরিশোধিত" : "Paid", count: invoices.filter(i => i.status === "paid").length },
+    { value: "cancelled", label: isBn ? "বাতিল" : "Cancelled", count: invoices.filter(i => i.status === "cancelled").length },
+  ]), [invoices, isBn]);
+
+  const exportInvoices = () => {
+    downloadCsv(
+      "yesshost-invoices",
+      ["invoice_number", "description", "amount_bdt", "status", "due_date", "paid_at", "payment_method"],
+      filteredInvoices.map(i => [
+        i.invoice_number, i.description || "", i.amount_bdt, i.status,
+        csvDate(i.due_date), csvDate(i.paid_at), i.payment_method || "",
+      ]),
+    );
+  };
+
+
   const tabs: { id: TabType; label: string; icon: typeof FileText; count?: number }[] = [
     { id: "invoices", label: isBn ? "ইনভয়েস" : "Invoices", icon: FileText, count: invoices.length },
     { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoicesAll.length },
@@ -370,12 +404,30 @@ const DashboardBilling = () => {
       {/* Invoices Tab */}
       {activeTab === "invoices" && (
         <>
+          {invoices.length > 0 && (
+            <div className="mb-4">
+              <DataToolbar
+                search={invSearch}
+                onSearch={setInvSearch}
+                placeholder={isBn ? "ইনভয়েস নম্বর বা বিবরণ খুঁজুন..." : "Search invoice no. or description..."}
+                filters={invoiceFilters}
+                activeFilter={invStatus}
+                onFilter={setInvStatus}
+                onExport={exportInvoices}
+                resultCount={filteredInvoices.length}
+              />
+            </div>
+          )}
           {invoices.length === 0 ? (
             <EmptyState
               icon={FileText}
               title={tr("dash.noInvoicesTitle")}
               description={tr("dash.noInvoicesDesc")}
             />
+          ) : filteredInvoices.length === 0 ? (
+            <div className="glass-card rounded-xl p-8 text-center text-sm text-muted-foreground">
+              {isBn ? "এই ফিল্টারে কোনো ইনভয়েস নেই" : "No invoices match this filter"}
+            </div>
           ) : (
             <div className="glass-card overflow-hidden rounded-xl">
               <div className="overflow-x-auto">
@@ -391,7 +443,7 @@ const DashboardBilling = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoices.map((inv) => {
+                    {filteredInvoices.map((inv) => {
                       const canPay = inv.status === "unpaid" || inv.status === "overdue";
                       const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
                       return (

@@ -4,8 +4,9 @@ import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import {
   HeadphonesIcon, Search, Send, ArrowLeft, MessageSquare,
-  Clock, CheckCircle2, AlertTriangle, Inbox, Filter, User
+  Clock, CheckCircle2, AlertTriangle, Inbox, Filter, User, Download
 } from "lucide-react";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -227,9 +228,19 @@ const AdminTickets = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{isBn ? "টিকেট ম্যানেজমেন্ট" : "Ticket Management"}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল সাপোর্ট টিকেট পরিচালনা ও রিপ্লাই করুন" : "Manage and reply to all support tickets"}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{isBn ? "টিকেট ম্যানেজমেন্ট" : "Ticket Management"}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল সাপোর্ট টিকেট পরিচালনা ও রিপ্লাই করুন" : "Manage and reply to all support tickets"}</p>
+        </div>
+        <button
+          onClick={() => downloadCsv("yesshost-tickets", ["ticket_number", "subject", "client", "status", "priority", "created"],
+            filtered.map((t: any) => [t.ticket_number, t.subject, t.profiles?.full_name || "", t.status, t.priority, csvDate(t.created_at)]))}
+          className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary shrink-0"
+        >
+          <Download className="w-4 h-4" />
+          <span className="hidden sm:inline">CSV</span>
+        </button>
       </div>
 
       {/* Stats */}

@@ -4,8 +4,9 @@ import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import {
   FileText, Search, DollarSign, TrendingUp, AlertTriangle, Eye,
-  CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw, Pencil, X, Save, Plus, Trash2
+  CreditCard, Calendar, CheckCircle2, Clock, XCircle, RotateCcw, Pencil, X, Save, Plus, Trash2, Download
 } from "lucide-react";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -208,10 +209,21 @@ const AdminBilling = () => {
           <h1 className="text-2xl font-bold text-foreground">{isBn ? "বিলিং ম্যানেজমেন্ট" : "Billing Management"}</h1>
           <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ইনভয়েস ও পেমেন্ট পরিচালনা" : "Manage all invoices and payments"}</p>
         </div>
-        <Button onClick={() => setShowCreate(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          {isBn ? "নতুন ইনভয়েস" : "New Invoice"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => downloadCsv("yesshost-admin-invoices", ["invoice_number", "client", "description", "amount_bdt", "status", "due_date", "paid_at"],
+              filtered.map((i: any) => [i.invoice_number, i.profiles?.full_name || "", i.description || "", i.amount_bdt, i.status, csvDate(i.due_date), csvDate(i.paid_at)]))}
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">CSV</span>
+          </Button>
+          <Button onClick={() => setShowCreate(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            {isBn ? "নতুন ইনভয়েস" : "New Invoice"}
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
