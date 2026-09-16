@@ -30,6 +30,7 @@ const emptyForm = {
   description_bn: "", description_en: "", price_bdt: 0, discount_price_bdt: null as number | null,
   preview_url: "", thumbnail_url: "", features: "[]", tags: "[]",
   hosting_bundle_price_bdt: null as number | null, hosting_bundle_features: "[]",
+  screenshots: "[]", file_path: "" as string | null,
   is_active: true, is_featured: false, sort_order: 0,
 };
 
