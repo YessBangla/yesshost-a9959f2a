@@ -75,6 +75,8 @@ const OrdersPage = () => {
   const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     if (!user) return;
@@ -135,6 +137,45 @@ const OrdersPage = () => {
     pending: orders.filter(o => ["pending", "confirmed", "processing", "provisioning"].includes(o.status)).length,
     totalSpent: orders.filter(o => o.payment_status === "paid").reduce((s, o) => s + Number(o.total_bdt), 0),
   };
+
+  const filteredOrders = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return orders.filter(o => {
+      const items = orderItems[o.id] || [];
+      const okSearch = !q || [o.order_number, o.status, o.payment_method, o.coupon_code, String(o.total_bdt), ...items.map(it => it.item_name), ...items.map(it => it.domain_name)]
+        .filter(Boolean).some(v => String(v).toLowerCase().includes(q));
+      const okStatus =
+        statusFilter === "all" ? true :
+        statusFilter === "active" ? ["active", "completed"].includes(o.status) :
+        statusFilter === "progress" ? ["pending", "confirmed", "processing", "provisioning"].includes(o.status) :
+        ["cancelled", "refunded"].includes(o.status);
+      return okSearch && okStatus;
+    });
+  }, [orders, orderItems, search, statusFilter]);
+
+  const exportOrders = () => {
+    downloadCsv(
+      "yesshost-orders",
+      ["order_number", "date", "status", "payment_status", "payment_method", "items", "discount_bdt", "total_bdt"],
+      filteredOrders.map(o => [
+        o.order_number,
+        csvDate(o.created_at),
+        o.status,
+        o.payment_status,
+        o.payment_method || "",
+        (orderItems[o.id] || []).map(i => i.item_name).join(" | "),
+        o.discount_bdt,
+        o.total_bdt,
+      ]),
+    );
+  };
+
+  const orderFilters = [
+    { value: "all", label: bn ? "সব" : "All", count: orders.length },
+    { value: "active", label: bn ? "সক্রিয়" : "Active", count: stats.active },
+    { value: "progress", label: bn ? "প্রসেসিং" : "In progress", count: stats.pending },
+    { value: "closed", label: bn ? "বাতিল/ফেরত" : "Cancelled", count: orders.filter(o => ["cancelled", "refunded"].includes(o.status)).length },
+  ];
 
   if (loading) return <OrdersSkeleton />;
 
