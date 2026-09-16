@@ -306,9 +306,17 @@ const AdminWHM = () => {
     setCreating(false);
     const errMsg = error?.message || (data && (data as any).error);
     if (errMsg) {
+      setConfirmCreate(false);
       toast({ title: bn ? "অ্যাকাউন্ট তৈরি ব্যর্থ" : "Account creation failed", description: String(errMsg), variant: "destructive" });
       return;
     }
+    setConfirmCreate(false);
+    setCreatedAccount({
+      ...((data as any)?.account || {}),
+      cpanel_created: (data as any)?.cpanel_created,
+      password: createForm.password,
+      server_host: selectedPkg.whm_server_host,
+    });
     toast({
       title: bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created",
       description: (data as any)?.cpanel_created
@@ -316,7 +324,7 @@ const AdminWHM = () => {
         : (bn ? "শুধু রেকর্ড সেভ হয়েছে — WHM টোকেন/হোস্ট সেট নেই" : "Recorded only — WHM host/token not configured"),
     });
     setCreateForm({ domain: "", username: "", password: "", email: "", plan_name: "", disk_quota_mb: 1000, bandwidth_mb: 10000 });
-    handleViewAccounts(selectedPkg);
+    refreshAccounts(true);
     fetchAll();
   };
 
