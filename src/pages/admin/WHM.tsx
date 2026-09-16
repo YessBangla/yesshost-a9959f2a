@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Server, Users, HardDrive, Wifi, Plus, Settings, Eye, Trash2,
@@ -62,6 +62,8 @@ const AdminWHM = () => {
   const [testingConn, setTestingConn] = useState(false);
   const [connResult, setConnResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [creating, setCreating] = useState(false);
+  const [hostMode, setHostMode] = useState(false);
+  const createRef = useRef<HTMLDivElement | null>(null);
   const [createForm, setCreateForm] = useState({
     domain: "", username: "", password: "", email: "", plan_name: "",
     disk_quota_mb: 1000, bandwidth_mb: 10000,
@@ -153,8 +155,10 @@ const AdminWHM = () => {
     setAssigning(false);
   };
 
-  const handleViewAccounts = async (pkg: ResellerPkg) => {
+  const handleViewAccounts = async (pkg: ResellerPkg, hostMode = false) => {
     setSelectedPkg(pkg);
+    setConnResult(null);
+    setHostMode(hostMode);
     const { data } = await supabase
       .from("reseller_accounts")
       .select("*")
@@ -162,6 +166,10 @@ const AdminWHM = () => {
       .order("created_at", { ascending: false });
     setAccounts(data || []);
     setShowAccounts(true);
+    if (hostMode) {
+      setTimeout(() => createRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+      if (pkg.whm_server_host) handleTestConnection(pkg);
+    }
   };
 
   const handleTestConnection = async (pkg: ResellerPkg) => {
@@ -420,6 +428,15 @@ const AdminWHM = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <button
+                            onClick={() => handleViewAccounts(pkg, true)}
+                            disabled={pkg.used_accounts >= pkg.max_accounts}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-semibold hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            title={bn ? "এই প্যাকেজে নতুন অ্যাকাউন্ট হোস্ট করুন" : "Host a new account on this package"}
+                          >
+                            <Server className="w-3.5 h-3.5" />
+                            {bn ? "হোস্ট করুন" : "Host"}
+                          </button>
+                          <button
                             onClick={() => openEditDialog(pkg)}
                             className="p-1.5 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-colors"
                             title={bn ? "এডিট করুন" : "Edit"}
@@ -614,11 +631,19 @@ const AdminWHM = () => {
               </div>
 
               {/* Create real cPanel account */}
-              <div className="p-3 rounded-xl border border-primary/25 bg-primary/5 space-y-3">
+              <div ref={createRef} className={`p-3 rounded-xl space-y-3 transition-all ${hostMode ? "border-2 border-primary bg-primary/10 ring-4 ring-primary/10" : "border border-primary/25 bg-primary/5"}`}>
                 <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <Plus className="w-3.5 h-3.5 text-primary" />
                   {bn ? "নতুন cPanel অ্যাকাউন্ট তৈরি" : "Create cPanel account"}
                 </p>
+                {hostMode && !selectedPkg.whm_server_host && (
+                  <p className="text-[11px] text-amber-600 flex items-start gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-px" />
+                    {bn
+                      ? "এই প্যাকেজে সার্ভারের ঠিকানা দেওয়া নেই — অ্যাকাউন্টটি শুধু রেকর্ড হিসেবে সেভ হবে। প্যাকেজ এডিট করে WHM হোস্ট ও ইউজারনেম দিন।"
+                      : "No server address set for this package — the account will only be recorded. Edit the package to add the WHM host and username."}
+                  </p>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
                     { key: "domain", label: bn ? "ডোমেইন" : "Domain", ph: "client-domain.com", type: "text" },
