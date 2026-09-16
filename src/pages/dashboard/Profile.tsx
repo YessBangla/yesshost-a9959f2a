@@ -138,7 +138,7 @@ const DashboardProfile = () => {
   const inputClass = "w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all text-sm";
 
   const memberSince = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString("bn-BD", { year: "numeric", month: "long", day: "numeric" })
+    ? new Date(profile.created_at).toLocaleDateString(bn ? "bn-BD" : "en-US", { year: "numeric", month: "long", day: "numeric" })
     : "";
 
   const ToggleSwitch = ({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) => (

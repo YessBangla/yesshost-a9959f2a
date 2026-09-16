@@ -192,12 +192,6 @@ const DashboardOverview = () => {
               <span className="text-2xl font-extrabold text-foreground tracking-wider tabular-nums">
                 {supportPin}
               </span>
-              <button onClick={() => {
-                const newPin = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
-                toast.success(bn ? "পিন রিফ্রেশ হয়েছে" : "PIN refreshed");
-              }} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Refresh">
-                <RefreshCw className="w-4 h-4" />
-              </button>
               <button onClick={copyPin} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Copy">
                 <Copy className="w-4 h-4" />
               </button>
