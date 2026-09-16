@@ -535,7 +535,11 @@ const DashboardOverview = () => {
               {recentNotifications.map((n: any) => {
                 const icon = n.type === "payment_success" ? "✅" : n.type === "payment_failed" ? "❌" : "📢";
                 return (
-                  <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${!n.is_read ? "bg-primary/5 border border-primary/10" : "bg-secondary/30"}`}>
+                  <div
+                    key={n.id}
+                    onClick={() => markRead(n.id, n.is_read)}
+                    className={`flex items-start gap-3 p-3 rounded-xl transition-colors text-left ${!n.is_read ? "bg-primary/5 border border-primary/10 cursor-pointer hover:bg-primary/10" : "bg-secondary/30"}`}
+                  >
                     <span className="text-base mt-0.5">{icon}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-foreground leading-tight">{n.title}</p>
