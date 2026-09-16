@@ -313,13 +313,23 @@ const AdminUsers = () => {
           <h1 className="text-2xl font-bold text-foreground">{isBn ? "ইউজার ম্যানেজমেন্ট" : "User Management"}</h1>
           <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল ক্লায়েন্ট ও অ্যাডমিন পরিচালনা করুন" : "Manage all clients and administrators"}</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
-        >
-          <UserPlus className="w-4 h-4" />
-          {isBn ? "ইউজার তৈরি" : "Create User"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => downloadCsv("yesshost-users", ["name", "phone", "company", "roles", "joined"],
+              filtered.map(u => [u.full_name || "", u.phone || "", u.company_name || "", (u.roles || []).join(" "), csvDate(u.created_at)]))}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary"
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">CSV</span>
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+          >
+            <UserPlus className="w-4 h-4" />
+            {isBn ? "ইউজার তৈরি" : "Create User"}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
