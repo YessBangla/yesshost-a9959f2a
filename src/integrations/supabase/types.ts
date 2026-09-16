@@ -1393,9 +1393,48 @@ export type Database = {
           },
         ]
       }
+      theme_seller_payouts: {
+        Row: {
+          account_details: string
+          amount_bdt: number
+          created_at: string
+          id: string
+          method: string
+          note: string | null
+          processed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          account_details: string
+          amount_bdt: number
+          created_at?: string
+          id?: string
+          method: string
+          note?: string | null
+          processed_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          account_details?: string
+          amount_bdt?: number
+          created_at?: string
+          id?: string
+          method?: string
+          note?: string | null
+          processed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       themes: {
         Row: {
+          approval_note: string | null
+          approval_status: string
           category: Database["public"]["Enums"]["theme_category"]
+          commission_rate: number
           created_at: string
           description_bn: string | null
           description_en: string | null
@@ -1411,6 +1450,7 @@ export type Database = {
           preview_url: string | null
           price_bdt: number
           screenshots: Json | null
+          seller_user_id: string | null
           slug: string
           sort_order: number | null
           tags: Json | null
@@ -1418,7 +1458,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_note?: string | null
+          approval_status?: string
           category: Database["public"]["Enums"]["theme_category"]
+          commission_rate?: number
           created_at?: string
           description_bn?: string | null
           description_en?: string | null
@@ -1434,6 +1477,7 @@ export type Database = {
           preview_url?: string | null
           price_bdt?: number
           screenshots?: Json | null
+          seller_user_id?: string | null
           slug: string
           sort_order?: number | null
           tags?: Json | null
@@ -1441,7 +1485,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_note?: string | null
+          approval_status?: string
           category?: Database["public"]["Enums"]["theme_category"]
+          commission_rate?: number
           created_at?: string
           description_bn?: string | null
           description_en?: string | null
@@ -1457,6 +1504,7 @@ export type Database = {
           preview_url?: string | null
           price_bdt?: number
           screenshots?: Json | null
+          seller_user_id?: string | null
           slug?: string
           sort_order?: number | null
           tags?: Json | null
