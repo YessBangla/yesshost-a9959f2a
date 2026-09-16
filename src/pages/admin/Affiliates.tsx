@@ -56,6 +56,37 @@ const AdminAffiliates = () => {
     totalPaid: payouts.filter(p => p.status === "paid").reduce((s, p) => s + Number(p.amount_bdt), 0),
   }), [commissions, payouts]);
 
+  const match = (row: any) => {
+    const q = search.trim().toLowerCase();
+    const okSearch = !q || [row.user?.full_name, row.method, row.account_details, row.description, row.status, String(row.amount_bdt)]
+      .filter(Boolean).some((v: string) => String(v).toLowerCase().includes(q));
+    const okStatus = status === "all" || row.status === status;
+    return okSearch && okStatus;
+  };
+
+  const filteredPayouts = useMemo(() => payouts.filter(match), [payouts, search, status]);
+  const filteredCommissions = useMemo(() => commissions.filter(match), [commissions, search, status]);
+
+  const statusFilters = useMemo(() => ([
+    { value: "all", label: bn ? "সব" : "All" },
+    { value: "requested", label: bn ? "রিকোয়েস্ট" : "Requested" },
+    { value: "pending", label: bn ? "অপেক্ষমাণ" : "Pending" },
+    { value: "approved", label: bn ? "অনুমোদিত" : "Approved" },
+    { value: "paid", label: bn ? "পরিশোধিত" : "Paid" },
+    { value: "rejected", label: bn ? "বাতিল" : "Rejected" },
+  ]), [bn]);
+
+  const exportCsv = () => {
+    downloadCsv(
+      "yesshost-affiliates",
+      ["type", "user", "amount_bdt", "status", "method", "details", "date"],
+      [
+        ...filteredPayouts.map(p => ["payout", p.user?.full_name || "", p.amount_bdt, p.status, p.method || "", p.account_details || "", csvDate(p.created_at)]),
+        ...filteredCommissions.map(c => ["commission", c.user?.full_name || "", c.amount_bdt, c.status, "", c.description || "", csvDate(c.created_at)]),
+      ],
+    );
+  };
+
   const badge = (s: string) => {
     const map: Record<string, string> = {
       pending: "bg-amber-500/10 text-amber-600", approved: "bg-emerald-500/10 text-emerald-600",
