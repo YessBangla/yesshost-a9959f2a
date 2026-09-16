@@ -86,21 +86,25 @@ const AdminAnalytics = () => {
 
   const serviceMix = useMemo(() => {
     const map: Record<string, number> = {};
-    services.forEach(s => {
+    services.filter(s => inRange(s.created_at)).forEach(s => {
       const key = String(s.service_type).replace(/_/g, " ");
       map[key] = (map[key] || 0) + 1;
     });
     return Object.entries(map).map(([name, value]) => ({ name, value }));
-  }, [services]);
+  }, [services, range]);
 
   const paymentMix = useMemo(() => {
     const map: Record<string, number> = {};
-    invoices.filter(i => i.status === "paid").forEach(i => {
-      const key = i.payment_method || (bn ? "অজানা" : "Unknown");
-      map[key] = (map[key] || 0) + Number(i.amount_bdt || 0);
-    });
-    return Object.entries(map).map(([name, value]) => ({ name, value }));
-  }, [invoices, bn]);
+    invoices
+      .filter(i => i.status === "paid" && inRange(i.paid_at || i.created_at))
+      .forEach(i => {
+        const key = i.payment_method || (bn ? "অজানা" : "Unknown");
+        map[key] = (map[key] || 0) + Number(i.amount_bdt || 0);
+      });
+    return Object.entries(map)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [invoices, bn, range]);
 
   const topPages = useMemo(() => {
     const map: Record<string, number> = {};

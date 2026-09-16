@@ -54,7 +54,7 @@ const AffiliateDashboard = () => {
       }
       const [c, r, cm, p] = await Promise.all([
         supabase.from("affiliate_clicks").select("*").eq("referrer_user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("affiliate_referrals").select("*, referred:profiles!affiliate_referrals_referred_user_id_fkey(full_name)").eq("referrer_user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("affiliate_referrals").select("*").eq("referrer_user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("affiliate_commissions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("affiliate_payouts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
