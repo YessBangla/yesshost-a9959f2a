@@ -420,6 +420,15 @@ const AdminWHM = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <button
+                            onClick={() => handleViewAccounts(pkg, true)}
+                            disabled={pkg.used_accounts >= pkg.max_accounts}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-semibold hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            title={bn ? "এই প্যাকেজে নতুন অ্যাকাউন্ট হোস্ট করুন" : "Host a new account on this package"}
+                          >
+                            <Server className="w-3.5 h-3.5" />
+                            {bn ? "হোস্ট করুন" : "Host"}
+                          </button>
+                          <button
                             onClick={() => openEditDialog(pkg)}
                             className="p-1.5 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-colors"
                             title={bn ? "এডিট করুন" : "Edit"}
