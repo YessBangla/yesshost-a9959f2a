@@ -119,7 +119,7 @@ const DashboardSupport = () => {
               <div key={r.id} className={`p-4 rounded-xl ${r.is_staff ? "bg-primary/5 border border-primary/20" : "bg-secondary/50"}`}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-bold text-foreground">{r.is_staff ? tr("dash.supportTeam") : tr("dash.you")}</span>
-                  <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString("bn-BD")}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}</span>
                 </div>
                 <p className="text-sm text-foreground whitespace-pre-wrap">{r.message}</p>
               </div>
@@ -163,7 +163,7 @@ const DashboardSupport = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h3 className="text-sm font-bold text-foreground">{ticket.subject}</h3>
-                  <p className="text-xs text-muted-foreground">{ticket.ticket_number} • {ticket.department} • {new Date(ticket.created_at).toLocaleDateString("bn-BD")}</p>
+                  <p className="text-xs text-muted-foreground">{ticket.ticket_number} • {ticket.department} • {new Date(ticket.created_at).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US")}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${priorityColors[ticket.priority]}`}>{ticket.priority}</span>
