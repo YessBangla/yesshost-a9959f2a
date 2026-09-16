@@ -115,19 +115,25 @@ const Navbar = () => {
 
   const isInternal = (href: string) => href.startsWith("/");
 
-  const renderMegaDropdown = (link: NavLink) => {
+  const renderMegaDropdown = (link: NavLink, align: "center" | "left" | "right") => {
     if (!link.children) return null;
     const isMega = link.mega && link.children.length >= 4;
+    const position =
+      align === "left"
+        ? "left-0"
+        : align === "right"
+        ? "right-0"
+        : "left-1/2 -translate-x-1/2";
 
     return (
       <motion.div
-        initial={{ opacity: 0, y: 10, scale: 0.96 }}
+        initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 10, scale: 0.96 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className={`absolute top-full pt-3 ${isMega ? "left-1/2 -translate-x-1/2 w-[540px]" : "left-1/2 -translate-x-1/2 min-w-[320px]"}`}
+        exit={{ opacity: 0, y: 6, scale: 0.98 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className={`absolute top-full pt-2 z-50 ${position} ${isMega ? "w-[540px]" : "w-[340px]"} max-w-[calc(100vw-2rem)]`}
       >
-        <div className="glass-card-elevated rounded-2xl p-2 shadow-2xl shadow-black/25 border border-border/60">
+        <div className="rounded-2xl p-2 shadow-2xl shadow-black/25 border border-border bg-popover/95 backdrop-blur-xl supports-[backdrop-filter]:bg-popover/80">
           {/* Header */}
           <div className="px-3.5 pt-2 pb-2 flex items-center gap-2 border-b border-border/40 mb-1.5">
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{link.label}</span>
@@ -189,7 +195,7 @@ const Navbar = () => {
 
         {/* Desktop */}
         <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
-          {navLinks.map((link) => (
+          {navLinks.map((link, idx) => (
             <div
               key={link.label}
               className="relative"
@@ -219,7 +225,10 @@ const Navbar = () => {
               )}
 
               <AnimatePresence>
-                {link.children && activeDropdown === link.label && renderMegaDropdown(link)}
+                {link.children && activeDropdown === link.label && renderMegaDropdown(
+                  link,
+                  idx === 0 ? "left" : idx >= navLinks.length - 3 ? "right" : "center"
+                )}
               </AnimatePresence>
             </div>
           ))}
