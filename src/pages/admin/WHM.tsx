@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import {
   Server, Users, HardDrive, Wifi, Plus, Settings, Eye, Trash2,
   Shield, Activity, Globe, Package, AlertTriangle, Check, X,
-  Search, ChevronDown, BarChart3, Cpu, Zap, Clock, Pencil
+  Search, ChevronDown, BarChart3, Cpu, Zap, Clock, Pencil,
+  KeyRound, RefreshCw, Loader2, Copy
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
