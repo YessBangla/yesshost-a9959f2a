@@ -182,7 +182,7 @@ const LiveChatWidget = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ delay: 0.05 }}
-              className="fixed bottom-[7.5rem] right-4 md:bottom-[5.5rem] md:right-6 z-50"
+              className="fixed bottom-[10rem] right-4 md:bottom-[6rem] md:right-6 z-50"
             >
               <Link
                 to="/contact"

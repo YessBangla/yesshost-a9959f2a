@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type Lang = "bn" | "en";
 
@@ -340,11 +340,31 @@ type LanguageContextType = {
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
+const STORAGE_KEY = "yh_lang";
+
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLang] = useState<Lang>("bn");
+  const [lang, setLangState] = useState<Lang>(() => {
+    if (typeof window === "undefined") return "en";
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved === "bn" || saved === "en" ? saved : "en";
+  });
+
+  const setLang = (next: Lang) => {
+    setLangState(next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.classList.toggle("lang-bn", lang === "bn");
+  }, [lang]);
 
   const tr = (key: string): string => {
-    return t[key]?.[lang] || t[key]?.["bn"] || key;
+    return t[key]?.[lang] || t[key]?.["en"] || key;
   };
 
   return (
