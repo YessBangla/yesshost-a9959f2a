@@ -223,15 +223,33 @@ const DashboardWallet = () => {
 
       {/* Transaction History */}
       <h2 className="text-base font-semibold text-foreground mb-3">{isBn ? "লেনদেনের ইতিহাস" : "Transaction History"}</h2>
+      {transactions.length > 0 && (
+        <div className="mb-4">
+          <DataToolbar
+            search={txnSearch}
+            onSearch={setTxnSearch}
+            placeholder={isBn ? "বিবরণ, ধরন বা পরিমাণ খুঁজুন..." : "Search description, type or amount..."}
+            filters={txnFilters}
+            activeFilter={txnType}
+            onFilter={setTxnType}
+            onExport={exportTransactions}
+            resultCount={filteredTxns.length}
+          />
+        </div>
+      )}
       {transactions.length === 0 ? (
         <EmptyState
           icon={Wallet}
           title={isBn ? "কোনো লেনদেন নেই" : "No Transactions"}
           description={isBn ? "আপনার ওয়ালেটে এখনো কোনো লেনদেন হয়নি" : "Your wallet has no transactions yet"}
         />
+      ) : filteredTxns.length === 0 ? (
+        <div className="glass-card rounded-xl p-8 text-center text-sm text-muted-foreground">
+          {isBn ? "এই ফিল্টারে কোনো লেনদেন নেই" : "No transactions match this filter"}
+        </div>
       ) : (
         <div className="space-y-2.5">
-          {transactions.map(txn => {
+          {filteredTxns.map(txn => {
             const sc = statusConfig[txn.status] || statusConfig.pending;
             const tl = typeLabels[txn.type] || typeLabels.deposit;
             const TypeIcon = tl.icon;
