@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2, Power, Monitor, ExternalLink, AlertCircle } from "lucide-react";
 import { ThemesSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +47,9 @@ const AdminThemes = () => {
   const [uploading, setUploading] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [addForm, setAddForm] = useState<any>({ ...emptyForm });
+  const [previewTheme, setPreviewTheme] = useState<any>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const fetchThemes = async () => {
     setLoading(true);
@@ -95,11 +98,49 @@ const AdminThemes = () => {
     fetchThemes();
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`"${name}" থিমটি ডিলিট করতে চান?`)) return;
-    await supabase.from("themes").delete().eq("id", id);
-    toast({ title: "থিম ডিলিট হয়েছে!" });
-    fetchThemes();
+  const handleDelete = async (theme: Tables<"themes">) => {
+    const msg = lang === "bn"
+      ? `"${theme.name}" থিমটি স্থায়ীভাবে মুছে ফেলতে চান? আপলোড করা ফাইল ও ছবিও মুছে যাবে।`
+      : `Permanently delete "${theme.name}"? Uploaded files and images will also be removed.`;
+    if (!confirm(msg)) return;
+    setDeletingId(theme.id);
+    try {
+      if (theme.file_path) {
+        await supabase.storage.from("theme-files").remove([theme.file_path]);
+      }
+      const imgUrls = [theme.thumbnail_url, ...((theme.screenshots as any as string[]) || [])].filter(Boolean) as string[];
+      const imgPaths = imgUrls
+        .filter(u => u.includes("/theme-images/"))
+        .map(u => decodeURIComponent(u.split("/theme-images/")[1].split("?")[0]));
+      if (imgPaths.length) await supabase.storage.from("theme-images").remove(imgPaths);
+
+      const { error } = await supabase.from("themes").delete().eq("id", theme.id);
+      if (error) throw error;
+      toast({ title: lang === "bn" ? "থিম মুছে ফেলা হয়েছে" : "Theme deleted" });
+      if (previewTheme?.id === theme.id) setPreviewTheme(null);
+      fetchThemes();
+    } catch (e: any) {
+      toast({ title: lang === "bn" ? "মুছে ফেলা যায়নি" : "Delete failed", description: e.message, variant: "destructive" });
+    }
+    setDeletingId(null);
+  };
+
+  const toggleActive = async (theme: Tables<"themes">) => {
+    const next = !theme.is_active;
+    setTogglingId(theme.id);
+    setThemes(prev => prev.map(t => (t.id === theme.id ? { ...t, is_active: next } : t)));
+    const { error } = await supabase.from("themes").update({ is_active: next }).eq("id", theme.id);
+    setTogglingId(null);
+    if (error) {
+      setThemes(prev => prev.map(t => (t.id === theme.id ? { ...t, is_active: !next } : t)));
+      toast({ title: lang === "bn" ? "পরিবর্তন সেভ হয়নি" : "Could not update", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: next
+        ? (lang === "bn" ? `"${theme.name}" এখন সাইটে লাইভ` : `"${theme.name}" is now live`)
+        : (lang === "bn" ? `"${theme.name}" সাইট থেকে সরানো হয়েছে` : `"${theme.name}" hidden from site`),
+    });
   };
 
   const filtered = themes.filter(t => {
@@ -112,6 +153,61 @@ const AdminThemes = () => {
 
   const safeName = (n: string) => n.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
 
+  const MAX_IMAGE_MB = 5;
+  const MAX_ZIP_MB = 200;
+  const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml", "image/avif"];
+  const ARCHIVE_EXT = [".zip", ".rar", ".7z", ".tar", ".gz"];
+  const mb = (bytes: number) => (bytes / (1024 * 1024)).toFixed(1);
+
+  const showError = (title: string, description: string) =>
+    toast({ title, description, variant: "destructive" });
+
+  // returns an error message (localized) or null when the file is acceptable
+  const validateFile = (file: File, kind: "image" | "archive"): string | null => {
+    if (file.size === 0) {
+      return lang === "bn" ? "ফাইলটি খালি — সঠিক ফাইল বাছুন।" : "This file is empty — choose a valid file.";
+    }
+    if (kind === "image") {
+      if (!IMAGE_TYPES.includes(file.type)) {
+        return lang === "bn"
+          ? `শুধু ছবি আপলোড করা যাবে (JPG, PNG, WebP, GIF, SVG)। আপনি দিয়েছেন: ${file.name.split(".").pop()?.toUpperCase() || "অজানা"} ফাইল।`
+          : `Only image files are allowed (JPG, PNG, WebP, GIF, SVG). You picked a ${file.name.split(".").pop()?.toUpperCase() || "unknown"} file.`;
+      }
+      if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+        return lang === "bn"
+          ? `ছবিটি ${mb(file.size)} MB — সর্বোচ্চ ${MAX_IMAGE_MB} MB পর্যন্ত আপলোড করা যাবে। ছবিটি ছোট করে আবার চেষ্টা করুন।`
+          : `This image is ${mb(file.size)} MB — the limit is ${MAX_IMAGE_MB} MB. Please compress it and try again.`;
+      }
+      return null;
+    }
+    const lower = file.name.toLowerCase();
+    if (!ARCHIVE_EXT.some(ext => lower.endsWith(ext))) {
+      return lang === "bn"
+        ? `থিম প্যাকেজ অবশ্যই ZIP (বা RAR/7Z) হতে হবে। আপনি "${file.name}" দিয়েছেন — ফাইলগুলো ZIP করে আবার আপলোড করুন।`
+        : `The theme package must be a ZIP (or RAR/7Z). You picked "${file.name}" — please compress your files into a ZIP and retry.`;
+    }
+    if (file.size > MAX_ZIP_MB * 1024 * 1024) {
+      return lang === "bn"
+        ? `ফাইলটি ${mb(file.size)} MB — সর্বোচ্চ ${MAX_ZIP_MB} MB পর্যন্ত আপলোড করা যাবে। অপ্রয়োজনীয় ফাইল বাদ দিয়ে আবার চেষ্টা করুন।`
+        : `The file is ${mb(file.size)} MB — the limit is ${MAX_ZIP_MB} MB. Remove unneeded files and try again.`;
+    }
+    return null;
+  };
+
+  const friendlyUploadError = (e: any) => {
+    const msg = String(e?.message || "");
+    if (/exceeded|too large|maximum size/i.test(msg)) {
+      return lang === "bn" ? `ফাইলটি সার্ভারের সর্বোচ্চ সীমার (${MAX_ZIP_MB} MB) চেয়ে বড়।` : `The file exceeds the server limit (${MAX_ZIP_MB} MB).`;
+    }
+    if (/row-level security|not authorized|permission/i.test(msg)) {
+      return lang === "bn" ? "আপলোডের অনুমতি নেই — অ্যাডমিন হিসেবে লগইন করা আছে কিনা দেখুন।" : "You do not have permission to upload — make sure you are signed in as an admin.";
+    }
+    if (/network|failed to fetch/i.test(msg)) {
+      return lang === "bn" ? "ইন্টারনেট সংযোগে সমস্যা — আবার চেষ্টা করুন।" : "Network problem — please try again.";
+    }
+    return msg || (lang === "bn" ? "অজানা সমস্যা হয়েছে।" : "Something went wrong.");
+  };
+
   const uploadToBucket = async (bucket: string, file: File) => {
     const path = `${Date.now()}-${safeName(file.name)}`;
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
@@ -120,43 +216,56 @@ const AdminThemes = () => {
   };
 
   const handleThumbUpload = async (file: File, form: any, setForm: (f: any) => void) => {
+    const invalid = validateFile(file, "image");
+    if (invalid) { showError(lang === "bn" ? "ছবিটি গ্রহণ করা যায়নি" : "Image not accepted", invalid); return; }
     setUploading("thumb");
     try {
       const path = await uploadToBucket("theme-images", file);
       const { data } = supabase.storage.from("theme-images").getPublicUrl(path);
       setForm({ ...form, thumbnail_url: data.publicUrl });
-      toast({ title: "থাম্বনেইল আপলোড হয়েছে!" });
+      toast({ title: lang === "bn" ? "থাম্বনেইল আপলোড হয়েছে!" : "Thumbnail uploaded!" });
     } catch (e: any) {
-      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+      showError(lang === "bn" ? "আপলোড ব্যর্থ" : "Upload failed", friendlyUploadError(e));
     }
     setUploading(null);
   };
 
   const handleShotsUpload = async (files: FileList, form: any, setForm: (f: any) => void) => {
+    const list = Array.from(files);
+    const rejected: string[] = [];
+    const accepted = list.filter(f => {
+      const invalid = validateFile(f, "image");
+      if (invalid) { rejected.push(`${f.name}: ${invalid}`); return false; }
+      return true;
+    });
+    if (rejected.length) showError(lang === "bn" ? `${rejected.length} টি ছবি বাদ পড়েছে` : `${rejected.length} image(s) skipped`, rejected.join("\n"));
+    if (!accepted.length) return;
     setUploading("shots");
     try {
       const urls: string[] = [];
-      for (const file of Array.from(files)) {
+      for (const file of accepted) {
         const path = await uploadToBucket("theme-images", file);
         urls.push(supabase.storage.from("theme-images").getPublicUrl(path).data.publicUrl);
       }
       const current = parseJson(form.screenshots ?? []) || [];
       setForm({ ...form, screenshots: JSON.stringify([...current, ...urls]) });
-      toast({ title: `${urls.length} টি স্ক্রিনশট আপলোড হয়েছে!` });
+      toast({ title: lang === "bn" ? `${urls.length} টি স্ক্রিনশট আপলোড হয়েছে!` : `${urls.length} screenshot(s) uploaded!` });
     } catch (e: any) {
-      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+      showError(lang === "bn" ? "আপলোড ব্যর্থ" : "Upload failed", friendlyUploadError(e));
     }
     setUploading(null);
   };
 
   const handleThemeFileUpload = async (file: File, form: any, setForm: (f: any) => void) => {
+    const invalid = validateFile(file, "archive");
+    if (invalid) { showError(lang === "bn" ? "ফাইলটি গ্রহণ করা যায়নি" : "File not accepted", invalid); return; }
     setUploading("file");
     try {
       const path = await uploadToBucket("theme-files", file);
       setForm({ ...form, file_path: path });
-      toast({ title: "থিম ফাইল আপলোড হয়েছে!" });
+      toast({ title: lang === "bn" ? `থিম ফাইল আপলোড হয়েছে (${mb(file.size)} MB)` : `Theme file uploaded (${mb(file.size)} MB)` });
     } catch (e: any) {
-      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+      showError(lang === "bn" ? "আপলোড ব্যর্থ" : "Upload failed", friendlyUploadError(e));
     }
     setUploading(null);
   };
@@ -399,18 +508,27 @@ const AdminThemes = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-0.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
-                    {theme.preview_url && (
-                      <a href={theme.preview_url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
-                        <Eye className="w-3.5 h-3.5" />
-                      </a>
-                    )}
+                  <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setPreviewTheme(theme)}
+                      title={lang === "bn" ? "লাইভ প্রিভিউ (প্রয়োগ ছাড়াই)" : "Live preview (without applying)"}
+                      className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
+                      <Monitor className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => toggleActive(theme)}
+                      disabled={togglingId === theme.id}
+                      title={theme.is_active ? (lang === "bn" ? "সাইট থেকে সরান" : "Remove from site") : (lang === "bn" ? "সাইটে প্রয়োগ করুন" : "Apply to site")}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${theme.is_active ? "bg-primary/10 text-primary hover:bg-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
+                      {togglingId === theme.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Power className="w-3 h-3" />}
+                      {theme.is_active ? (lang === "bn" ? "লাইভ" : "Live") : (lang === "bn" ? "প্রয়োগ" : "Apply")}
+                    </button>
                     <button onClick={() => { setEditingId(theme.id); setEditForm({ ...theme, features: JSON.stringify(theme.features), tags: JSON.stringify(theme.tags), hosting_bundle_features: JSON.stringify(theme.hosting_bundle_features), screenshots: JSON.stringify(theme.screenshots ?? []) }); setShowAdd(false); }}
                       className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => handleDelete(theme.id, theme.name)} className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive">
-                      <Trash2 className="w-3.5 h-3.5" />
+                    <button onClick={() => handleDelete(theme)} disabled={deletingId === theme.id} className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive">
+                      {deletingId === theme.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 </div>
@@ -429,6 +547,68 @@ const AdminThemes = () => {
           </div>
         )}
       </div>
+
+      {/* Live preview (does not apply the theme) */}
+      {previewTheme && (
+        <div className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm flex items-center justify-center p-3" onClick={() => setPreviewTheme(null)}>
+          <div className="bg-popover border border-border rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+              <Monitor className="w-4 h-4 text-primary shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground truncate">{previewTheme.name}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {lang === "bn" ? "লাইভ প্রিভিউ — সাইটে প্রয়োগ করা হয়নি" : "Live preview — not applied to the site"}
+                </p>
+              </div>
+              <button
+                onClick={() => toggleActive(previewTheme).then(() => setPreviewTheme({ ...previewTheme, is_active: !previewTheme.is_active }))}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold ${previewTheme.is_active ? "bg-secondary text-foreground" : "gradient-primary text-primary-foreground"}`}>
+                <Power className="w-3.5 h-3.5" />
+                {previewTheme.is_active ? (lang === "bn" ? "সাইট থেকে সরান" : "Remove from site") : (lang === "bn" ? "সাইটে প্রয়োগ করুন" : "Apply to site")}
+              </button>
+              <button onClick={() => setPreviewTheme(null)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><X className="w-4 h-4" /></button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              {previewTheme.preview_url ? (
+                <iframe
+                  src={previewTheme.preview_url}
+                  title={`${previewTheme.name} preview`}
+                  className="w-full h-[70vh] bg-white"
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start gap-2 rounded-xl bg-secondary/50 border border-border p-3 text-xs text-muted-foreground">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-primary" />
+                    <span>
+                      {lang === "bn"
+                        ? "এই থিমের কোনো প্রিভিউ লিংক দেওয়া নেই, তাই আপলোড করা ছবিগুলো দেখানো হচ্ছে। সম্পাদনা করে প্রিভিউ লিংক যোগ করলে এখানে পুরো সাইট দেখা যাবে।"
+                        : "No preview link is set for this theme, so the uploaded images are shown. Add a preview link while editing to see the full site here."}
+                    </span>
+                  </div>
+                  {previewTheme.thumbnail_url && (
+                    <img src={previewTheme.thumbnail_url} alt={`${previewTheme.name} thumbnail`} className="w-full rounded-xl border border-border" />
+                  )}
+                  {((previewTheme.screenshots as string[]) || []).map((url: string, i: number) => (
+                    <img key={i} src={url} alt={`${previewTheme.name} screenshot ${i + 1}`} className="w-full rounded-xl border border-border" />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {previewTheme.preview_url && (
+              <div className="px-4 py-2.5 border-t border-border">
+                <a href={previewTheme.preview_url} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+                  <ExternalLink className="w-3.5 h-3.5" /> {lang === "bn" ? "নতুন ট্যাবে খুলুন" : "Open in new tab"}
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
