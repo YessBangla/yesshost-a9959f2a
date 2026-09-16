@@ -875,8 +875,9 @@ const AdminWHM = () => {
                 <button
                   onClick={requestCreateAccount}
                   disabled={creating}
-                  className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
+                  className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
                 >
+                  {creating && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   {creating ? (bn ? "তৈরি হচ্ছে…" : "Creating…") : (bn ? "অ্যাকাউন্ট তৈরি করুন" : "Create account")}
                 </button>
               </div>
