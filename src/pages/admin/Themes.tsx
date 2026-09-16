@@ -547,6 +547,68 @@ const AdminThemes = () => {
           </div>
         )}
       </div>
+
+      {/* Live preview (does not apply the theme) */}
+      {previewTheme && (
+        <div className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm flex items-center justify-center p-3" onClick={() => setPreviewTheme(null)}>
+          <div className="bg-popover border border-border rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+              <Monitor className="w-4 h-4 text-primary shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground truncate">{previewTheme.name}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {lang === "bn" ? "লাইভ প্রিভিউ — সাইটে প্রয়োগ করা হয়নি" : "Live preview — not applied to the site"}
+                </p>
+              </div>
+              <button
+                onClick={() => toggleActive(previewTheme).then(() => setPreviewTheme({ ...previewTheme, is_active: !previewTheme.is_active }))}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold ${previewTheme.is_active ? "bg-secondary text-foreground" : "gradient-primary text-primary-foreground"}`}>
+                <Power className="w-3.5 h-3.5" />
+                {previewTheme.is_active ? (lang === "bn" ? "সাইট থেকে সরান" : "Remove from site") : (lang === "bn" ? "সাইটে প্রয়োগ করুন" : "Apply to site")}
+              </button>
+              <button onClick={() => setPreviewTheme(null)} className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"><X className="w-4 h-4" /></button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              {previewTheme.preview_url ? (
+                <iframe
+                  src={previewTheme.preview_url}
+                  title={`${previewTheme.name} preview`}
+                  className="w-full h-[70vh] bg-white"
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start gap-2 rounded-xl bg-secondary/50 border border-border p-3 text-xs text-muted-foreground">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-primary" />
+                    <span>
+                      {lang === "bn"
+                        ? "এই থিমের কোনো প্রিভিউ লিংক দেওয়া নেই, তাই আপলোড করা ছবিগুলো দেখানো হচ্ছে। সম্পাদনা করে প্রিভিউ লিংক যোগ করলে এখানে পুরো সাইট দেখা যাবে।"
+                        : "No preview link is set for this theme, so the uploaded images are shown. Add a preview link while editing to see the full site here."}
+                    </span>
+                  </div>
+                  {previewTheme.thumbnail_url && (
+                    <img src={previewTheme.thumbnail_url} alt={`${previewTheme.name} thumbnail`} className="w-full rounded-xl border border-border" />
+                  )}
+                  {((previewTheme.screenshots as string[]) || []).map((url: string, i: number) => (
+                    <img key={i} src={url} alt={`${previewTheme.name} screenshot ${i + 1}`} className="w-full rounded-xl border border-border" />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {previewTheme.preview_url && (
+              <div className="px-4 py-2.5 border-t border-border">
+                <a href={previewTheme.preview_url} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+                  <ExternalLink className="w-3.5 h-3.5" /> {lang === "bn" ? "নতুন ট্যাবে খুলুন" : "Open in new tab"}
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
