@@ -508,18 +508,27 @@ const AdminThemes = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-0.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
-                    {theme.preview_url && (
-                      <a href={theme.preview_url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
-                        <Eye className="w-3.5 h-3.5" />
-                      </a>
-                    )}
+                  <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setPreviewTheme(theme)}
+                      title={lang === "bn" ? "লাইভ প্রিভিউ (প্রয়োগ ছাড়াই)" : "Live preview (without applying)"}
+                      className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
+                      <Monitor className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => toggleActive(theme)}
+                      disabled={togglingId === theme.id}
+                      title={theme.is_active ? (lang === "bn" ? "সাইট থেকে সরান" : "Remove from site") : (lang === "bn" ? "সাইটে প্রয়োগ করুন" : "Apply to site")}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${theme.is_active ? "bg-primary/10 text-primary hover:bg-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
+                      {togglingId === theme.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Power className="w-3 h-3" />}
+                      {theme.is_active ? (lang === "bn" ? "লাইভ" : "Live") : (lang === "bn" ? "প্রয়োগ" : "Apply")}
+                    </button>
                     <button onClick={() => { setEditingId(theme.id); setEditForm({ ...theme, features: JSON.stringify(theme.features), tags: JSON.stringify(theme.tags), hosting_bundle_features: JSON.stringify(theme.hosting_bundle_features), screenshots: JSON.stringify(theme.screenshots ?? []) }); setShowAdd(false); }}
                       className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => handleDelete(theme.id, theme.name)} className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive">
-                      <Trash2 className="w-3.5 h-3.5" />
+                    <button onClick={() => handleDelete(theme)} disabled={deletingId === theme.id} className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive">
+                      {deletingId === theme.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 </div>
