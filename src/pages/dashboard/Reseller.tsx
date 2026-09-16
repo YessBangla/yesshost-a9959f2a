@@ -46,7 +46,7 @@ const ResellerDashboard = () => {
   const fetchPackages = useCallback(async () => {
     if (!user) { setPackages([]); setSelectedPkg(null); setAccounts([]); setLoading(false); return; }
     setLoading(true); setLoadError(null);
-    const { data, error } = await supabase.from("reseller_packages").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("reseller_packages").select("*, service:services(price_bdt, billing_cycle, name)").eq("user_id", user.id).order("created_at", { ascending: false });
     if (error) { setPackages([]); setSelectedPkg(null); setAccounts([]); setLoadError(error.message); setLoading(false); return; }
     const pkgs = data || [];
     setPackages(pkgs);
@@ -269,6 +269,26 @@ const ResellerDashboard = () => {
                     );
                   })}
                 </div>
+
+                {/* Cost Overview */}
+                {selectedPkg.service?.price_bdt > 0 && (
+                  <div className="glass-card rounded-xl p-3 sm:p-4">
+                    <h3 className="text-xs font-semibold text-foreground mb-3">{bn ? "খরচের হিসাব" : "Cost Overview"}</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { label: bn ? (selectedPkg.service.billing_cycle === "yearly" ? "বার্ষিক খরচ" : "মাসিক খরচ") : (selectedPkg.service.billing_cycle === "yearly" ? "Yearly cost" : "Monthly cost"), value: `৳${Number(selectedPkg.service.price_bdt).toLocaleString(bn ? "bn-BD" : "en-US")}` },
+                        { label: bn ? "প্রতি অ্যাকাউন্ট খরচ" : "Cost per account", value: `৳${(Number(selectedPkg.service.price_bdt) / (selectedPkg.max_accounts || 1)).toFixed(0)}` },
+                        { label: bn ? "বরাদ্দ অ্যাকাউন্ট" : "Allotted accounts", value: String(selectedPkg.max_accounts) },
+                        { label: bn ? "ব্যবহৃত অ্যাকাউন্ট" : "Used accounts", value: String(selectedPkg.used_accounts) },
+                      ].map((c, i) => (
+                        <div key={i} className="bg-secondary/30 rounded-lg p-2.5 text-center">
+                          <p className="text-sm font-bold text-foreground">{c.value}</p>
+                          <p className="text-[10px] text-muted-foreground">{c.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Status Summary Bar */}
                 <div className="glass-card rounded-xl p-3 sm:p-4">

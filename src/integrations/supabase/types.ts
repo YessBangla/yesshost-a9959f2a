@@ -14,6 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_clicks: {
+        Row: {
+          created_at: string
+          id: string
+          ref_code: string | null
+          referrer_user_id: string
+          source_page: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ref_code?: string | null
+          referrer_user_id: string
+          source_page?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ref_code?: string | null
+          referrer_user_id?: string
+          source_page?: string | null
+        }
+        Relationships: []
+      }
+      affiliate_commissions: {
+        Row: {
+          amount_bdt: number
+          created_at: string
+          description: string | null
+          id: string
+          invoice_id: string | null
+          referral_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_bdt: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string | null
+          referral_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_bdt?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string | null
+          referral_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_commissions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: true
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_commissions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_payouts: {
+        Row: {
+          account_details: string
+          amount_bdt: number
+          created_at: string
+          id: string
+          method: string
+          note: string | null
+          processed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          account_details: string
+          amount_bdt: number
+          created_at?: string
+          id?: string
+          method: string
+          note?: string | null
+          processed_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          account_details?: string
+          amount_bdt?: number
+          created_at?: string
+          id?: string
+          method?: string
+          note?: string | null
+          processed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      affiliate_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          payout_account: string | null
+          payout_method: string
+          referral_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          payout_account?: string | null
+          payout_method?: string
+          referral_code: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          payout_account?: string | null
+          payout_method?: string
+          referral_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      affiliate_referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_user_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_user_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_user_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       call_history: {
         Row: {
           caller_role: string
@@ -833,6 +1001,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          referred_by: string | null
           updated_at: string
           user_id: string
           vat_id: string | null
@@ -848,6 +1017,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_id: string
           vat_id?: string | null
@@ -863,6 +1033,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_id?: string
           vat_id?: string | null

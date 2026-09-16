@@ -35,7 +35,14 @@ const Login = () => {
         : error.message;
       toast({ title: bn ? "লগইন ব্যর্থ" : "Login Failed", description: msg, variant: "destructive" });
     }
-    else { navigate(from); }
+    else {
+      const refCode = localStorage.getItem("yh_ref");
+      if (refCode) {
+        supabase.functions.invoke("affiliate-track", { body: { action: "claim", referral_code: refCode } })
+          .then(() => localStorage.removeItem("yh_ref")).catch(() => {});
+      }
+      navigate(from);
+    }
     setLoading(false);
   };
 

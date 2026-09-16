@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { DollarSign, Users, Share2, Award, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,7 @@ const defaultBenefits = [
 
 const Affiliate = () => {
   const { lang } = useLanguage();
+  const { user } = useAuth();
   const bn = lang === "bn";
   const [siteContent, setSiteContent] = useState<any[]>([]);
 
@@ -99,9 +101,15 @@ const Affiliate = () => {
         </section>
 
         <section className="container mx-auto px-4 text-center">
-          <Link to="/signup" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 transition-all">
-            {bn ? "এখনই যোগ দিন" : "Join Now"} <ArrowRight className="w-4 h-4" />
-          </Link>
+          {user ? (
+            <Link to="/dashboard/affiliate" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 transition-all">
+              {bn ? "অ্যাফিলিয়েট ড্যাশবোর্ডে যান" : "Go to Affiliate Dashboard"} <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : (
+            <Link to="/signup" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 transition-all">
+              {bn ? "এখনই যোগ দিন" : "Join Now"} <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
         </section>
       </div>
     </PublicLayout>
