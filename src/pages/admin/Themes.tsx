@@ -307,9 +307,6 @@ const AdminThemes = () => {
 
         {filtered.length === 0 && (
           <div className="xl:col-span-2">
-          </div>
-        )}
-        {filtered.length === 0 && (
           <EmptyState
             icon={Palette}
             title={lang === "bn" ? "কোনো থিম পাওয়া যায়নি" : "No themes found"}
