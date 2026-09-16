@@ -72,7 +72,7 @@ const DashboardServices = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{bn ? "আমার সার্ভিস" : "My Services"}</h1>
           <p className="text-sm text-muted-foreground">{bn ? `মোট ${services.length}টি সার্ভিস` : `${services.length} total services`}</p>
         </div>
-        <Link to="/#pricing" className="flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
+        <Link to="/hosting-plans" className="flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
           {bn ? "নতুন সার্ভিস" : "New Service"} <ExternalLink className="w-4 h-4" />
         </Link>
       </div>
@@ -117,7 +117,7 @@ const DashboardServices = () => {
           <Server className="w-14 h-14 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="text-base font-bold text-foreground mb-2">{search ? (bn ? "কোনো সার্ভিস পাওয়া যায়নি" : "No services found") : (bn ? "কোনো সার্ভিস নেই" : "No services yet")}</h3>
           <p className="text-sm text-muted-foreground mb-4">{bn ? "আপনার পছন্দের প্ল্যান বেছে নিন" : "Choose a plan that suits your needs"}</p>
-          <Link to="/#pricing" className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm">
+          <Link to="/hosting-plans" className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm">
             {bn ? "প্ল্যান দেখুন" : "Browse Plans"} <ExternalLink className="w-4 h-4" />
           </Link>
         </div>

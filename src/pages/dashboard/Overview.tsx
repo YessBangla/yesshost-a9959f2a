@@ -146,6 +146,16 @@ const DashboardOverview = () => {
     return bn ? `${days} দিন আগে` : `${days}d ago`;
   };
 
+  const markRead = async (id: string, isRead: boolean) => {
+    if (isRead) return;
+    setRecentNotifications(prev => prev.map(n => (n.id === id ? { ...n, is_read: true } : n)));
+    const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    if (error) {
+      setRecentNotifications(prev => prev.map(n => (n.id === id ? { ...n, is_read: false } : n)));
+      toast.error(bn ? "আপডেট করা যায়নি" : "Could not update");
+    }
+  };
+
   const clientFor = useMemo(() => {
     if (!user?.created_at) return "";
     const created = new Date(user.created_at);
@@ -192,12 +202,6 @@ const DashboardOverview = () => {
               <span className="text-2xl font-extrabold text-foreground tracking-wider tabular-nums">
                 {supportPin}
               </span>
-              <button onClick={() => {
-                const newPin = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
-                toast.success(bn ? "পিন রিফ্রেশ হয়েছে" : "PIN refreshed");
-              }} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Refresh">
-                <RefreshCw className="w-4 h-4" />
-              </button>
               <button onClick={copyPin} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Copy">
                 <Copy className="w-4 h-4" />
               </button>
@@ -244,15 +248,29 @@ const DashboardOverview = () => {
                 <span className="text-muted-foreground">{bn ? "ক্লায়েন্ট" : "Client for"}</span>
                 <span className="text-foreground font-medium">{clientFor || "—"}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{bn ? "আইপি এড্রেস" : "IP Address"}</span>
-                <span className="text-foreground font-medium text-xs">—</span>
+              <div className="flex items-center justify-between text-sm gap-2">
+                <span className="text-muted-foreground shrink-0">{bn ? "ইমেইল" : "Email"}</span>
+                <span className="text-foreground font-medium text-xs truncate" title={user?.email || ""}>
+                  {user?.email || "—"}
+                </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{bn ? "ইমেইল যাচাই" : "Email Verified"}</span>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold">
-                  {bn ? "যাচাইকৃত" : "Verified"}
-                </span>
+                {user?.email_confirmed_at ? (
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold">
+                    {bn ? "যাচাইকৃত" : "Verified"}
+                  </span>
+                ) : (
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-semibold">
+                    {bn ? "যাচাই বাকি" : "Pending"}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{bn ? "ওয়ালেট ব্যালেন্স" : "Wallet Balance"}</span>
+                <Link to="/dashboard/wallet" className="text-foreground font-bold tabular-nums hover:text-primary transition-colors">
+                  ৳{formatAmount(stats.walletBalance, lang)}
+                </Link>
               </div>
 
               {/* Last Login */}
@@ -517,7 +535,11 @@ const DashboardOverview = () => {
               {recentNotifications.map((n: any) => {
                 const icon = n.type === "payment_success" ? "✅" : n.type === "payment_failed" ? "❌" : "📢";
                 return (
-                  <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${!n.is_read ? "bg-primary/5 border border-primary/10" : "bg-secondary/30"}`}>
+                  <div
+                    key={n.id}
+                    onClick={() => markRead(n.id, n.is_read)}
+                    className={`flex items-start gap-3 p-3 rounded-xl transition-colors text-left ${!n.is_read ? "bg-primary/5 border border-primary/10 cursor-pointer hover:bg-primary/10" : "bg-secondary/30"}`}
+                  >
                     <span className="text-base mt-0.5">{icon}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-foreground leading-tight">{n.title}</p>

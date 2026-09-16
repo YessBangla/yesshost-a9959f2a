@@ -143,9 +143,12 @@ const DashboardDomains = () => {
                       {d.status === "active" ? (bn ? "সক্রিয়" : "Active") : d.status}
                     </span>
                     {expiring && (
-                      <button className="text-xs gradient-primary text-primary-foreground px-3 py-1.5 rounded-lg font-semibold hover:opacity-90 transition-all">
+                      <Link
+                        to="/dashboard/billing"
+                        className="text-xs gradient-primary text-primary-foreground px-3 py-1.5 rounded-lg font-semibold hover:opacity-90 transition-all"
+                      >
                         {bn ? "রিনিউ" : "Renew"}
-                      </button>
+                      </Link>
                     )}
                   </div>
                 </div>
