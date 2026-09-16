@@ -587,6 +587,87 @@ const AdminWHM = () => {
                 ))}
               </div>
 
+              {/* Server connection */}
+              <div className="p-3 rounded-xl border border-border/40 bg-secondary/20 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground">{bn ? "WHM সার্ভার সংযোগ" : "WHM server connection"}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {selectedPkg.whm_server_host
+                        ? `${selectedPkg.whm_username || "—"}@${selectedPkg.whm_server_host}:2087`
+                        : (bn ? "সার্ভার হোস্ট সেট করা নেই — প্যাকেজ এডিট করে দিন" : "No server host set — edit the package to add it")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleTestConnection(selectedPkg)}
+                    disabled={testingConn}
+                    className="shrink-0 px-3 py-2 rounded-lg text-xs font-medium border border-border/50 hover:border-primary/50 disabled:opacity-60"
+                  >
+                    {testingConn ? (bn ? "পরীক্ষা চলছে…" : "Testing…") : (bn ? "সংযোগ পরীক্ষা" : "Test connection")}
+                  </button>
+                </div>
+                {connResult && (
+                  <p className={`text-[11px] break-words ${connResult.ok ? "text-emerald-600" : "text-destructive"}`}>
+                    {connResult.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Create real cPanel account */}
+              <div className="p-3 rounded-xl border border-primary/25 bg-primary/5 space-y-3">
+                <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Plus className="w-3.5 h-3.5 text-primary" />
+                  {bn ? "নতুন cPanel অ্যাকাউন্ট তৈরি" : "Create cPanel account"}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[
+                    { key: "domain", label: bn ? "ডোমেইন" : "Domain", ph: "client-domain.com", type: "text" },
+                    { key: "username", label: bn ? "ইউজারনেম" : "Username", ph: "clientusr", type: "text" },
+                    { key: "password", label: bn ? "পাসওয়ার্ড" : "Password", ph: "••••••••", type: "password" },
+                    { key: "email", label: bn ? "ইমেইল" : "Contact email", ph: "client@email.com", type: "email" },
+                    { key: "plan_name", label: bn ? "WHM প্যাকেজ" : "WHM package", ph: "default", type: "text" },
+                  ].map(f => (
+                    <div key={f.key}>
+                      <label className="block text-[10px] text-muted-foreground mb-1">{f.label}</label>
+                      <input
+                        type={f.type}
+                        value={(createForm as any)[f.key]}
+                        onChange={e => setCreateForm(p => ({ ...p, [f.key]: e.target.value }))}
+                        placeholder={f.ph}
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-muted-foreground mb-1">{bn ? "ডিস্ক (MB)" : "Disk (MB)"}</label>
+                      <input
+                        type="number"
+                        value={createForm.disk_quota_mb}
+                        onChange={e => setCreateForm(p => ({ ...p, disk_quota_mb: parseInt(e.target.value) || 0 }))}
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-muted-foreground mb-1">{bn ? "ব্যান্ডউইথ (MB)" : "Bandwidth (MB)"}</label>
+                      <input
+                        type="number"
+                        value={createForm.bandwidth_mb}
+                        onChange={e => setCreateForm(p => ({ ...p, bandwidth_mb: parseInt(e.target.value) || 0 }))}
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCreateAccount}
+                  disabled={creating}
+                  className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
+                >
+                  {creating ? (bn ? "তৈরি হচ্ছে…" : "Creating…") : (bn ? "অ্যাকাউন্ট তৈরি করুন" : "Create account")}
+                </button>
+              </div>
+
               {/* Account List */}
               {accounts.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
