@@ -112,6 +112,33 @@ const DashboardWallet = () => {
     [transactions]
   );
 
+  const filteredTxns = useMemo(() => {
+    const q = txnSearch.trim().toLowerCase();
+    return transactions.filter(t => {
+      const okSearch = !q || [t.description, t.type, t.status, t.payment_method, String(t.amount_bdt)]
+        .filter(Boolean).some(v => String(v).toLowerCase().includes(q));
+      const okType = txnType === "all" || t.type === txnType;
+      return okSearch && okType;
+    });
+  }, [transactions, txnSearch, txnType]);
+
+  const txnFilters = useMemo(() => ([
+    { value: "all", label: isBn ? "সব" : "All", count: transactions.length },
+    { value: "deposit", label: isBn ? "জমা" : "Deposit", count: transactions.filter(t => t.type === "deposit").length },
+    { value: "payment", label: isBn ? "পেমেন্ট" : "Payment", count: transactions.filter(t => t.type === "payment").length },
+    { value: "refund", label: isBn ? "ফেরত" : "Refund", count: transactions.filter(t => t.type === "refund").length },
+  ]), [transactions, isBn]);
+
+  const exportTransactions = () => {
+    downloadCsv(
+      "yesshost-wallet",
+      ["date", "type", "status", "description", "payment_method", "amount_bdt"],
+      filteredTxns.map(t => [csvDate(t.created_at), t.type, t.status, t.description || "", (t as any).payment_method || "", t.amount_bdt]),
+    );
+  };
+
+
+
   const handleAddFund = async () => {
     const numAmount = Number(amount);
     if (!numAmount || numAmount < 100) {
