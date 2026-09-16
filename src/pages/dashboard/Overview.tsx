@@ -146,6 +146,16 @@ const DashboardOverview = () => {
     return bn ? `${days} দিন আগে` : `${days}d ago`;
   };
 
+  const markRead = async (id: string, isRead: boolean) => {
+    if (isRead) return;
+    setRecentNotifications(prev => prev.map(n => (n.id === id ? { ...n, is_read: true } : n)));
+    const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    if (error) {
+      setRecentNotifications(prev => prev.map(n => (n.id === id ? { ...n, is_read: false } : n)));
+      toast.error(bn ? "আপডেট করা যায়নি" : "Could not update");
+    }
+  };
+
   const clientFor = useMemo(() => {
     if (!user?.created_at) return "";
     const created = new Date(user.created_at);
