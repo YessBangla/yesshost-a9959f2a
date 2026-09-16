@@ -442,6 +442,93 @@ const AdminWHM = () => {
         ))}
       </div>
 
+      {/* WHM API Token */}
+      <div className="glass-card p-4 rounded-xl space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-primary" />
+              {bn ? "WHM API টোকেন" : "WHM API token"}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {bn
+                ? "টোকেনটি শুধু সার্ভারে সংরক্ষিত থাকে — ব্রাউজারে কখনো পাঠানো হয় না।"
+                : "The token is stored server-side only and is never sent back to the browser."}
+            </p>
+          </div>
+          <Badge variant={tokenStatus?.configured ? "default" : "destructive"} className="text-[10px] shrink-0">
+            {tokenStatus?.configured ? (bn ? "কনফিগার করা" : "Configured") : (bn ? "সেট করা নেই" : "Not set")}
+          </Badge>
+        </div>
+
+        {!tokenEditing ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="px-3 py-2 rounded-lg bg-secondary/40 border border-border/50 text-xs font-mono text-foreground">
+              {tokenStatus?.masked || "—"}
+            </code>
+            {tokenStatus?.source && (
+              <span className="text-[10px] text-muted-foreground">
+                {tokenStatus.source === "database"
+                  ? (bn ? "সংরক্ষিত: নিরাপদ কনফিগ" : "Stored: secure config")
+                  : (bn ? "সংরক্ষিত: সার্ভার সিক্রেট" : "Stored: server secret")}
+              </span>
+            )}
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={() => { setTokenEditing(true); setTokenInput(""); }}
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border border-border/50 hover:border-primary/50"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                {tokenStatus?.configured ? (bn ? "এডিট" : "Edit") : (bn ? "টোকেন যোগ করুন" : "Add token")}
+              </button>
+              {tokenStatus?.source === "database" && (
+                <button
+                  onClick={handleRemoveToken}
+                  disabled={tokenSaving}
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border border-destructive/40 text-destructive hover:bg-destructive/10 disabled:opacity-60"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  {bn ? "রিমুভ" : "Remove"}
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type={showToken ? "text" : "password"}
+                value={tokenInput}
+                onChange={e => setTokenInput(e.target.value)}
+                placeholder={bn ? "WHM API টোকেন পেস্ট করুন" : "Paste the WHM API token"}
+                className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm font-mono text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <button
+                onClick={() => setShowToken(v => !v)}
+                className="px-3 py-2.5 rounded-xl border border-border/50 text-xs font-medium hover:border-primary/50"
+              >
+                {showToken ? (bn ? "লুকান" : "Hide") : (bn ? "দেখুন" : "Show")}
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSaveToken}
+                disabled={tokenSaving}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
+              >
+                {tokenSaving ? (bn ? "সেভ হচ্ছে…" : "Saving…") : (bn ? "নিরাপদে সেভ করুন" : "Save securely")}
+              </button>
+              <button
+                onClick={() => { setTokenEditing(false); setTokenInput(""); setShowToken(false); }}
+                className="px-4 py-2 rounded-lg border border-border/50 text-xs font-medium hover:border-primary/50"
+              >
+                {bn ? "বাতিল" : "Cancel"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Search */}
       <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50">
         <Search className="w-4 h-4 text-muted-foreground" />
