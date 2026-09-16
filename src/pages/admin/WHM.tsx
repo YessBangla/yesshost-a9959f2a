@@ -59,6 +59,13 @@ const AdminWHM = () => {
   });
   const [assigning, setAssigning] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [testingConn, setTestingConn] = useState(false);
+  const [connResult, setConnResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    domain: "", username: "", password: "", email: "", plan_name: "",
+    disk_quota_mb: 1000, bandwidth_mb: 10000,
+  });
 
   // Stats
   const [stats, setStats] = useState({
@@ -155,6 +162,61 @@ const AdminWHM = () => {
       .order("created_at", { ascending: false });
     setAccounts(data || []);
     setShowAccounts(true);
+  };
+
+  const handleTestConnection = async (pkg: ResellerPkg) => {
+    setTestingConn(true);
+    setConnResult(null);
+    const { data, error } = await supabase.functions.invoke("whm-manage", {
+      body: { action: "test_connection", reseller_package_id: pkg.id },
+    });
+    setTestingConn(false);
+    if (error) {
+      setConnResult({ ok: false, message: error.message });
+      return;
+    }
+    setConnResult(
+      data?.connected
+        ? { ok: true, message: `${bn ? "সংযুক্ত" : "Connected"} — ${data.server} (WHM ${data.version})` }
+        : { ok: false, message: data?.error || (bn ? "সংযোগ ব্যর্থ" : "Connection failed") }
+    );
+  };
+
+  const handleCreateAccount = async () => {
+    if (!selectedPkg) return;
+    if (!createForm.domain || !createForm.username || !createForm.password) {
+      toast({ title: bn ? "ডোমেইন, ইউজারনেম ও পাসওয়ার্ড দিন" : "Domain, username and password required", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const { data, error } = await supabase.functions.invoke("whm-manage", {
+      body: {
+        action: "create_account",
+        reseller_package_id: selectedPkg.id,
+        domain: createForm.domain.trim(),
+        username: createForm.username.trim(),
+        password: createForm.password,
+        email: createForm.email.trim() || undefined,
+        plan_name: createForm.plan_name || undefined,
+        disk_quota_mb: createForm.disk_quota_mb,
+        bandwidth_mb: createForm.bandwidth_mb,
+      },
+    });
+    setCreating(false);
+    const errMsg = error?.message || (data && (data as any).error);
+    if (errMsg) {
+      toast({ title: bn ? "অ্যাকাউন্ট তৈরি ব্যর্থ" : "Account creation failed", description: String(errMsg), variant: "destructive" });
+      return;
+    }
+    toast({
+      title: bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created",
+      description: (data as any)?.cpanel_created
+        ? (bn ? "cPanel সার্ভারে আসল অ্যাকাউন্ট তৈরি হয়েছে" : "Real cPanel account created on the server")
+        : (bn ? "শুধু রেকর্ড সেভ হয়েছে — WHM টোকেন/হোস্ট সেট নেই" : "Recorded only — WHM host/token not configured"),
+    });
+    setCreateForm({ domain: "", username: "", password: "", email: "", plan_name: "", disk_quota_mb: 1000, bandwidth_mb: 10000 });
+    handleViewAccounts(selectedPkg);
+    fetchAll();
   };
 
   const handleDeletePkg = async (pkgId: string) => {
