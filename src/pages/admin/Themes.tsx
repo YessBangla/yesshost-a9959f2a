@@ -109,6 +109,63 @@ const AdminThemes = () => {
 
   const inputClass = "w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30";
 
+  const safeName = (n: string) => n.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
+
+  const uploadToBucket = async (bucket: string, file: File) => {
+    const path = `${Date.now()}-${safeName(file.name)}`;
+    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
+    if (error) throw error;
+    return path;
+  };
+
+  const handleThumbUpload = async (file: File, form: any, setForm: (f: any) => void) => {
+    setUploading("thumb");
+    try {
+      const path = await uploadToBucket("theme-images", file);
+      const { data } = supabase.storage.from("theme-images").getPublicUrl(path);
+      setForm({ ...form, thumbnail_url: data.publicUrl });
+      toast({ title: "থাম্বনেইল আপলোড হয়েছে!" });
+    } catch (e: any) {
+      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+    }
+    setUploading(null);
+  };
+
+  const handleShotsUpload = async (files: FileList, form: any, setForm: (f: any) => void) => {
+    setUploading("shots");
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const path = await uploadToBucket("theme-images", file);
+        urls.push(supabase.storage.from("theme-images").getPublicUrl(path).data.publicUrl);
+      }
+      const current = parseJson(form.screenshots ?? []) || [];
+      setForm({ ...form, screenshots: JSON.stringify([...current, ...urls]) });
+      toast({ title: `${urls.length} টি স্ক্রিনশট আপলোড হয়েছে!` });
+    } catch (e: any) {
+      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+    }
+    setUploading(null);
+  };
+
+  const handleThemeFileUpload = async (file: File, form: any, setForm: (f: any) => void) => {
+    setUploading("file");
+    try {
+      const path = await uploadToBucket("theme-files", file);
+      setForm({ ...form, file_path: path });
+      toast({ title: "থিম ফাইল আপলোড হয়েছে!" });
+    } catch (e: any) {
+      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+    }
+    setUploading(null);
+  };
+
+  const downloadThemeFile = async (path: string) => {
+    const { data, error } = await supabase.storage.from("theme-files").createSignedUrl(path, 300);
+    if (error || !data) { toast({ title: "ডাউনলোড লিংক তৈরি হয়নি", variant: "destructive" }); return; }
+    window.open(data.signedUrl, "_blank");
+  };
+
   const ThemeForm = ({ form, setForm, onSave, onCancel }: { form: any; setForm: (f: any) => void; onSave: () => void; onCancel: () => void }) => (
     <div className="glass-card p-5 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
