@@ -124,16 +124,29 @@ const AdminAffiliates = () => {
         ))}
       </div>
 
+      <DataToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder={bn ? "নাম, মাধ্যম বা পরিমাণ খুঁজুন..." : "Search name, method or amount..."}
+        filters={statusFilters}
+        activeFilter={status}
+        onFilter={setStatus}
+        onExport={exportCsv}
+        onRefresh={load}
+        refreshing={loading}
+        resultCount={filteredPayouts.length + filteredCommissions.length}
+      />
+
       {/* Payout requests */}
       <div className="glass-card rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-border/30">
           <h3 className="text-xs font-semibold text-foreground">{bn ? "পেআউট রিকোয়েস্ট" : "Payout Requests"}</h3>
         </div>
-        {payouts.length === 0 ? (
+        {filteredPayouts.length === 0 ? (
           <p className="px-4 py-8 text-center text-xs text-muted-foreground">{bn ? "কোনো রিকোয়েস্ট নেই" : "No requests"}</p>
         ) : (
           <div className="divide-y divide-border/20">
-            {payouts.map(p => (
+            {filteredPayouts.map(p => (
               <div key={p.id} className="flex flex-col sm:flex-row sm:items-center gap-2 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-foreground">{fmtBDT(p.amount_bdt, bn)} <span className="text-[10px] font-normal text-muted-foreground uppercase">· {p.method}</span></p>
