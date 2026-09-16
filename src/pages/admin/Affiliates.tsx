@@ -16,6 +16,8 @@ const AdminAffiliates = () => {
   const [commissions, setCommissions] = useState<any[]>([]);
   const [payouts, setPayouts] = useState<any[]>([]);
   const [acting, setActing] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
 
   const load = useCallback(async () => {
     setLoading(true);
