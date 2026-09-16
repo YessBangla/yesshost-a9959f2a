@@ -6,8 +6,9 @@ const corsHeaders = {
 };
 
 interface WHMRequest {
-  action: 'create_account' | 'suspend_account' | 'unsuspend_account' | 'terminate_account' | 'list_accounts' | 'account_summary' | 'test_connection';
+  action: 'create_account' | 'suspend_account' | 'unsuspend_account' | 'terminate_account' | 'list_accounts' | 'account_summary' | 'test_connection' | 'token_status' | 'save_token' | 'remove_token';
   reseller_package_id: string;
+  api_token?: string;
   account_id?: string;
   // For create_account
   domain?: string;
@@ -49,6 +50,66 @@ Deno.serve(async (req) => {
     // Admins may manage any package; resellers only their own
     const { data: isAdmin } = await supabaseClient.rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
+    const json = (payload: unknown, status = 200) => new Response(JSON.stringify(payload), {
+      status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+    const envToken = Deno.env.get('WHM_API_TOKEN') || '';
+    const loadStoredToken = async (): Promise<string> => {
+      const { data } = await supabaseClient
+        .from('communication_config')
+        .select('config_value, is_active')
+        .eq('config_key', 'whm_api')
+        .maybeSingle();
+      if (!data || data.is_active === false) return '';
+      return (data.config_value as any)?.api_token || '';
+    };
+    const mask = (t: string) => t.length <= 8 ? '••••' : `${t.slice(0, 4)}${'•'.repeat(8)}${t.slice(-4)}`;
+
+    // ---- Token management (admin only, no package needed) ----
+    if (action === 'token_status' || action === 'save_token' || action === 'remove_token') {
+      if (!isAdmin) return json({ error: 'Admin only' }, 403);
+
+      if (action === 'save_token') {
+        const t = (body.api_token || '').trim();
+        if (t.length < 8) return json({ error: 'Token looks too short' }, 400);
+        const { error: upErr } = await supabaseClient
+          .from('communication_config')
+          .upsert({
+            config_key: 'whm_api',
+            config_value: { api_token: t },
+            is_active: true,
+            description: 'WHM API token (server-side only, never exposed to the browser)',
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'config_key' });
+        if (upErr) return json({ error: upErr.message }, 500);
+        return json({ success: true, configured: true, masked: mask(t), source: 'database' });
+      }
+
+      if (action === 'remove_token') {
+        const { error: delErr } = await supabaseClient
+          .from('communication_config')
+          .delete()
+          .eq('config_key', 'whm_api');
+        if (delErr) return json({ error: delErr.message }, 500);
+        return json({
+          success: true,
+          configured: !!envToken,
+          masked: envToken ? mask(envToken) : null,
+          source: envToken ? 'secret' : null,
+        });
+      }
+
+      const stored = await loadStoredToken();
+      const active = stored || envToken;
+      return json({
+        success: true,
+        configured: !!active,
+        masked: active ? mask(active) : null,
+        source: stored ? 'database' : (envToken ? 'secret' : null),
+      });
+    }
+
     let pkgQuery = supabaseClient
       .from('reseller_packages')
       .select('*')
@@ -65,7 +126,7 @@ Deno.serve(async (req) => {
     }
 
     // WHM API helper
-    const WHM_API_TOKEN = Deno.env.get('WHM_API_TOKEN');
+    const WHM_API_TOKEN = (await loadStoredToken()) || envToken;
     const whmCall = async (func: string, params: Record<string, string> = {}) => {
       if (!pkg.whm_server_host || !pkg.whm_username) {
         throw new Error('WHM server not configured for this package');

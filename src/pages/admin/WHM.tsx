@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import {
   Server, Users, HardDrive, Wifi, Plus, Settings, Eye, Trash2,
   Shield, Activity, Globe, Package, AlertTriangle, Check, X,
-  Search, ChevronDown, BarChart3, Cpu, Zap, Clock, Pencil
+  Search, ChevronDown, BarChart3, Cpu, Zap, Clock, Pencil,
+  KeyRound, RefreshCw, Loader2, Copy
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -69,12 +70,99 @@ const AdminWHM = () => {
     disk_quota_mb: 1000, bandwidth_mb: 10000,
   });
 
+  // Confirmation + success summary
+  const [confirmCreate, setConfirmCreate] = useState(false);
+  const [createdAccount, setCreatedAccount] = useState<any>(null);
+
+  // Live status panel
+  const [autoPoll, setAutoPoll] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+
+  // WHM API token
+  const [tokenStatus, setTokenStatus] = useState<{ configured: boolean; masked: string | null; source: string | null } | null>(null);
+  const [tokenInput, setTokenInput] = useState("");
+  const [tokenEditing, setTokenEditing] = useState(false);
+  const [tokenSaving, setTokenSaving] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+
   // Stats
   const [stats, setStats] = useState({
     total_packages: 0, active_packages: 0, total_accounts: 0, total_disk_used: 0, total_disk_max: 0
   });
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); fetchTokenStatus(); }, []);
+
+  // Auto-poll account statuses while the accounts dialog is open
+  useEffect(() => {
+    if (!showAccounts || !selectedPkg || !autoPoll) return;
+    const id = setInterval(() => { refreshAccounts(true); }, 10000);
+    return () => clearInterval(id);
+  }, [showAccounts, selectedPkg?.id, autoPoll]);
+
+  const fetchTokenStatus = async () => {
+    const { data } = await supabase.functions.invoke("whm-manage", {
+      body: { action: "token_status", reseller_package_id: "" },
+    });
+    if (data?.success) setTokenStatus({ configured: !!data.configured, masked: data.masked, source: data.source });
+  };
+
+  const handleSaveToken = async () => {
+    if (tokenInput.trim().length < 8) {
+      toast({ title: bn ? "টোকেনটি খুব ছোট মনে হচ্ছে" : "Token looks too short", variant: "destructive" });
+      return;
+    }
+    setTokenSaving(true);
+    const { data, error } = await supabase.functions.invoke("whm-manage", {
+      body: { action: "save_token", reseller_package_id: "", api_token: tokenInput.trim() },
+    });
+    setTokenSaving(false);
+    const errMsg = error?.message || (data as any)?.error;
+    if (errMsg) {
+      toast({ title: bn ? "সেভ ব্যর্থ" : "Save failed", description: String(errMsg), variant: "destructive" });
+      return;
+    }
+    setTokenStatus({ configured: true, masked: (data as any).masked, source: (data as any).source });
+    setTokenInput("");
+    setTokenEditing(false);
+    setShowToken(false);
+    toast({ title: bn ? "টোকেন নিরাপদে সংরক্ষিত হয়েছে" : "Token stored securely" });
+  };
+
+  const handleRemoveToken = async () => {
+    if (!confirm(bn ? "সংরক্ষিত WHM টোকেন মুছে ফেলবেন?" : "Remove the stored WHM token?")) return;
+    setTokenSaving(true);
+    const { data, error } = await supabase.functions.invoke("whm-manage", {
+      body: { action: "remove_token", reseller_package_id: "" },
+    });
+    setTokenSaving(false);
+    if (error) {
+      toast({ title: bn ? "মুছতে ব্যর্থ" : "Remove failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setTokenStatus({ configured: !!(data as any)?.configured, masked: (data as any)?.masked ?? null, source: (data as any)?.source ?? null });
+    toast({ title: bn ? "টোকেন মুছে ফেলা হয়েছে" : "Token removed" });
+  };
+
+  const refreshAccounts = async (silent = false) => {
+    if (!selectedPkg) return;
+    if (!silent) setRefreshing(true);
+    const { data } = await supabase
+      .from("reseller_accounts")
+      .select("*")
+      .eq("reseller_package_id", selectedPkg.id)
+      .order("created_at", { ascending: false });
+    setAccounts(data || []);
+    setLastSync(new Date());
+    if (!silent) setRefreshing(false);
+  };
+
+  const accountState = (acc: any) => {
+    if (acc.status === "suspended") return { key: "suspended", label: bn ? "স্থগিত" : "Suspended", cls: "bg-amber-500/10 text-amber-600 border-amber-500/30" };
+    if (acc.status !== "active") return { key: acc.status, label: acc.status, cls: "bg-secondary text-muted-foreground border-border/50" };
+    if (!acc.cpanel_created) return { key: "provisioning", label: bn ? "প্রোভিশনিং" : "Provisioning", cls: "bg-blue-500/10 text-blue-600 border-blue-500/30" };
+    return { key: "active", label: bn ? "সক্রিয়" : "Active", cls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" };
+  };
 
   const fetchAll = async () => {
     setLoading(true);
@@ -190,12 +278,17 @@ const AdminWHM = () => {
     );
   };
 
-  const handleCreateAccount = async () => {
+  const requestCreateAccount = () => {
     if (!selectedPkg) return;
     if (!createForm.domain || !createForm.username || !createForm.password) {
       toast({ title: bn ? "ডোমেইন, ইউজারনেম ও পাসওয়ার্ড দিন" : "Domain, username and password required", variant: "destructive" });
       return;
     }
+    setConfirmCreate(true);
+  };
+
+  const handleCreateAccount = async () => {
+    if (!selectedPkg) return;
     setCreating(true);
     const { data, error } = await supabase.functions.invoke("whm-manage", {
       body: {
@@ -213,9 +306,17 @@ const AdminWHM = () => {
     setCreating(false);
     const errMsg = error?.message || (data && (data as any).error);
     if (errMsg) {
+      setConfirmCreate(false);
       toast({ title: bn ? "অ্যাকাউন্ট তৈরি ব্যর্থ" : "Account creation failed", description: String(errMsg), variant: "destructive" });
       return;
     }
+    setConfirmCreate(false);
+    setCreatedAccount({
+      ...((data as any)?.account || {}),
+      cpanel_created: (data as any)?.cpanel_created,
+      password: createForm.password,
+      server_host: selectedPkg.whm_server_host,
+    });
     toast({
       title: bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created",
       description: (data as any)?.cpanel_created
@@ -223,7 +324,7 @@ const AdminWHM = () => {
         : (bn ? "শুধু রেকর্ড সেভ হয়েছে — WHM টোকেন/হোস্ট সেট নেই" : "Recorded only — WHM host/token not configured"),
     });
     setCreateForm({ domain: "", username: "", password: "", email: "", plan_name: "", disk_quota_mb: 1000, bandwidth_mb: 10000 });
-    handleViewAccounts(selectedPkg);
+    refreshAccounts(true);
     fetchAll();
   };
 
@@ -339,6 +440,93 @@ const AdminWHM = () => {
             <p className="text-[11px] text-muted-foreground mt-0.5">{s.label}</p>
           </motion.div>
         ))}
+      </div>
+
+      {/* WHM API Token */}
+      <div className="glass-card p-4 rounded-xl space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-primary" />
+              {bn ? "WHM API টোকেন" : "WHM API token"}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {bn
+                ? "টোকেনটি শুধু সার্ভারে সংরক্ষিত থাকে — ব্রাউজারে কখনো পাঠানো হয় না।"
+                : "The token is stored server-side only and is never sent back to the browser."}
+            </p>
+          </div>
+          <Badge variant={tokenStatus?.configured ? "default" : "destructive"} className="text-[10px] shrink-0">
+            {tokenStatus?.configured ? (bn ? "কনফিগার করা" : "Configured") : (bn ? "সেট করা নেই" : "Not set")}
+          </Badge>
+        </div>
+
+        {!tokenEditing ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="px-3 py-2 rounded-lg bg-secondary/40 border border-border/50 text-xs font-mono text-foreground">
+              {tokenStatus?.masked || "—"}
+            </code>
+            {tokenStatus?.source && (
+              <span className="text-[10px] text-muted-foreground">
+                {tokenStatus.source === "database"
+                  ? (bn ? "সংরক্ষিত: নিরাপদ কনফিগ" : "Stored: secure config")
+                  : (bn ? "সংরক্ষিত: সার্ভার সিক্রেট" : "Stored: server secret")}
+              </span>
+            )}
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={() => { setTokenEditing(true); setTokenInput(""); }}
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border border-border/50 hover:border-primary/50"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                {tokenStatus?.configured ? (bn ? "এডিট" : "Edit") : (bn ? "টোকেন যোগ করুন" : "Add token")}
+              </button>
+              {tokenStatus?.source === "database" && (
+                <button
+                  onClick={handleRemoveToken}
+                  disabled={tokenSaving}
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border border-destructive/40 text-destructive hover:bg-destructive/10 disabled:opacity-60"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  {bn ? "রিমুভ" : "Remove"}
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type={showToken ? "text" : "password"}
+                value={tokenInput}
+                onChange={e => setTokenInput(e.target.value)}
+                placeholder={bn ? "WHM API টোকেন পেস্ট করুন" : "Paste the WHM API token"}
+                className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm font-mono text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <button
+                onClick={() => setShowToken(v => !v)}
+                className="px-3 py-2.5 rounded-xl border border-border/50 text-xs font-medium hover:border-primary/50"
+              >
+                {showToken ? (bn ? "লুকান" : "Hide") : (bn ? "দেখুন" : "Show")}
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSaveToken}
+                disabled={tokenSaving}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
+              >
+                {tokenSaving ? (bn ? "সেভ হচ্ছে…" : "Saving…") : (bn ? "নিরাপদে সেভ করুন" : "Save securely")}
+              </button>
+              <button
+                onClick={() => { setTokenEditing(false); setTokenInput(""); setShowToken(false); }}
+                className="px-4 py-2 rounded-lg border border-border/50 text-xs font-medium hover:border-primary/50"
+              >
+                {bn ? "বাতিল" : "Cancel"}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Search */}
@@ -685,7 +873,7 @@ const AdminWHM = () => {
                   </div>
                 </div>
                 <button
-                  onClick={handleCreateAccount}
+                  onClick={requestCreateAccount}
                   disabled={creating}
                   className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
                 >
@@ -693,35 +881,71 @@ const AdminWHM = () => {
                 </button>
               </div>
 
-              {/* Account List */}
-              {accounts.length === 0 ? (
-                <div className="py-8 text-center text-muted-foreground">
-                  <Server className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
-                  <p className="text-sm">{bn ? "কোনো অ্যাকাউন্ট নেই" : "No accounts"}</p>
+              {/* Live status panel */}
+              <div className="rounded-xl border border-border/40 overflow-hidden">
+                <div className="flex items-center justify-between gap-2 px-3 py-2.5 bg-secondary/30 border-b border-border/40">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <Activity className="w-3.5 h-3.5 text-primary" />
+                      {bn ? "লাইভ স্ট্যাটাস" : "Live status"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {lastSync
+                        ? `${bn ? "সর্বশেষ আপডেট" : "Last updated"} ${lastSync.toLocaleTimeString()}`
+                        : (bn ? "এখনো আপডেট হয়নি" : "Not synced yet")}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => setAutoPoll(v => !v)}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium border transition-colors ${autoPoll ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600" : "border-border/50 text-muted-foreground"}`}
+                    >
+                      {autoPoll ? (bn ? "অটো চালু" : "Auto on") : (bn ? "অটো বন্ধ" : "Auto off")}
+                    </button>
+                    <button
+                      onClick={() => refreshAccounts()}
+                      disabled={refreshing}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-border/50 hover:border-primary/50 disabled:opacity-60"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+                      {bn ? "রিফ্রেশ" : "Refresh"}
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {accounts.map(acc => (
-                    <div key={acc.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 border border-border/30">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Globe className="w-4 h-4 text-primary" />
+
+                {accounts.length === 0 ? (
+                  <div className="py-8 text-center text-muted-foreground">
+                    <Server className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                    <p className="text-sm">{bn ? "কোনো অ্যাকাউন্ট নেই" : "No accounts"}</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border/30">
+                    {accounts.map(acc => {
+                      const st = accountState(acc);
+                      return (
+                        <div key={acc.id} className="flex items-center justify-between gap-2 p-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                              <Globe className="w-4 h-4 text-primary" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-foreground truncate">{acc.domain}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{acc.username} · {formatSize(acc.disk_quota_mb)}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-semibold ${st.cls}`}>
+                              {st.key === "provisioning" && <Loader2 className="w-3 h-3 animate-spin" />}
+                              {st.label}
+                            </span>
+                            {acc.cpanel_created && <Badge variant="outline" className="text-[10px]">cPanel</Badge>}
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{acc.domain}</p>
-                          <p className="text-[10px] text-muted-foreground">{acc.username} · {formatSize(acc.disk_quota_mb)}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={acc.status === "active" ? "default" : "destructive"} className="text-[10px]">
-                          {acc.status === "active" ? (bn ? "সক্রিয়" : "Active") : (bn ? "স্থগিত" : "Suspended")}
-                        </Badge>
-                        {acc.cpanel_created && <Badge variant="outline" className="text-[10px]">cPanel</Badge>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
@@ -811,6 +1035,122 @@ const AdminWHM = () => {
               {editing ? (bn ? "আপডেট হচ্ছে..." : "Updating...") : (bn ? "আপডেট করুন" : "Update Package")}
             </button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create confirmation */}
+      <Dialog open={confirmCreate} onOpenChange={(o) => { if (!creating) setConfirmCreate(o); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+              {bn ? "অ্যাকাউন্ট তৈরি নিশ্চিত করুন" : "Confirm account creation"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-1">
+            <p className="text-xs text-muted-foreground">
+              {selectedPkg?.whm_server_host
+                ? (bn
+                  ? `এই তথ্য দিয়ে ${selectedPkg.whm_server_host} সার্ভারে আসল cPanel অ্যাকাউন্ট তৈরি হবে।`
+                  : `A real cPanel account will be created on ${selectedPkg.whm_server_host}.`)
+                : (bn
+                  ? "সার্ভারের ঠিকানা সেট নেই — অ্যাকাউন্টটি শুধু রেকর্ড হিসেবে সেভ হবে।"
+                  : "No server host is set — the account will only be recorded.")}
+            </p>
+            <div className="rounded-xl border border-border/40 divide-y divide-border/30 text-xs">
+              {[
+                { l: bn ? "প্যাকেজ" : "Package", v: selectedPkg?.package_name || "—" },
+                { l: bn ? "ডোমেইন" : "Domain", v: createForm.domain },
+                { l: bn ? "ইউজারনেম" : "Username", v: createForm.username },
+                { l: bn ? "ইমেইল" : "Email", v: createForm.email || "—" },
+                { l: bn ? "ডিস্ক" : "Disk", v: formatSize(createForm.disk_quota_mb) },
+                { l: bn ? "ব্যান্ডউইথ" : "Bandwidth", v: formatSize(createForm.bandwidth_mb) },
+              ].map((r, i) => (
+                <div key={i} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <span className="text-muted-foreground">{r.l}</span>
+                  <span className="font-medium text-foreground truncate">{r.v}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleCreateAccount}
+                disabled={creating}
+                className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
+              >
+                {creating ? (bn ? "তৈরি হচ্ছে…" : "Creating…") : (bn ? "হ্যাঁ, তৈরি করুন" : "Yes, create it")}
+              </button>
+              <button
+                onClick={() => setConfirmCreate(false)}
+                disabled={creating}
+                className="px-4 py-2.5 rounded-lg border border-border/50 text-xs font-medium hover:border-primary/50 disabled:opacity-60"
+              >
+                {bn ? "বাতিল" : "Cancel"}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success summary */}
+      <Dialog open={!!createdAccount} onOpenChange={(o) => { if (!o) setCreatedAccount(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-emerald-500" />
+              {bn ? "অ্যাকাউন্ট সারাংশ" : "Account summary"}
+            </DialogTitle>
+          </DialogHeader>
+          {createdAccount && (
+            <div className="space-y-3 mt-1">
+              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-semibold ${createdAccount.cpanel_created ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" : "bg-blue-500/10 text-blue-600 border-blue-500/30"}`}>
+                {!createdAccount.cpanel_created && <Loader2 className="w-3 h-3 animate-spin" />}
+                {createdAccount.cpanel_created
+                  ? (bn ? "সক্রিয় — cPanel তৈরি হয়েছে" : "Active — cPanel created")
+                  : (bn ? "প্রোভিশনিং — শুধু রেকর্ড" : "Provisioning — recorded only")}
+              </span>
+              <div className="rounded-xl border border-border/40 divide-y divide-border/30 text-xs">
+                {[
+                  { l: bn ? "ডোমেইন" : "Domain", v: createdAccount.domain },
+                  { l: bn ? "ইউজারনেম" : "Username", v: createdAccount.username },
+                  { l: bn ? "পাসওয়ার্ড" : "Password", v: createdAccount.password },
+                  { l: bn ? "সার্ভার" : "Server", v: createdAccount.server_host || "—" },
+                  { l: bn ? "cPanel লগইন" : "cPanel login", v: createdAccount.server_host ? `https://${createdAccount.server_host}:2083` : "—" },
+                  { l: bn ? "ডিস্ক" : "Disk", v: formatSize(createdAccount.disk_quota_mb || 0) },
+                  { l: bn ? "ব্যান্ডউইথ" : "Bandwidth", v: formatSize(createdAccount.bandwidth_mb || 0) },
+                ].map((r, i) => (
+                  <div key={i} className="flex items-center justify-between gap-3 px-3 py-2">
+                    <span className="text-muted-foreground shrink-0">{r.l}</span>
+                    <span className="font-mono text-foreground truncate">{r.v}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const text = [
+                      `Domain: ${createdAccount.domain}`,
+                      `Username: ${createdAccount.username}`,
+                      `Password: ${createdAccount.password}`,
+                      createdAccount.server_host ? `cPanel: https://${createdAccount.server_host}:2083` : "",
+                    ].filter(Boolean).join("\n");
+                    navigator.clipboard.writeText(text);
+                    toast({ title: bn ? "কপি হয়েছে" : "Copied" });
+                  }}
+                  className="flex items-center justify-center gap-1.5 flex-1 py-2.5 rounded-lg border border-border/50 text-xs font-medium hover:border-primary/50"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  {bn ? "ডিটেইলস কপি করুন" : "Copy details"}
+                </button>
+                <button
+                  onClick={() => { setCreatedAccount(null); refreshAccounts(); }}
+                  className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90"
+                >
+                  {bn ? "ঠিক আছে" : "Done"}
+                </button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
