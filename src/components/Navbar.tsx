@@ -133,7 +133,7 @@ const Navbar = () => {
         transition={{ duration: 0.18, ease: "easeOut" }}
         className={`absolute top-full pt-2 z-50 ${position} ${isMega ? "w-[540px]" : "w-[340px]"} max-w-[calc(100vw-2rem)]`}
       >
-        <div className="rounded-2xl p-2 shadow-2xl shadow-black/25 border border-border bg-popover/95 backdrop-blur-xl supports-[backdrop-filter]:bg-popover/80">
+        <div className="rounded-2xl p-2 shadow-2xl shadow-black/25 border border-border bg-popover">
           {/* Header */}
           <div className="px-3.5 pt-2 pb-2 flex items-center gap-2 border-b border-border/40 mb-1.5">
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{link.label}</span>
@@ -288,7 +288,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden glass border-t border-border overflow-hidden"
+            className="lg:hidden bg-popover border-t border-border overflow-hidden"
           >
             <div className="px-4 py-3 space-y-0.5 max-h-[calc(100vh-4rem-5rem)] overflow-y-auto">
               {navLinks.map((link) => (
