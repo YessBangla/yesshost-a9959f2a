@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -117,6 +117,31 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
     @apply tracking-tight font-bold;
+  }
+
+  /* Bengali needs a larger optical size for comfortable reading */
+  html.lang-bn body,
+  html.lang-bn h1, html.lang-bn h2, html.lang-bn h3,
+  html.lang-bn h4, html.lang-bn h5, html.lang-bn h6 {
+    font-family: 'Noto Sans Bengali', 'Inter', system-ui, sans-serif;
+  }
+
+  html.lang-bn body {
+    font-size: 1.09375rem;
+    line-height: 1.7;
+  }
+
+  html.lang-bn .text-\[9px\],
+  html.lang-bn .text-\[10px\] {
+    font-size: 0.75rem;
+    line-height: 1.05rem;
+  }
+
+  html.lang-bn .text-\[11px\],
+  html.lang-bn .text-\[12px\],
+  html.lang-bn .text-\[13px\] {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 }
 
