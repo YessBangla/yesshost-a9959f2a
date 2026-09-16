@@ -65,6 +65,8 @@ const DashboardWallet = () => {
   const [amount, setAmount] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [txnSearch, setTxnSearch] = useState("");
+  const [txnType, setTxnType] = useState("all");
 
   const fetchTransactions = async () => {
     if (!user) return;
