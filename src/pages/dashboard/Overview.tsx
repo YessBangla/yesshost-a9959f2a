@@ -238,15 +238,29 @@ const DashboardOverview = () => {
                 <span className="text-muted-foreground">{bn ? "ক্লায়েন্ট" : "Client for"}</span>
                 <span className="text-foreground font-medium">{clientFor || "—"}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{bn ? "আইপি এড্রেস" : "IP Address"}</span>
-                <span className="text-foreground font-medium text-xs">—</span>
+              <div className="flex items-center justify-between text-sm gap-2">
+                <span className="text-muted-foreground shrink-0">{bn ? "ইমেইল" : "Email"}</span>
+                <span className="text-foreground font-medium text-xs truncate" title={user?.email || ""}>
+                  {user?.email || "—"}
+                </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{bn ? "ইমেইল যাচাই" : "Email Verified"}</span>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold">
-                  {bn ? "যাচাইকৃত" : "Verified"}
-                </span>
+                {user?.email_confirmed_at ? (
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold">
+                    {bn ? "যাচাইকৃত" : "Verified"}
+                  </span>
+                ) : (
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-semibold">
+                    {bn ? "যাচাই বাকি" : "Pending"}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{bn ? "ওয়ালেট ব্যালেন্স" : "Wallet Balance"}</span>
+                <Link to="/dashboard/wallet" className="text-foreground font-bold tabular-nums hover:text-primary transition-colors">
+                  ৳{formatAmount(stats.walletBalance, lang)}
+                </Link>
               </div>
 
               {/* Last Login */}
