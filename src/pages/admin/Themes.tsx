@@ -50,15 +50,49 @@ const AdminThemes = () => {
   const [previewTheme, setPreviewTheme] = useState<any>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [sellerPayouts, setSellerPayouts] = useState<any[]>([]);
 
   const fetchThemes = async () => {
     setLoading(true);
-    const { data } = await supabase.from("themes").select("*").order("sort_order").order("created_at", { ascending: false });
+    const [{ data }, { data: po }] = await Promise.all([
+      supabase.from("themes").select("*").order("sort_order").order("created_at", { ascending: false }),
+      supabase.from("theme_seller_payouts").select("*").order("created_at", { ascending: false }),
+    ]);
     setThemes(data || []);
+    setSellerPayouts(po || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchThemes(); }, []);
+
+  const setApproval = async (theme: any, status: "approved" | "rejected") => {
+    let note: string | null = null;
+    if (status === "rejected") {
+      note = window.prompt(lang === "bn" ? "বাতিলের কারণ লিখুন (বিক্রেতা দেখতে পাবেন)" : "Reason for rejection (visible to the seller)") || null;
+    }
+    setApprovingId(theme.id);
+    const { error } = await supabase.from("themes")
+      .update({ approval_status: status, approval_note: note, is_active: status === "approved" } as any)
+      .eq("id", theme.id);
+    setApprovingId(null);
+    if (error) { toast({ title: lang === "bn" ? "সেভ হয়নি" : "Could not save", description: error.message, variant: "destructive" }); return; }
+    toast({
+      title: status === "approved"
+        ? (lang === "bn" ? `"${theme.name}" অনুমোদিত ও মার্কেটপ্লেসে লাইভ` : `"${theme.name}" approved and live`)
+        : (lang === "bn" ? `"${theme.name}" বাতিল করা হয়েছে` : `"${theme.name}" rejected`),
+    });
+    fetchThemes();
+  };
+
+  const setPayoutStatus = async (payout: any, status: "approved" | "paid" | "rejected") => {
+    const { error } = await supabase.from("theme_seller_payouts")
+      .update({ status, processed_at: status === "paid" ? new Date().toISOString() : null })
+      .eq("id", payout.id);
+    if (error) { toast({ title: lang === "bn" ? "সেভ হয়নি" : "Could not save", description: error.message, variant: "destructive" }); return; }
+    toast({ title: lang === "bn" ? "অবস্থা আপডেট হয়েছে" : "Status updated" });
+    fetchThemes();
+  };
 
   const parseJson = (val: any) => {
     if (typeof val === "string") { try { return JSON.parse(val); } catch { return []; } }
