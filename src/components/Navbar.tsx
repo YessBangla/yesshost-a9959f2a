@@ -195,7 +195,7 @@ const Navbar = () => {
 
         {/* Desktop */}
         <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
-          {navLinks.map((link) => (
+          {navLinks.map((link, idx) => (
             <div
               key={link.label}
               className="relative"
@@ -225,7 +225,10 @@ const Navbar = () => {
               )}
 
               <AnimatePresence>
-                {link.children && activeDropdown === link.label && renderMegaDropdown(link)}
+                {link.children && activeDropdown === link.label && renderMegaDropdown(
+                  link,
+                  idx === 0 ? "left" : idx >= navLinks.length - 3 ? "right" : "center"
+                )}
               </AnimatePresence>
             </div>
           ))}
