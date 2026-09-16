@@ -65,6 +65,8 @@ const DashboardProfile = lazy(() => import("./pages/dashboard/Profile"));
 const DashboardOrders = lazy(() => import("./pages/dashboard/Orders"));
 const DashboardReseller = lazy(() => import("./pages/dashboard/Reseller"));
 const DashboardWallet = lazy(() => import("./pages/dashboard/Wallet"));
+const DashboardAffiliate = lazy(() => import("./pages/dashboard/AffiliateDashboard"));
+const AdminAffiliates = lazy(() => import("./pages/admin/Affiliates"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -179,6 +181,7 @@ const App = () => (
                   <Route path="support" element={<DashboardSupport />} />
                   <Route path="domains" element={<DashboardDomains />} />
                   <Route path="reseller" element={<DashboardReseller />} />
+                  <Route path="affiliate" element={<DashboardAffiliate />} />
                   <Route path="wallet" element={<DashboardWallet />} />
                   <Route path="profile" element={<DashboardProfile />} />
                 </Route>
@@ -205,6 +208,7 @@ const App = () => (
                   <Route path="contact-messages" element={<AdminContactMessages />} />
                   <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
                   <Route path="whm" element={<AdminWHM />} />
+                  <Route path="affiliates" element={<AdminAffiliates />} />
                 </Route>
                 <Route
                   path="/call-center"

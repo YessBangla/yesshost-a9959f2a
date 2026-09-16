@@ -36,6 +36,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/domains": { en: "Domains", bn: "ডোমেইন" },
   "/dashboard/profile": { en: "Profile", bn: "প্রোফাইল" },
   "/dashboard/reseller": { en: "Reseller", bn: "রিসেলার" },
+  "/dashboard/affiliate": { en: "Affiliate", bn: "অ্যাফিলিয়েট" },
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
 };
 
@@ -180,15 +181,16 @@ const DashboardLayout = () => {
     },
     {
       label: bn ? "অ্যাফিলিয়েট" : "Affiliate",
-      href: "/affiliate",
+      href: "/dashboard/affiliate",
       icon: Share2,
       hasDropdown: true,
       children: [
-        { label: bn ? "অ্যাফিলিয়েট অ্যাকাউন্ট" : "Affiliate Account", href: "/affiliate", icon: Users },
-        { label: bn ? "রেফারেল লিংক" : "Referral Link", href: "/affiliate", icon: Share2 },
-        { label: bn ? "আমার কমিশন" : "My Commissions", href: "/affiliate", icon: DollarSign },
-        { label: bn ? "পেমেন্ট রিকোয়েস্ট" : "Payment Requests", href: "/affiliate", icon: CreditCard },
-        { label: bn ? "রেফারেল ক্লিক" : "Referral Clicks", href: "/affiliate", icon: MousePointer },
+        { label: bn ? "অ্যাফিলিয়েট ড্যাশবোর্ড" : "Affiliate Dashboard", href: "/dashboard/affiliate", icon: Users },
+        { label: bn ? "রেফারেল লিংক" : "Referral Link", href: "/dashboard/affiliate", icon: Share2 },
+        { label: bn ? "আমার কমিশন" : "My Commissions", href: "/dashboard/affiliate", icon: DollarSign },
+        { label: bn ? "পেমেন্ট রিকোয়েস্ট" : "Payment Requests", href: "/dashboard/affiliate", icon: CreditCard },
+        { label: bn ? "রেফারেল ক্লিক" : "Referral Clicks", href: "/dashboard/affiliate", icon: MousePointer },
+        { label: bn ? "প্রোগ্রাম সম্পর্কে" : "About Program", href: "/affiliate", icon: BookOpen },
       ],
     },
   ];
@@ -201,6 +203,7 @@ const DashboardLayout = () => {
     { title: bn ? "ওয়ালেট" : "Wallet", url: "/dashboard/wallet", icon: Wallet },
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
+    { title: bn ? "অ্যাফিলিয়েট" : "Affiliate", url: "/dashboard/affiliate", icon: Share2 },
     ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),
   ];
 
@@ -332,6 +335,16 @@ const DashboardLayout = () => {
           >
             <Wallet className="w-[18px] h-[18px] shrink-0" />
             {!collapsed && <span className="truncate">{bn ? "ওয়ালেট" : "Wallet"}</span>}
+          </NavLink>
+
+          {/* Affiliate */}
+          <NavLink
+            to="/dashboard/affiliate"
+            className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
+          >
+            <Share2 className="w-[18px] h-[18px] shrink-0" />
+            {!collapsed && <span className="truncate">{bn ? "অ্যাফিলিয়েট" : "Affiliate"}</span>}
           </NavLink>
 
           {/* Reseller */}

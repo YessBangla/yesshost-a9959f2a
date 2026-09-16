@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, ArrowLeft, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,9 +17,18 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
+
+  // Capture affiliate referral code: track the click and remember it for signup attribution
+  useEffect(() => {
+    const refCode = new URLSearchParams(location.search).get("ref");
+    if (!refCode) return;
+    localStorage.setItem("yh_ref", refCode);
+    supabase.functions.invoke("affiliate-track", { body: { action: "click", referral_code: refCode, source_page: "/signup" } }).catch(() => {});
+  }, [location.search]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
