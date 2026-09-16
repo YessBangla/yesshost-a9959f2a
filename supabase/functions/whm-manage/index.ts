@@ -112,22 +112,33 @@ Deno.serve(async (req) => {
           return new Response(JSON.stringify({ error: 'Disk quota would exceed limit' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
 
+        // A real cPanel account is created whenever the server host + API token are present.
+        const whmReady = !!(pkg.whm_server_host && pkg.whm_username && WHM_API_TOKEN);
         let cpanelCreated = false;
-        try {
-          // Call WHM API to create account
-          const whmResult = await whmCall('createacct', {
-            username: body.username,
-            domain: body.domain,
-            password: body.password,
-            contactemail: body.email || '',
-            quota: String(diskQuota),
-            bwlimit: String(body.bandwidth_mb || 10000),
-            plan: body.plan_name || 'default',
-          });
+
+        if (whmReady) {
+          let whmResult: any;
+          try {
+            whmResult = await whmCall('createacct', {
+              username: body.username,
+              domain: body.domain,
+              password: body.password,
+              contactemail: body.email || '',
+              quota: String(diskQuota),
+              bwlimit: String(body.bandwidth_mb || 10000),
+              plan: body.plan_name || 'default',
+            });
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            console.error('WHM createacct failed:', msg);
+            return new Response(JSON.stringify({ error: `cPanel account creation failed: ${msg}` }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+
           cpanelCreated = whmResult?.metadata?.result === 1;
-        } catch (e) {
-          console.warn('WHM API call failed (may not be configured):', e);
-          // Continue without WHM - just track in DB
+          if (!cpanelCreated) {
+            const reason = whmResult?.metadata?.reason || 'Unknown WHM error';
+            return new Response(JSON.stringify({ error: `cPanel account creation failed: ${reason}` }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
         }
 
         // Insert into reseller_accounts
