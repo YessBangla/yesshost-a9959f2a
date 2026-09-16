@@ -47,6 +47,9 @@ const AdminThemes = () => {
   const [uploading, setUploading] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [addForm, setAddForm] = useState<any>({ ...emptyForm });
+  const [previewTheme, setPreviewTheme] = useState<any>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const fetchThemes = async () => {
     setLoading(true);
