@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2, Power, Monitor, ExternalLink, AlertCircle } from "lucide-react";
 import { ThemesSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
