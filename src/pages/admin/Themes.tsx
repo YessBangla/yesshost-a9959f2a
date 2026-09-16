@@ -95,11 +95,49 @@ const AdminThemes = () => {
     fetchThemes();
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`"${name}" থিমটি ডিলিট করতে চান?`)) return;
-    await supabase.from("themes").delete().eq("id", id);
-    toast({ title: "থিম ডিলিট হয়েছে!" });
-    fetchThemes();
+  const handleDelete = async (theme: Tables<"themes">) => {
+    const msg = lang === "bn"
+      ? `"${theme.name}" থিমটি স্থায়ীভাবে মুছে ফেলতে চান? আপলোড করা ফাইল ও ছবিও মুছে যাবে।`
+      : `Permanently delete "${theme.name}"? Uploaded files and images will also be removed.`;
+    if (!confirm(msg)) return;
+    setDeletingId(theme.id);
+    try {
+      if (theme.file_path) {
+        await supabase.storage.from("theme-files").remove([theme.file_path]);
+      }
+      const imgUrls = [theme.thumbnail_url, ...((theme.screenshots as any as string[]) || [])].filter(Boolean) as string[];
+      const imgPaths = imgUrls
+        .filter(u => u.includes("/theme-images/"))
+        .map(u => decodeURIComponent(u.split("/theme-images/")[1].split("?")[0]));
+      if (imgPaths.length) await supabase.storage.from("theme-images").remove(imgPaths);
+
+      const { error } = await supabase.from("themes").delete().eq("id", theme.id);
+      if (error) throw error;
+      toast({ title: lang === "bn" ? "থিম মুছে ফেলা হয়েছে" : "Theme deleted" });
+      if (previewTheme?.id === theme.id) setPreviewTheme(null);
+      fetchThemes();
+    } catch (e: any) {
+      toast({ title: lang === "bn" ? "মুছে ফেলা যায়নি" : "Delete failed", description: e.message, variant: "destructive" });
+    }
+    setDeletingId(null);
+  };
+
+  const toggleActive = async (theme: Tables<"themes">) => {
+    const next = !theme.is_active;
+    setTogglingId(theme.id);
+    setThemes(prev => prev.map(t => (t.id === theme.id ? { ...t, is_active: next } : t)));
+    const { error } = await supabase.from("themes").update({ is_active: next }).eq("id", theme.id);
+    setTogglingId(null);
+    if (error) {
+      setThemes(prev => prev.map(t => (t.id === theme.id ? { ...t, is_active: !next } : t)));
+      toast({ title: lang === "bn" ? "পরিবর্তন সেভ হয়নি" : "Could not update", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: next
+        ? (lang === "bn" ? `"${theme.name}" এখন সাইটে লাইভ` : `"${theme.name}" is now live`)
+        : (lang === "bn" ? `"${theme.name}" সাইট থেকে সরানো হয়েছে` : `"${theme.name}" hidden from site`),
+    });
   };
 
   const filtered = themes.filter(t => {
