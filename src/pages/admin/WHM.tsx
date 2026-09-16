@@ -786,7 +786,7 @@ const AdminWHM = () => {
                   </div>
                 </div>
                 <button
-                  onClick={handleCreateAccount}
+                  onClick={requestCreateAccount}
                   disabled={creating}
                   className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
                 >
