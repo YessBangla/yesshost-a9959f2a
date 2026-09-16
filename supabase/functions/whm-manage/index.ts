@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     }
 
     // WHM API helper
-    const WHM_API_TOKEN = Deno.env.get('WHM_API_TOKEN');
+    const WHM_API_TOKEN = (await loadStoredToken()) || envToken;
     const whmCall = async (func: string, params: Record<string, string> = {}) => {
       if (!pkg.whm_server_host || !pkg.whm_username) {
         throw new Error('WHM server not configured for this package');
