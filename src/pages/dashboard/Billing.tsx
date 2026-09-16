@@ -80,6 +80,8 @@ const DashboardBilling = () => {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [filterMethod, setFilterMethod] = useState<string>("all");
   const [walletBalance, setWalletBalance] = useState(0);
+  const [invSearch, setInvSearch] = useState("");
+  const [invStatus, setInvStatus] = useState("all");
 
   const fetchWalletBalance = async () => {
     if (!user) return;
