@@ -553,6 +553,24 @@ const AdminThemes = () => {
 
                   {/* Actions */}
                   <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                    {(theme as any).seller_user_id && (theme as any).approval_status !== "approved" && (
+                      <button
+                        onClick={() => setApproval(theme, "approved")}
+                        disabled={approvingId === theme.id}
+                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-success/10 text-success hover:bg-success/20">
+                        {approvingId === theme.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                        {lang === "bn" ? "অনুমোদন" : "Approve"}
+                      </button>
+                    )}
+                    {(theme as any).seller_user_id && (theme as any).approval_status !== "rejected" && (
+                      <button
+                        onClick={() => setApproval(theme, "rejected")}
+                        disabled={approvingId === theme.id}
+                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20">
+                        <XCircle className="w-3 h-3" />
+                        {lang === "bn" ? "বাতিল" : "Reject"}
+                      </button>
+                    )}
                     <button
                       onClick={() => setPreviewTheme(theme)}
                       title={lang === "bn" ? "লাইভ প্রিভিউ (প্রয়োগ ছাড়াই)" : "Live preview (without applying)"}
