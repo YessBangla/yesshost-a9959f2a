@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 interface WHMRequest {
-  action: 'create_account' | 'suspend_account' | 'unsuspend_account' | 'terminate_account' | 'list_accounts' | 'account_summary';
+  action: 'create_account' | 'suspend_account' | 'unsuspend_account' | 'terminate_account' | 'list_accounts' | 'account_summary' | 'test_connection';
   reseller_package_id: string;
   account_id?: string;
   // For create_account
@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
           .from('reseller_accounts')
           .insert({
             reseller_package_id: pkg.id,
-            reseller_user_id: user.id,
+            reseller_user_id: pkg.user_id,
             domain: body.domain,
             username: body.username,
             plan_name: body.plan_name || 'Basic',
