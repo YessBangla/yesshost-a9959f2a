@@ -1161,6 +1161,7 @@ export type Database = {
           description_en: string | null
           discount_price_bdt: number | null
           features: Json | null
+          file_path: string | null
           hosting_bundle_features: Json | null
           hosting_bundle_price_bdt: number | null
           id: string
@@ -1183,6 +1184,7 @@ export type Database = {
           description_en?: string | null
           discount_price_bdt?: number | null
           features?: Json | null
+          file_path?: string | null
           hosting_bundle_features?: Json | null
           hosting_bundle_price_bdt?: number | null
           id?: string
@@ -1205,6 +1207,7 @@ export type Database = {
           description_en?: string | null
           discount_price_bdt?: number | null
           features?: Json | null
+          file_path?: string | null
           hosting_bundle_features?: Json | null
           hosting_bundle_price_bdt?: number | null
           id?: string

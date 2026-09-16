@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2 } from "lucide-react";
 import { ThemesSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,7 @@ const emptyForm = {
   description_bn: "", description_en: "", price_bdt: 0, discount_price_bdt: null as number | null,
   preview_url: "", thumbnail_url: "", features: "[]", tags: "[]",
   hosting_bundle_price_bdt: null as number | null, hosting_bundle_features: "[]",
+  screenshots: "[]", file_path: "" as string | null,
   is_active: true, is_featured: false, sort_order: 0,
 };
 
@@ -43,6 +44,7 @@ const AdminThemes = () => {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [uploading, setUploading] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [addForm, setAddForm] = useState<any>({ ...emptyForm });
 
@@ -62,7 +64,8 @@ const AdminThemes = () => {
 
   const handleSave = async (isNew: boolean) => {
     const form = isNew ? { ...addForm } : { ...editForm };
-    const { id, created_at, updated_at, screenshots, ...rest } = form;
+    const { id, created_at, updated_at, ...rest } = form;
+    rest.screenshots = parseJson(rest.screenshots ?? []);
     rest.features = parseJson(rest.features);
     rest.tags = parseJson(rest.tags);
     rest.hosting_bundle_features = parseJson(rest.hosting_bundle_features);
@@ -106,6 +109,63 @@ const AdminThemes = () => {
   });
 
   const inputClass = "w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30";
+
+  const safeName = (n: string) => n.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
+
+  const uploadToBucket = async (bucket: string, file: File) => {
+    const path = `${Date.now()}-${safeName(file.name)}`;
+    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
+    if (error) throw error;
+    return path;
+  };
+
+  const handleThumbUpload = async (file: File, form: any, setForm: (f: any) => void) => {
+    setUploading("thumb");
+    try {
+      const path = await uploadToBucket("theme-images", file);
+      const { data } = supabase.storage.from("theme-images").getPublicUrl(path);
+      setForm({ ...form, thumbnail_url: data.publicUrl });
+      toast({ title: "থাম্বনেইল আপলোড হয়েছে!" });
+    } catch (e: any) {
+      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+    }
+    setUploading(null);
+  };
+
+  const handleShotsUpload = async (files: FileList, form: any, setForm: (f: any) => void) => {
+    setUploading("shots");
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const path = await uploadToBucket("theme-images", file);
+        urls.push(supabase.storage.from("theme-images").getPublicUrl(path).data.publicUrl);
+      }
+      const current = parseJson(form.screenshots ?? []) || [];
+      setForm({ ...form, screenshots: JSON.stringify([...current, ...urls]) });
+      toast({ title: `${urls.length} টি স্ক্রিনশট আপলোড হয়েছে!` });
+    } catch (e: any) {
+      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+    }
+    setUploading(null);
+  };
+
+  const handleThemeFileUpload = async (file: File, form: any, setForm: (f: any) => void) => {
+    setUploading("file");
+    try {
+      const path = await uploadToBucket("theme-files", file);
+      setForm({ ...form, file_path: path });
+      toast({ title: "থিম ফাইল আপলোড হয়েছে!" });
+    } catch (e: any) {
+      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+    }
+    setUploading(null);
+  };
+
+  const downloadThemeFile = async (path: string) => {
+    const { data, error } = await supabase.storage.from("theme-files").createSignedUrl(path, 300);
+    if (error || !data) { toast({ title: "ডাউনলোড লিংক তৈরি হয়নি", variant: "destructive" }); return; }
+    window.open(data.signedUrl, "_blank");
+  };
 
   const ThemeForm = ({ form, setForm, onSave, onCancel }: { form: any; setForm: (f: any) => void; onSave: () => void; onCancel: () => void }) => (
     <div className="glass-card p-5 space-y-4">
@@ -163,9 +223,63 @@ const AdminThemes = () => {
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Thumbnail URL</label>
-          <input value={form.thumbnail_url || ""} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })} className={inputClass} placeholder="https://" />
+          <input value={form.thumbnail_url || ""} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })} className={inputClass} placeholder="https:// অথবা নিচে আপলোড করুন" />
         </div>
       </div>
+
+      {/* Uploads */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Thumbnail upload */}
+        <div className="rounded-xl border border-dashed border-border p-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground"><ImagePlus className="w-3.5 h-3.5" /> থাম্বনেইল আপলোড</div>
+          {form.thumbnail_url && <img src={form.thumbnail_url} alt="thumbnail preview" className="w-full h-20 object-cover rounded-lg border border-border" />}
+          <label className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-foreground text-xs font-semibold cursor-pointer min-h-[44px]">
+            {uploading === "thumb" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} ছবি বাছুন
+            <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThumbUpload(f, form, setForm); e.target.value = ""; }} />
+          </label>
+        </div>
+
+        {/* Screenshots upload */}
+        <div className="rounded-xl border border-dashed border-border p-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground"><ImagePlus className="w-3.5 h-3.5" /> স্ক্রিনশট আপলোড</div>
+          <div className="flex flex-wrap gap-1.5">
+            {(parseJson(form.screenshots ?? []) || []).map((url: string, i: number) => (
+              <div key={i} className="relative">
+                <img src={url} alt={`screenshot ${i + 1}`} className="w-12 h-9 object-cover rounded border border-border" />
+                <button type="button" onClick={() => {
+                  const list = (parseJson(form.screenshots ?? []) || []).filter((_: string, j: number) => j !== i);
+                  setForm({ ...form, screenshots: JSON.stringify(list) });
+                }} className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full bg-destructive text-destructive-foreground">
+                  <X className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <label className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-foreground text-xs font-semibold cursor-pointer min-h-[44px]">
+            {uploading === "shots" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} একাধিক ছবি
+            <input type="file" accept="image/*" multiple className="hidden" onChange={e => { const fs = e.target.files; if (fs?.length) handleShotsUpload(fs, form, setForm); e.target.value = ""; }} />
+          </label>
+        </div>
+
+        {/* Theme package upload */}
+        <div className="rounded-xl border border-dashed border-border p-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground"><FileArchive className="w-3.5 h-3.5" /> থিম ফাইল (ZIP)</div>
+          {form.file_path ? (
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="truncate flex-1">{form.file_path}</span>
+              <button type="button" onClick={() => downloadThemeFile(form.file_path)} className="p-1 rounded hover:bg-secondary/60"><Download className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => setForm({ ...form, file_path: null })} className="p-1 rounded text-destructive hover:bg-destructive/10"><X className="w-3.5 h-3.5" /></button>
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground">সর্বোচ্চ ২০০ MB</p>
+          )}
+          <label className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-foreground text-xs font-semibold cursor-pointer min-h-[44px]">
+            {uploading === "file" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} ফাইল বাছুন
+            <input type="file" accept=".zip,.rar,.7z,application/zip" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThemeFileUpload(f, form, setForm); e.target.value = ""; }} />
+          </label>
+        </div>
+      </div>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
@@ -291,7 +405,7 @@ const AdminThemes = () => {
                         <Eye className="w-3.5 h-3.5" />
                       </a>
                     )}
-                    <button onClick={() => { setEditingId(theme.id); setEditForm({ ...theme, features: JSON.stringify(theme.features), tags: JSON.stringify(theme.tags), hosting_bundle_features: JSON.stringify(theme.hosting_bundle_features) }); setShowAdd(false); }}
+                    <button onClick={() => { setEditingId(theme.id); setEditForm({ ...theme, features: JSON.stringify(theme.features), tags: JSON.stringify(theme.tags), hosting_bundle_features: JSON.stringify(theme.hosting_bundle_features), screenshots: JSON.stringify(theme.screenshots ?? []) }); setShowAdd(false); }}
                       className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
