@@ -62,6 +62,8 @@ const AdminWHM = () => {
   const [testingConn, setTestingConn] = useState(false);
   const [connResult, setConnResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [creating, setCreating] = useState(false);
+  const [hostMode, setHostMode] = useState(false);
+  const createRef = useRef<HTMLDivElement | null>(null);
   const [createForm, setCreateForm] = useState({
     domain: "", username: "", password: "", email: "", plan_name: "",
     disk_quota_mb: 1000, bandwidth_mb: 10000,
