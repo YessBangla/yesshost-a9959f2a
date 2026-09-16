@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2, Power, Monitor, ExternalLink, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2, Power, Monitor, ExternalLink, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import { ThemesSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -609,6 +609,52 @@ const AdminThemes = () => {
           </div>
         )}
       </div>
+
+      {/* Seller payout requests */}
+      {sellerPayouts.length > 0 && (
+        <div>
+          <h2 className="text-base font-semibold text-foreground mb-3">
+            {lang === "bn" ? "বিক্রেতার আয় উত্তোলনের অনুরোধ" : "Seller Payout Requests"}
+          </h2>
+          <div className="space-y-2">
+            {sellerPayouts.map(p => (
+              <div key={p.id} className="glass-card rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">৳{formatPrice(Number(p.amount_bdt), lang)} · {p.method}</p>
+                  <p className="text-xs text-muted-foreground truncate">{p.account_details} · {new Date(p.created_at).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US")}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[11px] px-2 py-1 rounded-md font-semibold ${
+                    p.status === "paid" ? "bg-success/10 text-success"
+                    : p.status === "rejected" ? "bg-destructive/10 text-destructive"
+                    : "bg-warning/10 text-warning"}`}>
+                    {p.status}
+                  </span>
+                  {p.status !== "paid" && (
+                    <>
+                      {p.status === "requested" && (
+                        <button onClick={() => setPayoutStatus(p, "approved")} className="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20">
+                          {lang === "bn" ? "অনুমোদন" : "Approve"}
+                        </button>
+                      )}
+                      <button onClick={() => setPayoutStatus(p, "paid")} className="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-success/10 text-success hover:bg-success/20">
+                        {lang === "bn" ? "পরিশোধিত" : "Mark paid"}
+                      </button>
+                      {p.status !== "rejected" && (
+                        <button onClick={() => setPayoutStatus(p, "rejected")} className="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20">
+                          {lang === "bn" ? "বাতিল" : "Reject"}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
 
       {/* Live preview (does not apply the theme) */}
       {previewTheme && (
