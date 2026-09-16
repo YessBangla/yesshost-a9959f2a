@@ -287,6 +287,36 @@ const DashboardBilling = () => {
   const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
   const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
 
+  const filteredInvoices = useMemo(() => {
+    const q = invSearch.trim().toLowerCase();
+    return invoices.filter(i => {
+      const okSearch = !q || [i.invoice_number, i.description, i.status, i.payment_method, String(i.amount_bdt)]
+        .filter(Boolean).some(v => String(v).toLowerCase().includes(q));
+      const okStatus = invStatus === "all" || i.status === invStatus;
+      return okSearch && okStatus;
+    });
+  }, [invoices, invSearch, invStatus]);
+
+  const invoiceFilters = useMemo(() => ([
+    { value: "all", label: isBn ? "সব" : "All", count: invoices.length },
+    { value: "unpaid", label: isBn ? "অপরিশোধিত" : "Unpaid", count: invoices.filter(i => i.status === "unpaid").length },
+    { value: "overdue", label: isBn ? "মেয়াদোত্তীর্ণ" : "Overdue", count: invoices.filter(i => i.status === "overdue").length },
+    { value: "paid", label: isBn ? "পরিশোধিত" : "Paid", count: invoices.filter(i => i.status === "paid").length },
+    { value: "cancelled", label: isBn ? "বাতিল" : "Cancelled", count: invoices.filter(i => i.status === "cancelled").length },
+  ]), [invoices, isBn]);
+
+  const exportInvoices = () => {
+    downloadCsv(
+      "yesshost-invoices",
+      ["invoice_number", "description", "amount_bdt", "status", "due_date", "paid_at", "payment_method"],
+      filteredInvoices.map(i => [
+        i.invoice_number, i.description || "", i.amount_bdt, i.status,
+        csvDate(i.due_date), csvDate(i.paid_at), i.payment_method || "",
+      ]),
+    );
+  };
+
+
   const tabs: { id: TabType; label: string; icon: typeof FileText; count?: number }[] = [
     { id: "invoices", label: isBn ? "ইনভয়েস" : "Invoices", icon: FileText, count: invoices.length },
     { id: "history", label: isBn ? "পেমেন্ট হিস্ট্রি" : "Payment History", icon: History, count: paidInvoicesAll.length },
