@@ -6,8 +6,9 @@ const corsHeaders = {
 };
 
 interface WHMRequest {
-  action: 'create_account' | 'suspend_account' | 'unsuspend_account' | 'terminate_account' | 'list_accounts' | 'account_summary' | 'test_connection';
+  action: 'create_account' | 'suspend_account' | 'unsuspend_account' | 'terminate_account' | 'list_accounts' | 'account_summary' | 'test_connection' | 'token_status' | 'save_token' | 'remove_token';
   reseller_package_id: string;
+  api_token?: string;
   account_id?: string;
   // For create_account
   domain?: string;
