@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Mail, Phone, Key, Shield, Loader2, Save, Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
+import { Mail, Phone, Key, Shield, Loader2, Save, Eye, EyeOff, CheckCircle2, AlertCircle, PlayCircle, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ConfigRow {
@@ -27,6 +27,38 @@ const CommunicationConfig = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+  const [testTarget, setTestTarget] = useState("");
+  const [testSmsTarget, setTestSmsTarget] = useState("");
+  const [testing, setTesting] = useState<string | null>(null);
+  const [testSteps, setTestSteps] = useState<{ name: string; ok: boolean; detail?: string }[] | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
+
+  const runTest = async (testType: "full" | "email" | "sms") => {
+    const target = testType === "sms" ? testSmsTarget.trim() : testTarget.trim();
+    if (!target) {
+      toast.error(bn ? "টেস্টের জন্য ঠিকানা লিখুন" : "Enter a target first");
+      return;
+    }
+    setTesting(testType);
+    setTestSteps(null);
+    setTestError(null);
+    const { data, error } = await supabase.functions.invoke("communication-test", {
+      body: { test_type: testType, target },
+    });
+    setTesting(null);
+    if (error) {
+      setTestError(error.message);
+      toast.error(bn ? "টেস্ট চালানো যায়নি" : "Test could not run");
+      return;
+    }
+    setTestSteps(data?.steps || []);
+    if (data?.success) {
+      toast.success(bn ? "টেস্ট সফল — ইনবক্স দেখুন" : "Test passed — check the inbox");
+    } else {
+      setTestError(data?.error || null);
+      toast.error(bn ? "টেস্ট ব্যর্থ" : "Test failed");
+    }
+  };
 
   useEffect(() => {
     fetchConfigs();
