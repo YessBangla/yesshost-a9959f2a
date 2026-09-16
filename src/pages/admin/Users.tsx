@@ -13,6 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import type { Tables } from "@/integrations/supabase/types";
+import { Download } from "lucide-react";
+import { downloadCsv, csvDate } from "@/lib/export-csv";
 
 type UserWithRoles = Tables<"profiles"> & { roles: string[]; permissions: string[]; services_count?: number; invoices_total?: number };
 
