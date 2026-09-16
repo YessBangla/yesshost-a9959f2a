@@ -7,7 +7,7 @@ import {
   CreditCard, Share2, KeyRound, Bell, Settings, Wallet,
   ChevronDown, Package, PlusCircle, ListOrdered, RefreshCw, ArrowRightLeft, Search, Layers,
   TicketPlus, Ticket, KeyRound as KeyIcon, BookOpen, Activity,
-  Users, DollarSign, MousePointer
+  Users, DollarSign, MousePointer, Palette
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
