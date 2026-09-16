@@ -631,11 +631,19 @@ const AdminWHM = () => {
               </div>
 
               {/* Create real cPanel account */}
-              <div className="p-3 rounded-xl border border-primary/25 bg-primary/5 space-y-3">
+              <div ref={createRef} className={`p-3 rounded-xl space-y-3 transition-all ${hostMode ? "border-2 border-primary bg-primary/10 ring-4 ring-primary/10" : "border border-primary/25 bg-primary/5"}`}>
                 <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <Plus className="w-3.5 h-3.5 text-primary" />
                   {bn ? "নতুন cPanel অ্যাকাউন্ট তৈরি" : "Create cPanel account"}
                 </p>
+                {hostMode && !selectedPkg.whm_server_host && (
+                  <p className="text-[11px] text-amber-600 flex items-start gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-px" />
+                    {bn
+                      ? "এই প্যাকেজে সার্ভারের ঠিকানা দেওয়া নেই — অ্যাকাউন্টটি শুধু রেকর্ড হিসেবে সেভ হবে। প্যাকেজ এডিট করে WHM হোস্ট ও ইউজারনেম দিন।"
+                      : "No server address set for this package — the account will only be recorded. Edit the package to add the WHM host and username."}
+                  </p>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
                     { key: "domain", label: bn ? "ডোমেইন" : "Domain", ph: "client-domain.com", type: "text" },
