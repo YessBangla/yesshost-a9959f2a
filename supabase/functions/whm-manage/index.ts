@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 interface WHMRequest {
-  action: 'create_account' | 'suspend_account' | 'unsuspend_account' | 'terminate_account' | 'list_accounts' | 'account_summary';
+  action: 'create_account' | 'suspend_account' | 'unsuspend_account' | 'terminate_account' | 'list_accounts' | 'account_summary' | 'test_connection';
   reseller_package_id: string;
   account_id?: string;
   // For create_account
@@ -46,13 +46,15 @@ Deno.serve(async (req) => {
     const body: WHMRequest = await req.json();
     const { action, reseller_package_id } = body;
 
-    // Verify user owns this reseller package
-    const { data: pkg, error: pkgError } = await supabaseClient
+    // Admins may manage any package; resellers only their own
+    const { data: isAdmin } = await supabaseClient.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
+    let pkgQuery = supabaseClient
       .from('reseller_packages')
       .select('*')
-      .eq('id', reseller_package_id)
-      .eq('user_id', user.id)
-      .single();
+      .eq('id', reseller_package_id);
+    if (!isAdmin) pkgQuery = pkgQuery.eq('user_id', user.id);
+    const { data: pkg, error: pkgError } = await pkgQuery.single();
 
     if (pkgError || !pkg) {
       return new Response(JSON.stringify({ error: 'Reseller package not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -110,22 +112,33 @@ Deno.serve(async (req) => {
           return new Response(JSON.stringify({ error: 'Disk quota would exceed limit' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
 
+        // A real cPanel account is created whenever the server host + API token are present.
+        const whmReady = !!(pkg.whm_server_host && pkg.whm_username && WHM_API_TOKEN);
         let cpanelCreated = false;
-        try {
-          // Call WHM API to create account
-          const whmResult = await whmCall('createacct', {
-            username: body.username,
-            domain: body.domain,
-            password: body.password,
-            contactemail: body.email || '',
-            quota: String(diskQuota),
-            bwlimit: String(body.bandwidth_mb || 10000),
-            plan: body.plan_name || 'default',
-          });
+
+        if (whmReady) {
+          let whmResult: any;
+          try {
+            whmResult = await whmCall('createacct', {
+              username: body.username,
+              domain: body.domain,
+              password: body.password,
+              contactemail: body.email || '',
+              quota: String(diskQuota),
+              bwlimit: String(body.bandwidth_mb || 10000),
+              plan: body.plan_name || 'default',
+            });
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            console.error('WHM createacct failed:', msg);
+            return new Response(JSON.stringify({ error: `cPanel account creation failed: ${msg}` }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+
           cpanelCreated = whmResult?.metadata?.result === 1;
-        } catch (e) {
-          console.warn('WHM API call failed (may not be configured):', e);
-          // Continue without WHM - just track in DB
+          if (!cpanelCreated) {
+            const reason = whmResult?.metadata?.reason || 'Unknown WHM error';
+            return new Response(JSON.stringify({ error: `cPanel account creation failed: ${reason}` }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
         }
 
         // Insert into reseller_accounts
@@ -133,7 +146,7 @@ Deno.serve(async (req) => {
           .from('reseller_accounts')
           .insert({
             reseller_package_id: pkg.id,
-            reseller_user_id: user.id,
+            reseller_user_id: pkg.user_id,
             domain: body.domain,
             username: body.username,
             plan_name: body.plan_name || 'Basic',
@@ -267,6 +280,24 @@ Deno.serve(async (req) => {
           .order('created_at', { ascending: false });
 
         result = { success: true, accounts: accounts || [] };
+        break;
+      }
+
+      case 'test_connection': {
+        if (!pkg.whm_server_host || !pkg.whm_username) {
+          result = { success: false, connected: false, error: 'WHM server host / username not set on this package' };
+          break;
+        }
+        if (!WHM_API_TOKEN) {
+          result = { success: false, connected: false, error: 'WHM API token is not configured' };
+          break;
+        }
+        try {
+          const v = await whmCall('version');
+          result = { success: true, connected: true, server: pkg.whm_server_host, version: v?.data?.version || v?.version || 'unknown' };
+        } catch (e) {
+          result = { success: false, connected: false, error: e instanceof Error ? e.message : 'Connection failed' };
+        }
         break;
       }
 

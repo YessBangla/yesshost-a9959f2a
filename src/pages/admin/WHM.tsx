@@ -59,6 +59,13 @@ const AdminWHM = () => {
   });
   const [assigning, setAssigning] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [testingConn, setTestingConn] = useState(false);
+  const [connResult, setConnResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    domain: "", username: "", password: "", email: "", plan_name: "",
+    disk_quota_mb: 1000, bandwidth_mb: 10000,
+  });
 
   // Stats
   const [stats, setStats] = useState({
@@ -155,6 +162,61 @@ const AdminWHM = () => {
       .order("created_at", { ascending: false });
     setAccounts(data || []);
     setShowAccounts(true);
+  };
+
+  const handleTestConnection = async (pkg: ResellerPkg) => {
+    setTestingConn(true);
+    setConnResult(null);
+    const { data, error } = await supabase.functions.invoke("whm-manage", {
+      body: { action: "test_connection", reseller_package_id: pkg.id },
+    });
+    setTestingConn(false);
+    if (error) {
+      setConnResult({ ok: false, message: error.message });
+      return;
+    }
+    setConnResult(
+      data?.connected
+        ? { ok: true, message: `${bn ? "সংযুক্ত" : "Connected"} — ${data.server} (WHM ${data.version})` }
+        : { ok: false, message: data?.error || (bn ? "সংযোগ ব্যর্থ" : "Connection failed") }
+    );
+  };
+
+  const handleCreateAccount = async () => {
+    if (!selectedPkg) return;
+    if (!createForm.domain || !createForm.username || !createForm.password) {
+      toast({ title: bn ? "ডোমেইন, ইউজারনেম ও পাসওয়ার্ড দিন" : "Domain, username and password required", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const { data, error } = await supabase.functions.invoke("whm-manage", {
+      body: {
+        action: "create_account",
+        reseller_package_id: selectedPkg.id,
+        domain: createForm.domain.trim(),
+        username: createForm.username.trim(),
+        password: createForm.password,
+        email: createForm.email.trim() || undefined,
+        plan_name: createForm.plan_name || undefined,
+        disk_quota_mb: createForm.disk_quota_mb,
+        bandwidth_mb: createForm.bandwidth_mb,
+      },
+    });
+    setCreating(false);
+    const errMsg = error?.message || (data && (data as any).error);
+    if (errMsg) {
+      toast({ title: bn ? "অ্যাকাউন্ট তৈরি ব্যর্থ" : "Account creation failed", description: String(errMsg), variant: "destructive" });
+      return;
+    }
+    toast({
+      title: bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created",
+      description: (data as any)?.cpanel_created
+        ? (bn ? "cPanel সার্ভারে আসল অ্যাকাউন্ট তৈরি হয়েছে" : "Real cPanel account created on the server")
+        : (bn ? "শুধু রেকর্ড সেভ হয়েছে — WHM টোকেন/হোস্ট সেট নেই" : "Recorded only — WHM host/token not configured"),
+    });
+    setCreateForm({ domain: "", username: "", password: "", email: "", plan_name: "", disk_quota_mb: 1000, bandwidth_mb: 10000 });
+    handleViewAccounts(selectedPkg);
+    fetchAll();
   };
 
   const handleDeletePkg = async (pkgId: string) => {
@@ -523,6 +585,87 @@ const AdminWHM = () => {
                     <Progress value={q.pct} className="h-1 mt-1.5" />
                   </div>
                 ))}
+              </div>
+
+              {/* Server connection */}
+              <div className="p-3 rounded-xl border border-border/40 bg-secondary/20 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground">{bn ? "WHM সার্ভার সংযোগ" : "WHM server connection"}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {selectedPkg.whm_server_host
+                        ? `${selectedPkg.whm_username || "—"}@${selectedPkg.whm_server_host}:2087`
+                        : (bn ? "সার্ভার হোস্ট সেট করা নেই — প্যাকেজ এডিট করে দিন" : "No server host set — edit the package to add it")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleTestConnection(selectedPkg)}
+                    disabled={testingConn}
+                    className="shrink-0 px-3 py-2 rounded-lg text-xs font-medium border border-border/50 hover:border-primary/50 disabled:opacity-60"
+                  >
+                    {testingConn ? (bn ? "পরীক্ষা চলছে…" : "Testing…") : (bn ? "সংযোগ পরীক্ষা" : "Test connection")}
+                  </button>
+                </div>
+                {connResult && (
+                  <p className={`text-[11px] break-words ${connResult.ok ? "text-emerald-600" : "text-destructive"}`}>
+                    {connResult.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Create real cPanel account */}
+              <div className="p-3 rounded-xl border border-primary/25 bg-primary/5 space-y-3">
+                <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Plus className="w-3.5 h-3.5 text-primary" />
+                  {bn ? "নতুন cPanel অ্যাকাউন্ট তৈরি" : "Create cPanel account"}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[
+                    { key: "domain", label: bn ? "ডোমেইন" : "Domain", ph: "client-domain.com", type: "text" },
+                    { key: "username", label: bn ? "ইউজারনেম" : "Username", ph: "clientusr", type: "text" },
+                    { key: "password", label: bn ? "পাসওয়ার্ড" : "Password", ph: "••••••••", type: "password" },
+                    { key: "email", label: bn ? "ইমেইল" : "Contact email", ph: "client@email.com", type: "email" },
+                    { key: "plan_name", label: bn ? "WHM প্যাকেজ" : "WHM package", ph: "default", type: "text" },
+                  ].map(f => (
+                    <div key={f.key}>
+                      <label className="block text-[10px] text-muted-foreground mb-1">{f.label}</label>
+                      <input
+                        type={f.type}
+                        value={(createForm as any)[f.key]}
+                        onChange={e => setCreateForm(p => ({ ...p, [f.key]: e.target.value }))}
+                        placeholder={f.ph}
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-muted-foreground mb-1">{bn ? "ডিস্ক (MB)" : "Disk (MB)"}</label>
+                      <input
+                        type="number"
+                        value={createForm.disk_quota_mb}
+                        onChange={e => setCreateForm(p => ({ ...p, disk_quota_mb: parseInt(e.target.value) || 0 }))}
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-muted-foreground mb-1">{bn ? "ব্যান্ডউইথ (MB)" : "Bandwidth (MB)"}</label>
+                      <input
+                        type="number"
+                        value={createForm.bandwidth_mb}
+                        onChange={e => setCreateForm(p => ({ ...p, bandwidth_mb: parseInt(e.target.value) || 0 }))}
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCreateAccount}
+                  disabled={creating}
+                  className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
+                >
+                  {creating ? (bn ? "তৈরি হচ্ছে…" : "Creating…") : (bn ? "অ্যাকাউন্ট তৈরি করুন" : "Create account")}
+                </button>
               </div>
 
               {/* Account List */}

@@ -176,6 +176,39 @@ export type Database = {
         }
         Relationships: []
       }
+      communication_test_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          run_by: string | null
+          steps: Json
+          success: boolean
+          target: string | null
+          test_type: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          run_by?: string | null
+          steps?: Json
+          success?: boolean
+          target?: string | null
+          test_type: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          run_by?: string | null
+          steps?: Json
+          success?: boolean
+          target?: string | null
+          test_type?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -701,6 +734,42 @@ export type Database = {
           total_bdt?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      otp_codes: {
+        Row: {
+          attempts: number
+          channel: string
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          purpose: string
+          recipient: string
+          used_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          purpose?: string
+          recipient: string
+          used_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          purpose?: string
+          recipient?: string
+          used_at?: string | null
         }
         Relationships: []
       }
