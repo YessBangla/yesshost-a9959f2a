@@ -116,35 +116,48 @@ const ThemeStore = () => {
           </motion.div>
         </section>
 
-        {/* Category Filter - Dynamic */}
-        <section className="container mx-auto px-4 mb-10">
-          <div className="flex flex-wrap justify-center gap-2">
-            <button
-              onClick={() => setActiveCategory("all")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                activeCategory === "all"
-                  ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
-                  : "bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              {bn ? "সকল" : "All"} ({themes.length})
-            </button>
-            {Object.entries(categoryLabels).map(([key, label]) => {
-              const count = themes.filter((t) => t.category === key).length;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setActiveCategory(key)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    activeCategory === key
-                      ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
-                      : "bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary"
-                  }`}
-                >
-                  {bn ? label.bn : label.en} ({count})
-                </button>
-              );
-            })}
+        {/* Category Filter - corporate scrollable rail on mobile, centered wrap on desktop */}
+        <section className="mb-8 md:mb-10 sticky top-14 lg:top-16 z-30 bg-background/90 backdrop-blur-md border-y border-border/60 md:border-0 md:bg-transparent md:backdrop-blur-none md:static">
+          <div className="container mx-auto px-0 md:px-4 py-2.5 md:py-0">
+            <div className="relative">
+              {/* edge fades (mobile only) */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-background to-transparent md:hidden z-10" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-background to-transparent md:hidden z-10" />
+
+              <div className="flex md:flex-wrap md:justify-center gap-2 overflow-x-auto no-scrollbar px-4 md:px-0 snap-x snap-mandatory">
+                {[
+                  { key: "all", label: bn ? "সকল" : "All", count: themes.length },
+                  ...Object.entries(categoryLabels).map(([key, label]) => ({
+                    key,
+                    label: bn ? label.bn : label.en,
+                    count: themes.filter((t) => t.category === key).length,
+                  })),
+                ].map((cat) => {
+                  const active = activeCategory === cat.key;
+                  return (
+                    <button
+                      key={cat.key}
+                      onClick={() => setActiveCategory(cat.key)}
+                      aria-pressed={active}
+                      className={`shrink-0 snap-start inline-flex items-center gap-2 h-11 px-4 rounded-xl border text-sm font-semibold whitespace-nowrap transition-all ${
+                        active
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                          : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      {cat.label}
+                      <span
+                        className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-md text-[11px] font-bold tabular-nums ${
+                          active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-secondary text-muted-foreground"
+                        }`}
+                      >
+                        {cat.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </section>
 
