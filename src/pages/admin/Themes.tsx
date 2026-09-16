@@ -242,66 +242,61 @@ const AdminThemes = () => {
       )}
 
       {/* Theme List */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
         {filtered.map(theme => (
-          <div key={theme.id}>
+          <div key={theme.id} className={editingId === theme.id ? "xl:col-span-2" : ""}>
             {editingId === theme.id ? (
               <ThemeForm form={editForm} setForm={setEditForm} onSave={() => handleSave(false)} onCancel={() => { setEditingId(null); setEditForm({}); }} />
             ) : (
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-4">
+              <div className="group glass-card px-3 py-2 rounded-lg hover:border-primary/40 transition-colors">
+                <div className="flex items-center gap-3">
                   {/* Thumbnail */}
-                  <div className="w-16 h-12 rounded-lg bg-secondary/50 border border-border overflow-hidden shrink-0">
+                  <div className="w-11 h-8 rounded-md bg-secondary/50 border border-border overflow-hidden shrink-0">
                     {theme.thumbnail_url ? (
                       <img src={theme.thumbnail_url} alt={theme.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        <Palette className="w-5 h-5" />
+                        <Palette className="w-3.5 h-3.5" />
                       </div>
                     )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-bold text-foreground">{theme.name}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-[13px] font-semibold text-foreground truncate">{theme.name}</span>
+                      <span className="text-[10px] px-1.5 py-px rounded bg-primary/10 text-primary font-medium shrink-0">
                         {categoryLabels[theme.category]?.[lang] || theme.category}
                       </span>
                       {theme.is_featured && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-accent/50 text-accent-foreground flex items-center gap-0.5">
-                          <Star className="w-3 h-3" /> ফিচার্ড
-                        </span>
+                        <Star className="w-3 h-3 text-primary shrink-0" />
                       )}
                       {!theme.is_active && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive flex items-center gap-0.5">
-                          <EyeOff className="w-3 h-3" /> নিষ্ক্রিয়
-                        </span>
+                        <EyeOff className="w-3 h-3 text-destructive shrink-0" />
                       )}
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      <span>
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground truncate">
+                      <span className="tabular-nums">
                         ৳{formatPrice(theme.discount_price_bdt || theme.price_bdt, lang)}
-                        {theme.discount_price_bdt && <span className="line-through ml-1">৳{formatPrice(theme.price_bdt, lang)}</span>}
+                        {theme.discount_price_bdt && <span className="line-through ml-1 opacity-60">৳{formatPrice(theme.price_bdt, lang)}</span>}
                       </span>
-                      {theme.hosting_bundle_price_bdt && <span>• {lang === "bn" ? "বান্ডেল" : "Bundle"}: ৳{formatPrice(theme.hosting_bundle_price_bdt, lang)}</span>}
-                      <span>• /{theme.slug}</span>
+                      <span className="truncate">/{theme.slug}</span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-1 shrink-0">
+                  <div className="flex items-center gap-0.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
                     {theme.preview_url && (
-                      <a href={theme.preview_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground">
-                        <Eye className="w-4 h-4" />
+                      <a href={theme.preview_url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
+                        <Eye className="w-3.5 h-3.5" />
                       </a>
                     )}
                     <button onClick={() => { setEditingId(theme.id); setEditForm({ ...theme, features: JSON.stringify(theme.features), tags: JSON.stringify(theme.tags), hosting_bundle_features: JSON.stringify(theme.hosting_bundle_features) }); setShowAdd(false); }}
-                      className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground">
-                      <Pencil className="w-4 h-4" />
+                      className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
+                      <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => handleDelete(theme.id, theme.name)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive">
-                      <Trash2 className="w-4 h-4" />
+                    <button onClick={() => handleDelete(theme.id, theme.name)} className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive">
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -310,6 +305,10 @@ const AdminThemes = () => {
           </div>
         ))}
 
+        {filtered.length === 0 && (
+          <div className="xl:col-span-2">
+          </div>
+        )}
         {filtered.length === 0 && (
           <EmptyState
             icon={Palette}
