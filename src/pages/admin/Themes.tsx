@@ -223,9 +223,63 @@ const AdminThemes = () => {
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Thumbnail URL</label>
-          <input value={form.thumbnail_url || ""} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })} className={inputClass} placeholder="https://" />
+          <input value={form.thumbnail_url || ""} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })} className={inputClass} placeholder="https:// অথবা নিচে আপলোড করুন" />
         </div>
       </div>
+
+      {/* Uploads */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Thumbnail upload */}
+        <div className="rounded-xl border border-dashed border-border p-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground"><ImagePlus className="w-3.5 h-3.5" /> থাম্বনেইল আপলোড</div>
+          {form.thumbnail_url && <img src={form.thumbnail_url} alt="thumbnail preview" className="w-full h-20 object-cover rounded-lg border border-border" />}
+          <label className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-foreground text-xs font-semibold cursor-pointer min-h-[44px]">
+            {uploading === "thumb" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} ছবি বাছুন
+            <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThumbUpload(f, form, setForm); e.target.value = ""; }} />
+          </label>
+        </div>
+
+        {/* Screenshots upload */}
+        <div className="rounded-xl border border-dashed border-border p-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground"><ImagePlus className="w-3.5 h-3.5" /> স্ক্রিনশট আপলোড</div>
+          <div className="flex flex-wrap gap-1.5">
+            {(parseJson(form.screenshots ?? []) || []).map((url: string, i: number) => (
+              <div key={i} className="relative">
+                <img src={url} alt={`screenshot ${i + 1}`} className="w-12 h-9 object-cover rounded border border-border" />
+                <button type="button" onClick={() => {
+                  const list = (parseJson(form.screenshots ?? []) || []).filter((_: string, j: number) => j !== i);
+                  setForm({ ...form, screenshots: JSON.stringify(list) });
+                }} className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full bg-destructive text-destructive-foreground">
+                  <X className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <label className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-foreground text-xs font-semibold cursor-pointer min-h-[44px]">
+            {uploading === "shots" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} একাধিক ছবি
+            <input type="file" accept="image/*" multiple className="hidden" onChange={e => { const fs = e.target.files; if (fs?.length) handleShotsUpload(fs, form, setForm); e.target.value = ""; }} />
+          </label>
+        </div>
+
+        {/* Theme package upload */}
+        <div className="rounded-xl border border-dashed border-border p-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground"><FileArchive className="w-3.5 h-3.5" /> থিম ফাইল (ZIP)</div>
+          {form.file_path ? (
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="truncate flex-1">{form.file_path}</span>
+              <button type="button" onClick={() => downloadThemeFile(form.file_path)} className="p-1 rounded hover:bg-secondary/60"><Download className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => setForm({ ...form, file_path: null })} className="p-1 rounded text-destructive hover:bg-destructive/10"><X className="w-3.5 h-3.5" /></button>
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground">সর্বোচ্চ ২০০ MB</p>
+          )}
+          <label className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-foreground text-xs font-semibold cursor-pointer min-h-[44px]">
+            {uploading === "file" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} ফাইল বাছুন
+            <input type="file" accept=".zip,.rar,.7z,application/zip" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThemeFileUpload(f, form, setForm); e.target.value = ""; }} />
+          </label>
+        </div>
+      </div>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
