@@ -63,7 +63,8 @@ const AdminThemes = () => {
 
   const handleSave = async (isNew: boolean) => {
     const form = isNew ? { ...addForm } : { ...editForm };
-    const { id, created_at, updated_at, screenshots, ...rest } = form;
+    const { id, created_at, updated_at, ...rest } = form;
+    rest.screenshots = parseJson(rest.screenshots ?? []);
     rest.features = parseJson(rest.features);
     rest.tags = parseJson(rest.tags);
     rest.hosting_bundle_features = parseJson(rest.hosting_bundle_features);
