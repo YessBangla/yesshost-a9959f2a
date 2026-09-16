@@ -405,7 +405,7 @@ const AdminThemes = () => {
                         <Eye className="w-3.5 h-3.5" />
                       </a>
                     )}
-                    <button onClick={() => { setEditingId(theme.id); setEditForm({ ...theme, features: JSON.stringify(theme.features), tags: JSON.stringify(theme.tags), hosting_bundle_features: JSON.stringify(theme.hosting_bundle_features) }); setShowAdd(false); }}
+                    <button onClick={() => { setEditingId(theme.id); setEditForm({ ...theme, features: JSON.stringify(theme.features), tags: JSON.stringify(theme.tags), hosting_bundle_features: JSON.stringify(theme.hosting_bundle_features), screenshots: JSON.stringify(theme.screenshots ?? []) }); setShowAdd(false); }}
                       className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
