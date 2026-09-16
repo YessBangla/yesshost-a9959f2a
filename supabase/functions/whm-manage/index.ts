@@ -46,13 +46,15 @@ Deno.serve(async (req) => {
     const body: WHMRequest = await req.json();
     const { action, reseller_package_id } = body;
 
-    // Verify user owns this reseller package
-    const { data: pkg, error: pkgError } = await supabaseClient
+    // Admins may manage any package; resellers only their own
+    const { data: isAdmin } = await supabaseClient.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
+    let pkgQuery = supabaseClient
       .from('reseller_packages')
       .select('*')
-      .eq('id', reseller_package_id)
-      .eq('user_id', user.id)
-      .single();
+      .eq('id', reseller_package_id);
+    if (!isAdmin) pkgQuery = pkgQuery.eq('user_id', user.id);
+    const { data: pkg, error: pkgError } = await pkgQuery.single();
 
     if (pkgError || !pkg) {
       return new Response(JSON.stringify({ error: 'Reseller package not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
