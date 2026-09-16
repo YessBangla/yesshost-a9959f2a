@@ -1037,6 +1037,122 @@ const AdminWHM = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Create confirmation */}
+      <Dialog open={confirmCreate} onOpenChange={(o) => { if (!creating) setConfirmCreate(o); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+              {bn ? "অ্যাকাউন্ট তৈরি নিশ্চিত করুন" : "Confirm account creation"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-1">
+            <p className="text-xs text-muted-foreground">
+              {selectedPkg?.whm_server_host
+                ? (bn
+                  ? `এই তথ্য দিয়ে ${selectedPkg.whm_server_host} সার্ভারে আসল cPanel অ্যাকাউন্ট তৈরি হবে।`
+                  : `A real cPanel account will be created on ${selectedPkg.whm_server_host}.`)
+                : (bn
+                  ? "সার্ভারের ঠিকানা সেট নেই — অ্যাকাউন্টটি শুধু রেকর্ড হিসেবে সেভ হবে।"
+                  : "No server host is set — the account will only be recorded.")}
+            </p>
+            <div className="rounded-xl border border-border/40 divide-y divide-border/30 text-xs">
+              {[
+                { l: bn ? "প্যাকেজ" : "Package", v: selectedPkg?.package_name || "—" },
+                { l: bn ? "ডোমেইন" : "Domain", v: createForm.domain },
+                { l: bn ? "ইউজারনেম" : "Username", v: createForm.username },
+                { l: bn ? "ইমেইল" : "Email", v: createForm.email || "—" },
+                { l: bn ? "ডিস্ক" : "Disk", v: formatSize(createForm.disk_quota_mb) },
+                { l: bn ? "ব্যান্ডউইথ" : "Bandwidth", v: formatSize(createForm.bandwidth_mb) },
+              ].map((r, i) => (
+                <div key={i} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <span className="text-muted-foreground">{r.l}</span>
+                  <span className="font-medium text-foreground truncate">{r.v}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleCreateAccount}
+                disabled={creating}
+                className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60"
+              >
+                {creating ? (bn ? "তৈরি হচ্ছে…" : "Creating…") : (bn ? "হ্যাঁ, তৈরি করুন" : "Yes, create it")}
+              </button>
+              <button
+                onClick={() => setConfirmCreate(false)}
+                disabled={creating}
+                className="px-4 py-2.5 rounded-lg border border-border/50 text-xs font-medium hover:border-primary/50 disabled:opacity-60"
+              >
+                {bn ? "বাতিল" : "Cancel"}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success summary */}
+      <Dialog open={!!createdAccount} onOpenChange={(o) => { if (!o) setCreatedAccount(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-emerald-500" />
+              {bn ? "অ্যাকাউন্ট সারাংশ" : "Account summary"}
+            </DialogTitle>
+          </DialogHeader>
+          {createdAccount && (
+            <div className="space-y-3 mt-1">
+              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-semibold ${createdAccount.cpanel_created ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" : "bg-blue-500/10 text-blue-600 border-blue-500/30"}`}>
+                {!createdAccount.cpanel_created && <Loader2 className="w-3 h-3 animate-spin" />}
+                {createdAccount.cpanel_created
+                  ? (bn ? "সক্রিয় — cPanel তৈরি হয়েছে" : "Active — cPanel created")
+                  : (bn ? "প্রোভিশনিং — শুধু রেকর্ড" : "Provisioning — recorded only")}
+              </span>
+              <div className="rounded-xl border border-border/40 divide-y divide-border/30 text-xs">
+                {[
+                  { l: bn ? "ডোমেইন" : "Domain", v: createdAccount.domain },
+                  { l: bn ? "ইউজারনেম" : "Username", v: createdAccount.username },
+                  { l: bn ? "পাসওয়ার্ড" : "Password", v: createdAccount.password },
+                  { l: bn ? "সার্ভার" : "Server", v: createdAccount.server_host || "—" },
+                  { l: bn ? "cPanel লগইন" : "cPanel login", v: createdAccount.server_host ? `https://${createdAccount.server_host}:2083` : "—" },
+                  { l: bn ? "ডিস্ক" : "Disk", v: formatSize(createdAccount.disk_quota_mb || 0) },
+                  { l: bn ? "ব্যান্ডউইথ" : "Bandwidth", v: formatSize(createdAccount.bandwidth_mb || 0) },
+                ].map((r, i) => (
+                  <div key={i} className="flex items-center justify-between gap-3 px-3 py-2">
+                    <span className="text-muted-foreground shrink-0">{r.l}</span>
+                    <span className="font-mono text-foreground truncate">{r.v}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const text = [
+                      `Domain: ${createdAccount.domain}`,
+                      `Username: ${createdAccount.username}`,
+                      `Password: ${createdAccount.password}`,
+                      createdAccount.server_host ? `cPanel: https://${createdAccount.server_host}:2083` : "",
+                    ].filter(Boolean).join("\n");
+                    navigator.clipboard.writeText(text);
+                    toast({ title: bn ? "কপি হয়েছে" : "Copied" });
+                  }}
+                  className="flex items-center justify-center gap-1.5 flex-1 py-2.5 rounded-lg border border-border/50 text-xs font-medium hover:border-primary/50"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  {bn ? "ডিটেইলস কপি করুন" : "Copy details"}
+                </button>
+                <button
+                  onClick={() => { setCreatedAccount(null); refreshAccounts(); }}
+                  className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90"
+                >
+                  {bn ? "ঠিক আছে" : "Done"}
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
