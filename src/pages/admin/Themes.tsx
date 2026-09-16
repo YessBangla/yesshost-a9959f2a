@@ -531,6 +531,16 @@ const AdminThemes = () => {
                       {!theme.is_active && (
                         <EyeOff className="w-3 h-3 text-destructive shrink-0" />
                       )}
+                      {(theme as any).seller_user_id && (
+                        <span className={`text-[10px] px-1.5 py-px rounded font-medium shrink-0 ${
+                          (theme as any).approval_status === "approved" ? "bg-success/10 text-success"
+                          : (theme as any).approval_status === "rejected" ? "bg-destructive/10 text-destructive"
+                          : "bg-warning/10 text-warning"}`}>
+                          {(theme as any).approval_status === "approved" ? (lang === "bn" ? "বিক্রেতা · অনুমোদিত" : "Seller · Approved")
+                            : (theme as any).approval_status === "rejected" ? (lang === "bn" ? "বিক্রেতা · বাতিল" : "Seller · Rejected")
+                            : (lang === "bn" ? "বিক্রেতা · পর্যালোচনায়" : "Seller · In review")}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground truncate">
                       <span className="tabular-nums">
