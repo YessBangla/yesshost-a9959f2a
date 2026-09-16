@@ -288,7 +288,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden glass border-t border-border overflow-hidden"
+            className="lg:hidden bg-popover border-t border-border overflow-hidden"
           >
             <div className="px-4 py-3 space-y-0.5 max-h-[calc(100vh-4rem-5rem)] overflow-y-auto">
               {navLinks.map((link) => (
