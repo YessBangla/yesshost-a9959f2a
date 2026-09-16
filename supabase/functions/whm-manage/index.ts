@@ -283,6 +283,24 @@ Deno.serve(async (req) => {
         break;
       }
 
+      case 'test_connection': {
+        if (!pkg.whm_server_host || !pkg.whm_username) {
+          result = { success: false, connected: false, error: 'WHM server host / username not set on this package' };
+          break;
+        }
+        if (!WHM_API_TOKEN) {
+          result = { success: false, connected: false, error: 'WHM API token is not configured' };
+          break;
+        }
+        try {
+          const v = await whmCall('version');
+          result = { success: true, connected: true, server: pkg.whm_server_host, version: v?.data?.version || v?.version || 'unknown' };
+        } catch (e) {
+          result = { success: false, connected: false, error: e instanceof Error ? e.message : 'Connection failed' };
+        }
+        break;
+      }
+
       case 'account_summary': {
         const { data: accounts } = await supabaseClient
           .from('reseller_accounts')
