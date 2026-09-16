@@ -153,6 +153,61 @@ const AdminThemes = () => {
 
   const safeName = (n: string) => n.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
 
+  const MAX_IMAGE_MB = 5;
+  const MAX_ZIP_MB = 200;
+  const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml", "image/avif"];
+  const ARCHIVE_EXT = [".zip", ".rar", ".7z", ".tar", ".gz"];
+  const mb = (bytes: number) => (bytes / (1024 * 1024)).toFixed(1);
+
+  const showError = (title: string, description: string) =>
+    toast({ title, description, variant: "destructive" });
+
+  // returns an error message (localized) or null when the file is acceptable
+  const validateFile = (file: File, kind: "image" | "archive"): string | null => {
+    if (file.size === 0) {
+      return lang === "bn" ? "ফাইলটি খালি — সঠিক ফাইল বাছুন।" : "This file is empty — choose a valid file.";
+    }
+    if (kind === "image") {
+      if (!IMAGE_TYPES.includes(file.type)) {
+        return lang === "bn"
+          ? `শুধু ছবি আপলোড করা যাবে (JPG, PNG, WebP, GIF, SVG)। আপনি দিয়েছেন: ${file.name.split(".").pop()?.toUpperCase() || "অজানা"} ফাইল।`
+          : `Only image files are allowed (JPG, PNG, WebP, GIF, SVG). You picked a ${file.name.split(".").pop()?.toUpperCase() || "unknown"} file.`;
+      }
+      if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+        return lang === "bn"
+          ? `ছবিটি ${mb(file.size)} MB — সর্বোচ্চ ${MAX_IMAGE_MB} MB পর্যন্ত আপলোড করা যাবে। ছবিটি ছোট করে আবার চেষ্টা করুন।`
+          : `This image is ${mb(file.size)} MB — the limit is ${MAX_IMAGE_MB} MB. Please compress it and try again.`;
+      }
+      return null;
+    }
+    const lower = file.name.toLowerCase();
+    if (!ARCHIVE_EXT.some(ext => lower.endsWith(ext))) {
+      return lang === "bn"
+        ? `থিম প্যাকেজ অবশ্যই ZIP (বা RAR/7Z) হতে হবে। আপনি "${file.name}" দিয়েছেন — ফাইলগুলো ZIP করে আবার আপলোড করুন।`
+        : `The theme package must be a ZIP (or RAR/7Z). You picked "${file.name}" — please compress your files into a ZIP and retry.`;
+    }
+    if (file.size > MAX_ZIP_MB * 1024 * 1024) {
+      return lang === "bn"
+        ? `ফাইলটি ${mb(file.size)} MB — সর্বোচ্চ ${MAX_ZIP_MB} MB পর্যন্ত আপলোড করা যাবে। অপ্রয়োজনীয় ফাইল বাদ দিয়ে আবার চেষ্টা করুন।`
+        : `The file is ${mb(file.size)} MB — the limit is ${MAX_ZIP_MB} MB. Remove unneeded files and try again.`;
+    }
+    return null;
+  };
+
+  const friendlyUploadError = (e: any) => {
+    const msg = String(e?.message || "");
+    if (/exceeded|too large|maximum size/i.test(msg)) {
+      return lang === "bn" ? `ফাইলটি সার্ভারের সর্বোচ্চ সীমার (${MAX_ZIP_MB} MB) চেয়ে বড়।` : `The file exceeds the server limit (${MAX_ZIP_MB} MB).`;
+    }
+    if (/row-level security|not authorized|permission/i.test(msg)) {
+      return lang === "bn" ? "আপলোডের অনুমতি নেই — অ্যাডমিন হিসেবে লগইন করা আছে কিনা দেখুন।" : "You do not have permission to upload — make sure you are signed in as an admin.";
+    }
+    if (/network|failed to fetch/i.test(msg)) {
+      return lang === "bn" ? "ইন্টারনেট সংযোগে সমস্যা — আবার চেষ্টা করুন।" : "Network problem — please try again.";
+    }
+    return msg || (lang === "bn" ? "অজানা সমস্যা হয়েছে।" : "Something went wrong.");
+  };
+
   const uploadToBucket = async (bucket: string, file: File) => {
     const path = `${Date.now()}-${safeName(file.name)}`;
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
@@ -161,43 +216,56 @@ const AdminThemes = () => {
   };
 
   const handleThumbUpload = async (file: File, form: any, setForm: (f: any) => void) => {
+    const invalid = validateFile(file, "image");
+    if (invalid) { showError(lang === "bn" ? "ছবিটি গ্রহণ করা যায়নি" : "Image not accepted", invalid); return; }
     setUploading("thumb");
     try {
       const path = await uploadToBucket("theme-images", file);
       const { data } = supabase.storage.from("theme-images").getPublicUrl(path);
       setForm({ ...form, thumbnail_url: data.publicUrl });
-      toast({ title: "থাম্বনেইল আপলোড হয়েছে!" });
+      toast({ title: lang === "bn" ? "থাম্বনেইল আপলোড হয়েছে!" : "Thumbnail uploaded!" });
     } catch (e: any) {
-      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+      showError(lang === "bn" ? "আপলোড ব্যর্থ" : "Upload failed", friendlyUploadError(e));
     }
     setUploading(null);
   };
 
   const handleShotsUpload = async (files: FileList, form: any, setForm: (f: any) => void) => {
+    const list = Array.from(files);
+    const rejected: string[] = [];
+    const accepted = list.filter(f => {
+      const invalid = validateFile(f, "image");
+      if (invalid) { rejected.push(`${f.name}: ${invalid}`); return false; }
+      return true;
+    });
+    if (rejected.length) showError(lang === "bn" ? `${rejected.length} টি ছবি বাদ পড়েছে` : `${rejected.length} image(s) skipped`, rejected.join("\n"));
+    if (!accepted.length) return;
     setUploading("shots");
     try {
       const urls: string[] = [];
-      for (const file of Array.from(files)) {
+      for (const file of accepted) {
         const path = await uploadToBucket("theme-images", file);
         urls.push(supabase.storage.from("theme-images").getPublicUrl(path).data.publicUrl);
       }
       const current = parseJson(form.screenshots ?? []) || [];
       setForm({ ...form, screenshots: JSON.stringify([...current, ...urls]) });
-      toast({ title: `${urls.length} টি স্ক্রিনশট আপলোড হয়েছে!` });
+      toast({ title: lang === "bn" ? `${urls.length} টি স্ক্রিনশট আপলোড হয়েছে!` : `${urls.length} screenshot(s) uploaded!` });
     } catch (e: any) {
-      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+      showError(lang === "bn" ? "আপলোড ব্যর্থ" : "Upload failed", friendlyUploadError(e));
     }
     setUploading(null);
   };
 
   const handleThemeFileUpload = async (file: File, form: any, setForm: (f: any) => void) => {
+    const invalid = validateFile(file, "archive");
+    if (invalid) { showError(lang === "bn" ? "ফাইলটি গ্রহণ করা যায়নি" : "File not accepted", invalid); return; }
     setUploading("file");
     try {
       const path = await uploadToBucket("theme-files", file);
       setForm({ ...form, file_path: path });
-      toast({ title: "থিম ফাইল আপলোড হয়েছে!" });
+      toast({ title: lang === "bn" ? `থিম ফাইল আপলোড হয়েছে (${mb(file.size)} MB)` : `Theme file uploaded (${mb(file.size)} MB)` });
     } catch (e: any) {
-      toast({ title: "আপলোড ব্যর্থ", description: e.message, variant: "destructive" });
+      showError(lang === "bn" ? "আপলোড ব্যর্থ" : "Upload failed", friendlyUploadError(e));
     }
     setUploading(null);
   };
