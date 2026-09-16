@@ -70,12 +70,99 @@ const AdminWHM = () => {
     disk_quota_mb: 1000, bandwidth_mb: 10000,
   });
 
+  // Confirmation + success summary
+  const [confirmCreate, setConfirmCreate] = useState(false);
+  const [createdAccount, setCreatedAccount] = useState<any>(null);
+
+  // Live status panel
+  const [autoPoll, setAutoPoll] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+
+  // WHM API token
+  const [tokenStatus, setTokenStatus] = useState<{ configured: boolean; masked: string | null; source: string | null } | null>(null);
+  const [tokenInput, setTokenInput] = useState("");
+  const [tokenEditing, setTokenEditing] = useState(false);
+  const [tokenSaving, setTokenSaving] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+
   // Stats
   const [stats, setStats] = useState({
     total_packages: 0, active_packages: 0, total_accounts: 0, total_disk_used: 0, total_disk_max: 0
   });
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); fetchTokenStatus(); }, []);
+
+  // Auto-poll account statuses while the accounts dialog is open
+  useEffect(() => {
+    if (!showAccounts || !selectedPkg || !autoPoll) return;
+    const id = setInterval(() => { refreshAccounts(true); }, 10000);
+    return () => clearInterval(id);
+  }, [showAccounts, selectedPkg?.id, autoPoll]);
+
+  const fetchTokenStatus = async () => {
+    const { data } = await supabase.functions.invoke("whm-manage", {
+      body: { action: "token_status", reseller_package_id: "" },
+    });
+    if (data?.success) setTokenStatus({ configured: !!data.configured, masked: data.masked, source: data.source });
+  };
+
+  const handleSaveToken = async () => {
+    if (tokenInput.trim().length < 8) {
+      toast({ title: bn ? "টোকেনটি খুব ছোট মনে হচ্ছে" : "Token looks too short", variant: "destructive" });
+      return;
+    }
+    setTokenSaving(true);
+    const { data, error } = await supabase.functions.invoke("whm-manage", {
+      body: { action: "save_token", reseller_package_id: "", api_token: tokenInput.trim() },
+    });
+    setTokenSaving(false);
+    const errMsg = error?.message || (data as any)?.error;
+    if (errMsg) {
+      toast({ title: bn ? "সেভ ব্যর্থ" : "Save failed", description: String(errMsg), variant: "destructive" });
+      return;
+    }
+    setTokenStatus({ configured: true, masked: (data as any).masked, source: (data as any).source });
+    setTokenInput("");
+    setTokenEditing(false);
+    setShowToken(false);
+    toast({ title: bn ? "টোকেন নিরাপদে সংরক্ষিত হয়েছে" : "Token stored securely" });
+  };
+
+  const handleRemoveToken = async () => {
+    if (!confirm(bn ? "সংরক্ষিত WHM টোকেন মুছে ফেলবেন?" : "Remove the stored WHM token?")) return;
+    setTokenSaving(true);
+    const { data, error } = await supabase.functions.invoke("whm-manage", {
+      body: { action: "remove_token", reseller_package_id: "" },
+    });
+    setTokenSaving(false);
+    if (error) {
+      toast({ title: bn ? "মুছতে ব্যর্থ" : "Remove failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setTokenStatus({ configured: !!(data as any)?.configured, masked: (data as any)?.masked ?? null, source: (data as any)?.source ?? null });
+    toast({ title: bn ? "টোকেন মুছে ফেলা হয়েছে" : "Token removed" });
+  };
+
+  const refreshAccounts = async (silent = false) => {
+    if (!selectedPkg) return;
+    if (!silent) setRefreshing(true);
+    const { data } = await supabase
+      .from("reseller_accounts")
+      .select("*")
+      .eq("reseller_package_id", selectedPkg.id)
+      .order("created_at", { ascending: false });
+    setAccounts(data || []);
+    setLastSync(new Date());
+    if (!silent) setRefreshing(false);
+  };
+
+  const accountState = (acc: any) => {
+    if (acc.status === "suspended") return { key: "suspended", label: bn ? "স্থগিত" : "Suspended", cls: "bg-amber-500/10 text-amber-600 border-amber-500/30" };
+    if (acc.status !== "active") return { key: acc.status, label: acc.status, cls: "bg-secondary text-muted-foreground border-border/50" };
+    if (!acc.cpanel_created) return { key: "provisioning", label: bn ? "প্রোভিশনিং" : "Provisioning", cls: "bg-blue-500/10 text-blue-600 border-blue-500/30" };
+    return { key: "active", label: bn ? "সক্রিয়" : "Active", cls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" };
+  };
 
   const fetchAll = async () => {
     setLoading(true);
