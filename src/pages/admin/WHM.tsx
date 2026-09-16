@@ -278,12 +278,17 @@ const AdminWHM = () => {
     );
   };
 
-  const handleCreateAccount = async () => {
+  const requestCreateAccount = () => {
     if (!selectedPkg) return;
     if (!createForm.domain || !createForm.username || !createForm.password) {
       toast({ title: bn ? "ডোমেইন, ইউজারনেম ও পাসওয়ার্ড দিন" : "Domain, username and password required", variant: "destructive" });
       return;
     }
+    setConfirmCreate(true);
+  };
+
+  const handleCreateAccount = async () => {
+    if (!selectedPkg) return;
     setCreating(true);
     const { data, error } = await supabase.functions.invoke("whm-manage", {
       body: {
