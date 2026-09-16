@@ -3,7 +3,8 @@ import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
   LogOut, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
   Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown, Share2,
-  UserCircle, Package, Receipt, TicketCheck, Loader2, History, Settings
+  UserCircle, Package, Receipt, TicketCheck, Loader2, History, Settings,
+  BarChart3, Wallet, Megaphone, UserCog
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -113,7 +114,15 @@ const AdminLayout = () => {
         { title: tr("admin.tickets"), url: "/admin/tickets", icon: HeadphonesIcon },
         { title: bn ? "WHM সার্ভার" : "WHM Server", url: "/admin/whm", icon: HardDrive },
         { title: bn ? "অ্যাফিলিয়েট" : "Affiliates", url: "/admin/affiliates", icon: Share2 },
-        
+      ],
+    },
+    {
+      label: bn ? "বিশ্লেষণ ও ব্যবস্থাপনা" : "Insights & Management",
+      items: [
+        { title: bn ? "অ্যানালিটিক্স" : "Analytics", url: "/admin/analytics", icon: BarChart3 },
+        { title: bn ? "হিসাব/ফিন্যান্স" : "Finance", url: "/admin/finance", icon: Wallet },
+        { title: bn ? "মার্কেটিং" : "Marketing", url: "/admin/marketing", icon: Megaphone },
+        { title: bn ? "স্টাফ" : "Staff", url: "/admin/staff", icon: UserCog },
       ],
     },
     {

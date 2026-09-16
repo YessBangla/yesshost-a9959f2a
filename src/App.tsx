@@ -84,6 +84,10 @@ const AdminKnowledgeBase = lazy(() => import("./pages/admin/KnowledgeBase"));
 const AdminWHM = lazy(() => import("./pages/admin/WHM"));
 const AdminCallHistory = lazy(() => import("./pages/callcenter/CallHistory"));
 const AdminCommunicationConfig = lazy(() => import("./pages/admin/CommunicationConfig"));
+const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
+const AdminFinance = lazy(() => import("./pages/admin/Finance"));
+const AdminMarketing = lazy(() => import("./pages/admin/Marketing"));
+const AdminStaff = lazy(() => import("./pages/admin/Staff"));
 
 // Call center pages
 const CallCenterDashboard = lazy(() => import("./pages/callcenter/Dashboard"));
@@ -209,6 +213,10 @@ const App = () => (
                   <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
                   <Route path="whm" element={<AdminWHM />} />
                   <Route path="affiliates" element={<AdminAffiliates />} />
+                  <Route path="analytics" element={<AdminAnalytics />} />
+                  <Route path="finance" element={<AdminFinance />} />
+                  <Route path="marketing" element={<AdminMarketing />} />
+                  <Route path="staff" element={<AdminStaff />} />
                 </Route>
                 <Route
                   path="/call-center"
