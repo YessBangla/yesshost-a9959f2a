@@ -60,7 +60,8 @@ export function errorCode(area: ErrorArea, message: string, status?: number | nu
   const seed = `${area}|${status ?? ""}|${message}`;
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return `YH-${AREA_PREFIX[area] || "GEN"}-${h.toString(16).toUpperCase().slice(0, 4).padStart(4, "0")}`;
+  const hex = h.toString(16).toUpperCase().padStart(8, "0");
+  return `YH-${AREA_PREFIX[area] || "GEN"}-${hex.slice(-4)}`;
 }
 
 export function friendlyMessage(
