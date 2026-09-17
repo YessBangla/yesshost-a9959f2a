@@ -132,6 +132,28 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Domain renewal invoices extend the linked domain automatically
+    const desc: string = invoice.description || "";
+    if (invoice.service_id && desc.toLowerCase().includes("domain renewal")) {
+      const yearsMatch = desc.match(/(\d+)y @/);
+      const years = yearsMatch ? Number(yearsMatch[1]) : 1;
+      const { data: service } = await admin
+        .from("services")
+        .select("id, expiry_date")
+        .eq("id", invoice.service_id)
+        .single();
+      if (service) {
+        const base = service.expiry_date && new Date(service.expiry_date) > new Date()
+          ? new Date(service.expiry_date)
+          : new Date();
+        base.setFullYear(base.getFullYear() + years);
+        await admin
+          .from("services")
+          .update({ status: "active", expiry_date: base.toISOString() })
+          .eq("id", service.id);
+      }
+    }
+
     // Send notification
     await admin.from("notifications").insert({
       user_id: user.id,
