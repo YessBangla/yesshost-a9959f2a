@@ -31,8 +31,12 @@ const DashboardSupport = () => {
   const fetchTickets = async () => { if (!user) return; const { data } = await supabase.from("support_tickets").select("*").eq("user_id", user.id).order("created_at", { ascending: false }); setTickets(data || []); setLoading(false); };
   const fetchReplies = async (ticketId: string) => { const { data } = await supabase.from("ticket_replies").select("*").eq("ticket_id", ticketId).order("created_at", { ascending: true }); setReplies(data || []); };
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setShowCreate(true); setSearchParams({}, { replace: true }); } }, [searchParams, setSearchParams]);
+
   useEffect(() => { fetchTickets(); }, [user]);
   useEffect(() => { if (selectedTicket) fetchReplies(selectedTicket); }, [selectedTicket]);
+
 
   const createTicket = async (e: React.FormEvent) => {
     e.preventDefault();
