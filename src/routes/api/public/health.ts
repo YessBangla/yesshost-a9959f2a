@@ -37,8 +37,9 @@ export const Route = createFileRoute("/api/public/health")({
           }),
           timed("web", async () => {
             const { error } = await supabase
-              .from("hosting_plans")
+              .from("site_content")
               .select("id", { head: true, count: "exact" })
+              .eq("is_active", true)
               .limit(1);
             if (error) throw new Error(error.message);
           }),
