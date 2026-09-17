@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { formatAmount } from "@/lib/formatPrice";
 import DataToolbar from "@/components/DataToolbar";
+import DataPagination from "@/components/DataPagination";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
 
 type Order = {
@@ -153,6 +154,14 @@ const OrdersPage = () => {
     });
   }, [orders, orderItems, search, statusFilter]);
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  useEffect(() => { setPage(1); }, [search, statusFilter]);
+  const pagedOrders = useMemo(
+    () => filteredOrders.slice((page - 1) * pageSize, page * pageSize),
+    [filteredOrders, page, pageSize]
+  );
+
   const exportOrders = () => {
     downloadCsv(
       "yesshost-orders",
@@ -242,7 +251,7 @@ const OrdersPage = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((order, i) => {
+          {pagedOrders.map((order, i) => {
             const sc = statusConfig[order.status] || statusConfig.pending;
             const isExpanded = expandedOrder === order.id;
             const items = orderItems[order.id] || [];
@@ -389,6 +398,13 @@ const OrdersPage = () => {
               </motion.div>
             );
           })}
+          <DataPagination
+            total={filteredOrders.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={setPageSize}
+          />
         </div>
       )}
     </div>

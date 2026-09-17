@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Tables } from "@/integrations/supabase/types";
 import { Download } from "lucide-react";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
+import DataPagination from "@/components/DataPagination";
 
 type UserWithRoles = Tables<"profiles"> & { roles: string[]; permissions: string[]; services_count?: number; invoices_total?: number };
 
@@ -58,6 +59,8 @@ const AdminUsers = () => {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user" | "call_center">("all");
+  const [userPage, setUserPage] = useState(1);
+  const [userPageSize, setUserPageSize] = useState(25);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
 
@@ -254,6 +257,8 @@ const AdminUsers = () => {
     return matchSearch && matchRole;
   });
 
+  const pagedUsers = filtered.slice((userPage - 1) * userPageSize, userPage * userPageSize);
+
   const stats = {
     total: users.length,
     admins: users.filter(u => u.roles.includes("admin")).length,
@@ -387,7 +392,7 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((u) => {
+              {pagedUsers.map((u) => {
                 const isAdmin = u.roles.includes("admin");
                 return (
                   <tr key={u.id} className="border-b border-border/30 hover:bg-secondary/10 transition-colors">
@@ -471,9 +476,16 @@ const AdminUsers = () => {
         </div>
         <div className="px-4 py-3 border-t border-border/30 bg-secondary/10">
           <p className="text-xs text-muted-foreground">
-            {isBn ? `${filtered.length} জন ইউজার দেখাচ্ছে` : `Showing ${filtered.length} users`}
+            {isBn ? `মোট ${filtered.length} জন ইউজার` : `${filtered.length} users total`}
             {search && (isBn ? ` "${search}" এর জন্য` : ` for "${search}"`)}
           </p>
+          <DataPagination
+            total={filtered.length}
+            page={userPage}
+            pageSize={userPageSize}
+            onPage={setUserPage}
+            onPageSize={setUserPageSize}
+          />
         </div>
       </div>
 

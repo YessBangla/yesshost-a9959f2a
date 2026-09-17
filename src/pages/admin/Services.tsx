@@ -7,6 +7,7 @@ import {
   Globe, Calendar, CreditCard, Download
 } from "lucide-react";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
+import DataPagination from "@/components/DataPagination";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +38,8 @@ const AdminServices = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ServiceWithUser | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const fetchData = async () => {
     const [svc, prof] = await Promise.all([
@@ -73,6 +76,8 @@ const AdminServices = () => {
     const matchType = typeFilter === "all" || s.service_type === typeFilter;
     return matchSearch && matchStatus && matchType;
   });
+
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const stats = {
     total: services.length,
@@ -167,7 +172,7 @@ const AdminServices = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((s) => {
+              {paged.map((s) => {
                 const sc = statusConfig[s.status] || statusConfig.pending;
                 const isExpiringSoon = s.expiry_date && (new Date(s.expiry_date).getTime() - Date.now()) < 30 * 86400000 && (new Date(s.expiry_date).getTime() - Date.now()) > 0;
                 return (
@@ -220,7 +225,14 @@ const AdminServices = () => {
           </table>
         </div>
         <div className="px-4 py-3 border-t border-border/30 bg-secondary/10">
-          <p className="text-xs text-muted-foreground">{isBn ? `${filtered.length} টি সার্ভিস দেখাচ্ছে` : `Showing ${filtered.length} services`}</p>
+          <p className="text-xs text-muted-foreground">{isBn ? `মোট ${filtered.length} টি সার্ভিস` : `${filtered.length} services total`}</p>
+          <DataPagination
+            total={filtered.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={setPageSize}
+          />
         </div>
       </div>
 

@@ -140,6 +140,20 @@ const Troubleshoot = () => {
           </div>
         )}
 
+        {!result && !running && !error && (
+          <div className="rounded-xl border border-dashed border-border p-8 text-center">
+            <Search className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm font-semibold text-foreground">
+              {bn ? "এখনো কোনো পরীক্ষা চালানো হয়নি" : "No diagnostics run yet"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {bn
+                ? "উপরে আপনার ডোমেইন লিখে পরীক্ষা শুরু করুন — DNS, SSL ও CNAME যাচাই করা হবে।"
+                : "Enter your domain above to check DNS, SSL and CNAME records."}
+            </p>
+          </div>
+        )}
+
         {result && !running && (
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3 text-xs">

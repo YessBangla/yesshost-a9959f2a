@@ -23,6 +23,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import DataToolbar from "@/components/DataToolbar";
+import DataPagination from "@/components/DataPagination";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
@@ -189,9 +190,48 @@ const DashboardBilling = () => {
       return;
     }
 
+    if (selectedPayment === "bkash" || selectedPayment === "nagad") {
+      setPaying(true);
+      try {
+        const { data, error } = await supabase.functions.invoke(
+          selectedPayment === "bkash" ? "bkash-init" : "nagad-init",
+          {
+            body: {
+              amount: Number(payInvoice.amount_bdt),
+              invoice_id: payInvoice.id,
+              invoice_number: payInvoice.invoice_number,
+              payer_reference: user?.email || "",
+              callback_url: `${window.location.origin}/dashboard/billing`,
+            },
+          },
+        );
+        const gatewayUrl = data?.gateway_url || data?.bkashURL || data?.callBackUrl;
+        if (gatewayUrl) {
+          window.location.href = gatewayUrl;
+          return;
+        }
+        toast({
+          title: isBn ? "এই মাধ্যমটি এখনো চালু হয়নি" : "This method isn't live yet",
+          description: isBn
+            ? `${selectedPayment === "bkash" ? "বিকাশ" : "নগদ"} পেমেন্ট এখনো সক্রিয় করা হয়নি। এখন SSLCommerz (কার্ড/মোবাইল ব্যাংকিং), ওয়ালেট অথবা ব্যাংক ট্রান্সফার ব্যবহার করুন।`
+            : `${selectedPayment === "bkash" ? "bKash" : "Nagad"} is not activated yet. Please use SSLCommerz (card/mobile banking), wallet or bank transfer for now.`,
+          variant: "destructive",
+        });
+        if (error) console.error("[billing] gateway init failed", error);
+      } catch (err) {
+        console.error("[billing] payment error", err);
+        toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট প্রসেসিং এ সমস্যা হয়েছে" : "Payment processing error", variant: "destructive" });
+      }
+      setPaying(false);
+      return;
+    }
+
     toast({
-      title: isBn ? "শীঘ্রই আসছে" : "Coming Soon",
-      description: isBn ? "এই পেমেন্ট মেথড শীঘ্রই চালু হবে" : "This payment method will be available soon",
+      title: isBn ? "মাধ্যম নির্বাচন করুন" : "Select a method",
+      description: isBn
+        ? "অনুগ্রহ করে একটি সক্রিয় পেমেন্ট মাধ্যম বেছে নিন।"
+        : "Please choose an available payment method.",
+      variant: "destructive",
     });
   };
 
@@ -296,6 +336,22 @@ const DashboardBilling = () => {
       return okSearch && okStatus;
     });
   }, [invoices, invSearch, invStatus]);
+
+  const [invPage, setInvPage] = useState(1);
+  const [invPageSize, setInvPageSize] = useState(10);
+  useEffect(() => { setInvPage(1); }, [invSearch, invStatus]);
+  const pagedInvoices = useMemo(
+    () => filteredInvoices.slice((invPage - 1) * invPageSize, invPage * invPageSize),
+    [filteredInvoices, invPage, invPageSize]
+  );
+
+  const [histPage, setHistPage] = useState(1);
+  const [histPageSize, setHistPageSize] = useState(10);
+  useEffect(() => { setHistPage(1); }, [dateFrom, dateTo, filterMethod]);
+  const pagedHistory = useMemo(
+    () => paidInvoices.slice((histPage - 1) * histPageSize, histPage * histPageSize),
+    [paidInvoices, histPage, histPageSize]
+  );
 
   const invoiceFilters = useMemo(() => ([
     { value: "all", label: isBn ? "সব" : "All", count: invoices.length },
@@ -447,7 +503,7 @@ const DashboardBilling = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredInvoices.map((inv) => {
+                    {pagedInvoices.map((inv) => {
                       const canPay = inv.status === "unpaid" || inv.status === "overdue";
                       const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
                       return (
@@ -490,6 +546,15 @@ const DashboardBilling = () => {
                     })}
                   </tbody>
                 </table>
+              </div>
+              <div className="px-4 pb-4">
+                <DataPagination
+                  total={filteredInvoices.length}
+                  page={invPage}
+                  pageSize={invPageSize}
+                  onPage={setInvPage}
+                  onPageSize={setInvPageSize}
+                />
               </div>
             </div>
           )}
@@ -573,7 +638,7 @@ const DashboardBilling = () => {
             />
           ) : (
             <div className="space-y-3">
-              {paidInvoices.map((inv) => {
+              {pagedHistory.map((inv) => {
                 const StatusIcon = statusIcons[inv.status] || CheckCircle2;
                 const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
                 const pmLabel = inv.payment_method
@@ -651,6 +716,13 @@ const DashboardBilling = () => {
                   </div>
                 );
               })}
+              <DataPagination
+                total={paidInvoices.length}
+                page={histPage}
+                pageSize={histPageSize}
+                onPage={setHistPage}
+                onPageSize={setHistPageSize}
+              />
             </div>
           )}
         </>
@@ -747,6 +819,13 @@ const DashboardBilling = () => {
                   );
                 })}
               </div>
+              {paymentMethods.some((pm) => !pm.ready) && (
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  {isBn
+                    ? "বিকাশ ও নগদ সরাসরি এখনো চালু হয়নি। তবে SSLCommerz দিয়ে বিকাশ, নগদ, কার্ড ও মোবাইল ব্যাংকিং — সবই ব্যবহার করা যায়।"
+                    : "Direct bKash and Nagad aren't live yet. SSLCommerz already covers bKash, Nagad, cards and mobile banking."}
+                </p>
+              )}
 
               {/* Wallet balance indicator */}
               {selectedPayment === "wallet" && (
