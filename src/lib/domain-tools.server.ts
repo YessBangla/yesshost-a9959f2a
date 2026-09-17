@@ -255,3 +255,98 @@ export async function transferStatus(
     fetchedAt: new Date().toISOString(),
   };
 }
+
+export type InvoicePaymentStatus = {
+  invoiceNumber: string;
+  status: string;
+  paid: boolean;
+  amount: number;
+  paidAt: string | null;
+  paymentMethod: string | null;
+  dueDate: string | null;
+  createdAt: string;
+  description: string | null;
+  transaction: { id: string; amount: number; method: string | null; at: string; status: string } | null;
+  fetchedAt: string;
+};
+
+export async function invoicePaymentStatus(
+  supabase: DashboardClient,
+  userId: string,
+  invoiceNumber: string,
+): Promise<InvoicePaymentStatus | null> {
+  const { data: invoice, error } = await supabase
+    .from("invoices")
+    .select("id, invoice_number, status, amount_bdt, paid_at, payment_method, due_date, created_at, description")
+    .eq("user_id", userId)
+    .eq("invoice_number", invoiceNumber)
+    .maybeSingle();
+  if (error) throw new DomainToolsError("server_error", error.message);
+  if (!invoice) return null;
+
+  const paid = invoice.status === "paid" || !!invoice.paid_at;
+  let transaction: InvoicePaymentStatus["transaction"] = null;
+  if (paid) {
+    const { data: tx } = await supabase
+      .from("wallet_transactions")
+      .select("id, amount_bdt, payment_method, created_at, status, description")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    const hit = (tx ?? []).find((t) => (t.description ?? "").includes(invoice.invoice_number));
+    if (hit) {
+      transaction = {
+        id: hit.id,
+        amount: Number(hit.amount_bdt ?? 0),
+        method: hit.payment_method ?? null,
+        at: hit.created_at,
+        status: String(hit.status ?? ""),
+      };
+    }
+  }
+
+  return {
+    invoiceNumber: invoice.invoice_number,
+    status: invoice.status,
+    paid,
+    amount: Number(invoice.amount_bdt ?? 0),
+    paidAt: invoice.paid_at,
+    paymentMethod: invoice.payment_method,
+    dueDate: invoice.due_date,
+    createdAt: invoice.created_at,
+    description: invoice.description,
+    transaction,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
+export async function transferFollowUp(
+  supabase: DashboardClient,
+  userId: string,
+  ticketNumber: string,
+  message: string,
+): Promise<{ ticketNumber: string; at: string }> {
+  const text = message.trim();
+  if (text.length < 10) throw new DomainToolsError("note_too_short");
+  const { data: ticket, error } = await supabase
+    .from("support_tickets")
+    .select("id, ticket_number, status")
+    .eq("user_id", userId)
+    .eq("ticket_number", ticketNumber)
+    .maybeSingle();
+  if (error) throw new DomainToolsError("server_error", error.message);
+  if (!ticket) throw new DomainToolsError("not_owner");
+
+  const { error: replyErr } = await supabase.from("ticket_replies").insert({
+    ticket_id: ticket.id,
+    user_id: userId,
+    message: text,
+  });
+  if (replyErr) throw new DomainToolsError("server_error", replyErr.message);
+  await supabase
+    .from("support_tickets")
+    .update({ status: "open", priority: "high", updated_at: new Date().toISOString() })
+    .eq("id", ticket.id);
+
+  return { ticketNumber: ticket.ticket_number, at: new Date().toISOString() };
+}
