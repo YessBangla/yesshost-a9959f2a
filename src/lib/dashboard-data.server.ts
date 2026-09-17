@@ -239,12 +239,8 @@ export type ChatMessage = {
 };
 
 export async function loadChatMessages(chatId: string): Promise<ChatMessage[]> {
-  const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("live_chat_messages")
-    .select("id, sender_type, message, created_at")
-    .eq("chat_id", chatId)
-    .order("created_at");
-  if (error) throw new Error(error.message);
-  return (data ?? []) as ChatMessage[];
+  // Chat transcripts are no longer readable through the public API, so this
+  // read runs with the service-role client scoped to a single chat id.
+  const { readChatMessages } = await import("./live-chat.server");
+  return readChatMessages(chatId);
 }
