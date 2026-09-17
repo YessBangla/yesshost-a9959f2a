@@ -171,7 +171,7 @@ const AdminServices = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((s) => {
+              {paged.map((s) => {
                 const sc = statusConfig[s.status] || statusConfig.pending;
                 const isExpiringSoon = s.expiry_date && (new Date(s.expiry_date).getTime() - Date.now()) < 30 * 86400000 && (new Date(s.expiry_date).getTime() - Date.now()) > 0;
                 return (
@@ -224,7 +224,14 @@ const AdminServices = () => {
           </table>
         </div>
         <div className="px-4 py-3 border-t border-border/30 bg-secondary/10">
-          <p className="text-xs text-muted-foreground">{isBn ? `${filtered.length} টি সার্ভিস দেখাচ্ছে` : `Showing ${filtered.length} services`}</p>
+          <p className="text-xs text-muted-foreground">{isBn ? `মোট ${filtered.length} টি সার্ভিস` : `${filtered.length} services total`}</p>
+          <DataPagination
+            total={filtered.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={setPageSize}
+          />
         </div>
       </div>
 
