@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import logoWhite from "@/assets/logo-white.png";
 import bkashLogo from "@/assets/partners/bkash.png";
 import nagadLogo from "@/assets/partners/nagad.png";

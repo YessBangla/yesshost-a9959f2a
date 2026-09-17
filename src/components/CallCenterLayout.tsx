@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "@/lib/router-compat";
 import {
   LayoutDashboard, LogOut, Menu, Globe, Headphones,
   ShoppingCart, MessageCircle, HeadphonesIcon, ChevronRight,
@@ -9,7 +9,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-mo
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import logoWhite from "@/assets/logo-white.png";
 
 const SIDEBAR_W = 260;

@@ -1,8 +1,8 @@
 import { Phone, MessageCircle, TicketCheck, Mail } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 
 const NeedHelpSection = () => {
   const { lang } = useLanguage();

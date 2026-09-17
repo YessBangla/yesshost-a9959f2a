@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Home, ArrowLeft, Search } from "lucide-react";

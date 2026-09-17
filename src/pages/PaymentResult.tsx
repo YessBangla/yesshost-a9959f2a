@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link } from "@/lib/router-compat";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PublicLayout from "@/components/PublicLayout";
 

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { motion, AnimatePresence } from "framer-motion";
 import { Server, Globe, HardDrive, Shield, Mail, Layers, ArrowRight, Check, Star, Zap, Clock, Headphones, ChevronDown, ShoppingCart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";

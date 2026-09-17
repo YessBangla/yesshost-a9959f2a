@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ShoppingCart, Trash2, ArrowRight, Globe, Server, Palette } from "lucide-react";
 import { useCart, CartItem } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { formatPrice, formatAmount } from "@/lib/formatPrice";
 
 const itemIcon = (type: CartItem["type"]) => {

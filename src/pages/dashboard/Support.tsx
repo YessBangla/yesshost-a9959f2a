@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 
 import { HeadphonesIcon, Plus, Send } from "lucide-react";
 import { SupportSkeleton } from "@/components/DashboardSkeleton";

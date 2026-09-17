@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Send, Loader2, Users, Lock, CheckCircle, Clock, ArrowLeft, Smile } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { supabase } from "@/integrations/supabase/client";

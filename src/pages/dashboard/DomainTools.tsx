@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link } from "@/lib/router-compat";
 import { Globe, RefreshCw, ArrowRightLeft, Search, Clock, Loader2, ShieldCheck } from "lucide-react";
 import DomainSearch from "@/components/DomainSearch";
 import EmptyState from "@/components/EmptyState";

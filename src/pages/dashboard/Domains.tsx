@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { logApiError } from "@/lib/errorReporting";
 
 const DashboardDomains = () => {

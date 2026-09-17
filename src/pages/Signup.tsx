@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, ArrowLeft, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock, ShoppingBag, Layers, HardDrive } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 
 import heroImg from "@/assets/hero-corporate.png";
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
