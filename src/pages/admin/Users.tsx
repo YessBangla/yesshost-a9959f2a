@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Tables } from "@/integrations/supabase/types";
 import { Download } from "lucide-react";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
+import DataPagination from "@/components/DataPagination";
 
 type UserWithRoles = Tables<"profiles"> & { roles: string[]; permissions: string[]; services_count?: number; invoices_total?: number };
 
