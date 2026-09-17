@@ -108,6 +108,7 @@ const DashboardDomainTools = () => {
   const [transferYears, setTransferYears] = useState<number>(1);
   const [submitting, setSubmitting] = useState(false);
   const [transferTicket, setTransferTicket] = useState<string | null>(null);
+  const [transferInvoice, setTransferInvoice] = useState<{ number: string; amount: number; dueDate: string } | null>(null);
   const [ack, setAck] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [transferFormError, setTransferFormError] = useState<string | null>(null);
@@ -321,6 +322,11 @@ const DashboardDomainTools = () => {
           : `Transfer request received (${res.data.ticketNumber})`,
       });
       setTransferTicket(res.data.ticketNumber);
+      setTransferInvoice({
+        number: res.data.invoiceNumber,
+        amount: res.data.quote.totals.total,
+        dueDate: res.data.dueDate,
+      });
     } catch (err) {
       logApiError("submitDomainTransfer", err, { area: "domain" });
       setTransferFormError(bn ? "সংযোগ সমস্যা — আবার চেষ্টা করুন।" : "Connection problem — please try again.");
@@ -1085,6 +1091,29 @@ const DashboardDomainTools = () => {
                     {bn ? "স্ট্যাটাস আপডেট" : "Refresh status"}
                   </button>
                 </div>
+
+                {transferInvoice && (
+                  <div className="rounded-xl border border-border bg-secondary/40 p-4 space-y-2">
+                    <p className="text-xs font-bold text-foreground">
+                      {bn ? "ট্রান্সফার ইনভয়েস তৈরি হয়েছে" : "Transfer invoice created"}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{transferInvoice.number}</span>
+                      <span className="font-semibold text-foreground">{formatPriceBDT(transferInvoice.amount, lang)}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      {bn
+                        ? `পরিশোধের শেষ তারিখ ${transferInvoice.dueDate}। পেমেন্ট সম্পন্ন হলে বিলিং পাতায় দেখা যাবে।`
+                        : `Due by ${transferInvoice.dueDate}. Once paid it appears on your billing page.`}
+                    </p>
+                    <Link
+                      to="/dashboard/billing"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary"
+                    >
+                      {bn ? "বিলিং পাতায় পরিশোধ করুন" : "Pay on billing page"}
+                    </Link>
+                  </div>
+                )}
 
                 <div className="space-y-3">
                   {(statusQuery.data?.stages ?? [{ key: "received", done: true, current: true, at: null }]).map((s) => (

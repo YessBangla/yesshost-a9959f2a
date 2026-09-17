@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getLiveChatMessages } from "@/lib/dashboard.functions";
+import { getLiveChatMessages, startLiveChat, sendLiveChatMessage } from "@/lib/dashboard.functions";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2, Smile, Phone, PhoneCall, Mail } from "lucide-react";
 import { Link } from "@/lib/router-compat";
@@ -66,11 +66,16 @@ const LiveChatWidget = () => {
   }, []);
 
   const loadMessages = useServerFn(getLiveChatMessages);
+  const startChatFn = useServerFn(startLiveChat);
+  const sendChatMessage = useServerFn(sendLiveChatMessage);
   const historyQuery = useQuery({
     queryKey: ["live-chat", "messages", chatId],
     queryFn: () => loadMessages({ data: { chatId: chatId as string } }),
     enabled: !!chatId,
-    staleTime: 10_000,
+    staleTime: 3_000,
+    // Visitor transcripts are private now, so the widget polls the server
+    // instead of relying on an anonymous realtime subscription.
+    refetchInterval: open ? 5_000 : false,
   });
 
   // Hydrate the server-rendered transcript into local state before the first
@@ -129,25 +134,23 @@ const LiveChatWidget = () => {
 
   const startChat = async () => {
     if (!name.trim() || !email.trim() || !phone.trim()) return;
-    const { data, error } = await supabase
-      .from("live_chats")
-      .insert({ visitor_name: name.trim(), visitor_email: email.trim(), visitor_phone: phone.trim() })
-      .select("id")
-      .single();
-    if (error || !data) return;
-    const id = data.id;
-    localStorage.setItem(CHAT_STORAGE_KEY, id);
-    setChatId(id);
-    setStarted(true);
-
-    // Auto greeting
-    await supabase.from("live_chat_messages").insert({
-      chat_id: id,
-      sender_type: "admin",
-      message: bn
-        ? `হ্যালো ${name.trim()}! 👋 আপনাকে স্বাগতম। কিভাবে সাহায্য করতে পারি?`
-        : `Hello ${name.trim()}! 👋 Welcome! How can we help you?`,
-    });
+    try {
+      const { chatId: id } = await startChatFn({
+        data: {
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          greeting: bn
+            ? `হ্যালো ${name.trim()}! 👋 আপনাকে স্বাগতম। কিভাবে সাহায্য করতে পারি?`
+            : `Hello ${name.trim()}! 👋 Welcome! How can we help you?`,
+        },
+      });
+      localStorage.setItem(CHAT_STORAGE_KEY, id);
+      setChatId(id);
+      setStarted(true);
+    } catch (err) {
+      console.error("Could not start chat:", err);
+    }
   };
 
   const sendMessage = async () => {
@@ -155,12 +158,14 @@ const LiveChatWidget = () => {
     if (!msg || !chatId) return;
     setInput("");
     setSending(true);
-    await supabase.from("live_chat_messages").insert({
-      chat_id: chatId,
-      sender_type: "visitor",
-      message: msg,
-    });
-    setSending(false);
+    try {
+      const { message } = await sendChatMessage({ data: { chatId, message: msg } });
+      setMessages((prev) => (prev.some((m) => m.id === message.id) ? prev : [...prev, message]));
+    } catch (err) {
+      console.error("Could not send message:", err);
+    } finally {
+      setSending(false);
+    }
 
     // Trigger AI auto-reply
     setAdminTyping(true);
@@ -168,6 +173,7 @@ const LiveChatWidget = () => {
       await supabase.functions.invoke("chat-ai-reply", {
         body: { chat_id: chatId, message: msg, lang },
       });
+      await historyQuery.refetch();
     } catch (err) {
       console.error("AI reply error:", err);
     } finally {
