@@ -24,13 +24,13 @@ const isBnUI = () => {
 };
 
 class ErrorBoundary extends Component<Props, State> {
-  public state: State = { hasError: false, error: null, entry: null, copied: false };
+  public override state: State = { hasError: false, error: null, entry: null, copied: false };
 
   public static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("ErrorBoundary caught:", error, errorInfo);
     const entry = reportError({
       area: "render",
@@ -60,7 +60,7 @@ class ErrorBoundary extends Component<Props, State> {
     }
   };
 
-  public render() {
+  public override render() {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
 

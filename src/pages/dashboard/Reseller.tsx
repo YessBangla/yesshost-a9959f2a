@@ -52,7 +52,7 @@ const ResellerDashboard = () => {
     // Fall back to the user's reseller service price when the package has no linked service
     if (pkgs.length && pkgs.some(p => !p.service?.price_bdt)) {
       const { data: svc } = await supabase.from("services").select("id, price_bdt, billing_cycle, name").eq("user_id", user.id).eq("service_type", "reseller").order("created_at", { ascending: false }).limit(1);
-      if (svc?.[0]?.price_bdt > 0) pkgs = pkgs.map(p => (p.service?.price_bdt ? p : { ...p, service: svc[0] }));
+      if ((svc?.[0]?.price_bdt ?? 0) > 0) pkgs = pkgs.map(p => (p.service?.price_bdt ? p : { ...p, service: svc![0] }));
     }
     setPackages(pkgs);
     if (pkgs.length === 0) { setSelectedPkg(null); setAccounts([]); setLoading(false); return; }

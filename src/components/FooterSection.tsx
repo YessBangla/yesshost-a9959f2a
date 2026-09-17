@@ -186,9 +186,9 @@ const FooterSection = () => {
                   >
                     {p.type === "logo" ? (
                       <img src={p.logo} alt={p.name} className="h-4 sm:h-5 w-auto object-contain brightness-0 invert opacity-50 group-hover:opacity-80 transition-all" />
-                    ) : (
+                    ) : p.icon ? (
                       <p.icon className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />
-                    )}
+                    ) : null}
                     <span className="text-[11px] font-medium text-white/40 group-hover:text-white/70 transition-colors">{p.name}</span>
                   </Link>
                 ))}
