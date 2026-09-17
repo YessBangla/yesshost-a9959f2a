@@ -7,16 +7,33 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// SSLCommerz Sandbox credentials (replace with live credentials via secrets)
-const SSLCOMMERZ_STORE_ID = Deno.env.get("SSLCOMMERZ_STORE_ID") || "testbox";
-const SSLCOMMERZ_STORE_PASS = Deno.env.get("SSLCOMMERZ_STORE_PASS") || "qwerty";
-const SSLCOMMERZ_IS_SANDBOX = !Deno.env.get("SSLCOMMERZ_STORE_ID"); // sandbox if no live credentials
-const SSLCOMMERZ_BASE = SSLCOMMERZ_IS_SANDBOX
-  ? "https://sandbox.sslcommerz.com"
-  : "https://securepay.sslcommerz.com";
-
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+// Credentials come from the admin Payment Gateway settings (server-only table),
+// with environment secrets as a fallback.
+async function loadSslCfg() {
+  const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const { data } = await db
+    .from("payment_gateway_settings")
+    .select("enabled, is_sandbox, credentials")
+    .eq("gateway", "sslcommerz")
+    .maybeSingle();
+
+  const creds = (data?.credentials ?? {}) as Record<string, string>;
+  const storeId = creds.store_id || Deno.env.get("SSLCOMMERZ_STORE_ID") || "testbox";
+  const storePass = creds.store_pass || Deno.env.get("SSLCOMMERZ_STORE_PASS") || "qwerty";
+  const configured = !!creds.store_id || !!Deno.env.get("SSLCOMMERZ_STORE_ID");
+  const isSandbox = data ? !!data.is_sandbox : !configured;
+
+  return {
+    storeId,
+    storePass,
+    isSandbox,
+    enabled: data ? !!data.enabled : configured,
+    base: isSandbox ? "https://sandbox.sslcommerz.com" : "https://securepay.sslcommerz.com",
+  };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -33,12 +50,23 @@ serve(async (req) => {
       );
     }
 
+    const cfg = await loadSslCfg();
+    if (!cfg.enabled) {
+      return new Response(
+        JSON.stringify({
+          error: "SSLCommerz is not enabled",
+          message: "SSLCommerz এখনো চালু করা হয়নি। অ্যাডমিন প্যানেলের পেমেন্ট গেটওয়ে সেটিংসে তথ্য দিন।",
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const tran_id = `TXN-${invoice_id}-${Date.now()}`;
 
     // Prepare SSLCommerz session
     const formData = new URLSearchParams();
-    formData.append("store_id", SSLCOMMERZ_STORE_ID);
-    formData.append("store_passwd", SSLCOMMERZ_STORE_PASS);
+    formData.append("store_id", cfg.storeId);
+    formData.append("store_passwd", cfg.storePass);
     formData.append("total_amount", String(amount));
     formData.append("currency", "BDT");
     formData.append("tran_id", tran_id);
@@ -57,7 +85,7 @@ serve(async (req) => {
     formData.append("product_category", "Digital Service");
     formData.append("product_profile", "non-physical-goods");
 
-    const response = await fetch(`${SSLCOMMERZ_BASE}/gwprocess/v4/api.php`, {
+    const response = await fetch(`${cfg.base}/gwprocess/v4/api.php`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString(),
@@ -79,7 +107,7 @@ serve(async (req) => {
           gateway_url: data.GatewayPageURL,
           tran_id,
           sessionkey: data.sessionkey,
-          is_sandbox: SSLCOMMERZ_IS_SANDBOX,
+          is_sandbox: cfg.isSandbox,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );

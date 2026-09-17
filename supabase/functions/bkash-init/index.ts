@@ -7,33 +7,51 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// bKash Sandbox credentials (replace with live credentials via secrets)
-const BKASH_APP_KEY = Deno.env.get("BKASH_APP_KEY") || "";
-const BKASH_APP_SECRET = Deno.env.get("BKASH_APP_SECRET") || "";
-const BKASH_USERNAME = Deno.env.get("BKASH_USERNAME") || "";
-const BKASH_PASSWORD = Deno.env.get("BKASH_PASSWORD") || "";
-const BKASH_IS_SANDBOX = !Deno.env.get("BKASH_APP_KEY");
-const BKASH_BASE = BKASH_IS_SANDBOX
-  ? "https://tokenized.sandbox.bka.sh/v1.2.0-beta"
-  : "https://tokenized.pay.bka.sh/v1.2.0-beta";
-
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-async function getToken(): Promise<string | null> {
-  if (!BKASH_APP_KEY || !BKASH_APP_SECRET) return null;
+// Credentials come from the admin Payment Gateway settings (server-only table),
+// with environment secrets as a fallback.
+async function loadBkashCfg() {
+  const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const { data } = await db
+    .from("payment_gateway_settings")
+    .select("enabled, is_sandbox, credentials")
+    .eq("gateway", "bkash")
+    .maybeSingle();
 
+  const creds = (data?.credentials ?? {}) as Record<string, string>;
+  const appKey = creds.app_key || Deno.env.get("BKASH_APP_KEY") || "";
+  const appSecret = creds.app_secret || Deno.env.get("BKASH_APP_SECRET") || "";
+  const username = creds.username || Deno.env.get("BKASH_USERNAME") || "";
+  const password = creds.password || Deno.env.get("BKASH_PASSWORD") || "";
+  const isSandbox = data ? !!data.is_sandbox : !appKey;
+
+  return {
+    appKey,
+    appSecret,
+    username,
+    password,
+    isSandbox,
+    enabled: (data ? !!data.enabled : !!appKey) && !!appKey && !!appSecret,
+    base: isSandbox
+      ? "https://tokenized.sandbox.bka.sh/v1.2.0-beta"
+      : "https://tokenized.pay.bka.sh/v1.2.0-beta",
+  };
+}
+
+async function getToken(cfg: Awaited<ReturnType<typeof loadBkashCfg>>): Promise<string | null> {
   try {
-    const res = await fetch(`${BKASH_BASE}/tokenized/checkout/token/grant`, {
+    const res = await fetch(`${cfg.base}/tokenized/checkout/token/grant`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        username: BKASH_USERNAME,
-        password: BKASH_PASSWORD,
+        username: cfg.username,
+        password: cfg.password,
       },
       body: JSON.stringify({
-        app_key: BKASH_APP_KEY,
-        app_secret: BKASH_APP_SECRET,
+        app_key: cfg.appKey,
+        app_secret: cfg.appSecret,
       }),
     });
     const data = await res.json();
@@ -52,18 +70,19 @@ serve(async (req) => {
   try {
     const { invoice_id, amount, payer_reference, callback_url } = await req.json();
 
-    if (!BKASH_APP_KEY) {
+    const cfg = await loadBkashCfg();
+    if (!cfg.enabled) {
       return new Response(
         JSON.stringify({
           error: "bKash credentials not configured",
           is_sandbox: true,
-          message: "bKash পেমেন্ট গেটওয়ে এখনো কনফিগার করা হয়নি। লাইভ credentials যোগ করুন।",
+          message: "bKash পেমেন্ট গেটওয়ে এখনো চালু হয়নি। অ্যাডমিন প্যানেলের পেমেন্ট গেটওয়ে সেটিংসে তথ্য দিন।",
         }),
         { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const token = await getToken();
+    const token = await getToken(cfg);
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Failed to get bKash token" }),
@@ -71,12 +90,12 @@ serve(async (req) => {
       );
     }
 
-    const paymentRes = await fetch(`${BKASH_BASE}/tokenized/checkout/create`, {
+    const paymentRes = await fetch(`${cfg.base}/tokenized/checkout/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: token,
-        "X-APP-Key": BKASH_APP_KEY,
+        "X-APP-Key": cfg.appKey,
       },
       body: JSON.stringify({
         mode: "0011",
@@ -102,7 +121,7 @@ serve(async (req) => {
           success: true,
           bkash_url: paymentData.bkashURL,
           payment_id: paymentData.paymentID,
-          is_sandbox: BKASH_IS_SANDBOX,
+          is_sandbox: cfg.isSandbox,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
