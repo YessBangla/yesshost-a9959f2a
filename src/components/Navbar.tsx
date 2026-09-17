@@ -108,9 +108,10 @@ const Navbar = () => {
         { label: tr("nav.emailHosting"), href: "/services/email-hosting", icon: Mail, desc: isBn ? "প্রফেশনাল ইমেইল সার্ভিস" : "Professional email service" },
         { label: tr("nav.radioHosting"), href: "/services/radio-hosting", icon: Radio, desc: isBn ? "অনলাইন রেডিও স্ট্রিমিং" : "Online radio streaming" },
         { label: tr("nav.graphicsDesign"), href: "/services/graphics-design", icon: Palette, desc: isBn ? "লোগো, ব্যানার ও গ্রাফিক্স" : "Logo, banner & graphics" },
+        { label: isBn ? "চ্যাট রুম" : "Chat Rooms", href: "/chat-rooms", icon: Users, desc: isBn ? "কমিউনিটি লাইভ চ্যাট রুম" : "Community live chat rooms" },
       ],
     },
-    { label: tr("nav.themes"), href: "/themes", blink: true, minor: true },
+    { label: tr("nav.themes"), href: "/themes", blink: true },
     { label: isBn ? "চ্যাট রুম" : "Chat Rooms", href: "/chat-rooms", minor: true },
   ];
 
