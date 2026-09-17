@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { logApiError } from "@/lib/errorReporting";
 import { FileText, Eye, CreditCard, Building2, Loader2, History, Receipt, CheckCircle2, Clock, XCircle, RotateCcw, AlertTriangle, CalendarIcon, X, Filter, Download, Wallet } from "lucide-react";
 import { BillingSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
@@ -87,9 +88,10 @@ const DashboardBilling = () => {
 
   const fetchWalletBalance = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("wallet_transactions").select("*")
       .eq("user_id", user.id).eq("status", "completed");
+    if (error) logApiError("wallet_transactions.select", error, { area: "billing" });
     const balance = (data || []).reduce((sum: number, t: any) => {
       const isCredit = t.type === "deposit" || t.type === "refund";
       return isCredit ? sum + Number(t.amount_bdt) : sum - Number(t.amount_bdt);
@@ -99,7 +101,12 @@ const DashboardBilling = () => {
 
   const fetchInvoices = () => {
     if (!user) return;
-    supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => { setInvoices(data || []); setLoading(false); });
+    supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (error) logApiError("invoices.select", error, { area: "billing" });
+        setInvoices(data || []);
+        setLoading(false);
+      });
   };
 
   useEffect(() => { fetchInvoices(); fetchWalletBalance(); }, [user]);

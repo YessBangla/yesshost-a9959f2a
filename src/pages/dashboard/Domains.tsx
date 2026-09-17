@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
+import { logApiError } from "@/lib/errorReporting";
 
 const DashboardDomains = () => {
   const { user } = useAuth();
@@ -21,7 +22,11 @@ const DashboardDomains = () => {
     if (!user) return;
     supabase.from("services").select("*").eq("user_id", user.id).eq("service_type", "domain")
       .order("created_at", { ascending: false })
-      .then(({ data }) => { setDomains(data || []); setLoading(false); });
+      .then(({ data, error }) => {
+        if (error) logApiError("services.select(domain)", error, { area: "domain" });
+        setDomains(data || []);
+        setLoading(false);
+      });
   }, [user]);
 
   const filtered = domains.filter(d =>
