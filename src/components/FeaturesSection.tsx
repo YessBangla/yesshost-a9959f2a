@@ -100,7 +100,7 @@ const FeaturesSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.04 }}
-                className="bg-card border border-border rounded-xl p-4 md:p-5 group cursor-pointer h-full hover:border-primary/25 hover:shadow-sm transition-all"
+                className="bg-card border border-border rounded-xl p-4 md:p-5 group cursor-pointer h-full hover:border-primary/25 hover:shadow-xs transition-all"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center mb-3 group-hover:bg-primary/12 transition-colors">
                   <service.icon className="w-5 h-5 text-primary" />

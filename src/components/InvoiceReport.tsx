@@ -142,7 +142,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
         {/* Toolbar */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur-xs">
           <h2 className="text-lg font-bold text-foreground">
             {isBn ? "ইনভয়েস রিপোর্ট" : "Invoice Report"}
           </h2>

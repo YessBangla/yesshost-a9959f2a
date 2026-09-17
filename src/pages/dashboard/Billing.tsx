@@ -391,7 +391,7 @@ const DashboardBilling = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.id
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-primary text-primary-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -533,7 +533,7 @@ const DashboardBilling = () => {
               <select
                 value={filterMethod}
                 onChange={(e) => setFilterMethod(e.target.value)}
-                className="h-8 text-xs rounded-lg border border-border bg-secondary/20 px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                className="h-8 text-xs rounded-lg border border-border bg-secondary/20 px-2 py-1 text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
               >
                 <option value="all">{isBn ? "সব মেথড" : "All Methods"}</option>
                 <option value="sslcommerz">SSLCommerz</option>

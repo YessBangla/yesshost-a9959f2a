@@ -10,7 +10,7 @@ export const OverviewSkeleton = () => (
         <div key={i} className="glass-card p-4 sm:p-5 rounded-xl space-y-3">
           <div className="flex items-center justify-between">
             <Skeleton className="w-10 h-10 rounded-xl" />
-            <Skeleton className="w-4 h-4 rounded" />
+            <Skeleton className="w-4 h-4 rounded-sm" />
           </div>
           <Skeleton className="h-7 w-16" />
           <Skeleton className="h-3 w-24" />
@@ -246,7 +246,7 @@ export const DomainsSkeleton = () => (
     <div className="grid grid-cols-3 gap-3">
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="glass-card rounded-xl p-4 text-center space-y-2">
-          <Skeleton className="w-5 h-5 rounded mx-auto" />
+          <Skeleton className="w-5 h-5 rounded-sm mx-auto" />
           <Skeleton className="h-6 w-8 mx-auto" />
           <Skeleton className="h-3 w-12 mx-auto" />
         </div>

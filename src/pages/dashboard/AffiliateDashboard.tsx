@@ -347,12 +347,12 @@ const AffiliateDashboard = () => {
               </label>
               <input value={payoutForm.account} onChange={e => setPayoutForm(f => ({ ...f, account: e.target.value }))}
                 placeholder={payoutForm.method === "bank" ? "AC 1234567890 — John Doe" : "01XXXXXXXXX"}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20" />
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/20" />
             </div>
             <div>
               <label className="text-xs font-medium text-foreground mb-1.5 block">{bn ? "পরিমাণ (৳)" : "Amount (৳)"}</label>
               <input type="number" min={500} value={payoutForm.amount} onChange={e => setPayoutForm(f => ({ ...f, amount: e.target.value }))}
-                placeholder="500" className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20" />
+                placeholder="500" className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/20" />
             </div>
             <button onClick={requestPayout} disabled={requesting}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50">

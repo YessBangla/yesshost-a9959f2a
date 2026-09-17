@@ -96,13 +96,13 @@ const Contact = () => {
                 }
               }}>
                 <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={bn ? "আপনার নাম" : "Your Name"} required
-                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder={bn ? "ইমেইল ঠিকানা" : "Email Address"} type="email" required
-                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 <input value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} placeholder={bn ? "বিষয়" : "Subject"} required
-                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder={bn ? "আপনার মেসেজ লিখুন..." : "Write your message..."} rows={4} required
-                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 resize-none" />
                 <button type="submit" disabled={sending} className="w-full py-3.5 font-semibold rounded-xl gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
                   {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : sent ? <CheckCircle className="w-4 h-4" /> : <Send className="w-4 h-4" />}
                   {sending ? (bn ? "পাঠানো হচ্ছে..." : "Sending...") : sent ? (bn ? "পাঠানো হয়েছে!" : "Sent!") : (bn ? "পাঠান" : "Send Message")}

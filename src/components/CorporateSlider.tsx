@@ -177,7 +177,7 @@ const CorporateSlider = () => {
         </button>
 
         {/* Dots */}
-        <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm z-10">
+        <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-xs z-10">
           {slides.map((_, i) => (
             <button
               key={i}
@@ -194,7 +194,7 @@ const CorporateSlider = () => {
         </div>
 
         {/* Slide counter */}
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 px-3 py-1 rounded-full bg-black/20 backdrop-blur-sm text-white/60 text-xs font-mono z-10">
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 px-3 py-1 rounded-full bg-black/20 backdrop-blur-xs text-white/60 text-xs font-mono z-10">
           {String(current + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
         </div>
       </section>

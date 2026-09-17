@@ -149,7 +149,7 @@ const AdminStaff = () => {
               value={addSearch}
               onChange={e => setAddSearch(e.target.value)}
               placeholder={bn ? "নাম বা ফোন দিয়ে গ্রাহক খুঁজুন" : "Search customer by name or phone"}
-              className="flex-1 bg-transparent py-2.5 text-sm outline-none min-h-[44px]"
+              className="flex-1 bg-transparent py-2.5 text-sm outline-hidden min-h-[44px]"
             />
           </div>
           <div className="space-y-2">
@@ -181,7 +181,7 @@ const AdminStaff = () => {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={bn ? "স্টাফ খুঁজুন" : "Search staff"}
-            className="flex-1 bg-transparent py-3 text-sm outline-none min-h-[44px]"
+            className="flex-1 bg-transparent py-3 text-sm outline-hidden min-h-[44px]"
           />
         </div>
         <div className="divide-y divide-border">

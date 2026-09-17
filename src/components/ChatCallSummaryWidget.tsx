@@ -123,8 +123,8 @@ const ChatCallSummaryWidget = ({ userId, bn }: Props) => {
     return (
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-4 h-4 rounded bg-muted animate-pulse" />
-          <div className="w-32 h-4 rounded bg-muted animate-pulse" />
+          <div className="w-4 h-4 rounded-sm bg-muted animate-pulse" />
+          <div className="w-32 h-4 rounded-sm bg-muted animate-pulse" />
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (

@@ -206,7 +206,7 @@ const ResellerHosting = () => {
                     {mobileDurations.map(d => (
                       <button key={d.key} onClick={() => setDuration(d)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
-                          duration.key === d.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                          duration.key === d.key ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
                         }`}>
                         {bn ? d.shortBn : d.shortEn}
                         {d.discount > 0 && <span className="ml-0.5 text-primary text-[9px]">-{d.discount}%</span>}
@@ -218,7 +218,7 @@ const ResellerHosting = () => {
                     {BILLING_DURATIONS.map(d => (
                       <button key={d.key} onClick={() => setDuration(d)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                          duration.key === d.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                          duration.key === d.key ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
                         }`}>
                         {bn ? d.labelBn : d.labelEn}
                         {d.discount > 0 && <span className="ml-1 text-primary text-[9px]">-{d.discount}%</span>}

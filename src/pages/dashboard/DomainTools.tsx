@@ -241,7 +241,7 @@ const DashboardDomainTools = () => {
               onChange={(e) => setTransferDomain(e.target.value)}
               required
               placeholder="example.com"
-              className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+              className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm"
             />
           </div>
           <div>
@@ -250,7 +250,7 @@ const DashboardDomainTools = () => {
               value={eppCode}
               onChange={(e) => setEppCode(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+              className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm"
             />
           </div>
           <div>
@@ -259,7 +259,7 @@ const DashboardDomainTools = () => {
               value={transferNote}
               onChange={(e) => setTransferNote(e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm resize-none"
+              className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm resize-none"
             />
           </div>
           <button
@@ -280,7 +280,7 @@ const DashboardDomainTools = () => {
               value={whoisDomain}
               onChange={(e) => setWhoisDomain(e.target.value)}
               placeholder="example.com"
-              className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+              className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm"
             />
             <button
               type="submit"

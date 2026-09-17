@@ -89,7 +89,7 @@ const DashboardDomains = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={bn ? "ডোমেইন খুঁজুন..." : "Search domains..."}
-            className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+            className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm"
           />
         </div>
       )}

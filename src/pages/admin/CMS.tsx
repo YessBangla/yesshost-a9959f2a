@@ -102,10 +102,10 @@ const AdminCMS = () => {
       <label className="text-[11px] font-semibold text-muted-foreground mb-1.5 block uppercase tracking-wider">{label}</label>
       {multiline ? (
         <textarea value={value || ""} onChange={e => onChange(e.target.value)} rows={3}
-          className="w-full px-3 py-2.5 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 resize-none transition-all" />
+          className="w-full px-3 py-2.5 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 resize-none transition-all" />
       ) : (
         <input value={value || ""} onChange={e => onChange(e.target.value)}
-          className="w-full px-3 py-2.5 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all" />
+          className="w-full px-3 py-2.5 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 transition-all" />
       )}
     </div>
   );
@@ -200,10 +200,10 @@ const AdminCMS = () => {
                 <InputField label="Features (JSON)" value={typeof editForm.features === "string" ? editForm.features : JSON.stringify(editForm.features)} onChange={v => setEditForm({ ...editForm, features: v })} multiline />
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input type="checkbox" checked={editForm.is_highlighted} onChange={e => setEditForm({ ...editForm, is_highlighted: e.target.checked })} className="rounded" /> {isBn ? "হাইলাইটেড" : "Highlighted"}
+                    <input type="checkbox" checked={editForm.is_highlighted} onChange={e => setEditForm({ ...editForm, is_highlighted: e.target.checked })} className="rounded-sm" /> {isBn ? "হাইলাইটেড" : "Highlighted"}
                   </label>
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input type="checkbox" checked={editForm.is_active} onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })} className="rounded" /> {isBn ? "সক্রিয়" : "Active"}
+                    <input type="checkbox" checked={editForm.is_active} onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })} className="rounded-sm" /> {isBn ? "সক্রিয়" : "Active"}
                   </label>
                 </div>
                 <div className="flex gap-2">
@@ -356,11 +356,11 @@ const AdminCMS = () => {
                   <InputField label="Sort Order" value={String(editForm.sort_order || 0)} onChange={v => setEditForm({ ...editForm, sort_order: parseInt(v) || 0 })} />
                   <div className="flex items-end gap-4 pb-1">
                     <label className="flex items-center gap-2 text-sm">
-                      <input type="checkbox" checked={editForm.is_popular || false} onChange={e => setEditForm({ ...editForm, is_popular: e.target.checked })} className="rounded" />
+                      <input type="checkbox" checked={editForm.is_popular || false} onChange={e => setEditForm({ ...editForm, is_popular: e.target.checked })} className="rounded-sm" />
                       {isBn ? "জনপ্রিয়" : "Popular"}
                     </label>
                     <label className="flex items-center gap-2 text-sm">
-                      <input type="checkbox" checked={editForm.is_active !== false} onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })} className="rounded" />
+                      <input type="checkbox" checked={editForm.is_active !== false} onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })} className="rounded-sm" />
                       {isBn ? "সক্রিয়" : "Active"}
                     </label>
                   </div>
@@ -410,7 +410,7 @@ const AdminCMS = () => {
               key={t.key}
               onClick={() => { setTab(t.key); setShowAdd(false); cancelEdit(); setSearch(""); }}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                tab === t.key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                tab === t.key ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <t.icon className="w-3.5 h-3.5" />
@@ -426,7 +426,7 @@ const AdminCMS = () => {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={isBn ? "সার্চ..." : "Search..."}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
             />
           </div>
           <button

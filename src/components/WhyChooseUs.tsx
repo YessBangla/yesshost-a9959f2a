@@ -82,7 +82,7 @@ const WhyChooseUs = () => {
               transition={{ duration: 0.4, delay: i * 0.08 }}
               className="bg-card border border-border rounded-xl p-4 md:p-6 text-center hover:border-primary/20 transition-colors"
             >
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-3 shadow-sm shadow-primary/15">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-3 shadow-xs shadow-primary/15">
                 <stat.icon className="w-5 h-5 text-primary-foreground" />
               </div>
               <p className="text-xl md:text-3xl font-extrabold text-foreground mb-0.5">
@@ -128,7 +128,7 @@ const WhyChooseUs = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="bg-card border border-border rounded-xl p-5 md:p-6 group hover:border-primary/20 hover:shadow-sm transition-all"
+              className="bg-card border border-border rounded-xl p-5 md:p-6 group hover:border-primary/20 hover:shadow-xs transition-all"
             >
               <div className="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center mb-3 group-hover:bg-primary/12 transition-colors">
                 <reason.icon className="w-5 h-5 text-primary" />

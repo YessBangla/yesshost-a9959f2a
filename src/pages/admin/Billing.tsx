@@ -252,7 +252,7 @@ const AdminBilling = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={isBn ? "ইনভয়েস নম্বর, ক্লায়েন্ট বা বিবরণ দিয়ে সার্চ..." : "Search by invoice, client or description..."}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50 overflow-x-auto">
@@ -260,7 +260,7 @@ const AdminBilling = () => {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${statusFilter === s ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${statusFilter === s ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
             >
               {s === "all" ? (isBn ? "সকল" : "All") : s.charAt(0).toUpperCase() + s.slice(1)}
               {s !== "all" && <span className="ml-1 opacity-60">({invoices.filter(i => i.status === s).length})</span>}
@@ -341,7 +341,7 @@ const AdminBilling = () => {
                         <select
                           value={inv.status}
                           onChange={e => updateStatus(inv.id, e.target.value)}
-                          className="text-xs px-2 py-1.5 rounded-lg bg-secondary/40 border border-border/50 text-foreground outline-none"
+                          className="text-xs px-2 py-1.5 rounded-lg bg-secondary/40 border border-border/50 text-foreground outline-hidden"
                         >
                           {invoiceStatuses.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
@@ -381,7 +381,7 @@ const AdminBilling = () => {
               <select
                 value={editForm.user_id}
                 onChange={e => setEditForm({ ...editForm, user_id: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">{isBn ? "— ক্লায়েন্ট বাছুন —" : "— Choose client —"}</option>
                 {allProfiles.map(p => (
@@ -396,7 +396,7 @@ const AdminBilling = () => {
               <input
                 value={editForm.invoice_number}
                 onChange={e => setEditForm({ ...editForm, invoice_number: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -405,7 +405,7 @@ const AdminBilling = () => {
                 value={editForm.description}
                 onChange={e => setEditForm({ ...editForm, description: e.target.value })}
                 placeholder={isBn ? "সার্ভিসের বিবরণ" : "Service description"}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -415,7 +415,7 @@ const AdminBilling = () => {
                   type="number"
                   value={editForm.amount_bdt}
                   onChange={e => setEditForm({ ...editForm, amount_bdt: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -423,7 +423,7 @@ const AdminBilling = () => {
                 <select
                   value={editForm.status}
                   onChange={e => setEditForm({ ...editForm, status: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 >
                   {invoiceStatuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
                 </select>
@@ -436,7 +436,7 @@ const AdminBilling = () => {
                   value={editForm.payment_method}
                   onChange={e => setEditForm({ ...editForm, payment_method: e.target.value })}
                   placeholder="bKash, Nagad, Bank..."
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -445,7 +445,7 @@ const AdminBilling = () => {
                   type="date"
                   value={editForm.due_date}
                   onChange={e => setEditForm({ ...editForm, due_date: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -455,7 +455,7 @@ const AdminBilling = () => {
                 type="date"
                 value={editForm.paid_at}
                 onChange={e => setEditForm({ ...editForm, paid_at: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="flex gap-2 pt-2">
@@ -481,7 +481,7 @@ const AdminBilling = () => {
               <select
                 value={createForm.user_id}
                 onChange={e => setCreateForm({ ...createForm, user_id: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">{isBn ? "— ক্লায়েন্ট বাছুন —" : "— Choose client —"}</option>
                 {allProfiles.map(p => (
@@ -497,7 +497,7 @@ const AdminBilling = () => {
                 value={createForm.description}
                 onChange={e => setCreateForm({ ...createForm, description: e.target.value })}
                 placeholder={isBn ? "সার্ভিসের বিবরণ" : "Service description"}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -508,7 +508,7 @@ const AdminBilling = () => {
                   value={createForm.amount_bdt}
                   onChange={e => setCreateForm({ ...createForm, amount_bdt: e.target.value })}
                   placeholder="0"
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -516,7 +516,7 @@ const AdminBilling = () => {
                 <select
                   value={createForm.status}
                   onChange={e => setCreateForm({ ...createForm, status: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 >
                   {invoiceStatuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
                 </select>
@@ -529,7 +529,7 @@ const AdminBilling = () => {
                   value={createForm.payment_method}
                   onChange={e => setCreateForm({ ...createForm, payment_method: e.target.value })}
                   placeholder="bKash, Nagad, Bank..."
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -538,7 +538,7 @@ const AdminBilling = () => {
                   type="date"
                   value={createForm.due_date}
                   onChange={e => setCreateForm({ ...createForm, due_date: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
             </div>

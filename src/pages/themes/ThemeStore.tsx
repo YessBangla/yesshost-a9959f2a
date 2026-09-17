@@ -110,7 +110,7 @@ const ThemeStore = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={bn ? "থিম সার্চ করুন..." : "Search themes..."}
-                className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
           </motion.div>
@@ -142,7 +142,7 @@ const ThemeStore = () => {
                       aria-pressed={active}
                       className={`shrink-0 snap-start inline-flex items-center gap-2 h-11 px-4 rounded-xl border text-sm font-semibold whitespace-nowrap transition-all ${
                         active
-                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                          ? "border-primary bg-primary text-primary-foreground shadow-xs shadow-primary/20"
                           : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
                       }`}
                     >
@@ -170,9 +170,9 @@ const ThemeStore = () => {
                 <div key={i} className="glass-card p-0 overflow-hidden animate-pulse">
                   <div className="h-48 bg-secondary/50" />
                   <div className="p-5 space-y-3">
-                    <div className="h-5 bg-secondary/50 rounded w-2/3" />
-                    <div className="h-4 bg-secondary/50 rounded w-full" />
-                    <div className="h-8 bg-secondary/50 rounded w-1/3" />
+                    <div className="h-5 bg-secondary/50 rounded-sm w-2/3" />
+                    <div className="h-4 bg-secondary/50 rounded-sm w-full" />
+                    <div className="h-8 bg-secondary/50 rounded-sm w-1/3" />
                   </div>
                 </div>
               ))}
@@ -244,7 +244,7 @@ const ThemeStore = () => {
                                 thumbnail_url: theme.thumbnail_url,
                               });
                             }}
-                            className="px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm shadow-primary/20"
+                            className="px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-xs shadow-primary/20"
                           >
                             <ShoppingCart className="w-4 h-4" />
                             {bn ? "কার্টে যোগ করুন" : "Add to Cart"}
@@ -329,7 +329,7 @@ const ThemeStore = () => {
                               thumbnail_url: theme.thumbnail_url,
                             });
                           }}
-                          className="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-sm shadow-primary/20"
+                          className="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-xs shadow-primary/20"
                         >
                           <ShoppingCart className="w-4 h-4" />
                           {bn ? "কার্টে যোগ করুন" : "Add to Cart"}

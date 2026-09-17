@@ -501,7 +501,7 @@ const AdminWHM = () => {
                 value={tokenInput}
                 onChange={e => setTokenInput(e.target.value)}
                 placeholder={bn ? "WHM API টোকেন পেস্ট করুন" : "Paste the WHM API token"}
-                className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm font-mono text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm font-mono text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               />
               <button
                 onClick={() => setShowToken(v => !v)}
@@ -536,7 +536,7 @@ const AdminWHM = () => {
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           placeholder={bn ? "ইউজার, প্যাকেজ বা সার্ভার খুঁজুন..." : "Search by user, package or server..."}
-          className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
+          className="flex-1 bg-transparent text-sm text-foreground outline-hidden placeholder:text-muted-foreground/50"
         />
       </div>
 
@@ -679,7 +679,7 @@ const AdminWHM = () => {
               <select
                 value={assignForm.user_id}
                 onChange={e => setAssignForm(p => ({ ...p, user_id: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">{bn ? "-- ইউজার বাছুন --" : "-- Select user --"}</option>
                 {users.map(u => (
@@ -693,7 +693,7 @@ const AdminWHM = () => {
               <input
                 value={assignForm.package_name}
                 onChange={e => setAssignForm(p => ({ ...p, package_name: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
 
@@ -704,7 +704,7 @@ const AdminWHM = () => {
                   type="number"
                   value={assignForm.max_accounts}
                   onChange={e => setAssignForm(p => ({ ...p, max_accounts: +e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -713,7 +713,7 @@ const AdminWHM = () => {
                   type="number"
                   value={assignForm.max_disk_mb}
                   onChange={e => setAssignForm(p => ({ ...p, max_disk_mb: +e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -722,7 +722,7 @@ const AdminWHM = () => {
                   type="number"
                   value={assignForm.max_bandwidth_mb}
                   onChange={e => setAssignForm(p => ({ ...p, max_bandwidth_mb: +e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -739,7 +739,7 @@ const AdminWHM = () => {
                     value={assignForm.whm_server_host}
                     onChange={e => setAssignForm(p => ({ ...p, whm_server_host: e.target.value }))}
                     placeholder="server1.yesshost.com"
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
                 <div>
@@ -748,7 +748,7 @@ const AdminWHM = () => {
                     value={assignForm.whm_username}
                     onChange={e => setAssignForm(p => ({ ...p, whm_username: e.target.value }))}
                     placeholder="root"
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
               </div>
@@ -847,7 +847,7 @@ const AdminWHM = () => {
                         value={(createForm as any)[f.key]}
                         onChange={e => setCreateForm(p => ({ ...p, [f.key]: e.target.value }))}
                         placeholder={f.ph}
-                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-hidden focus:border-primary/50"
                       />
                     </div>
                   ))}
@@ -858,7 +858,7 @@ const AdminWHM = () => {
                         type="number"
                         value={createForm.disk_quota_mb}
                         onChange={e => setCreateForm(p => ({ ...p, disk_quota_mb: parseInt(e.target.value) || 0 }))}
-                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-hidden focus:border-primary/50"
                       />
                     </div>
                     <div>
@@ -867,7 +867,7 @@ const AdminWHM = () => {
                         type="number"
                         value={createForm.bandwidth_mb}
                         onChange={e => setCreateForm(p => ({ ...p, bandwidth_mb: parseInt(e.target.value) || 0 }))}
-                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-none focus:border-primary/50"
+                        className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-xs focus:outline-hidden focus:border-primary/50"
                       />
                     </div>
                   </div>
@@ -967,7 +967,7 @@ const AdminWHM = () => {
               <input
                 value={editForm.package_name}
                 onChange={e => setEditForm(p => ({ ...p, package_name: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
 
@@ -978,7 +978,7 @@ const AdminWHM = () => {
                   type="number"
                   value={editForm.max_accounts}
                   onChange={e => setEditForm(p => ({ ...p, max_accounts: +e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -987,7 +987,7 @@ const AdminWHM = () => {
                   type="number"
                   value={editForm.max_disk_mb}
                   onChange={e => setEditForm(p => ({ ...p, max_disk_mb: +e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -996,7 +996,7 @@ const AdminWHM = () => {
                   type="number"
                   value={editForm.max_bandwidth_mb}
                   onChange={e => setEditForm(p => ({ ...p, max_bandwidth_mb: +e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -1013,7 +1013,7 @@ const AdminWHM = () => {
                     value={editForm.whm_server_host}
                     onChange={e => setEditForm(p => ({ ...p, whm_server_host: e.target.value }))}
                     placeholder="server1.yesshost.com"
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
                 <div>
@@ -1022,7 +1022,7 @@ const AdminWHM = () => {
                     value={editForm.whm_username}
                     onChange={e => setEditForm(p => ({ ...p, whm_username: e.target.value }))}
                     placeholder="root"
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
               </div>

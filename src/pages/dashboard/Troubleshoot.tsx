@@ -106,14 +106,14 @@ const Troubleshoot = () => {
               onChange={(e) => setDomain(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && runDiagnose()}
               placeholder={bn ? "yourdomain.com" : "yourdomain.com"}
-              className="w-full pl-10 pr-4 py-3 min-h-[44px] rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+              className="w-full pl-10 pr-4 py-3 min-h-[44px] rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm"
             />
           </div>
           <input
             value={expectedIp}
             onChange={(e) => setExpectedIp(e.target.value)}
             placeholder={bn ? "প্রত্যাশিত IP (ঐচ্ছিক)" : "Expected IP (optional)"}
-            className="sm:w-56 px-4 py-3 min-h-[44px] rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+            className="sm:w-56 px-4 py-3 min-h-[44px] rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm"
           />
           <button
             onClick={runDiagnose}

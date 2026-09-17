@@ -95,7 +95,7 @@ const CallCenterLiveChat = () => {
               className={`w-full text-left p-3 border-b border-border/30 hover:bg-secondary/40 transition-all ${selectedChat === c.id ? "bg-primary/10" : ""}`}>
               <p className="text-sm font-medium text-foreground">{c.visitor_name}</p>
               <p className="text-xs text-muted-foreground">{c.visitor_email || c.visitor_phone || "—"}</p>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded ${c.status === "open" ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>{c.status}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-sm ${c.status === "open" ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>{c.status}</span>
             </button>
           ))}
           {chats.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">{bn ? "কোনো চ্যাট নেই" : "No chats"}</p>}
@@ -229,7 +229,7 @@ const CallCenterLiveChat = () => {
               </div>
               <div className="p-3 border-t border-border/50 flex gap-2">
                 <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === "Enter" && sendReply()}
-                  placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="flex-1 px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                  placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="flex-1 px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 <button onClick={sendReply} className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground"><Send className="w-4 h-4" /></button>
               </div>
             </>
