@@ -190,6 +190,7 @@ const App = () => (
                   <Route path="affiliate" element={<DashboardAffiliate />} />
                   <Route path="wallet" element={<DashboardWallet />} />
                   <Route path="theme-seller" element={<DashboardThemeSeller />} />
+                  <Route path="troubleshoot" element={<DashboardTroubleshoot />} />
                   <Route path="profile" element={<DashboardProfile />} />
                 </Route>
                 <Route
