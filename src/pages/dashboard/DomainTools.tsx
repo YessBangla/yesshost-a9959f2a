@@ -1028,6 +1028,65 @@ const DashboardDomainTools = () => {
                   </div>
                 )}
 
+                {transferStale && (
+                  <div className="rounded-xl border border-warning/50 bg-warning/5 p-4 space-y-3">
+                    <div>
+                      <p className="text-xs font-bold text-warning flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4" />
+                        {bn
+                          ? `গত ${transferStale.hours} ঘণ্টায় কোনো আপডেট আসেনি`
+                          : `No update for the last ${transferStale.hours} hours`}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        {bn
+                          ? `সর্বশেষ কার্যক্রম: ${fmtTime(transferStale.lastAt)}। সাধারণত এত দেরি হয় না — নিচের বার্তাটি সাপোর্ট টিমে পাঠিয়ে অগ্রগতি জেনে নিন।`
+                          : `Last activity: ${fmtTime(transferStale.lastAt)}. This is longer than usual — send the pre-filled message below to ask support for an update.`}
+                      </p>
+                    </div>
+
+                    {followUpSent ? (
+                      <p className="text-[11px] text-success flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        {bn
+                          ? "বার্তা পাঠানো হয়েছে — সাপোর্ট টিম শীঘ্রই উত্তর দেবে।"
+                          : "Message sent — the support team will reply shortly."}
+                      </p>
+                    ) : (
+                      <>
+                        <textarea
+                          value={followUpMessage}
+                          onChange={(e) => setFollowUpMessage(e.target.value)}
+                          rows={3}
+                          className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-foreground text-xs outline-hidden focus:ring-2 focus:ring-primary/30 resize-y"
+                        />
+                        {followUpError && (
+                          <p className="text-[11px] text-destructive flex items-center gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {followUpError}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={submitFollowUp}
+                            disabled={followUpSending}
+                            className="gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 disabled:opacity-50"
+                          >
+                            {followUpSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MessageSquareWarning className="w-3.5 h-3.5" />}
+                            {bn ? "সাপোর্ট টিমে পাঠান" : "Send to support"}
+                          </button>
+                          <button
+                            onClick={() => statusQuery.refetch()}
+                            disabled={statusQuery.isFetching}
+                            className="bg-secondary/50 text-foreground px-4 py-2.5 rounded-xl font-semibold text-xs border border-border flex items-center gap-2 disabled:opacity-50"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${statusQuery.isFetching ? "animate-spin" : ""}`} />
+                            {bn ? "আবার চেষ্টা করুন" : "Retry status check"}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
                 <p className="text-[11px] text-muted-foreground">
                   {bn
                     ? "ট্রান্সফার সাধারণত ৫-৭ দিনে সম্পন্ন হয়। এই পাতা প্রতি ২০ সেকেন্ডে স্ট্যাটাস আপডেট করে।"
