@@ -98,6 +98,7 @@ export type ValidationCode =
   | "term_invalid"
   | "price_unknown"
   | "note_too_long"
+  | "note_too_short"
   | "not_owner";
 
 const DOMAIN_RE = /^(?!-)[a-z0-9-]{1,63}(?<!-)(\.[a-z0-9-]{1,63})*\.[a-z]{2,24}$/;
