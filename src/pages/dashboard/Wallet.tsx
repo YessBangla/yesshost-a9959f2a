@@ -210,9 +210,65 @@ const DashboardWallet = () => {
       return;
     }
 
+    if (selectedMethod === "bkash" || selectedMethod === "nagad") {
+      setProcessing(true);
+      try {
+        const { data: txn } = await supabase.from("wallet_transactions").insert({
+          user_id: user!.id,
+          type: "deposit",
+          amount_bdt: numAmount,
+          status: "pending",
+          payment_method: selectedMethod,
+          description: isBn
+            ? `${selectedMethod === "bkash" ? "বিকাশ" : "নগদ"} দিয়ে ফান্ড জমা`
+            : `Fund deposit via ${selectedMethod === "bkash" ? "bKash" : "Nagad"}`,
+        }).select().single();
+
+        const { data, error } = await supabase.functions.invoke(
+          selectedMethod === "bkash" ? "bkash-init" : "nagad-init",
+          {
+            body: {
+              amount: numAmount,
+              invoice_id: txn?.id,
+              invoice_number: `WALLET-${txn?.id?.slice(0, 8).toUpperCase()}`,
+              payer_reference: user?.email || "",
+              is_wallet_deposit: true,
+              callback_url: `${window.location.origin}/dashboard/wallet`,
+            },
+          },
+        );
+
+        const gatewayUrl = data?.gateway_url || data?.bkashURL || data?.callBackUrl;
+        if (gatewayUrl) {
+          window.location.href = gatewayUrl;
+          return;
+        }
+
+        if (txn?.id) {
+          await supabase.from("wallet_transactions").update({ status: "cancelled" }).eq("id", txn.id);
+        }
+        toast({
+          title: isBn ? "এই মাধ্যমটি এখনো চালু হয়নি" : "This method isn't live yet",
+          description: isBn
+            ? `${selectedMethod === "bkash" ? "বিকাশ" : "নগদ"} পেমেন্ট এখনো সক্রিয় করা হয়নি। এখন SSLCommerz (কার্ড/মোবাইল ব্যাংকিং) অথবা ব্যাংক ট্রান্সফার ব্যবহার করুন।`
+            : `${selectedMethod === "bkash" ? "bKash" : "Nagad"} is not activated yet. Please use SSLCommerz (card/mobile banking) or bank transfer for now.`,
+          variant: "destructive",
+        });
+        if (error) console.error("[wallet] gateway init failed", error);
+      } catch (err) {
+        console.error("[wallet] payment error", err);
+        toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট প্রসেসিং এ সমস্যা" : "Payment processing error", variant: "destructive" });
+      }
+      setProcessing(false);
+      return;
+    }
+
     toast({
-      title: isBn ? "শীঘ্রই আসছে" : "Coming Soon",
-      description: isBn ? "এই পেমেন্ট মেথড শীঘ্রই চালু হবে" : "This payment method will be available soon",
+      title: isBn ? "মাধ্যম নির্বাচন করুন" : "Select a method",
+      description: isBn
+        ? "অনুগ্রহ করে একটি সক্রিয় পেমেন্ট মাধ্যম বেছে নিন।"
+        : "Please choose an available payment method.",
+      variant: "destructive",
     });
   };
 

@@ -189,9 +189,48 @@ const DashboardBilling = () => {
       return;
     }
 
+    if (selectedPayment === "bkash" || selectedPayment === "nagad") {
+      setPaying(true);
+      try {
+        const { data, error } = await supabase.functions.invoke(
+          selectedPayment === "bkash" ? "bkash-init" : "nagad-init",
+          {
+            body: {
+              amount: Number(payInvoice.amount_bdt),
+              invoice_id: payInvoice.id,
+              invoice_number: payInvoice.invoice_number,
+              payer_reference: user?.email || "",
+              callback_url: `${window.location.origin}/dashboard/billing`,
+            },
+          },
+        );
+        const gatewayUrl = data?.gateway_url || data?.bkashURL || data?.callBackUrl;
+        if (gatewayUrl) {
+          window.location.href = gatewayUrl;
+          return;
+        }
+        toast({
+          title: isBn ? "এই মাধ্যমটি এখনো চালু হয়নি" : "This method isn't live yet",
+          description: isBn
+            ? `${selectedPayment === "bkash" ? "বিকাশ" : "নগদ"} পেমেন্ট এখনো সক্রিয় করা হয়নি। এখন SSLCommerz (কার্ড/মোবাইল ব্যাংকিং), ওয়ালেট অথবা ব্যাংক ট্রান্সফার ব্যবহার করুন।`
+            : `${selectedPayment === "bkash" ? "bKash" : "Nagad"} is not activated yet. Please use SSLCommerz (card/mobile banking), wallet or bank transfer for now.`,
+          variant: "destructive",
+        });
+        if (error) console.error("[billing] gateway init failed", error);
+      } catch (err) {
+        console.error("[billing] payment error", err);
+        toast({ title: isBn ? "ত্রুটি" : "Error", description: isBn ? "পেমেন্ট প্রসেসিং এ সমস্যা হয়েছে" : "Payment processing error", variant: "destructive" });
+      }
+      setPaying(false);
+      return;
+    }
+
     toast({
-      title: isBn ? "শীঘ্রই আসছে" : "Coming Soon",
-      description: isBn ? "এই পেমেন্ট মেথড শীঘ্রই চালু হবে" : "This payment method will be available soon",
+      title: isBn ? "মাধ্যম নির্বাচন করুন" : "Select a method",
+      description: isBn
+        ? "অনুগ্রহ করে একটি সক্রিয় পেমেন্ট মাধ্যম বেছে নিন।"
+        : "Please choose an available payment method.",
+      variant: "destructive",
     });
   };
 
