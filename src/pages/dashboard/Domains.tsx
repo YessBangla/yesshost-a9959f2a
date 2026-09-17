@@ -1,33 +1,38 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import { Globe, ExternalLink, Search, Clock, Shield, Server, AlertTriangle } from "lucide-react";
 import { DomainsSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "@/lib/router-compat";
+import { getDashboardDomains } from "@/lib/dashboard.functions";
 import { logApiError } from "@/lib/errorReporting";
 
 const DashboardDomains = () => {
   const { user } = useAuth();
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
-  const [domains, setDomains] = useState<Tables<"services">[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
+  // Server-side fetch keeps the domain list identical on SSR and in the browser.
+  const fetchDomains = useServerFn(getDashboardDomains);
+  const domainsQuery = useQuery({
+    queryKey: ["dashboard", "domains", user?.id ?? "anon"],
+    queryFn: () => fetchDomains(),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+
   useEffect(() => {
-    if (!user) return;
-    supabase.from("services").select("*").eq("user_id", user.id).eq("service_type", "domain")
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) logApiError("services.select(domain)", error, { area: "domain" });
-        setDomains(data || []);
-        setLoading(false);
-      });
-  }, [user]);
+    if (domainsQuery.error) logApiError("dashboard.domains", domainsQuery.error, { area: "domain" });
+  }, [domainsQuery.error]);
+
+  const domains: Tables<"services">[] = domainsQuery.data?.domains ?? [];
+  const loading = !!user && domainsQuery.isPending;
 
   const filtered = domains.filter(d =>
     !search || (d.domain || d.name).toLowerCase().includes(search.toLowerCase())

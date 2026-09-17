@@ -60,6 +60,7 @@ import { Route as DashboardAffiliateRouteImport } from './routes/dashboard/affil
 import { Route as DashboardBillingRouteImport } from './routes/dashboard/billing'
 import { Route as DashboardDomainToolsRouteImport } from './routes/dashboard/domain-tools'
 import { Route as DashboardDomainsRouteImport } from './routes/dashboard/domains'
+import { Route as DashboardIncomeRouteImport } from './routes/dashboard/income'
 import { Route as DashboardKnowledgeBaseRouteImport } from './routes/dashboard/knowledge-base'
 import { Route as DashboardOrderServiceRouteImport } from './routes/dashboard/order-service'
 import { Route as DashboardOrdersRouteImport } from './routes/dashboard/orders'
@@ -80,6 +81,11 @@ import { Route as PaymentFailRouteImport } from './routes/payment/fail'
 import { Route as PaymentSuccessRouteImport } from './routes/payment/success'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as ThemesIndexRouteImport } from './routes/themes/index'
+import { Route as ApiDashboardBillingRouteImport } from './routes/api/dashboard/billing'
+import { Route as ApiDashboardDomainsRouteImport } from './routes/api/dashboard/domains'
+import { Route as ApiDashboardIncomeRouteImport } from './routes/api/dashboard/income'
+import { Route as ApiDashboardServicesRouteImport } from './routes/api/dashboard/services'
+import { Route as ApiPublicLiveChatMessagesRouteImport } from './routes/api/public/live-chat-messages'
 import { Route as ThemesSlugIndexRouteImport } from './routes/themes/$slug/index'
 import { Route as ThemesSlugDemoRouteImport } from './routes/themes/$slug/demo'
 
@@ -339,6 +345,11 @@ const DashboardDomainsRoute = DashboardDomainsRouteImport.update({
   path: '/domains',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardIncomeRoute = DashboardIncomeRouteImport.update({
+  id: '/income',
+  path: '/income',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardKnowledgeBaseRoute = DashboardKnowledgeBaseRouteImport.update({
   id: '/knowledge-base',
   path: '/knowledge-base',
@@ -439,6 +450,32 @@ const ThemesIndexRoute = ThemesIndexRouteImport.update({
   path: '/themes/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDashboardBillingRoute = ApiDashboardBillingRouteImport.update({
+  id: '/api/dashboard/billing',
+  path: '/api/dashboard/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardDomainsRoute = ApiDashboardDomainsRouteImport.update({
+  id: '/api/dashboard/domains',
+  path: '/api/dashboard/domains',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardIncomeRoute = ApiDashboardIncomeRouteImport.update({
+  id: '/api/dashboard/income',
+  path: '/api/dashboard/income',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardServicesRoute = ApiDashboardServicesRouteImport.update({
+  id: '/api/dashboard/services',
+  path: '/api/dashboard/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLiveChatMessagesRoute =
+  ApiPublicLiveChatMessagesRouteImport.update({
+    id: '/api/public/live-chat-messages',
+    path: '/api/public/live-chat-messages',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ThemesSlugIndexRoute = ThemesSlugIndexRouteImport.update({
   id: '/themes/$slug/',
   path: '/themes/$slug/',
@@ -499,6 +536,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/domain-tools': typeof DashboardDomainToolsRoute
   '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
@@ -522,6 +560,11 @@ export interface FileRoutesByFullPath {
   '/knowledge-base/': typeof KnowledgeBaseIndexRoute
   '/payment/': typeof PaymentIndexRoute
   '/themes/': typeof ThemesIndexRoute
+  '/api/dashboard/billing': typeof ApiDashboardBillingRoute
+  '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
+  '/api/dashboard/income': typeof ApiDashboardIncomeRoute
+  '/api/dashboard/services': typeof ApiDashboardServicesRoute
+  '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug/': typeof ThemesSlugIndexRoute
 }
@@ -571,6 +614,7 @@ export interface FileRoutesByTo {
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/domain-tools': typeof DashboardDomainToolsRoute
   '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
@@ -594,6 +638,11 @@ export interface FileRoutesByTo {
   '/knowledge-base': typeof KnowledgeBaseIndexRoute
   '/payment': typeof PaymentIndexRoute
   '/themes': typeof ThemesIndexRoute
+  '/api/dashboard/billing': typeof ApiDashboardBillingRoute
+  '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
+  '/api/dashboard/income': typeof ApiDashboardIncomeRoute
+  '/api/dashboard/services': typeof ApiDashboardServicesRoute
+  '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug': typeof ThemesSlugIndexRoute
 }
@@ -647,6 +696,7 @@ export interface FileRoutesById {
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/domain-tools': typeof DashboardDomainToolsRoute
   '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
@@ -670,6 +720,11 @@ export interface FileRoutesById {
   '/knowledge-base/': typeof KnowledgeBaseIndexRoute
   '/payment/': typeof PaymentIndexRoute
   '/themes/': typeof ThemesIndexRoute
+  '/api/dashboard/billing': typeof ApiDashboardBillingRoute
+  '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
+  '/api/dashboard/income': typeof ApiDashboardIncomeRoute
+  '/api/dashboard/services': typeof ApiDashboardServicesRoute
+  '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug/': typeof ThemesSlugIndexRoute
 }
@@ -724,6 +779,7 @@ export interface FileRouteTypes {
     | '/dashboard/billing'
     | '/dashboard/domain-tools'
     | '/dashboard/domains'
+    | '/dashboard/income'
     | '/dashboard/knowledge-base'
     | '/dashboard/order-service'
     | '/dashboard/orders'
@@ -747,6 +803,11 @@ export interface FileRouteTypes {
     | '/knowledge-base/'
     | '/payment/'
     | '/themes/'
+    | '/api/dashboard/billing'
+    | '/api/dashboard/domains'
+    | '/api/dashboard/income'
+    | '/api/dashboard/services'
+    | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
     | '/themes/$slug/'
   fileRoutesByTo: FileRoutesByTo
@@ -796,6 +857,7 @@ export interface FileRouteTypes {
     | '/dashboard/billing'
     | '/dashboard/domain-tools'
     | '/dashboard/domains'
+    | '/dashboard/income'
     | '/dashboard/knowledge-base'
     | '/dashboard/order-service'
     | '/dashboard/orders'
@@ -819,6 +881,11 @@ export interface FileRouteTypes {
     | '/knowledge-base'
     | '/payment'
     | '/themes'
+    | '/api/dashboard/billing'
+    | '/api/dashboard/domains'
+    | '/api/dashboard/income'
+    | '/api/dashboard/services'
+    | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
     | '/themes/$slug'
   id:
@@ -871,6 +938,7 @@ export interface FileRouteTypes {
     | '/dashboard/billing'
     | '/dashboard/domain-tools'
     | '/dashboard/domains'
+    | '/dashboard/income'
     | '/dashboard/knowledge-base'
     | '/dashboard/order-service'
     | '/dashboard/orders'
@@ -894,6 +962,11 @@ export interface FileRouteTypes {
     | '/knowledge-base/'
     | '/payment/'
     | '/themes/'
+    | '/api/dashboard/billing'
+    | '/api/dashboard/domains'
+    | '/api/dashboard/income'
+    | '/api/dashboard/services'
+    | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
     | '/themes/$slug/'
   fileRoutesById: FileRoutesById
@@ -928,6 +1001,11 @@ export interface RootRouteChildren {
   KnowledgeBaseIndexRoute: typeof KnowledgeBaseIndexRoute
   PaymentIndexRoute: typeof PaymentIndexRoute
   ThemesIndexRoute: typeof ThemesIndexRoute
+  ApiDashboardBillingRoute: typeof ApiDashboardBillingRoute
+  ApiDashboardDomainsRoute: typeof ApiDashboardDomainsRoute
+  ApiDashboardIncomeRoute: typeof ApiDashboardIncomeRoute
+  ApiDashboardServicesRoute: typeof ApiDashboardServicesRoute
+  ApiPublicLiveChatMessagesRoute: typeof ApiPublicLiveChatMessagesRoute
   ThemesSlugDemoRoute: typeof ThemesSlugDemoRoute
   ThemesSlugIndexRoute: typeof ThemesSlugIndexRoute
 }
@@ -1291,6 +1369,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDomainsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/income': {
+      id: '/dashboard/income'
+      path: '/income'
+      fullPath: '/dashboard/income'
+      preLoaderRoute: typeof DashboardIncomeRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/knowledge-base': {
       id: '/dashboard/knowledge-base'
       path: '/knowledge-base'
@@ -1431,6 +1516,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ThemesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/dashboard/billing': {
+      id: '/api/dashboard/billing'
+      path: '/api/dashboard/billing'
+      fullPath: '/api/dashboard/billing'
+      preLoaderRoute: typeof ApiDashboardBillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/domains': {
+      id: '/api/dashboard/domains'
+      path: '/api/dashboard/domains'
+      fullPath: '/api/dashboard/domains'
+      preLoaderRoute: typeof ApiDashboardDomainsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/income': {
+      id: '/api/dashboard/income'
+      path: '/api/dashboard/income'
+      fullPath: '/api/dashboard/income'
+      preLoaderRoute: typeof ApiDashboardIncomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/services': {
+      id: '/api/dashboard/services'
+      path: '/api/dashboard/services'
+      fullPath: '/api/dashboard/services'
+      preLoaderRoute: typeof ApiDashboardServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/live-chat-messages': {
+      id: '/api/public/live-chat-messages'
+      path: '/api/public/live-chat-messages'
+      fullPath: '/api/public/live-chat-messages'
+      preLoaderRoute: typeof ApiPublicLiveChatMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/themes/$slug/': {
       id: '/themes/$slug/'
       path: '/themes/$slug'
@@ -1523,6 +1643,7 @@ interface DashboardRouteRouteChildren {
   DashboardBillingRoute: typeof DashboardBillingRoute
   DashboardDomainToolsRoute: typeof DashboardDomainToolsRoute
   DashboardDomainsRoute: typeof DashboardDomainsRoute
+  DashboardIncomeRoute: typeof DashboardIncomeRoute
   DashboardKnowledgeBaseRoute: typeof DashboardKnowledgeBaseRoute
   DashboardOrderServiceRoute: typeof DashboardOrderServiceRoute
   DashboardOrdersRoute: typeof DashboardOrdersRoute
@@ -1543,6 +1664,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardBillingRoute: DashboardBillingRoute,
   DashboardDomainToolsRoute: DashboardDomainToolsRoute,
   DashboardDomainsRoute: DashboardDomainsRoute,
+  DashboardIncomeRoute: DashboardIncomeRoute,
   DashboardKnowledgeBaseRoute: DashboardKnowledgeBaseRoute,
   DashboardOrderServiceRoute: DashboardOrderServiceRoute,
   DashboardOrdersRoute: DashboardOrdersRoute,
@@ -1592,6 +1714,11 @@ const rootRouteChildren: RootRouteChildren = {
   KnowledgeBaseIndexRoute: KnowledgeBaseIndexRoute,
   PaymentIndexRoute: PaymentIndexRoute,
   ThemesIndexRoute: ThemesIndexRoute,
+  ApiDashboardBillingRoute: ApiDashboardBillingRoute,
+  ApiDashboardDomainsRoute: ApiDashboardDomainsRoute,
+  ApiDashboardIncomeRoute: ApiDashboardIncomeRoute,
+  ApiDashboardServicesRoute: ApiDashboardServicesRoute,
+  ApiPublicLiveChatMessagesRoute: ApiPublicLiveChatMessagesRoute,
   ThemesSlugDemoRoute: ThemesSlugDemoRoute,
   ThemesSlugIndexRoute: ThemesSlugIndexRoute,
 }

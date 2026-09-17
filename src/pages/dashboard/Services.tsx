@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { motion, AnimatePresence } from "framer-motion";
 import { ServicesSkeleton } from "@/components/DashboardSkeleton";
 import { Server, ExternalLink, Search, Filter, ChevronDown, ChevronUp, Clock, Globe, Cpu, HardDrive, Wifi, Calendar } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "@/lib/router-compat";
+import { getDashboardServices } from "@/lib/dashboard.functions";
+import { logApiError } from "@/lib/errorReporting";
 import { formatAmount } from "@/lib/formatPrice";
 
 const statusConfig: Record<string, { label_en: string; label_bn: string; color: string; dot: string }> = {
@@ -32,18 +35,26 @@ const DashboardServices = () => {
   const { user } = useAuth();
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
-  const [services, setServices] = useState<Tables<"services">[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Server-side fetch keeps the service list identical on SSR and in the browser.
+  const fetchServices = useServerFn(getDashboardServices);
+  const servicesQuery = useQuery({
+    queryKey: ["dashboard", "services", user?.id ?? "anon"],
+    queryFn: () => fetchServices(),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+
   useEffect(() => {
-    if (!user) return;
-    supabase.from("services").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => { setServices(data || []); setLoading(false); });
-  }, [user]);
+    if (servicesQuery.error) logApiError("dashboard.services", servicesQuery.error, { area: "api" });
+  }, [servicesQuery.error]);
+
+  const services: Tables<"services">[] = servicesQuery.data?.services ?? [];
+  const loading = !!user && servicesQuery.isPending;
 
   const filtered = services.filter(s => {
     const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.domain || "").toLowerCase().includes(search.toLowerCase());
