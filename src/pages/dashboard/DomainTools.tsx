@@ -706,6 +706,55 @@ const DashboardDomainTools = () => {
             })}
           </div>
           <Breakdown lines={renewLines} />
+
+          {(() => {
+            const dates = renewLines
+              .map((l) => domains.find((d) => (d.domain || d.name) === l.domain)?.expiry_date)
+              .filter(Boolean)
+              .map((d) => new Date(d as string).getTime())
+              .filter((t) => !Number.isNaN(t));
+            if (dates.length === 0) return null;
+            const soonest = Math.min(...dates);
+            const days = Math.ceil((soonest - Date.now()) / 86_400_000);
+            const expired = days < 0;
+            const urgent = days <= 15;
+            return (
+              <div
+                className={`rounded-xl border p-4 space-y-1.5 ${
+                  expired ? "border-destructive/40 bg-destructive/5" : urgent ? "border-warning/40 bg-warning/5" : "border-border/60 bg-secondary/30"
+                }`}
+              >
+                <p className={`text-xs font-bold flex items-center gap-1.5 ${expired ? "text-destructive" : urgent ? "text-warning" : "text-foreground"}`}>
+                  {expired || urgent ? <AlertTriangle className="w-4 h-4" /> : <CalendarClock className="w-4 h-4" />}
+                  {expired
+                    ? bn
+                      ? "মেয়াদ ইতিমধ্যে শেষ — দ্রুত পরিশোধ করুন"
+                      : "Already expired — please pay immediately"
+                    : bn
+                      ? `রিনিউ ডেডলাইন: ${days} দিন বাকি`
+                      : `Renewal deadline: ${days} day${days === 1 ? "" : "s"} left`}
+                </p>
+                <ul className="text-[11px] text-muted-foreground list-disc pl-4 space-y-1">
+                  <li>
+                    {bn
+                      ? `নিকটতম মেয়াদ শেষের তারিখ ${fmt(new Date(soonest).toISOString())} — ইনভয়েস পরিশোধের পরেই রিনিউ কার্যকর হয়।`
+                      : `Earliest expiry is ${fmt(new Date(soonest).toISOString())} — the renewal only takes effect once the invoice is paid.`}
+                  </li>
+                  <li>
+                    {bn
+                      ? "মেয়াদ শেষের পর ডোমেইন ৩০ দিনের গ্রেস পিরিয়ডে যায়, তারপর রিডেম্পশন ফি (অতিরিক্ত খরচ) প্রযোজ্য হয়।"
+                      : "After expiry a domain enters a 30-day grace period, then redemption fees (extra cost) apply."}
+                  </li>
+                  <li>
+                    {bn
+                      ? "মেয়াদ শেষ হলে বা রিনিউর ৬০ দিনের মধ্যে EPP/Auth কোড দিয়ে ট্রান্সফার করা যায় না — তাই সময়মতো রিনিউ করুন।"
+                      : "An expired domain, or one renewed within the last 60 days, cannot be transferred with an EPP/Auth code — renew on time."}
+                  </li>
+                </ul>
+              </div>
+            );
+          })()}
+
           {renewError && (
             <p className="text-xs text-destructive flex items-center gap-1.5">
               <AlertCircle className="w-4 h-4 shrink-0" /> {renewError}
