@@ -469,6 +469,13 @@ const DashboardWallet = () => {
                   );
                 })}
               </div>
+              {paymentMethods.some((pm) => !pm.ready) && (
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  {isBn
+                    ? "বিকাশ ও নগদ সরাসরি এখনো চালু হয়নি। তবে SSLCommerz দিয়ে বিকাশ, নগদ, কার্ড ও মোবাইল ব্যাংকিং — সবই ব্যবহার করা যায়।"
+                    : "Direct bKash and Nagad aren't live yet. SSLCommerz already covers bKash, Nagad, cards and mobile banking."}
+                </p>
+              )}
             </div>
 
             {/* Actions */}
