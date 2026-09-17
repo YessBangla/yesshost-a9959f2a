@@ -941,6 +941,59 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_events: {
+        Row: {
+          amount_bdt: number | null
+          created_at: string
+          gateway: string
+          id: string
+          invoice_id: string | null
+          message: string | null
+          payload: Json | null
+          settled: boolean
+          status: string
+          transaction_id: string
+          user_id: string | null
+          verified: boolean
+        }
+        Insert: {
+          amount_bdt?: number | null
+          created_at?: string
+          gateway: string
+          id?: string
+          invoice_id?: string | null
+          message?: string | null
+          payload?: Json | null
+          settled?: boolean
+          status: string
+          transaction_id: string
+          user_id?: string | null
+          verified?: boolean
+        }
+        Update: {
+          amount_bdt?: number | null
+          created_at?: string
+          gateway?: string
+          id?: string
+          invoice_id?: string | null
+          message?: string | null
+          payload?: Json | null
+          settled?: boolean
+          status?: string
+          transaction_id?: string
+          user_id?: string | null
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_plans: {
         Row: {
           annual_price_bdt: string | null
