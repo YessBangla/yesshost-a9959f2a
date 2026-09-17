@@ -69,6 +69,12 @@ const DashboardWallet = lazy(() => import("./pages/dashboard/Wallet"));
 const DashboardAffiliate = lazy(() => import("./pages/dashboard/AffiliateDashboard"));
 const DashboardThemeSeller = lazy(() => import("./pages/dashboard/ThemeSeller"));
 const DashboardTroubleshoot = lazy(() => import("./pages/dashboard/Troubleshoot"));
+const DashboardOrderService = lazy(() => import("./pages/dashboard/OrderService"));
+const DashboardDomainTools = lazy(() => import("./pages/dashboard/DomainTools"));
+const DashboardSupportPin = lazy(() => import("./pages/dashboard/SupportPin"));
+const DashboardKnowledgeBase = lazy(() => import("./pages/dashboard/KnowledgeBasePage"));
+const DashboardServerStatus = lazy(() => import("./pages/dashboard/ServerStatusPage"));
+
 const AdminAffiliates = lazy(() => import("./pages/admin/Affiliates"));
 
 // Admin pages
@@ -193,7 +199,13 @@ const App = () => (
                   <Route path="wallet" element={<DashboardWallet />} />
                   <Route path="theme-seller" element={<DashboardThemeSeller />} />
                   <Route path="troubleshoot" element={<DashboardTroubleshoot />} />
+                  <Route path="order-service" element={<DashboardOrderService />} />
+                  <Route path="domain-tools" element={<DashboardDomainTools />} />
+                  <Route path="support-pin" element={<DashboardSupportPin />} />
+                  <Route path="knowledge-base" element={<DashboardKnowledgeBase />} />
+                  <Route path="server-status" element={<DashboardServerStatus />} />
                   <Route path="profile" element={<DashboardProfile />} />
+
                 </Route>
                 <Route
                   path="/admin"
