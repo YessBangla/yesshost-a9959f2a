@@ -146,7 +146,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 // pass a fresh `state` object each render (its effect re-fires forever).
 
 export function Navigate({ to, replace, state }: { to: string; replace?: boolean; state?: unknown }) {
-  const nav = useTSNavigate();
+  const nav = tsNavigate();
   const done = useRef<string | null>(null);
   useEffect(() => {
     if (done.current === to) return;
