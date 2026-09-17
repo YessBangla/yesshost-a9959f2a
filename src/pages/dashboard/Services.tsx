@@ -10,6 +10,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "@/lib/router-compat";
 import { getDashboardServices } from "@/lib/dashboard.functions";
 import { logApiError } from "@/lib/errorReporting";
+import DataPagination from "@/components/DataPagination";
 import { formatAmount } from "@/lib/formatPrice";
 
 const statusConfig: Record<string, { label_en: string; label_bn: string; color: string; dot: string }> = {
@@ -39,6 +40,8 @@ const DashboardServices = () => {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Server-side fetch keeps the service list identical on SSR and in the browser.
   const fetchServices = useServerFn(getDashboardServices);
@@ -61,6 +64,8 @@ const DashboardServices = () => {
     const matchStatus = filterStatus === "all" || s.status === filterStatus;
     return matchSearch && matchStatus;
   });
+
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const statusCounts = services.reduce((acc, s) => {
     acc[s.status] = (acc[s.status] || 0) + 1;
@@ -134,7 +139,7 @@ const DashboardServices = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((service, i) => {
+          {paged.map((service, i) => {
             const sc = statusConfig[service.status] || statusConfig.pending;
             const tl = typeLabels[service.service_type] || { en: service.service_type, bn: service.service_type };
             const expanded = expandedId === service.id;
@@ -254,6 +259,13 @@ const DashboardServices = () => {
               </motion.div>
             );
           })}
+          <DataPagination
+            total={filtered.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(n) => { setPageSize(n); setPage(1); }}
+          />
         </div>
       )}
     </div>

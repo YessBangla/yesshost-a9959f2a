@@ -5,6 +5,7 @@ import { Mail, MailOpen, Trash2, Eye, Send, Search, ArrowLeft, Clock, User, AtSi
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import DataPagination from "@/components/DataPagination";
 
 interface ContactMessage {
   id: string;
@@ -26,6 +27,8 @@ const ContactMessages = () => {
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const fetchMessages = async () => {
     const { data, error } = await supabase
@@ -73,6 +76,8 @@ const ContactMessages = () => {
     const matchFilter = filter === "all" || (filter === "unread" && !m.is_read) || (filter === "read" && m.is_read);
     return matchSearch && matchFilter;
   });
+
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const unreadCount = messages.filter(m => !m.is_read).length;
 
@@ -135,7 +140,7 @@ const ContactMessages = () => {
               <p className="text-sm">{bn ? "কোনো মেসেজ পাওয়া যায়নি" : "No messages found"}</p>
             </div>
           ) : (
-            filtered.map(msg => (
+            paged.map(msg => (
               <motion.div
                 key={msg.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -170,6 +175,15 @@ const ContactMessages = () => {
                 </div>
               </motion.div>
             ))
+          )}
+          {filtered.length > 0 && (
+            <DataPagination
+              total={filtered.length}
+              page={page}
+              pageSize={pageSize}
+              onPage={setPage}
+              onPageSize={(n) => { setPageSize(n); setPage(1); }}
+            />
           )}
         </div>
 
