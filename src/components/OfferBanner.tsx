@@ -28,29 +28,31 @@ const OfferBanner = () => {
   if (!visible) return null;
 
   return (
-    <div className="relative z-40 bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground overflow-hidden">
+    <div className="relative h-8 sm:h-9 flex items-center bg-primary text-primary-foreground overflow-hidden">
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex whitespace-nowrap" style={{ animation: "marquee 60s linear infinite" }}>
+          {[...offers, ...offers].map((offer, i) => {
+            const Icon = offer.icon;
+            return (
+              <span
+                key={i}
+                className="inline-flex items-center gap-2 px-6 text-[11px] sm:text-xs font-medium tracking-wide"
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0 opacity-90" />
+                {bn ? offer.bn : offer.en}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
       <button
         onClick={() => setVisible(false)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full hover:bg-white/20 transition-colors"
+        className="shrink-0 h-full px-3 flex items-center border-l border-primary-foreground/20 hover:bg-primary-foreground/15 transition-colors"
         aria-label="Close"
       >
         <X className="w-3.5 h-3.5" />
       </button>
-
-      <div className="flex whitespace-nowrap py-2 pr-8" style={{ animation: "marquee 45s linear infinite" }}>
-        {[...offers, ...offers].map((offer, i) => {
-          const Icon = offer.icon;
-          return (
-            <span
-              key={i}
-              className="inline-flex items-center gap-1.5 mx-8 text-xs sm:text-sm font-medium"
-            >
-              <Icon className="w-3.5 h-3.5 shrink-0" />
-              {bn ? offer.bn : offer.en}
-            </span>
-          );
-        })}
-      </div>
     </div>
   );
 };

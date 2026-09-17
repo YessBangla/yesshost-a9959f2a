@@ -26,6 +26,7 @@ interface NavLink {
   href: string;
   children?: NavChild[];
   mega?: boolean;
+  minor?: boolean;
   cta?: { label: string; href: string };
   blink?: boolean;
 }
@@ -107,10 +108,11 @@ const Navbar = () => {
         { label: tr("nav.emailHosting"), href: "/services/email-hosting", icon: Mail, desc: isBn ? "প্রফেশনাল ইমেইল সার্ভিস" : "Professional email service" },
         { label: tr("nav.radioHosting"), href: "/services/radio-hosting", icon: Radio, desc: isBn ? "অনলাইন রেডিও স্ট্রিমিং" : "Online radio streaming" },
         { label: tr("nav.graphicsDesign"), href: "/services/graphics-design", icon: Palette, desc: isBn ? "লোগো, ব্যানার ও গ্রাফিক্স" : "Logo, banner & graphics" },
+        { label: isBn ? "চ্যাট রুম" : "Chat Rooms", href: "/chat-rooms", icon: Users, desc: isBn ? "কমিউনিটি লাইভ চ্যাট রুম" : "Community live chat rooms" },
       ],
     },
     { label: tr("nav.themes"), href: "/themes", blink: true },
-    { label: isBn ? "চ্যাট রুম" : "Chat Rooms", href: "/chat-rooms" },
+    { label: isBn ? "চ্যাট রুম" : "Chat Rooms", href: "/chat-rooms", minor: true },
   ];
 
   const isInternal = (href: string) => href.startsWith("/");
@@ -183,29 +185,29 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled 
-        ? "bg-background/85 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-border/50" 
-        : "glass-surface"
+    <nav className={`relative w-full transition-all duration-300 bg-background/95 backdrop-blur-xl border-b ${
+      scrolled
+        ? "border-border/60 shadow-lg shadow-black/5"
+        : "border-border/40"
     }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
-        <Link to="/" className="flex items-center shrink-0 mr-6 lg:mr-10">
+        <Link to="/" className="flex items-center shrink-0 mr-4 xl:mr-8">
           <img src={logoWhite} alt="Yess Host" className="h-8 lg:h-10" />
         </Link>
 
         {/* Desktop */}
-        <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
+        <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 mr-auto">
           {navLinks.map((link, idx) => (
             <div
               key={link.label}
-              className="relative"
+              className={`relative ${link.minor ? "hidden 2xl:block" : ""}`}
               onMouseEnter={() => link.children && setActiveDropdown(link.label)}
               onMouseLeave={() => setActiveDropdown(null)}
             >
               {isInternal(link.href) ? (
                 <Link
                   to={link.href}
-                  className={`flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-lg text-[15px] font-semibold hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1 px-2 xl:px-3 py-2 rounded-lg text-[14px] xl:text-[15px] font-semibold hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
                     link.blink ? "text-primary animate-pulse" : "text-muted-foreground"
                   }`}
                 >
@@ -215,7 +217,7 @@ const Navbar = () => {
               ) : (
                 <a
                   href={link.href}
-                  className={`flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-lg text-[15px] font-semibold hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1 px-2 xl:px-3 py-2 rounded-lg text-[14px] xl:text-[15px] font-semibold hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
                     link.blink ? "text-primary animate-pulse" : "text-muted-foreground"
                   }`}
                 >
@@ -234,7 +236,7 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="hidden lg:flex items-center gap-2 shrink-0">
+        <div className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0 ml-2">
           <button
             onClick={() => setLang(lang === "bn" ? "en" : "bn")}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2.5 py-2 rounded-lg hover:bg-secondary/60"
@@ -256,17 +258,17 @@ const Navbar = () => {
           </button>
           {user ? (
             <Link to="/dashboard"
-              className="text-sm px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+              className="text-sm px-4 xl:px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
               {tr("nav.dashboard")}
             </Link>
           ) : (
             <>
               <Link to="/login"
-                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl font-semibold border border-border hover:bg-secondary/60 text-foreground transition-all">
+                className="flex items-center gap-2 text-sm px-3 xl:px-4 py-2.5 rounded-xl font-semibold border border-border hover:bg-secondary/60 text-foreground transition-all">
                 <LogIn className="w-4 h-4" /> {tr("nav.login")}
               </Link>
               <Link to="/signup"
-                className="text-sm px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                className="text-sm px-4 xl:px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
                 {tr("nav.signup")}
               </Link>
             </>
