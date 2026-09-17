@@ -111,6 +111,8 @@ async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
       }).eq("id", invoiceId);
 
       if (verified) {
+        await settlePaidInvoice(supabase, invoiceId, "sslcommerz", tran_id);
+
         // Update linked order status to paid/active
         const { data: linkedOrders } = await supabase
           .from("orders")
@@ -129,12 +131,18 @@ async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
           }
         }
 
-        // Activate pending services linked to this invoice
-        await supabase.from("services").update({
-          status: "active",
-          start_date: new Date().toISOString(),
-          expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        }).eq("status", "pending");
+        // Activate only the service linked to this invoice
+        const { data: paidInvoice } = await supabase
+          .from("invoices")
+          .select("service_id")
+          .eq("id", invoiceId)
+          .single();
+        if (paidInvoice?.service_id) {
+          await supabase.from("services").update({
+            status: "active",
+            start_date: new Date().toISOString(),
+          }).eq("id", paidInvoice.service_id).eq("status", "pending");
+        }
       }
 
       // Create notification
