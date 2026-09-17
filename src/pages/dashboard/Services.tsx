@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { motion, AnimatePresence } from "framer-motion";
 import { ServicesSkeleton } from "@/components/DashboardSkeleton";
 import { Server, ExternalLink, Search, Filter, ChevronDown, ChevronUp, Clock, Globe, Cpu, HardDrive, Wifi, Calendar } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "@/lib/router-compat";
+import { getDashboardServices } from "@/lib/dashboard.functions";
+import { logApiError } from "@/lib/errorReporting";
 import { formatAmount } from "@/lib/formatPrice";
 
 const statusConfig: Record<string, { label_en: string; label_bn: string; color: string; dot: string }> = {
