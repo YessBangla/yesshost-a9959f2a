@@ -50,12 +50,23 @@ serve(async (req) => {
       );
     }
 
+    const cfg = await loadSslCfg();
+    if (!cfg.enabled) {
+      return new Response(
+        JSON.stringify({
+          error: "SSLCommerz is not enabled",
+          message: "SSLCommerz এখনো চালু করা হয়নি। অ্যাডমিন প্যানেলের পেমেন্ট গেটওয়ে সেটিংসে তথ্য দিন।",
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const tran_id = `TXN-${invoice_id}-${Date.now()}`;
 
     // Prepare SSLCommerz session
     const formData = new URLSearchParams();
-    formData.append("store_id", SSLCOMMERZ_STORE_ID);
-    formData.append("store_passwd", SSLCOMMERZ_STORE_PASS);
+    formData.append("store_id", cfg.storeId);
+    formData.append("store_passwd", cfg.storePass);
     formData.append("total_amount", String(amount));
     formData.append("currency", "BDT");
     formData.append("tran_id", tran_id);
