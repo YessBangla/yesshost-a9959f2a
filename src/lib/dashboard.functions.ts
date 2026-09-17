@@ -45,3 +45,29 @@ export const getLiveChatMessages = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<{ messages: ChatMessage[] }> => {
     return { messages: await loadChatMessages(data.chatId) };
   });
+
+export const startLiveChat = createServerFn({ method: "POST" })
+  .inputValidator((data: { name: string; email: string; phone: string; greeting: string }) => {
+    const name = (data?.name ?? "").trim();
+    const email = (data?.email ?? "").trim();
+    const phone = (data?.phone ?? "").trim();
+    const greeting = (data?.greeting ?? "").trim();
+    if (!name || !email || !phone) throw new Error("name, email and phone are required");
+    return { name, email, phone, greeting };
+  })
+  .handler(async ({ data }): Promise<{ chatId: string }> => {
+    const { createVisitorChat } = await import("./live-chat.server");
+    return createVisitorChat(data);
+  });
+
+export const sendLiveChatMessage = createServerFn({ method: "POST" })
+  .inputValidator((data: { chatId: string; message: string }) => {
+    const chatId = (data?.chatId ?? "").trim();
+    const message = (data?.message ?? "").trim();
+    if (!chatId || !message) throw new Error("chatId and message are required");
+    return { chatId, message: message.slice(0, 2000) };
+  })
+  .handler(async ({ data }): Promise<{ message: ChatMessage }> => {
+    const { postVisitorMessage } = await import("./live-chat.server");
+    return postVisitorMessage(data);
+  });
