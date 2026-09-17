@@ -40,8 +40,7 @@ export function priceFrom(
     .filter((p) => name.endsWith(p.ext.startsWith(".") ? p.ext : `.${p.ext}`))
     .sort((a, b) => b.ext.length - a.ext.length)[0];
   if (!match) return null;
-  const n = Number(String(match[kind]).replace(/[^\d.]/g, ""));
-  return Number.isFinite(n) && n > 0 ? n : null;
+  return parseNumeric(match[kind]);
 }
 
 export type RenewalQuote = { lines: PriceLine[]; totals: PriceTotals };
