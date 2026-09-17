@@ -195,11 +195,11 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop */}
-        <div className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-0 xl:gap-0.5">
+        <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 mr-auto">
           {navLinks.map((link, idx) => (
             <div
               key={link.label}
-              className={`relative ${link.minor ? "hidden xl:block" : ""}`}
+              className={`relative ${link.minor ? "hidden 2xl:block" : ""}`}
               onMouseEnter={() => link.children && setActiveDropdown(link.label)}
               onMouseLeave={() => setActiveDropdown(null)}
             >
