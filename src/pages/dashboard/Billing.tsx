@@ -502,7 +502,7 @@ const DashboardBilling = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredInvoices.map((inv) => {
+                    {pagedInvoices.map((inv) => {
                       const canPay = inv.status === "unpaid" || inv.status === "overdue";
                       const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
                       return (
@@ -545,6 +545,15 @@ const DashboardBilling = () => {
                     })}
                   </tbody>
                 </table>
+              </div>
+              <div className="px-4 pb-4">
+                <DataPagination
+                  total={filteredInvoices.length}
+                  page={invPage}
+                  pageSize={invPageSize}
+                  onPage={setInvPage}
+                  onPageSize={setInvPageSize}
+                />
               </div>
             </div>
           )}
