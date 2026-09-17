@@ -637,7 +637,7 @@ const DashboardBilling = () => {
             />
           ) : (
             <div className="space-y-3">
-              {paidInvoices.map((inv) => {
+              {pagedHistory.map((inv) => {
                 const StatusIcon = statusIcons[inv.status] || CheckCircle2;
                 const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
                 const pmLabel = inv.payment_method
@@ -715,6 +715,13 @@ const DashboardBilling = () => {
                   </div>
                 );
               })}
+              <DataPagination
+                total={paidInvoices.length}
+                page={histPage}
+                pageSize={histPageSize}
+                onPage={setHistPage}
+                onPageSize={setHistPageSize}
+              />
             </div>
           )}
         </>
