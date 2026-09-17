@@ -994,6 +994,39 @@ export type Database = {
           },
         ]
       }
+      payment_gateway_settings: {
+        Row: {
+          created_at: string
+          credentials: Json
+          enabled: boolean
+          gateway: string
+          id: string
+          is_sandbox: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          credentials?: Json
+          enabled?: boolean
+          gateway: string
+          id?: string
+          is_sandbox?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          credentials?: Json
+          enabled?: boolean
+          gateway?: string
+          id?: string
+          is_sandbox?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       pricing_plans: {
         Row: {
           annual_price_bdt: string | null
