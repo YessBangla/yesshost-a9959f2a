@@ -3,6 +3,7 @@ import AdminRoute from "@/components/AdminRoute";
 import AdminLayout from "@/components/AdminLayout";
 
 export const Route = createFileRoute("/admin")({
+  ssr: false,
   component: AdminRouteComponent,
 });
 
