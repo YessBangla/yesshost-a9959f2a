@@ -45,12 +45,18 @@ import {
   type ValidationCode,
 } from "@/lib/domain-pricing";
 import {
+  getRenewalInvoiceStatus,
   getTransferTicketStatus,
+  sendTransferFollowUp,
   submitDomainRenewal,
   submitDomainTransfer,
 } from "@/lib/domain-tools.functions";
+import { downloadInvoicePdf } from "@/lib/invoice-pdf";
 import type { RenewalResult } from "@/lib/domain-tools.server";
 import type { Tables } from "@/integrations/supabase/types";
+
+/** Hours without any ticket movement before we warn the customer. */
+const TRANSFER_STALE_HOURS = 48;
 
 type TabKey = "register" | "renew" | "transfer" | "whois";
 
