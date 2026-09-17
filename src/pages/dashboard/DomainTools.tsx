@@ -329,6 +329,97 @@ const DashboardDomainTools = () => {
     queryFn: () => fetchTransferStatus({ data: { ticketNumber: transferTicket! } }),
   });
 
+  // ---- transfer staleness detection + support follow-up -------------------
+  const transferStale = useMemo(() => {
+    const data = statusQuery.data;
+    if (!data) return null;
+    const complete = data.stages.some((s) => s.key === "complete" && s.done);
+    if (complete) return null;
+    const times = [data.updatedAt, ...data.updates.map((u) => u.at)]
+      .map((t) => (t ? new Date(t).getTime() : NaN))
+      .filter((t) => !Number.isNaN(t));
+    if (times.length === 0) return null;
+    const last = Math.max(...times);
+    const hours = Math.floor((Date.now() - last) / 3_600_000);
+    return hours >= TRANSFER_STALE_HOURS ? { hours, lastAt: new Date(last).toISOString() } : null;
+  }, [statusQuery.data]);
+
+  useEffect(() => {
+    if (!transferStale || followUpMessage || followUpSent) return;
+    const domain = statusQuery.data ? transferDomain || "" : "";
+    setFollowUpMessage(
+      bn
+        ? `আসসালামু আলাইকুম, টিকেট ${transferTicket ?? ""} — ${domain || "আমার ডোমেইন"} ট্রান্সফারের কোনো আপডেট গত ${transferStale.hours} ঘণ্টায় পাইনি। বর্তমান অবস্থা জানালে উপকৃত হবো।`
+        : `Hello, ticket ${transferTicket ?? ""} — I have not received any update on the transfer of ${domain || "my domain"} for ${transferStale.hours} hours. Could you please share the current status?`,
+    );
+  }, [transferStale, transferTicket, transferDomain, bn, followUpMessage, followUpSent, statusQuery.data]);
+
+  const submitFollowUp = async () => {
+    if (!transferTicket) return;
+    setFollowUpError(null);
+    if (followUpMessage.trim().length < 10) {
+      setFollowUpError(msg("note_too_short"));
+      return;
+    }
+    setFollowUpSending(true);
+    try {
+      const res = await runFollowUp({ data: { ticketNumber: transferTicket, message: followUpMessage.trim() } });
+      if (!res.ok) {
+        setFollowUpError(res.code === "server_error" ? (bn ? "সার্ভারে সমস্যা হয়েছে।" : "Something went wrong on the server.") : msg(res.code));
+        return;
+      }
+      setFollowUpSent(true);
+      toast({
+        title: "✅",
+        description: bn ? "সাপোর্ট টিমে বার্তা পাঠানো হয়েছে" : "Your message was sent to the support team",
+      });
+      statusQuery.refetch();
+    } catch (err) {
+      logApiError("sendTransferFollowUp", err, { area: "domain" });
+      setFollowUpError(bn ? "সংযোগ সমস্যা — আবার চেষ্টা করুন।" : "Connection problem — please try again.");
+    } finally {
+      setFollowUpSending(false);
+    }
+  };
+
+  // ---- renewal invoice payment status -------------------------------------
+  const invoiceQuery = useQuery({
+    queryKey: ["domain-renew", "invoice", renewResult?.invoiceNumber],
+    enabled: !!renewResult?.invoiceNumber,
+    refetchInterval: (q) => (q.state.data?.paid ? false : 15000),
+    refetchOnWindowFocus: true,
+    queryFn: () => fetchInvoiceStatus({ data: { invoiceNumber: renewResult!.invoiceNumber } }),
+  });
+  const invoicePaid = !!invoiceQuery.data?.paid;
+
+  const downloadRenewalPdf = () => {
+    if (!renewResult) return;
+    const totals = sumPriceLines(renewResult.lines);
+    downloadInvoicePdf({
+      invoiceNumber: renewResult.invoiceNumber,
+      createdAt: renewResult.createdAt,
+      dueDate: renewResult.dueDate,
+      paid: invoicePaid,
+      paidAt: invoiceQuery.data?.paidAt ?? null,
+      paymentMethod: invoiceQuery.data?.paymentMethod ?? null,
+      customerEmail: user?.email ?? null,
+      customerName: (user?.user_metadata as { full_name?: string } | undefined)?.full_name ?? null,
+      lines: renewResult.lines.map((l) => ({
+        domain: l.domain,
+        years: l.years,
+        unitPrice: l.unitPrice,
+        total: l.subtotal,
+      })),
+      totals: {
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        fees: totals.fees,
+        vat: totals.vat,
+        total: totals.total,
+      },
+    });
+  };
+
   const resetTransfer = () => {
     setTransferDomain("");
     setEppCode("");
