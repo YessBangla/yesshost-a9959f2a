@@ -146,7 +146,7 @@ const DashboardLayout = () => {
       hasDropdown: true,
       children: [
         { label: bn ? "আমার সকল সার্ভিস" : "My All Services", href: "/dashboard/services", icon: Server, badge: serviceCount },
-        { label: bn ? "নতুন সার্ভিস অর্ডার" : "Order New Services", href: "/services/basic-hosting", icon: PlusCircle },
+        { label: bn ? "নতুন সার্ভিস অর্ডার" : "Order New Services", href: "/dashboard/order-service", icon: PlusCircle },
         { label: bn ? "এভেইলেবল অ্যাডঅন দেখুন" : "View Available Addons", href: "/dashboard/orders", icon: Package },
       ],
     },
@@ -157,10 +157,11 @@ const DashboardLayout = () => {
       hasDropdown: true,
       children: [
         { label: bn ? "আমার ডোমেইন লিস্ট" : "My Domain List", href: "/dashboard/domains", icon: ListOrdered, badge: domainCount },
-        { label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain", href: "/domain-search", icon: PlusCircle },
-        { label: bn ? "ডোমেইন রিনিউ" : "Domain Renew", href: "/dashboard/domains", icon: RefreshCw },
-        { label: bn ? "ডোমেইন ট্রান্সফার" : "Transfer Domain", href: "/services/domain", icon: ArrowRightLeft },
-        { label: "WHOIS Lookup", href: "/services/domain", icon: Search },
+        { label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain", href: "/dashboard/domain-tools?tab=register", icon: PlusCircle },
+        { label: bn ? "ডোমেইন রিনিউ" : "Domain Renew", href: "/dashboard/domain-tools?tab=renew", icon: RefreshCw },
+        { label: bn ? "ডোমেইন ট্রান্সফার" : "Transfer Domain", href: "/dashboard/domain-tools?tab=transfer", icon: ArrowRightLeft },
+        { label: "WHOIS Lookup", href: "/dashboard/domain-tools?tab=whois", icon: Search },
+
       ],
     },
     {
@@ -180,11 +181,12 @@ const DashboardLayout = () => {
       icon: HeadphonesIcon,
       hasDropdown: true,
       children: [
-        { label: bn ? "সাপোর্ট টিকেট খুলুন" : "Open Support Ticket", href: "/dashboard/support", icon: TicketPlus },
+        { label: bn ? "সাপোর্ট টিকেট খুলুন" : "Open Support Ticket", href: "/dashboard/support?new=1", icon: TicketPlus },
         { label: bn ? "আমার সাপোর্ট টিকেট" : "My Support Tickets", href: "/dashboard/support", icon: Ticket },
-        { label: bn ? "সাপোর্ট পিন" : "Support PIN", href: "/dashboard", icon: KeyIcon },
-        { label: bn ? "নলেজবেস" : "Knowledgebase", href: "/knowledge-base", icon: BookOpen },
-        { label: bn ? "সার্ভার স্ট্যাটাস" : "Server Status", href: "/dashboard", icon: Activity },
+        { label: bn ? "সাপোর্ট পিন" : "Support PIN", href: "/dashboard/support-pin", icon: KeyIcon },
+        { label: bn ? "নলেজবেস" : "Knowledgebase", href: "/dashboard/knowledge-base", icon: BookOpen },
+        { label: bn ? "সার্ভার স্ট্যাটাস" : "Server Status", href: "/dashboard/server-status", icon: Activity },
+
       ],
     },
     {
