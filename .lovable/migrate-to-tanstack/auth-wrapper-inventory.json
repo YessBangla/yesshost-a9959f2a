@@ -1,0 +1,54 @@
+{
+  "library": "supabase",
+  "wrappers": [
+    {
+      "name": "ProtectedRoute",
+      "file": "src/components/ProtectedRoute.tsx",
+      "behavior": "redirects unauthenticated users to /login",
+      "props": [],
+      "usages": [
+        {
+          "file": "/tmp/migrate-to-tanstack/App.tsx.bak",
+          "line": 186,
+          "openingTag": "<ProtectedRoute>",
+          "props": [],
+          "context": "<ProtectedRoute> <DashboardLayout /> </ProtectedRoute>"
+        }
+      ]
+    },
+    {
+      "name": "AdminRoute",
+      "file": "src/components/AdminRoute.tsx",
+      "behavior": "redirects unauthenticated users to /admin-login and non-admins to /dashboard",
+      "props": [],
+      "usages": [
+        {
+          "file": "/tmp/migrate-to-tanstack/App.tsx.bak",
+          "line": 213,
+          "openingTag": "<AdminRoute>",
+          "props": [],
+          "context": "<AdminRoute> <AdminLayout /> </AdminRoute>"
+        }
+      ]
+    },
+    {
+      "name": "CallCenterRoute",
+      "file": "src/components/CallCenterRoute.tsx",
+      "behavior": "redirects unauthenticated users to /admin-login and users without admin or call_center role to /dashboard",
+      "props": [],
+      "usages": [
+        {
+          "file": "/tmp/migrate-to-tanstack/App.tsx.bak",
+          "line": 242,
+          "openingTag": "<CallCenterRoute>",
+          "props": [],
+          "context": "<CallCenterRoute> <CallCenterLayout /> </CallCenterRoute>"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Auth wrappers utilize a custom useAuth hook and Supabase RPC calls for role-based access control.",
+    "Each wrapper gates one nested layout block; wrappers moved into the corresponding layout route files."
+  ]
+}
