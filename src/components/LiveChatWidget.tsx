@@ -66,11 +66,16 @@ const LiveChatWidget = () => {
   }, []);
 
   const loadMessages = useServerFn(getLiveChatMessages);
+  const startChatFn = useServerFn(startLiveChat);
+  const sendChatMessage = useServerFn(sendLiveChatMessage);
   const historyQuery = useQuery({
     queryKey: ["live-chat", "messages", chatId],
     queryFn: () => loadMessages({ data: { chatId: chatId as string } }),
     enabled: !!chatId,
-    staleTime: 10_000,
+    staleTime: 3_000,
+    // Visitor transcripts are private now, so the widget polls the server
+    // instead of relying on an anonymous realtime subscription.
+    refetchInterval: open ? 5_000 : false,
   });
 
   // Hydrate the server-rendered transcript into local state before the first
