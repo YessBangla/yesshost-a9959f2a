@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "@/lib/router-compat";
 import { getDashboardDomains } from "@/lib/dashboard.functions";
+import DataPagination from "@/components/DataPagination";
 import { logApiError } from "@/lib/errorReporting";
 
 const DashboardDomains = () => {
@@ -17,6 +18,8 @@ const DashboardDomains = () => {
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Server-side fetch keeps the domain list identical on SSR and in the browser.
   const fetchDomains = useServerFn(getDashboardDomains);
@@ -37,6 +40,10 @@ const DashboardDomains = () => {
   const filtered = domains.filter(d =>
     !search || (d.domain || d.name).toLowerCase().includes(search.toLowerCase())
   );
+
+  useEffect(() => { setPage(1); }, [search]);
+
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const isExpiringSoon = (date: string | null) => {
     if (!date) return false;
@@ -110,7 +117,7 @@ const DashboardDomains = () => {
         />
       ) : (
         <div className="space-y-3">
-          {filtered.map((d, i) => {
+          {paged.map((d, i) => {
             const expiring = isExpiringSoon(d.expiry_date);
             const days = daysUntilExpiry(d.expiry_date);
 
@@ -165,6 +172,13 @@ const DashboardDomains = () => {
               </motion.div>
             );
           })}
+          <DataPagination
+            total={filtered.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(n) => { setPageSize(n); setPage(1); }}
+          />
         </div>
       )}
     </div>

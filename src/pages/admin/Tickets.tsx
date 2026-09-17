@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AdminTableSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
+import DataPagination from "@/components/DataPagination";
 import {
   HeadphonesIcon, Search, Send, ArrowLeft, MessageSquare,
   Clock, CheckCircle2, AlertTriangle, Inbox, Filter, User, Download
@@ -47,6 +48,8 @@ const AdminTickets = () => {
   const [replies, setReplies] = useState<Tables<"ticket_replies">[]>([]);
   const [replyMsg, setReplyMsg] = useState("");
   const [sending, setSending] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const fetchData = async () => {
     const [tix, prof] = await Promise.all([
@@ -122,6 +125,10 @@ const AdminTickets = () => {
     const matchPriority = priorityFilter === "all" || t.priority === priorityFilter;
     return matchSearch && matchStatus && matchPriority;
   });
+
+  useEffect(() => { setPage(1); }, [search, statusFilter, priorityFilter]);
+
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" });
   const formatTime = (d: string) => new Date(d).toLocaleTimeString(isBn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" });
@@ -305,7 +312,7 @@ const AdminTickets = () => {
             description={isBn ? "সার্চ ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন" : "Try adjusting your search filters"}
           />
         )}
-        {filtered.map((t, i) => {
+        {paged.map((t, i) => {
           const sc = statusConfig[t.status] || statusConfig.open;
           const pc = priorityConfig[t.priority] || priorityConfig.medium;
           const timeSince = Math.floor((Date.now() - new Date(t.created_at).getTime()) / 3600000);
@@ -360,11 +367,14 @@ const AdminTickets = () => {
         })}
       </div>
 
-      {/* Footer count */}
       {filtered.length > 0 && (
-        <div className="text-xs text-muted-foreground text-center">
-          {isBn ? `${filtered.length} টি টিকেট দেখাচ্ছে` : `Showing ${filtered.length} tickets`}
-        </div>
+        <DataPagination
+          total={filtered.length}
+          page={page}
+          pageSize={pageSize}
+          onPage={setPage}
+          onPageSize={(n) => { setPageSize(n); setPage(1); }}
+        />
       )}
     </div>
   );
