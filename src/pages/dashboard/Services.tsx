@@ -35,18 +35,26 @@ const DashboardServices = () => {
   const { user } = useAuth();
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
-  const [services, setServices] = useState<Tables<"services">[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Server-side fetch keeps the service list identical on SSR and in the browser.
+  const fetchServices = useServerFn(getDashboardServices);
+  const servicesQuery = useQuery({
+    queryKey: ["dashboard", "services", user?.id ?? "anon"],
+    queryFn: () => fetchServices(),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+
   useEffect(() => {
-    if (!user) return;
-    supabase.from("services").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => { setServices(data || []); setLoading(false); });
-  }, [user]);
+    if (servicesQuery.error) logApiError("dashboard.services", servicesQuery.error, { area: "services" });
+  }, [servicesQuery.error]);
+
+  const services: Tables<"services">[] = servicesQuery.data?.services ?? [];
+  const loading = !!user && servicesQuery.isPending;
 
   const filtered = services.filter(s => {
     const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.domain || "").toLowerCase().includes(search.toLowerCase());
