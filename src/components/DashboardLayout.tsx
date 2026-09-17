@@ -7,7 +7,7 @@ import {
   CreditCard, Share2, KeyRound, Bell, Settings, Wallet,
   ChevronDown, Package, PlusCircle, ListOrdered, RefreshCw, ArrowRightLeft, Search, Layers,
   TicketPlus, Ticket, KeyRound as KeyIcon, BookOpen, Activity,
-  Users, DollarSign, MousePointer, Palette
+  Users, DollarSign, MousePointer, Palette, LifeBuoy
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -39,6 +39,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/affiliate": { en: "Affiliate", bn: "অ্যাফিলিয়েট" },
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
   "/dashboard/theme-seller": { en: "Sell Themes", bn: "থিম বিক্রি" },
+  "/dashboard/troubleshoot": { en: "Troubleshoot", bn: "সমস্যা নির্ণয়" },
 };
 
 interface TopMenuChild {
@@ -206,6 +207,7 @@ const DashboardLayout = () => {
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
     { title: bn ? "অ্যাফিলিয়েট" : "Affiliate", url: "/dashboard/affiliate", icon: Share2 },
     { title: bn ? "থিম বিক্রি" : "Sell Themes", url: "/dashboard/theme-seller", icon: Palette },
+    { title: bn ? "সমস্যা নির্ণয়" : "Troubleshoot", url: "/dashboard/troubleshoot", icon: LifeBuoy },
     ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),
   ];
 
@@ -357,6 +359,16 @@ const DashboardLayout = () => {
           >
             <Palette className="w-[18px] h-[18px] shrink-0" />
             {!collapsed && <span className="truncate">{bn ? "থিম বিক্রি" : "Sell Themes"}</span>}
+          </NavLink>
+
+          {/* Troubleshoot */}
+          <NavLink
+            to="/dashboard/troubleshoot"
+            className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
+          >
+            <LifeBuoy className="w-[18px] h-[18px] shrink-0" />
+            {!collapsed && <span className="truncate">{bn ? "সমস্যা নির্ণয়" : "Troubleshoot"}</span>}
           </NavLink>
 
           {/* Reseller */}
