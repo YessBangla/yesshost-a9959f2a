@@ -37,6 +37,8 @@ const AdminServices = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ServiceWithUser | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const fetchData = async () => {
     const [svc, prof] = await Promise.all([
@@ -73,6 +75,8 @@ const AdminServices = () => {
     const matchType = typeFilter === "all" || s.service_type === typeFilter;
     return matchSearch && matchStatus && matchType;
   });
+
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const stats = {
     total: services.length,
