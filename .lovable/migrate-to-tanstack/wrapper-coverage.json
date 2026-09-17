@@ -1,46 +1,38 @@
-{
-  "wrappers": [
-    {
-      "name": "ProtectedRoute",
-      "definitionFile": "src/components/ProtectedRoute.tsx",
-      "originalUsages": 1,
-      "migratedUsages": 1,
-      "coverage": [
-        {
-          "routePath": "/dashboard",
-          "routeFile": "src/routes/dashboard/route.tsx",
-          "openingTag": "<ProtectedRoute>",
-          "protects": "layout route and all 17 /dashboard/* children"
-        }
-      ]
-    },
-    {
-      "name": "AdminRoute",
-      "definitionFile": "src/components/AdminRoute.tsx",
-      "originalUsages": 1,
-      "migratedUsages": 1,
-      "coverage": [
-        {
-          "routePath": "/admin",
-          "routeFile": "src/routes/admin/route.tsx",
-          "openingTag": "<AdminRoute>",
-          "protects": "layout route and all 20 /admin/* children"
-        }
-      ]
-    },
-    {
-      "name": "CallCenterRoute",
-      "definitionFile": "src/components/CallCenterRoute.tsx",
-      "originalUsages": 1,
-      "migratedUsages": 1,
-      "coverage": [
-        {
-          "routePath": "/call-center",
-          "routeFile": "src/routes/call-center/route.tsx",
-          "openingTag": "<CallCenterRoute>",
-          "protects": "layout route and all 5 /call-center/* children"
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "routePath": "/dashboard",
+    "routeFile": "src/routes/dashboard/route.tsx",
+    "wrappers": [
+      {
+        "name": "ProtectedRoute",
+        "openingTag": "<ProtectedRoute>",
+        "props": [],
+        "sourceUsage": { "file": "/tmp/migrate-to-tanstack/App.tsx.bak", "line": 186 }
+      }
+    ]
+  },
+  {
+    "routePath": "/admin",
+    "routeFile": "src/routes/admin/route.tsx",
+    "wrappers": [
+      {
+        "name": "AdminRoute",
+        "openingTag": "<AdminRoute>",
+        "props": [],
+        "sourceUsage": { "file": "/tmp/migrate-to-tanstack/App.tsx.bak", "line": 213 }
+      }
+    ]
+  },
+  {
+    "routePath": "/call-center",
+    "routeFile": "src/routes/call-center/route.tsx",
+    "wrappers": [
+      {
+        "name": "CallCenterRoute",
+        "openingTag": "<CallCenterRoute>",
+        "props": [],
+        "sourceUsage": { "file": "/tmp/migrate-to-tanstack/App.tsx.bak", "line": 242 }
+      }
+    ]
+  }
+]
