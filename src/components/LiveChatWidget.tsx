@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getLiveChatMessages } from "@/lib/dashboard.functions";
+import { getLiveChatMessages, startLiveChat, sendLiveChatMessage } from "@/lib/dashboard.functions";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2, Smile, Phone, PhoneCall, Mail } from "lucide-react";
 import { Link } from "@/lib/router-compat";
