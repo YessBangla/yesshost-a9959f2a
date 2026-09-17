@@ -151,7 +151,7 @@ const DashboardLayout = () => {
       hasDropdown: true,
       children: [
         { label: bn ? "আমার ডোমেইন লিস্ট" : "My Domain List", href: "/dashboard/domains", icon: ListOrdered, badge: domainCount },
-        { label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain", href: "/services/domain", icon: PlusCircle },
+        { label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain", href: "/domain-search", icon: PlusCircle },
         { label: bn ? "ডোমেইন রিনিউ" : "Domain Renew", href: "/dashboard/domains", icon: RefreshCw },
         { label: bn ? "ডোমেইন ট্রান্সফার" : "Transfer Domain", href: "/services/domain", icon: ArrowRightLeft },
         { label: "WHOIS Lookup", href: "/services/domain", icon: Search },

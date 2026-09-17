@@ -57,7 +57,7 @@ const DashboardDomains = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{bn ? "আমার ডোমেইন" : "My Domains"}</h1>
           <p className="text-sm text-muted-foreground">{bn ? "আপনার নিবন্ধিত ডোমেইন পরিচালনা করুন" : "Manage your registered domains"}</p>
         </div>
-        <Link to="/services/domain" className="flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
+        <Link to="/domain-search" className="flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
           {bn ? "নতুন ডোমেইন" : "Register Domain"}
         </Link>
       </div>
