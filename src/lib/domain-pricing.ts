@@ -148,3 +148,14 @@ export function validationMessage(code: ValidationCode, bn: boolean): string {
   const m = MESSAGES[code];
   return bn ? m.bn : m.en;
 }
+
+/* --------------------------- numeral handling --------------------------- */
+
+const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
+
+/** Parses prices that may be stored with Bengali numerals and separators. */
+export function parseNumeric(value: unknown): number | null {
+  const ascii = String(value ?? "").replace(/[০-৯]/g, (d) => String(BN_DIGITS.indexOf(d)));
+  const n = Number(ascii.replace(/[^\d.]/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
