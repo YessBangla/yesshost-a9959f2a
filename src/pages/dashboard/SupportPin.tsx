@@ -3,6 +3,7 @@ import { KeyRound, Copy, RefreshCw, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const STORAGE_KEY = "yh_support_pin";
 const VALID_MS = 60 * 60 * 1000; // 1 hour
@@ -120,6 +121,7 @@ const DashboardSupportPin = () => {
           </button>
         </div>
       </div>
+      )}
 
       <div className="glass-card rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-2">
