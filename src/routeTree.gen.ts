@@ -10,33 +10,926 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
+import { Route as AffiliateRouteImport } from './routes/affiliate'
+import { Route as CallCenterRouteRouteImport } from './routes/call-center/route'
+import { Route as ChatRoomsRouteImport } from './routes/chat-rooms'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as DomainPricingRouteImport } from './routes/domain-pricing'
+import { Route as DomainSearchRouteImport } from './routes/domain-search'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as HostingPlansRouteImport } from './routes/hosting-plans'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RefundRouteImport } from './routes/refund'
+import { Route as ResellerHostingRouteImport } from './routes/reseller-hosting'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
+import { Route as AdminBillingRouteImport } from './routes/admin/billing'
+import { Route as AdminCallHistoryRouteImport } from './routes/admin/call-history'
+import { Route as AdminChatRoomsRouteImport } from './routes/admin/chat-rooms'
+import { Route as AdminCmsRouteImport } from './routes/admin/cms'
+import { Route as AdminCommunicationConfigRouteImport } from './routes/admin/communication-config'
+import { Route as AdminContactMessagesRouteImport } from './routes/admin/contact-messages'
+import { Route as AdminCouponsRouteImport } from './routes/admin/coupons'
+import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
+import { Route as AdminKnowledgeBaseRouteImport } from './routes/admin/knowledge-base'
+import { Route as AdminLiveChatRouteImport } from './routes/admin/live-chat'
+import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
+import { Route as AdminServicesRouteImport } from './routes/admin/services'
+import { Route as AdminStaffRouteImport } from './routes/admin/staff'
+import { Route as AdminThemesRouteImport } from './routes/admin/themes'
+import { Route as AdminTicketsRouteImport } from './routes/admin/tickets'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminWhmRouteImport } from './routes/admin/whm'
+import { Route as CallCenterIndexRouteImport } from './routes/call-center/index'
+import { Route as CallCenterCallHistoryRouteImport } from './routes/call-center/call-history'
+import { Route as CallCenterLiveChatRouteImport } from './routes/call-center/live-chat'
+import { Route as CallCenterOrdersRouteImport } from './routes/call-center/orders'
+import { Route as CallCenterTicketsRouteImport } from './routes/call-center/tickets'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardAffiliateRouteImport } from './routes/dashboard/affiliate'
+import { Route as DashboardBillingRouteImport } from './routes/dashboard/billing'
+import { Route as DashboardDomainToolsRouteImport } from './routes/dashboard/domain-tools'
+import { Route as DashboardDomainsRouteImport } from './routes/dashboard/domains'
+import { Route as DashboardKnowledgeBaseRouteImport } from './routes/dashboard/knowledge-base'
+import { Route as DashboardOrderServiceRouteImport } from './routes/dashboard/order-service'
+import { Route as DashboardOrdersRouteImport } from './routes/dashboard/orders'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
+import { Route as DashboardResellerRouteImport } from './routes/dashboard/reseller'
+import { Route as DashboardServerStatusRouteImport } from './routes/dashboard/server-status'
+import { Route as DashboardServicesRouteImport } from './routes/dashboard/services'
+import { Route as DashboardSupportRouteImport } from './routes/dashboard/support'
+import { Route as DashboardSupportPinRouteImport } from './routes/dashboard/support-pin'
+import { Route as DashboardThemeSellerRouteImport } from './routes/dashboard/theme-seller'
+import { Route as DashboardTroubleshootRouteImport } from './routes/dashboard/troubleshoot'
+import { Route as DashboardWalletRouteImport } from './routes/dashboard/wallet'
+import { Route as KnowledgeBaseIndexRouteImport } from './routes/knowledge-base/index'
+import { Route as KnowledgeBaseSlugRouteImport } from './routes/knowledge-base/$slug'
+import { Route as PaymentIndexRouteImport } from './routes/payment/index'
+import { Route as PaymentCancelRouteImport } from './routes/payment/cancel'
+import { Route as PaymentFailRouteImport } from './routes/payment/fail'
+import { Route as PaymentSuccessRouteImport } from './routes/payment/success'
+import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
+import { Route as ThemesIndexRouteImport } from './routes/themes/index'
+import { Route as ThemesSlugIndexRouteImport } from './routes/themes/$slug/index'
+import { Route as ThemesSlugDemoRouteImport } from './routes/themes/$slug/demo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AffiliateRoute = AffiliateRouteImport.update({
+  id: '/affiliate',
+  path: '/affiliate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CallCenterRouteRoute = CallCenterRouteRouteImport.update({
+  id: '/call-center',
+  path: '/call-center',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoomsRoute = ChatRoomsRouteImport.update({
+  id: '/chat-rooms',
+  path: '/chat-rooms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DomainPricingRoute = DomainPricingRouteImport.update({
+  id: '/domain-pricing',
+  path: '/domain-pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DomainSearchRoute = DomainSearchRouteImport.update({
+  id: '/domain-search',
+  path: '/domain-search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostingPlansRoute = HostingPlansRouteImport.update({
+  id: '/hosting-plans',
+  path: '/hosting-plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundRoute = RefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResellerHostingRoute = ResellerHostingRouteImport.update({
+  id: '/reseller-hosting',
+  path: '/reseller-hosting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAffiliatesRoute = AdminAffiliatesRouteImport.update({
+  id: '/affiliates',
+  path: '/affiliates',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminBillingRoute = AdminBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCallHistoryRoute = AdminCallHistoryRouteImport.update({
+  id: '/call-history',
+  path: '/call-history',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminChatRoomsRoute = AdminChatRoomsRouteImport.update({
+  id: '/chat-rooms',
+  path: '/chat-rooms',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCmsRoute = AdminCmsRouteImport.update({
+  id: '/cms',
+  path: '/cms',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCommunicationConfigRoute =
+  AdminCommunicationConfigRouteImport.update({
+    id: '/communication-config',
+    path: '/communication-config',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminContactMessagesRoute = AdminContactMessagesRouteImport.update({
+  id: '/contact-messages',
+  path: '/contact-messages',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCouponsRoute = AdminCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminKnowledgeBaseRoute = AdminKnowledgeBaseRouteImport.update({
+  id: '/knowledge-base',
+  path: '/knowledge-base',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLiveChatRoute = AdminLiveChatRouteImport.update({
+  id: '/live-chat',
+  path: '/live-chat',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminStaffRoute = AdminStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminThemesRoute = AdminThemesRouteImport.update({
+  id: '/themes',
+  path: '/themes',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminTicketsRoute = AdminTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminWhmRoute = AdminWhmRouteImport.update({
+  id: '/whm',
+  path: '/whm',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const CallCenterIndexRoute = CallCenterIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CallCenterRouteRoute,
+} as any)
+const CallCenterCallHistoryRoute = CallCenterCallHistoryRouteImport.update({
+  id: '/call-history',
+  path: '/call-history',
+  getParentRoute: () => CallCenterRouteRoute,
+} as any)
+const CallCenterLiveChatRoute = CallCenterLiveChatRouteImport.update({
+  id: '/live-chat',
+  path: '/live-chat',
+  getParentRoute: () => CallCenterRouteRoute,
+} as any)
+const CallCenterOrdersRoute = CallCenterOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => CallCenterRouteRoute,
+} as any)
+const CallCenterTicketsRoute = CallCenterTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => CallCenterRouteRoute,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAffiliateRoute = DashboardAffiliateRouteImport.update({
+  id: '/affiliate',
+  path: '/affiliate',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardBillingRoute = DashboardBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardDomainToolsRoute = DashboardDomainToolsRouteImport.update({
+  id: '/domain-tools',
+  path: '/domain-tools',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardDomainsRoute = DashboardDomainsRouteImport.update({
+  id: '/domains',
+  path: '/domains',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardKnowledgeBaseRoute = DashboardKnowledgeBaseRouteImport.update({
+  id: '/knowledge-base',
+  path: '/knowledge-base',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardOrderServiceRoute = DashboardOrderServiceRouteImport.update({
+  id: '/order-service',
+  path: '/order-service',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardOrdersRoute = DashboardOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardResellerRoute = DashboardResellerRouteImport.update({
+  id: '/reseller',
+  path: '/reseller',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardServerStatusRoute = DashboardServerStatusRouteImport.update({
+  id: '/server-status',
+  path: '/server-status',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardServicesRoute = DashboardServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardSupportRoute = DashboardSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardSupportPinRoute = DashboardSupportPinRouteImport.update({
+  id: '/support-pin',
+  path: '/support-pin',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardThemeSellerRoute = DashboardThemeSellerRouteImport.update({
+  id: '/theme-seller',
+  path: '/theme-seller',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardTroubleshootRoute = DashboardTroubleshootRouteImport.update({
+  id: '/troubleshoot',
+  path: '/troubleshoot',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardWalletRoute = DashboardWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const KnowledgeBaseIndexRoute = KnowledgeBaseIndexRouteImport.update({
+  id: '/knowledge-base/',
+  path: '/knowledge-base/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeBaseSlugRoute = KnowledgeBaseSlugRouteImport.update({
+  id: '/knowledge-base/$slug',
+  path: '/knowledge-base/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentIndexRoute = PaymentIndexRouteImport.update({
+  id: '/payment/',
+  path: '/payment/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentCancelRoute = PaymentCancelRouteImport.update({
+  id: '/payment/cancel',
+  path: '/payment/cancel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentFailRoute = PaymentFailRouteImport.update({
+  id: '/payment/fail',
+  path: '/payment/fail',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
+  id: '/payment/success',
+  path: '/payment/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSlugRoute = ServicesSlugRouteImport.update({
+  id: '/services/$slug',
+  path: '/services/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThemesIndexRoute = ThemesIndexRouteImport.update({
+  id: '/themes/',
+  path: '/themes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThemesSlugIndexRoute = ThemesSlugIndexRouteImport.update({
+  id: '/themes/$slug/',
+  path: '/themes/$slug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThemesSlugDemoRoute = ThemesSlugDemoRouteImport.update({
+  id: '/themes/$slug/demo',
+  path: '/themes/$slug/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/call-center': typeof CallCenterRouteRouteWithChildren
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/about': typeof AboutRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/affiliate': typeof AffiliateRoute
+  '/chat-rooms': typeof ChatRoomsRoute
+  '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
+  '/domain-pricing': typeof DomainPricingRoute
+  '/domain-search': typeof DomainSearchRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/hosting-plans': typeof HostingPlansRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
+  '/reseller-hosting': typeof ResellerHostingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/billing': typeof AdminBillingRoute
+  '/admin/call-history': typeof AdminCallHistoryRoute
+  '/admin/chat-rooms': typeof AdminChatRoomsRoute
+  '/admin/cms': typeof AdminCmsRoute
+  '/admin/communication-config': typeof AdminCommunicationConfigRoute
+  '/admin/contact-messages': typeof AdminContactMessagesRoute
+  '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
+  '/admin/live-chat': typeof AdminLiveChatRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/themes': typeof AdminThemesRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/whm': typeof AdminWhmRoute
+  '/call-center/call-history': typeof CallCenterCallHistoryRoute
+  '/call-center/live-chat': typeof CallCenterLiveChatRoute
+  '/call-center/orders': typeof CallCenterOrdersRoute
+  '/call-center/tickets': typeof CallCenterTicketsRoute
+  '/dashboard/affiliate': typeof DashboardAffiliateRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/domain-tools': typeof DashboardDomainToolsRoute
+  '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/order-service': typeof DashboardOrderServiceRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/reseller': typeof DashboardResellerRoute
+  '/dashboard/server-status': typeof DashboardServerStatusRoute
+  '/dashboard/services': typeof DashboardServicesRoute
+  '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/support-pin': typeof DashboardSupportPinRoute
+  '/dashboard/theme-seller': typeof DashboardThemeSellerRoute
+  '/dashboard/troubleshoot': typeof DashboardTroubleshootRoute
+  '/dashboard/wallet': typeof DashboardWalletRoute
+  '/knowledge-base/$slug': typeof KnowledgeBaseSlugRoute
+  '/payment/cancel': typeof PaymentCancelRoute
+  '/payment/fail': typeof PaymentFailRoute
+  '/payment/success': typeof PaymentSuccessRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/call-center/': typeof CallCenterIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/knowledge-base/': typeof KnowledgeBaseIndexRoute
+  '/payment/': typeof PaymentIndexRoute
+  '/themes/': typeof ThemesIndexRoute
+  '/themes/$slug/demo': typeof ThemesSlugDemoRoute
+  '/themes/$slug/': typeof ThemesSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/affiliate': typeof AffiliateRoute
+  '/chat-rooms': typeof ChatRoomsRoute
+  '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
+  '/domain-pricing': typeof DomainPricingRoute
+  '/domain-search': typeof DomainSearchRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/hosting-plans': typeof HostingPlansRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
+  '/reseller-hosting': typeof ResellerHostingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/billing': typeof AdminBillingRoute
+  '/admin/call-history': typeof AdminCallHistoryRoute
+  '/admin/chat-rooms': typeof AdminChatRoomsRoute
+  '/admin/cms': typeof AdminCmsRoute
+  '/admin/communication-config': typeof AdminCommunicationConfigRoute
+  '/admin/contact-messages': typeof AdminContactMessagesRoute
+  '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
+  '/admin/live-chat': typeof AdminLiveChatRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/themes': typeof AdminThemesRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/whm': typeof AdminWhmRoute
+  '/call-center/call-history': typeof CallCenterCallHistoryRoute
+  '/call-center/live-chat': typeof CallCenterLiveChatRoute
+  '/call-center/orders': typeof CallCenterOrdersRoute
+  '/call-center/tickets': typeof CallCenterTicketsRoute
+  '/dashboard/affiliate': typeof DashboardAffiliateRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/domain-tools': typeof DashboardDomainToolsRoute
+  '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/order-service': typeof DashboardOrderServiceRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/reseller': typeof DashboardResellerRoute
+  '/dashboard/server-status': typeof DashboardServerStatusRoute
+  '/dashboard/services': typeof DashboardServicesRoute
+  '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/support-pin': typeof DashboardSupportPinRoute
+  '/dashboard/theme-seller': typeof DashboardThemeSellerRoute
+  '/dashboard/troubleshoot': typeof DashboardTroubleshootRoute
+  '/dashboard/wallet': typeof DashboardWalletRoute
+  '/knowledge-base/$slug': typeof KnowledgeBaseSlugRoute
+  '/payment/cancel': typeof PaymentCancelRoute
+  '/payment/fail': typeof PaymentFailRoute
+  '/payment/success': typeof PaymentSuccessRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/admin': typeof AdminIndexRoute
+  '/call-center': typeof CallCenterIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/knowledge-base': typeof KnowledgeBaseIndexRoute
+  '/payment': typeof PaymentIndexRoute
+  '/themes': typeof ThemesIndexRoute
+  '/themes/$slug/demo': typeof ThemesSlugDemoRoute
+  '/themes/$slug': typeof ThemesSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/call-center': typeof CallCenterRouteRouteWithChildren
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/about': typeof AboutRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/affiliate': typeof AffiliateRoute
+  '/chat-rooms': typeof ChatRoomsRoute
+  '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
+  '/domain-pricing': typeof DomainPricingRoute
+  '/domain-search': typeof DomainSearchRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/hosting-plans': typeof HostingPlansRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
+  '/reseller-hosting': typeof ResellerHostingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/billing': typeof AdminBillingRoute
+  '/admin/call-history': typeof AdminCallHistoryRoute
+  '/admin/chat-rooms': typeof AdminChatRoomsRoute
+  '/admin/cms': typeof AdminCmsRoute
+  '/admin/communication-config': typeof AdminCommunicationConfigRoute
+  '/admin/contact-messages': typeof AdminContactMessagesRoute
+  '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
+  '/admin/live-chat': typeof AdminLiveChatRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/themes': typeof AdminThemesRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/whm': typeof AdminWhmRoute
+  '/call-center/call-history': typeof CallCenterCallHistoryRoute
+  '/call-center/live-chat': typeof CallCenterLiveChatRoute
+  '/call-center/orders': typeof CallCenterOrdersRoute
+  '/call-center/tickets': typeof CallCenterTicketsRoute
+  '/dashboard/affiliate': typeof DashboardAffiliateRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/domain-tools': typeof DashboardDomainToolsRoute
+  '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/order-service': typeof DashboardOrderServiceRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/reseller': typeof DashboardResellerRoute
+  '/dashboard/server-status': typeof DashboardServerStatusRoute
+  '/dashboard/services': typeof DashboardServicesRoute
+  '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/support-pin': typeof DashboardSupportPinRoute
+  '/dashboard/theme-seller': typeof DashboardThemeSellerRoute
+  '/dashboard/troubleshoot': typeof DashboardTroubleshootRoute
+  '/dashboard/wallet': typeof DashboardWalletRoute
+  '/knowledge-base/$slug': typeof KnowledgeBaseSlugRoute
+  '/payment/cancel': typeof PaymentCancelRoute
+  '/payment/fail': typeof PaymentFailRoute
+  '/payment/success': typeof PaymentSuccessRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/call-center/': typeof CallCenterIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/knowledge-base/': typeof KnowledgeBaseIndexRoute
+  '/payment/': typeof PaymentIndexRoute
+  '/themes/': typeof ThemesIndexRoute
+  '/themes/$slug/demo': typeof ThemesSlugDemoRoute
+  '/themes/$slug/': typeof ThemesSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/call-center'
+    | '/dashboard'
+    | '/about'
+    | '/admin-login'
+    | '/affiliate'
+    | '/chat-rooms'
+    | '/checkout'
+    | '/contact'
+    | '/domain-pricing'
+    | '/domain-search'
+    | '/forgot-password'
+    | '/hosting-plans'
+    | '/login'
+    | '/privacy'
+    | '/refund'
+    | '/reseller-hosting'
+    | '/reset-password'
+    | '/signup'
+    | '/terms'
+    | '/admin/affiliates'
+    | '/admin/analytics'
+    | '/admin/billing'
+    | '/admin/call-history'
+    | '/admin/chat-rooms'
+    | '/admin/cms'
+    | '/admin/communication-config'
+    | '/admin/contact-messages'
+    | '/admin/coupons'
+    | '/admin/finance'
+    | '/admin/knowledge-base'
+    | '/admin/live-chat'
+    | '/admin/marketing'
+    | '/admin/services'
+    | '/admin/staff'
+    | '/admin/themes'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/whm'
+    | '/call-center/call-history'
+    | '/call-center/live-chat'
+    | '/call-center/orders'
+    | '/call-center/tickets'
+    | '/dashboard/affiliate'
+    | '/dashboard/billing'
+    | '/dashboard/domain-tools'
+    | '/dashboard/domains'
+    | '/dashboard/knowledge-base'
+    | '/dashboard/order-service'
+    | '/dashboard/orders'
+    | '/dashboard/profile'
+    | '/dashboard/reseller'
+    | '/dashboard/server-status'
+    | '/dashboard/services'
+    | '/dashboard/support'
+    | '/dashboard/support-pin'
+    | '/dashboard/theme-seller'
+    | '/dashboard/troubleshoot'
+    | '/dashboard/wallet'
+    | '/knowledge-base/$slug'
+    | '/payment/cancel'
+    | '/payment/fail'
+    | '/payment/success'
+    | '/services/$slug'
+    | '/admin/'
+    | '/call-center/'
+    | '/dashboard/'
+    | '/knowledge-base/'
+    | '/payment/'
+    | '/themes/'
+    | '/themes/$slug/demo'
+    | '/themes/$slug/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/admin-login'
+    | '/affiliate'
+    | '/chat-rooms'
+    | '/checkout'
+    | '/contact'
+    | '/domain-pricing'
+    | '/domain-search'
+    | '/forgot-password'
+    | '/hosting-plans'
+    | '/login'
+    | '/privacy'
+    | '/refund'
+    | '/reseller-hosting'
+    | '/reset-password'
+    | '/signup'
+    | '/terms'
+    | '/admin/affiliates'
+    | '/admin/analytics'
+    | '/admin/billing'
+    | '/admin/call-history'
+    | '/admin/chat-rooms'
+    | '/admin/cms'
+    | '/admin/communication-config'
+    | '/admin/contact-messages'
+    | '/admin/coupons'
+    | '/admin/finance'
+    | '/admin/knowledge-base'
+    | '/admin/live-chat'
+    | '/admin/marketing'
+    | '/admin/services'
+    | '/admin/staff'
+    | '/admin/themes'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/whm'
+    | '/call-center/call-history'
+    | '/call-center/live-chat'
+    | '/call-center/orders'
+    | '/call-center/tickets'
+    | '/dashboard/affiliate'
+    | '/dashboard/billing'
+    | '/dashboard/domain-tools'
+    | '/dashboard/domains'
+    | '/dashboard/knowledge-base'
+    | '/dashboard/order-service'
+    | '/dashboard/orders'
+    | '/dashboard/profile'
+    | '/dashboard/reseller'
+    | '/dashboard/server-status'
+    | '/dashboard/services'
+    | '/dashboard/support'
+    | '/dashboard/support-pin'
+    | '/dashboard/theme-seller'
+    | '/dashboard/troubleshoot'
+    | '/dashboard/wallet'
+    | '/knowledge-base/$slug'
+    | '/payment/cancel'
+    | '/payment/fail'
+    | '/payment/success'
+    | '/services/$slug'
+    | '/admin'
+    | '/call-center'
+    | '/dashboard'
+    | '/knowledge-base'
+    | '/payment'
+    | '/themes'
+    | '/themes/$slug/demo'
+    | '/themes/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/call-center'
+    | '/dashboard'
+    | '/about'
+    | '/admin-login'
+    | '/affiliate'
+    | '/chat-rooms'
+    | '/checkout'
+    | '/contact'
+    | '/domain-pricing'
+    | '/domain-search'
+    | '/forgot-password'
+    | '/hosting-plans'
+    | '/login'
+    | '/privacy'
+    | '/refund'
+    | '/reseller-hosting'
+    | '/reset-password'
+    | '/signup'
+    | '/terms'
+    | '/admin/affiliates'
+    | '/admin/analytics'
+    | '/admin/billing'
+    | '/admin/call-history'
+    | '/admin/chat-rooms'
+    | '/admin/cms'
+    | '/admin/communication-config'
+    | '/admin/contact-messages'
+    | '/admin/coupons'
+    | '/admin/finance'
+    | '/admin/knowledge-base'
+    | '/admin/live-chat'
+    | '/admin/marketing'
+    | '/admin/services'
+    | '/admin/staff'
+    | '/admin/themes'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/whm'
+    | '/call-center/call-history'
+    | '/call-center/live-chat'
+    | '/call-center/orders'
+    | '/call-center/tickets'
+    | '/dashboard/affiliate'
+    | '/dashboard/billing'
+    | '/dashboard/domain-tools'
+    | '/dashboard/domains'
+    | '/dashboard/knowledge-base'
+    | '/dashboard/order-service'
+    | '/dashboard/orders'
+    | '/dashboard/profile'
+    | '/dashboard/reseller'
+    | '/dashboard/server-status'
+    | '/dashboard/services'
+    | '/dashboard/support'
+    | '/dashboard/support-pin'
+    | '/dashboard/theme-seller'
+    | '/dashboard/troubleshoot'
+    | '/dashboard/wallet'
+    | '/knowledge-base/$slug'
+    | '/payment/cancel'
+    | '/payment/fail'
+    | '/payment/success'
+    | '/services/$slug'
+    | '/admin/'
+    | '/call-center/'
+    | '/dashboard/'
+    | '/knowledge-base/'
+    | '/payment/'
+    | '/themes/'
+    | '/themes/$slug/demo'
+    | '/themes/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  CallCenterRouteRoute: typeof CallCenterRouteRouteWithChildren
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AffiliateRoute: typeof AffiliateRoute
+  ChatRoomsRoute: typeof ChatRoomsRoute
+  CheckoutRoute: typeof CheckoutRoute
+  ContactRoute: typeof ContactRoute
+  DomainPricingRoute: typeof DomainPricingRoute
+  DomainSearchRoute: typeof DomainSearchRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  HostingPlansRoute: typeof HostingPlansRoute
+  LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RefundRoute: typeof RefundRoute
+  ResellerHostingRoute: typeof ResellerHostingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SignupRoute: typeof SignupRoute
+  TermsRoute: typeof TermsRoute
+  KnowledgeBaseSlugRoute: typeof KnowledgeBaseSlugRoute
+  PaymentCancelRoute: typeof PaymentCancelRoute
+  PaymentFailRoute: typeof PaymentFailRoute
+  PaymentSuccessRoute: typeof PaymentSuccessRoute
+  ServicesSlugRoute: typeof ServicesSlugRoute
+  KnowledgeBaseIndexRoute: typeof KnowledgeBaseIndexRoute
+  PaymentIndexRoute: typeof PaymentIndexRoute
+  ThemesIndexRoute: typeof ThemesIndexRoute
+  ThemesSlugDemoRoute: typeof ThemesSlugDemoRoute
+  ThemesSlugIndexRoute: typeof ThemesSlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +941,659 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/affiliate': {
+      id: '/affiliate'
+      path: '/affiliate'
+      fullPath: '/affiliate'
+      preLoaderRoute: typeof AffiliateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/call-center': {
+      id: '/call-center'
+      path: '/call-center'
+      fullPath: '/call-center'
+      preLoaderRoute: typeof CallCenterRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat-rooms': {
+      id: '/chat-rooms'
+      path: '/chat-rooms'
+      fullPath: '/chat-rooms'
+      preLoaderRoute: typeof ChatRoomsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/domain-pricing': {
+      id: '/domain-pricing'
+      path: '/domain-pricing'
+      fullPath: '/domain-pricing'
+      preLoaderRoute: typeof DomainPricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/domain-search': {
+      id: '/domain-search'
+      path: '/domain-search'
+      fullPath: '/domain-search'
+      preLoaderRoute: typeof DomainSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hosting-plans': {
+      id: '/hosting-plans'
+      path: '/hosting-plans'
+      fullPath: '/hosting-plans'
+      preLoaderRoute: typeof HostingPlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund': {
+      id: '/refund'
+      path: '/refund'
+      fullPath: '/refund'
+      preLoaderRoute: typeof RefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reseller-hosting': {
+      id: '/reseller-hosting'
+      path: '/reseller-hosting'
+      fullPath: '/reseller-hosting'
+      preLoaderRoute: typeof ResellerHostingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/affiliates': {
+      id: '/admin/affiliates'
+      path: '/affiliates'
+      fullPath: '/admin/affiliates'
+      preLoaderRoute: typeof AdminAffiliatesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/billing': {
+      id: '/admin/billing'
+      path: '/billing'
+      fullPath: '/admin/billing'
+      preLoaderRoute: typeof AdminBillingRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/call-history': {
+      id: '/admin/call-history'
+      path: '/call-history'
+      fullPath: '/admin/call-history'
+      preLoaderRoute: typeof AdminCallHistoryRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/chat-rooms': {
+      id: '/admin/chat-rooms'
+      path: '/chat-rooms'
+      fullPath: '/admin/chat-rooms'
+      preLoaderRoute: typeof AdminChatRoomsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/cms': {
+      id: '/admin/cms'
+      path: '/cms'
+      fullPath: '/admin/cms'
+      preLoaderRoute: typeof AdminCmsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/communication-config': {
+      id: '/admin/communication-config'
+      path: '/communication-config'
+      fullPath: '/admin/communication-config'
+      preLoaderRoute: typeof AdminCommunicationConfigRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/contact-messages': {
+      id: '/admin/contact-messages'
+      path: '/contact-messages'
+      fullPath: '/admin/contact-messages'
+      preLoaderRoute: typeof AdminContactMessagesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/coupons': {
+      id: '/admin/coupons'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminCouponsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/knowledge-base': {
+      id: '/admin/knowledge-base'
+      path: '/knowledge-base'
+      fullPath: '/admin/knowledge-base'
+      preLoaderRoute: typeof AdminKnowledgeBaseRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/live-chat': {
+      id: '/admin/live-chat'
+      path: '/live-chat'
+      fullPath: '/admin/live-chat'
+      preLoaderRoute: typeof AdminLiveChatRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/staff': {
+      id: '/admin/staff'
+      path: '/staff'
+      fullPath: '/admin/staff'
+      preLoaderRoute: typeof AdminStaffRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/themes': {
+      id: '/admin/themes'
+      path: '/themes'
+      fullPath: '/admin/themes'
+      preLoaderRoute: typeof AdminThemesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/tickets': {
+      id: '/admin/tickets'
+      path: '/tickets'
+      fullPath: '/admin/tickets'
+      preLoaderRoute: typeof AdminTicketsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/whm': {
+      id: '/admin/whm'
+      path: '/whm'
+      fullPath: '/admin/whm'
+      preLoaderRoute: typeof AdminWhmRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/call-center/': {
+      id: '/call-center/'
+      path: '/'
+      fullPath: '/call-center/'
+      preLoaderRoute: typeof CallCenterIndexRouteImport
+      parentRoute: typeof CallCenterRouteRoute
+    }
+    '/call-center/call-history': {
+      id: '/call-center/call-history'
+      path: '/call-history'
+      fullPath: '/call-center/call-history'
+      preLoaderRoute: typeof CallCenterCallHistoryRouteImport
+      parentRoute: typeof CallCenterRouteRoute
+    }
+    '/call-center/live-chat': {
+      id: '/call-center/live-chat'
+      path: '/live-chat'
+      fullPath: '/call-center/live-chat'
+      preLoaderRoute: typeof CallCenterLiveChatRouteImport
+      parentRoute: typeof CallCenterRouteRoute
+    }
+    '/call-center/orders': {
+      id: '/call-center/orders'
+      path: '/orders'
+      fullPath: '/call-center/orders'
+      preLoaderRoute: typeof CallCenterOrdersRouteImport
+      parentRoute: typeof CallCenterRouteRoute
+    }
+    '/call-center/tickets': {
+      id: '/call-center/tickets'
+      path: '/tickets'
+      fullPath: '/call-center/tickets'
+      preLoaderRoute: typeof CallCenterTicketsRouteImport
+      parentRoute: typeof CallCenterRouteRoute
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/affiliate': {
+      id: '/dashboard/affiliate'
+      path: '/affiliate'
+      fullPath: '/dashboard/affiliate'
+      preLoaderRoute: typeof DashboardAffiliateRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/billing': {
+      id: '/dashboard/billing'
+      path: '/billing'
+      fullPath: '/dashboard/billing'
+      preLoaderRoute: typeof DashboardBillingRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/domain-tools': {
+      id: '/dashboard/domain-tools'
+      path: '/domain-tools'
+      fullPath: '/dashboard/domain-tools'
+      preLoaderRoute: typeof DashboardDomainToolsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/domains': {
+      id: '/dashboard/domains'
+      path: '/domains'
+      fullPath: '/dashboard/domains'
+      preLoaderRoute: typeof DashboardDomainsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/knowledge-base': {
+      id: '/dashboard/knowledge-base'
+      path: '/knowledge-base'
+      fullPath: '/dashboard/knowledge-base'
+      preLoaderRoute: typeof DashboardKnowledgeBaseRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/order-service': {
+      id: '/dashboard/order-service'
+      path: '/order-service'
+      fullPath: '/dashboard/order-service'
+      preLoaderRoute: typeof DashboardOrderServiceRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/orders': {
+      id: '/dashboard/orders'
+      path: '/orders'
+      fullPath: '/dashboard/orders'
+      preLoaderRoute: typeof DashboardOrdersRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/reseller': {
+      id: '/dashboard/reseller'
+      path: '/reseller'
+      fullPath: '/dashboard/reseller'
+      preLoaderRoute: typeof DashboardResellerRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/server-status': {
+      id: '/dashboard/server-status'
+      path: '/server-status'
+      fullPath: '/dashboard/server-status'
+      preLoaderRoute: typeof DashboardServerStatusRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/services': {
+      id: '/dashboard/services'
+      path: '/services'
+      fullPath: '/dashboard/services'
+      preLoaderRoute: typeof DashboardServicesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/support': {
+      id: '/dashboard/support'
+      path: '/support'
+      fullPath: '/dashboard/support'
+      preLoaderRoute: typeof DashboardSupportRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/support-pin': {
+      id: '/dashboard/support-pin'
+      path: '/support-pin'
+      fullPath: '/dashboard/support-pin'
+      preLoaderRoute: typeof DashboardSupportPinRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/theme-seller': {
+      id: '/dashboard/theme-seller'
+      path: '/theme-seller'
+      fullPath: '/dashboard/theme-seller'
+      preLoaderRoute: typeof DashboardThemeSellerRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/troubleshoot': {
+      id: '/dashboard/troubleshoot'
+      path: '/troubleshoot'
+      fullPath: '/dashboard/troubleshoot'
+      preLoaderRoute: typeof DashboardTroubleshootRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/wallet': {
+      id: '/dashboard/wallet'
+      path: '/wallet'
+      fullPath: '/dashboard/wallet'
+      preLoaderRoute: typeof DashboardWalletRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/knowledge-base/': {
+      id: '/knowledge-base/'
+      path: '/knowledge-base'
+      fullPath: '/knowledge-base/'
+      preLoaderRoute: typeof KnowledgeBaseIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge-base/$slug': {
+      id: '/knowledge-base/$slug'
+      path: '/knowledge-base/$slug'
+      fullPath: '/knowledge-base/$slug'
+      preLoaderRoute: typeof KnowledgeBaseSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/': {
+      id: '/payment/'
+      path: '/payment'
+      fullPath: '/payment/'
+      preLoaderRoute: typeof PaymentIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/cancel': {
+      id: '/payment/cancel'
+      path: '/payment/cancel'
+      fullPath: '/payment/cancel'
+      preLoaderRoute: typeof PaymentCancelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/fail': {
+      id: '/payment/fail'
+      path: '/payment/fail'
+      fullPath: '/payment/fail'
+      preLoaderRoute: typeof PaymentFailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/success': {
+      id: '/payment/success'
+      path: '/payment/success'
+      fullPath: '/payment/success'
+      preLoaderRoute: typeof PaymentSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/services/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/themes/': {
+      id: '/themes/'
+      path: '/themes'
+      fullPath: '/themes/'
+      preLoaderRoute: typeof ThemesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/themes/$slug/': {
+      id: '/themes/$slug/'
+      path: '/themes/$slug'
+      fullPath: '/themes/$slug/'
+      preLoaderRoute: typeof ThemesSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/themes/$slug/demo': {
+      id: '/themes/$slug/demo'
+      path: '/themes/$slug/demo'
+      fullPath: '/themes/$slug/demo'
+      preLoaderRoute: typeof ThemesSlugDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminAffiliatesRoute: typeof AdminAffiliatesRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminBillingRoute: typeof AdminBillingRoute
+  AdminCallHistoryRoute: typeof AdminCallHistoryRoute
+  AdminChatRoomsRoute: typeof AdminChatRoomsRoute
+  AdminCmsRoute: typeof AdminCmsRoute
+  AdminCommunicationConfigRoute: typeof AdminCommunicationConfigRoute
+  AdminContactMessagesRoute: typeof AdminContactMessagesRoute
+  AdminCouponsRoute: typeof AdminCouponsRoute
+  AdminFinanceRoute: typeof AdminFinanceRoute
+  AdminKnowledgeBaseRoute: typeof AdminKnowledgeBaseRoute
+  AdminLiveChatRoute: typeof AdminLiveChatRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
+  AdminServicesRoute: typeof AdminServicesRoute
+  AdminStaffRoute: typeof AdminStaffRoute
+  AdminThemesRoute: typeof AdminThemesRoute
+  AdminTicketsRoute: typeof AdminTicketsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminWhmRoute: typeof AdminWhmRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminAffiliatesRoute: AdminAffiliatesRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminBillingRoute: AdminBillingRoute,
+  AdminCallHistoryRoute: AdminCallHistoryRoute,
+  AdminChatRoomsRoute: AdminChatRoomsRoute,
+  AdminCmsRoute: AdminCmsRoute,
+  AdminCommunicationConfigRoute: AdminCommunicationConfigRoute,
+  AdminContactMessagesRoute: AdminContactMessagesRoute,
+  AdminCouponsRoute: AdminCouponsRoute,
+  AdminFinanceRoute: AdminFinanceRoute,
+  AdminKnowledgeBaseRoute: AdminKnowledgeBaseRoute,
+  AdminLiveChatRoute: AdminLiveChatRoute,
+  AdminMarketingRoute: AdminMarketingRoute,
+  AdminServicesRoute: AdminServicesRoute,
+  AdminStaffRoute: AdminStaffRoute,
+  AdminThemesRoute: AdminThemesRoute,
+  AdminTicketsRoute: AdminTicketsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminWhmRoute: AdminWhmRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
+interface CallCenterRouteRouteChildren {
+  CallCenterCallHistoryRoute: typeof CallCenterCallHistoryRoute
+  CallCenterLiveChatRoute: typeof CallCenterLiveChatRoute
+  CallCenterOrdersRoute: typeof CallCenterOrdersRoute
+  CallCenterTicketsRoute: typeof CallCenterTicketsRoute
+  CallCenterIndexRoute: typeof CallCenterIndexRoute
+}
+
+const CallCenterRouteRouteChildren: CallCenterRouteRouteChildren = {
+  CallCenterCallHistoryRoute: CallCenterCallHistoryRoute,
+  CallCenterLiveChatRoute: CallCenterLiveChatRoute,
+  CallCenterOrdersRoute: CallCenterOrdersRoute,
+  CallCenterTicketsRoute: CallCenterTicketsRoute,
+  CallCenterIndexRoute: CallCenterIndexRoute,
+}
+
+const CallCenterRouteRouteWithChildren = CallCenterRouteRoute._addFileChildren(
+  CallCenterRouteRouteChildren,
+)
+
+interface DashboardRouteRouteChildren {
+  DashboardAffiliateRoute: typeof DashboardAffiliateRoute
+  DashboardBillingRoute: typeof DashboardBillingRoute
+  DashboardDomainToolsRoute: typeof DashboardDomainToolsRoute
+  DashboardDomainsRoute: typeof DashboardDomainsRoute
+  DashboardKnowledgeBaseRoute: typeof DashboardKnowledgeBaseRoute
+  DashboardOrderServiceRoute: typeof DashboardOrderServiceRoute
+  DashboardOrdersRoute: typeof DashboardOrdersRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardResellerRoute: typeof DashboardResellerRoute
+  DashboardServerStatusRoute: typeof DashboardServerStatusRoute
+  DashboardServicesRoute: typeof DashboardServicesRoute
+  DashboardSupportRoute: typeof DashboardSupportRoute
+  DashboardSupportPinRoute: typeof DashboardSupportPinRoute
+  DashboardThemeSellerRoute: typeof DashboardThemeSellerRoute
+  DashboardTroubleshootRoute: typeof DashboardTroubleshootRoute
+  DashboardWalletRoute: typeof DashboardWalletRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardAffiliateRoute: DashboardAffiliateRoute,
+  DashboardBillingRoute: DashboardBillingRoute,
+  DashboardDomainToolsRoute: DashboardDomainToolsRoute,
+  DashboardDomainsRoute: DashboardDomainsRoute,
+  DashboardKnowledgeBaseRoute: DashboardKnowledgeBaseRoute,
+  DashboardOrderServiceRoute: DashboardOrderServiceRoute,
+  DashboardOrdersRoute: DashboardOrdersRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
+  DashboardResellerRoute: DashboardResellerRoute,
+  DashboardServerStatusRoute: DashboardServerStatusRoute,
+  DashboardServicesRoute: DashboardServicesRoute,
+  DashboardSupportRoute: DashboardSupportRoute,
+  DashboardSupportPinRoute: DashboardSupportPinRoute,
+  DashboardThemeSellerRoute: DashboardThemeSellerRoute,
+  DashboardTroubleshootRoute: DashboardTroubleshootRoute,
+  DashboardWalletRoute: DashboardWalletRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
+  CallCenterRouteRoute: CallCenterRouteRouteWithChildren,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AffiliateRoute: AffiliateRoute,
+  ChatRoomsRoute: ChatRoomsRoute,
+  CheckoutRoute: CheckoutRoute,
+  ContactRoute: ContactRoute,
+  DomainPricingRoute: DomainPricingRoute,
+  DomainSearchRoute: DomainSearchRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  HostingPlansRoute: HostingPlansRoute,
+  LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
+  RefundRoute: RefundRoute,
+  ResellerHostingRoute: ResellerHostingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SignupRoute: SignupRoute,
+  TermsRoute: TermsRoute,
+  KnowledgeBaseSlugRoute: KnowledgeBaseSlugRoute,
+  PaymentCancelRoute: PaymentCancelRoute,
+  PaymentFailRoute: PaymentFailRoute,
+  PaymentSuccessRoute: PaymentSuccessRoute,
+  ServicesSlugRoute: ServicesSlugRoute,
+  KnowledgeBaseIndexRoute: KnowledgeBaseIndexRoute,
+  PaymentIndexRoute: PaymentIndexRoute,
+  ThemesIndexRoute: ThemesIndexRoute,
+  ThemesSlugDemoRoute: ThemesSlugDemoRoute,
+  ThemesSlugIndexRoute: ThemesSlugIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
