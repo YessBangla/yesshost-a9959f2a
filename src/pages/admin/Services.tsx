@@ -7,6 +7,7 @@ import {
   Globe, Calendar, CreditCard, Download
 } from "lucide-react";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
+import DataPagination from "@/components/DataPagination";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
