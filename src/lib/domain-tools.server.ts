@@ -27,7 +27,7 @@ export async function fetchPricing(supabase: DashboardClient): Promise<PricingRo
     .from("domain_pricing" as never)
     .select("ext, renewal_bdt, transfer_bdt")
     .eq("is_active", true);
-  return ((data ?? []) as unknown as PricingRow[]) ?? [];
+  return (data ?? []) as unknown as PricingRow[];
 }
 
 export function priceFrom(
