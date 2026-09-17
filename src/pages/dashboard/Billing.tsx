@@ -72,8 +72,6 @@ const DashboardBilling = () => {
   const { tr, lang } = useLanguage();
   const isBn = lang === "bn";
   const { toast } = useToast();
-  const [invoices, setInvoices] = useState<Tables<"invoices">[]>([]);
-  const [loading, setLoading] = useState(true);
   const [reportInvoice, setReportInvoice] = useState<Tables<"invoices"> | null>(null);
   const [payInvoice, setPayInvoice] = useState<Tables<"invoices"> | null>(null);
   const [selectedPayment, setSelectedPayment] = useState("");
@@ -82,34 +80,30 @@ const DashboardBilling = () => {
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [filterMethod, setFilterMethod] = useState<string>("all");
-  const [walletBalance, setWalletBalance] = useState(0);
   const [invSearch, setInvSearch] = useState("");
   const [invStatus, setInvStatus] = useState("all");
 
-  const fetchWalletBalance = async () => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from("wallet_transactions").select("*")
-      .eq("user_id", user.id).eq("status", "completed");
-    if (error) logApiError("wallet_transactions.select", error, { area: "billing" });
-    const balance = (data || []).reduce((sum: number, t: any) => {
-      const isCredit = t.type === "deposit" || t.type === "refund";
-      return isCredit ? sum + Number(t.amount_bdt) : sum - Number(t.amount_bdt);
-    }, 0);
-    setWalletBalance(balance);
-  };
+  // Billing data is fetched on the server (server function -> Supabase) so the
+  // page renders with real data and stays identical across domains/environments.
+  const fetchBilling = useServerFn(getDashboardBilling);
+  const billingQuery = useQuery({
+    queryKey: ["dashboard", "billing", user?.id ?? "anon"],
+    queryFn: () => fetchBilling(),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
 
-  const fetchInvoices = () => {
-    if (!user) return;
-    supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) logApiError("invoices.select", error, { area: "billing" });
-        setInvoices(data || []);
-        setLoading(false);
-      });
-  };
+  useEffect(() => {
+    if (billingQuery.error) logApiError("dashboard.billing", billingQuery.error, { area: "billing" });
+  }, [billingQuery.error]);
 
-  useEffect(() => { fetchInvoices(); fetchWalletBalance(); }, [user]);
+  const invoices: Tables<"invoices">[] = billingQuery.data?.invoices ?? [];
+  const walletBalance = billingQuery.data?.walletBalance ?? 0;
+  const loading = !!user && billingQuery.isPending;
+
+  const fetchInvoices = () => { void billingQuery.refetch(); };
+  const fetchWalletBalance = () => { void billingQuery.refetch(); };
+
 
   const handlePay = async () => {
     if (!payInvoice || !selectedPayment) return;
