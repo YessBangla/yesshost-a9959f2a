@@ -1,0 +1,22 @@
+{
+  "decision": "keep-all-in-supabase",
+  "reason": "The app keeps its Supabase (Lovable Cloud) backend after migration. Every edge function is either invoked from the client via supabase.functions.invoke, called by external payment gateways as a webhook/callback, or scheduled via pg_cron — none are candidates for conversion to TanStack server functions in this migration.",
+  "functions": [
+    { "name": "admin-create-user", "classification": "client-invoked (admin panel)", "action": "stays in Supabase" },
+    { "name": "affiliate-track", "classification": "client-invoked tracking", "action": "stays in Supabase" },
+    { "name": "bkash-init", "classification": "payment init, client-invoked", "action": "stays in Supabase" },
+    { "name": "chat-ai-reply", "classification": "client-invoked AI reply", "action": "stays in Supabase" },
+    { "name": "check-domain", "classification": "client-invoked WHOIS/availability", "action": "stays in Supabase" },
+    { "name": "communication-test", "classification": "client-invoked admin test", "action": "stays in Supabase" },
+    { "name": "domain-diagnose", "classification": "client-invoked diagnostics", "action": "stays in Supabase" },
+    { "name": "domain-suggest", "classification": "client-invoked AI suggestions", "action": "stays in Supabase" },
+    { "name": "invoice-reminders", "classification": "cron (pg_cron scheduled)", "action": "stays in Supabase" },
+    { "name": "nagad-init", "classification": "payment init, client-invoked", "action": "stays in Supabase" },
+    { "name": "payment-callback", "classification": "external webhook (payment gateways)", "action": "stays in Supabase" },
+    { "name": "send-otp", "classification": "client-invoked auth helper", "action": "stays in Supabase" },
+    { "name": "sslcommerz-init", "classification": "payment init, client-invoked", "action": "stays in Supabase" },
+    { "name": "verify-otp", "classification": "client-invoked auth helper", "action": "stays in Supabase" },
+    { "name": "wallet-pay-invoice", "classification": "client-invoked billing", "action": "stays in Supabase" },
+    { "name": "whm-manage", "classification": "client-invoked WHM provisioning", "action": "stays in Supabase" }
+  ]
+}
