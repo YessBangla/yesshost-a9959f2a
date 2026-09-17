@@ -3,6 +3,7 @@ import {
   buildPriceLine,
   isTerm,
   normaliseDomain,
+  parseNumeric,
   sumPriceLines,
   validateDomainName,
   validateEppCode,

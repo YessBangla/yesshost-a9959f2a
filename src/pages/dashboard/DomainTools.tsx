@@ -35,6 +35,7 @@ import {
   VAT_RATE,
   buildPriceLine,
   normaliseDomain,
+  parseNumeric,
   sumPriceLines,
   validateDomainName,
   validateEppCode,
