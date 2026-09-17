@@ -21,6 +21,8 @@ import {
   Ticket,
   ReceiptText,
   ArrowLeft,
+  Download,
+  MessageSquareWarning,
 } from "lucide-react";
 import DomainSearch from "@/components/DomainSearch";
 import EmptyState from "@/components/EmptyState";
@@ -45,12 +47,18 @@ import {
   type ValidationCode,
 } from "@/lib/domain-pricing";
 import {
+  getRenewalInvoiceStatus,
   getTransferTicketStatus,
+  sendTransferFollowUp,
   submitDomainRenewal,
   submitDomainTransfer,
 } from "@/lib/domain-tools.functions";
+import { downloadInvoicePdf } from "@/lib/invoice-pdf";
 import type { RenewalResult } from "@/lib/domain-tools.server";
 import type { Tables } from "@/integrations/supabase/types";
+
+/** Hours without any ticket movement before we warn the customer. */
+const TRANSFER_STALE_HOURS = 48;
 
 type TabKey = "register" | "renew" | "transfer" | "whois";
 
@@ -100,6 +108,10 @@ const DashboardDomainTools = () => {
   const [ack, setAck] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [transferFormError, setTransferFormError] = useState<string | null>(null);
+  const [followUpMessage, setFollowUpMessage] = useState("");
+  const [followUpSending, setFollowUpSending] = useState(false);
+  const [followUpSent, setFollowUpSent] = useState(false);
+  const [followUpError, setFollowUpError] = useState<string | null>(null);
 
   // whois
   const [whoisDomain, setWhoisDomain] = useState("");
@@ -110,6 +122,8 @@ const DashboardDomainTools = () => {
   const runRenewal = useServerFn(submitDomainRenewal);
   const runTransfer = useServerFn(submitDomainTransfer);
   const fetchTransferStatus = useServerFn(getTransferTicketStatus);
+  const fetchInvoiceStatus = useServerFn(getRenewalInvoiceStatus);
+  const runFollowUp = useServerFn(sendTransferFollowUp);
 
   const msg = (code: ValidationCode) => validationMessage(code, bn);
 
@@ -319,6 +333,97 @@ const DashboardDomainTools = () => {
     queryFn: () => fetchTransferStatus({ data: { ticketNumber: transferTicket! } }),
   });
 
+  // ---- transfer staleness detection + support follow-up -------------------
+  const transferStale = useMemo(() => {
+    const data = statusQuery.data;
+    if (!data) return null;
+    const complete = data.stages.some((s) => s.key === "complete" && s.done);
+    if (complete) return null;
+    const times = [data.updatedAt, ...data.updates.map((u) => u.at)]
+      .map((t) => (t ? new Date(t).getTime() : NaN))
+      .filter((t) => !Number.isNaN(t));
+    if (times.length === 0) return null;
+    const last = Math.max(...times);
+    const hours = Math.floor((Date.now() - last) / 3_600_000);
+    return hours >= TRANSFER_STALE_HOURS ? { hours, lastAt: new Date(last).toISOString() } : null;
+  }, [statusQuery.data]);
+
+  useEffect(() => {
+    if (!transferStale || followUpMessage || followUpSent) return;
+    const domain = statusQuery.data ? transferDomain || "" : "";
+    setFollowUpMessage(
+      bn
+        ? `আসসালামু আলাইকুম, টিকেট ${transferTicket ?? ""} — ${domain || "আমার ডোমেইন"} ট্রান্সফারের কোনো আপডেট গত ${transferStale.hours} ঘণ্টায় পাইনি। বর্তমান অবস্থা জানালে উপকৃত হবো।`
+        : `Hello, ticket ${transferTicket ?? ""} — I have not received any update on the transfer of ${domain || "my domain"} for ${transferStale.hours} hours. Could you please share the current status?`,
+    );
+  }, [transferStale, transferTicket, transferDomain, bn, followUpMessage, followUpSent, statusQuery.data]);
+
+  const submitFollowUp = async () => {
+    if (!transferTicket) return;
+    setFollowUpError(null);
+    if (followUpMessage.trim().length < 10) {
+      setFollowUpError(msg("note_too_short"));
+      return;
+    }
+    setFollowUpSending(true);
+    try {
+      const res = await runFollowUp({ data: { ticketNumber: transferTicket, message: followUpMessage.trim() } });
+      if (!res.ok) {
+        setFollowUpError(res.code === "server_error" ? (bn ? "সার্ভারে সমস্যা হয়েছে।" : "Something went wrong on the server.") : msg(res.code));
+        return;
+      }
+      setFollowUpSent(true);
+      toast({
+        title: "✅",
+        description: bn ? "সাপোর্ট টিমে বার্তা পাঠানো হয়েছে" : "Your message was sent to the support team",
+      });
+      statusQuery.refetch();
+    } catch (err) {
+      logApiError("sendTransferFollowUp", err, { area: "domain" });
+      setFollowUpError(bn ? "সংযোগ সমস্যা — আবার চেষ্টা করুন।" : "Connection problem — please try again.");
+    } finally {
+      setFollowUpSending(false);
+    }
+  };
+
+  // ---- renewal invoice payment status -------------------------------------
+  const invoiceQuery = useQuery({
+    queryKey: ["domain-renew", "invoice", renewResult?.invoiceNumber],
+    enabled: !!renewResult?.invoiceNumber,
+    refetchInterval: (q) => (q.state.data?.paid ? false : 15000),
+    refetchOnWindowFocus: true,
+    queryFn: () => fetchInvoiceStatus({ data: { invoiceNumber: renewResult!.invoiceNumber } }),
+  });
+  const invoicePaid = !!invoiceQuery.data?.paid;
+
+  const downloadRenewalPdf = () => {
+    if (!renewResult) return;
+    const totals = sumPriceLines(renewResult.lines);
+    downloadInvoicePdf({
+      invoiceNumber: renewResult.invoiceNumber,
+      createdAt: renewResult.createdAt,
+      dueDate: renewResult.dueDate,
+      paid: invoicePaid,
+      paidAt: invoiceQuery.data?.paidAt ?? null,
+      paymentMethod: invoiceQuery.data?.paymentMethod ?? null,
+      customerEmail: user?.email ?? null,
+      customerName: (user?.user_metadata as { full_name?: string } | undefined)?.full_name ?? null,
+      lines: renewResult.lines.map((l) => ({
+        domain: l.domain,
+        years: l.years,
+        unitPrice: l.unitPrice,
+        total: l.subtotal,
+      })),
+      totals: {
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        fees: totals.fees,
+        vat: totals.vat,
+        total: totals.total,
+      },
+    });
+  };
+
   const resetTransfer = () => {
     setTransferDomain("");
     setEppCode("");
@@ -328,6 +433,9 @@ const DashboardDomainTools = () => {
     setTouched({});
     setTransferFormError(null);
     setTransferTicket(null);
+    setFollowUpMessage("");
+    setFollowUpSent(false);
+    setFollowUpError(null);
   };
 
   const runWhois = async (e: React.FormEvent) => {
@@ -472,27 +580,96 @@ const DashboardDomainTools = () => {
 
       {tab === "renew" && renewStep === "done" && renewResult && (
         <div className="glass-card rounded-2xl p-6 space-y-5 max-w-2xl">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-success/10 flex items-center justify-center">
-              <CheckCircle2 className="w-6 h-6 text-success" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${invoicePaid ? "bg-success/10" : "bg-warning/10"}`}>
+                {invoicePaid ? <CheckCircle2 className="w-6 h-6 text-success" /> : <Clock className="w-6 h-6 text-warning" />}
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-foreground">
+                  {invoicePaid
+                    ? bn
+                      ? "পেমেন্ট সম্পন্ন — রিনিউ নিশ্চিত"
+                      : "Payment received — renewal confirmed"
+                    : bn
+                      ? "রিনিউ অনুরোধ নিশ্চিত হয়েছে"
+                      : "Renewal request confirmed"}
+                </h2>
+                <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5 mt-0.5">
+                  <ReceiptText className="w-3.5 h-3.5" /> {renewResult.invoiceNumber} ·{" "}
+                  {invoicePaid
+                    ? `${bn ? "পরিশোধের তারিখ" : "Paid on"} ${fmt(invoiceQuery.data?.paidAt)}`
+                    : `${bn ? "পরিশোধের শেষ তারিখ" : "Due"} ${fmt(renewResult.dueDate)}`}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                      invoicePaid ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
+                    }`}
+                  >
+                    {invoicePaid ? (bn ? "পরিশোধিত" : "Paid") : bn ? "অপেক্ষমাণ" : "Pending"}
+                  </span>
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base font-bold text-foreground">{bn ? "রিনিউ অনুরোধ নিশ্চিত হয়েছে" : "Renewal request confirmed"}</h2>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                <ReceiptText className="w-3.5 h-3.5" /> {renewResult.invoiceNumber} · {bn ? "পরিশোধের শেষ তারিখ" : "Due"} {fmt(renewResult.dueDate)}
-              </p>
-            </div>
+            <button
+              onClick={() => invoiceQuery.refetch()}
+              disabled={invoiceQuery.isFetching}
+              className="text-xs text-muted-foreground flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-secondary/40 disabled:opacity-50 shrink-0"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${invoiceQuery.isFetching ? "animate-spin" : ""}`} />
+              {bn ? "স্ট্যাটাস" : "Status"}
+            </button>
           </div>
+
           <Breakdown lines={renewResult.lines} />
-          <p className="text-[11px] text-muted-foreground">
-            {bn
-              ? "ইনভয়েস পরিশোধ হলে ডোমেইনের মেয়াদ স্বয়ংক্রিয়ভাবে বাড়ানো হবে।"
-              : "Your domains are extended automatically as soon as the invoice is paid."}
-          </p>
+
+          {invoicePaid ? (
+            <div className="rounded-xl border border-success/40 bg-success/5 p-4 space-y-1.5">
+              <p className="text-xs font-bold text-success flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4" /> {bn ? "রিসিপ্ট" : "Receipt"}
+              </p>
+              <div className="text-[11px] text-muted-foreground space-y-0.5">
+                <p>
+                  {bn ? "পরিশোধিত অর্থ" : "Amount paid"}:{" "}
+                  <span className="text-foreground font-semibold">{formatPriceBDT(invoiceQuery.data?.amount ?? 0, lang)}</span>
+                </p>
+                <p>
+                  {bn ? "পেমেন্ট মাধ্যম" : "Payment method"}:{" "}
+                  <span className="text-foreground font-semibold">{invoiceQuery.data?.paymentMethod || (bn ? "ওয়ালেট" : "Wallet")}</span>
+                </p>
+                {invoiceQuery.data?.transaction && (
+                  <p>
+                    {bn ? "ট্রানজ্যাকশন" : "Transaction"}:{" "}
+                    <span className="text-foreground font-mono">{invoiceQuery.data.transaction.id.slice(0, 8)}</span> ·{" "}
+                    {fmtTime(invoiceQuery.data.transaction.at)}
+                  </p>
+                )}
+                <p>{bn ? "আপনার ডোমেইনের মেয়াদ বাড়ানো হয়েছে।" : "Your domain terms have been extended."}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+              <Loader2 className="w-3.5 h-3.5 mt-0.5 animate-spin shrink-0" />
+              {bn
+                ? "পেমেন্ট সম্পন্ন হলে এই পাতাটি স্বয়ংক্রিয়ভাবে রিসিপ্ট দেখাবে (প্রতি ১৫ সেকেন্ডে স্ট্যাটাস যাচাই হচ্ছে)।"
+                : "This page checks the server every 15 seconds and will show your receipt automatically once the payment is completed."}
+            </p>
+          )}
+
           <div className="flex flex-wrap gap-2">
-            <Link to="/dashboard/billing" className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-xs">
-              {bn ? "ইনভয়েস পরিশোধ করুন" : "Pay the invoice"}
-            </Link>
+            {!invoicePaid && (
+              <Link to="/dashboard/billing" className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-xs">
+                {bn ? "ইনভয়েস পরিশোধ করুন" : "Pay the invoice"}
+              </Link>
+            )}
+            <button
+              onClick={downloadRenewalPdf}
+              className={`px-5 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 border ${
+                invoicePaid ? "gradient-primary text-primary-foreground border-transparent" : "bg-secondary/50 text-foreground border-border"
+              }`}
+            >
+              <Download className="w-3.5 h-3.5" />
+              {invoicePaid ? (bn ? "রিসিপ্ট ডাউনলোড (PDF)" : "Download receipt (PDF)") : bn ? "ইনভয়েস ডাউনলোড (PDF)" : "Download invoice (PDF)"}
+            </button>
             <button onClick={resetRenewal} className="bg-secondary/50 text-foreground px-5 py-2.5 rounded-xl font-semibold text-xs border border-border">
               {bn ? "আরও ডোমেইন রিনিউ" : "Renew more domains"}
             </button>
@@ -529,6 +706,55 @@ const DashboardDomainTools = () => {
             })}
           </div>
           <Breakdown lines={renewLines} />
+
+          {(() => {
+            const dates = renewLines
+              .map((l) => domains.find((d) => (d.domain || d.name) === l.domain)?.expiry_date)
+              .filter(Boolean)
+              .map((d) => new Date(d as string).getTime())
+              .filter((t) => !Number.isNaN(t));
+            if (dates.length === 0) return null;
+            const soonest = Math.min(...dates);
+            const days = Math.ceil((soonest - Date.now()) / 86_400_000);
+            const expired = days < 0;
+            const urgent = days <= 15;
+            return (
+              <div
+                className={`rounded-xl border p-4 space-y-1.5 ${
+                  expired ? "border-destructive/40 bg-destructive/5" : urgent ? "border-warning/40 bg-warning/5" : "border-border/60 bg-secondary/30"
+                }`}
+              >
+                <p className={`text-xs font-bold flex items-center gap-1.5 ${expired ? "text-destructive" : urgent ? "text-warning" : "text-foreground"}`}>
+                  {expired || urgent ? <AlertTriangle className="w-4 h-4" /> : <CalendarClock className="w-4 h-4" />}
+                  {expired
+                    ? bn
+                      ? "মেয়াদ ইতিমধ্যে শেষ — দ্রুত পরিশোধ করুন"
+                      : "Already expired — please pay immediately"
+                    : bn
+                      ? `রিনিউ ডেডলাইন: ${days} দিন বাকি`
+                      : `Renewal deadline: ${days} day${days === 1 ? "" : "s"} left`}
+                </p>
+                <ul className="text-[11px] text-muted-foreground list-disc pl-4 space-y-1">
+                  <li>
+                    {bn
+                      ? `নিকটতম মেয়াদ শেষের তারিখ ${fmt(new Date(soonest).toISOString())} — ইনভয়েস পরিশোধের পরেই রিনিউ কার্যকর হয়।`
+                      : `Earliest expiry is ${fmt(new Date(soonest).toISOString())} — the renewal only takes effect once the invoice is paid.`}
+                  </li>
+                  <li>
+                    {bn
+                      ? "মেয়াদ শেষের পর ডোমেইন ৩০ দিনের গ্রেস পিরিয়ডে যায়, তারপর রিডেম্পশন ফি (অতিরিক্ত খরচ) প্রযোজ্য হয়।"
+                      : "After expiry a domain enters a 30-day grace period, then redemption fees (extra cost) apply."}
+                  </li>
+                  <li>
+                    {bn
+                      ? "মেয়াদ শেষ হলে বা রিনিউর ৬০ দিনের মধ্যে EPP/Auth কোড দিয়ে ট্রান্সফার করা যায় না — তাই সময়মতো রিনিউ করুন।"
+                      : "An expired domain, or one renewed within the last 60 days, cannot be transferred with an EPP/Auth code — renew on time."}
+                  </li>
+                </ul>
+              </div>
+            );
+          })()}
+
           {renewError && (
             <p className="text-xs text-destructive flex items-center gap-1.5">
               <AlertCircle className="w-4 h-4 shrink-0" /> {renewError}
@@ -799,6 +1025,65 @@ const DashboardDomainTools = () => {
                         </p>
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {transferStale && (
+                  <div className="rounded-xl border border-warning/50 bg-warning/5 p-4 space-y-3">
+                    <div>
+                      <p className="text-xs font-bold text-warning flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4" />
+                        {bn
+                          ? `গত ${transferStale.hours} ঘণ্টায় কোনো আপডেট আসেনি`
+                          : `No update for the last ${transferStale.hours} hours`}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        {bn
+                          ? `সর্বশেষ কার্যক্রম: ${fmtTime(transferStale.lastAt)}। সাধারণত এত দেরি হয় না — নিচের বার্তাটি সাপোর্ট টিমে পাঠিয়ে অগ্রগতি জেনে নিন।`
+                          : `Last activity: ${fmtTime(transferStale.lastAt)}. This is longer than usual — send the pre-filled message below to ask support for an update.`}
+                      </p>
+                    </div>
+
+                    {followUpSent ? (
+                      <p className="text-[11px] text-success flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        {bn
+                          ? "বার্তা পাঠানো হয়েছে — সাপোর্ট টিম শীঘ্রই উত্তর দেবে।"
+                          : "Message sent — the support team will reply shortly."}
+                      </p>
+                    ) : (
+                      <>
+                        <textarea
+                          value={followUpMessage}
+                          onChange={(e) => setFollowUpMessage(e.target.value)}
+                          rows={3}
+                          className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-foreground text-xs outline-hidden focus:ring-2 focus:ring-primary/30 resize-y"
+                        />
+                        {followUpError && (
+                          <p className="text-[11px] text-destructive flex items-center gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {followUpError}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={submitFollowUp}
+                            disabled={followUpSending}
+                            className="gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 disabled:opacity-50"
+                          >
+                            {followUpSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MessageSquareWarning className="w-3.5 h-3.5" />}
+                            {bn ? "সাপোর্ট টিমে পাঠান" : "Send to support"}
+                          </button>
+                          <button
+                            onClick={() => statusQuery.refetch()}
+                            disabled={statusQuery.isFetching}
+                            className="bg-secondary/50 text-foreground px-4 py-2.5 rounded-xl font-semibold text-xs border border-border flex items-center gap-2 disabled:opacity-50"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${statusQuery.isFetching ? "animate-spin" : ""}`} />
+                            {bn ? "আবার চেষ্টা করুন" : "Retry status check"}
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 

@@ -98,6 +98,7 @@ export type ValidationCode =
   | "term_invalid"
   | "price_unknown"
   | "note_too_long"
+  | "note_too_short"
   | "not_owner";
 
 const DOMAIN_RE = /^(?!-)[a-z0-9-]{1,63}(?<!-)(\.[a-z0-9-]{1,63})*\.[a-z]{2,24}$/;
@@ -141,6 +142,7 @@ const MESSAGES: Record<ValidationCode, { en: string; bn: string }> = {
   term_invalid: { en: "Choose a renewal term of 1, 2, 3 or 5 years.", bn: "১, ২, ৩ বা ৫ বছরের মেয়াদ বেছে নিন।" },
   price_unknown: { en: "We don't have a live price for this extension — our team will quote it.", bn: "এই এক্সটেনশনের দাম এখনই পাওয়া যায়নি — আমাদের টিম দাম জানাবে।" },
   note_too_long: { en: "Please keep the note under 1000 characters.", bn: "নোটটি ১০০০ অক্ষরের মধ্যে রাখুন।" },
+  note_too_short: { en: "Write at least 10 characters so support can help.", bn: "সাপোর্ট টিম যেন বুঝতে পারে — অন্তত ১০ অক্ষর লিখুন।" },
   not_owner: { en: "One of the selected domains is not on your account.", bn: "নির্বাচিত একটি ডোমেইন আপনার অ্যাকাউন্টে নেই।" },
 };
 
