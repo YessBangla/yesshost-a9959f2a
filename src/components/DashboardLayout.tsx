@@ -212,6 +212,7 @@ const DashboardLayout = () => {
     { title: bn ? "অর্ডার" : "Orders", url: "/dashboard/orders", icon: ShoppingBag },
     { title: tr("dash.billing"), url: "/dashboard/billing", icon: CreditCard },
     { title: bn ? "ওয়ালেট" : "Wallet", url: "/dashboard/wallet", icon: Wallet },
+    { title: bn ? "আয় ও পেমেন্ট" : "Income", url: "/dashboard/income", icon: DollarSign },
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
     { title: bn ? "অ্যাফিলিয়েট" : "Affiliate", url: "/dashboard/affiliate", icon: Share2 },
