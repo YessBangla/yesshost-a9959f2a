@@ -174,6 +174,7 @@ const DashboardLayout = () => {
         { label: bn ? "আমার ইনভয়েস" : "My Invoice", href: "/dashboard/billing", icon: FileText, badge: unpaidInvoiceCount },
         { label: bn ? "ম্যাস পেমেন্ট" : "Mass Payment", href: "/dashboard/billing", icon: Layers },
         { label: bn ? "ফান্ড যোগ করুন" : "Add Funds", href: "/dashboard/wallet", icon: PlusCircle },
+        { label: bn ? "আয় ও পেমেন্ট" : "Income & Payments", href: "/dashboard/income", icon: DollarSign },
       ],
     },
     {
