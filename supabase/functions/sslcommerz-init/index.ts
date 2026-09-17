@@ -85,7 +85,7 @@ serve(async (req) => {
     formData.append("product_category", "Digital Service");
     formData.append("product_profile", "non-physical-goods");
 
-    const response = await fetch(`${SSLCOMMERZ_BASE}/gwprocess/v4/api.php`, {
+    const response = await fetch(`${cfg.base}/gwprocess/v4/api.php`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString(),
@@ -107,7 +107,7 @@ serve(async (req) => {
           gateway_url: data.GatewayPageURL,
           tran_id,
           sessionkey: data.sessionkey,
-          is_sandbox: SSLCOMMERZ_IS_SANDBOX,
+          is_sandbox: cfg.isSandbox,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
