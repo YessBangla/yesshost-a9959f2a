@@ -357,7 +357,7 @@ const AdminUsers = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={isBn ? "নাম, ফোন বা কোম্পানি দিয়ে সার্চ..." : "Search by name, phone or company..."}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 transition-all"
           />
         </div>
         <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50 flex-wrap">
@@ -365,7 +365,7 @@ const AdminUsers = () => {
             <button
               key={f}
               onClick={() => setRoleFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${roleFilter === f ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${roleFilter === f ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
             >
               {f === "all" ? (isBn ? "সকল" : "All") : f === "admin" ? (isBn ? "অ্যাডমিন" : "Admin") : f === "call_center" ? (isBn ? "কল সেন্টার" : "Call Center") : (isBn ? "ইউজার" : "User")}
             </button>
@@ -492,23 +492,23 @@ const AdminUsers = () => {
               <div>
                 <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "পূর্ণ নাম" : "Full Name"}</label>
                 <input value={createForm.full_name} onChange={e => setCreateForm(prev => ({ ...prev, full_name: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" placeholder={isBn ? "নাম লিখুন" : "Enter name"} />
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" placeholder={isBn ? "নাম লিখুন" : "Enter name"} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "ফোন" : "Phone"}</label>
                 <input value={createForm.phone} onChange={e => setCreateForm(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" placeholder="01XXXXXXXXX" />
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" placeholder="01XXXXXXXXX" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "ইমেইল" : "Email"} *</label>
               <input type="email" value={createForm.email} onChange={e => setCreateForm(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" placeholder="user@example.com" required />
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" placeholder="user@example.com" required />
             </div>
             <div>
               <label className="block text-xs font-medium text-foreground mb-1.5">{isBn ? "পাসওয়ার্ড" : "Password"} *</label>
               <input type="password" value={createForm.password} onChange={e => setCreateForm(prev => ({ ...prev, password: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" placeholder="••••••••" required />
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" placeholder="••••••••" required />
             </div>
 
             {/* Role selection */}
@@ -633,7 +633,7 @@ const AdminUsers = () => {
                             isActive ? "bg-primary" : "bg-secondary/60 border border-border/50"
                           }`}
                         >
-                          <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
+                          <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-xs transition-all ${
                             isActive ? "left-6" : "left-1"
                           }`} />
                         </button>
@@ -757,7 +757,7 @@ const AdminUsers = () => {
                   <input
                     value={editProfileForm.full_name}
                     onChange={e => setEditProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                     placeholder={isBn ? "পূর্ণ নাম" : "Full name"}
                   />
                 </div>
@@ -766,7 +766,7 @@ const AdminUsers = () => {
                   <input
                     value={editProfileForm.phone}
                     onChange={e => setEditProfileForm(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                     placeholder="01XXXXXXXXX"
                   />
                 </div>
@@ -778,7 +778,7 @@ const AdminUsers = () => {
                   <input
                     value={editProfileForm.company_name}
                     onChange={e => setEditProfileForm(prev => ({ ...prev, company_name: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                     placeholder={isBn ? "কোম্পানির নাম" : "Company name"}
                   />
                 </div>
@@ -787,7 +787,7 @@ const AdminUsers = () => {
                   <input
                     value={editProfileForm.company_website}
                     onChange={e => setEditProfileForm(prev => ({ ...prev, company_website: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                     placeholder="https://example.com"
                   />
                 </div>
@@ -798,7 +798,7 @@ const AdminUsers = () => {
                 <input
                   value={editProfileForm.address}
                   onChange={e => setEditProfileForm(prev => ({ ...prev, address: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                   placeholder={isBn ? "সম্পূর্ণ ঠিকানা" : "Full address"}
                 />
               </div>
@@ -809,7 +809,7 @@ const AdminUsers = () => {
                   <input
                     value={editProfileForm.city}
                     onChange={e => setEditProfileForm(prev => ({ ...prev, city: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                     placeholder={isBn ? "শহর" : "City"}
                   />
                 </div>
@@ -818,7 +818,7 @@ const AdminUsers = () => {
                   <input
                     value={editProfileForm.country}
                     onChange={e => setEditProfileForm(prev => ({ ...prev, country: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                     placeholder={isBn ? "দেশ" : "Country"}
                   />
                 </div>
@@ -829,7 +829,7 @@ const AdminUsers = () => {
                 <input
                   value={editProfileForm.vat_id}
                   onChange={e => setEditProfileForm(prev => ({ ...prev, vat_id: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
                   placeholder="VAT ID"
                 />
               </div>

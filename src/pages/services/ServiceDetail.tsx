@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "@/lib/router-compat";
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -55,7 +55,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
       className={`relative bg-card border rounded-xl flex flex-col transition-all duration-200 ${
         plan.is_highlighted
           ? "border-primary shadow-md shadow-primary/10 scale-[1.02] z-10"
-          : "border-border hover:border-primary/20 hover:shadow-sm"
+          : "border-border hover:border-primary/20 hover:shadow-xs"
       }`}
     >
       {plan.is_highlighted && (
@@ -165,7 +165,7 @@ const PlanCard = ({ plan, i, title, slug, isBn, addItem, isInCart }: any) => {
             onClick={handleAdd}
             className={`w-full py-2.5 text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-2 ${
               plan.is_highlighted
-                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
                 : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
             }`}
           >
@@ -467,7 +467,7 @@ const ServiceDetail = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, ease, delay: i * 0.05 }}
-                className="bg-card border border-border rounded-xl p-5 hover:border-primary/20 hover:shadow-sm transition-all"
+                className="bg-card border border-border rounded-xl p-5 hover:border-primary/20 hover:shadow-xs transition-all"
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center mb-3">
                   <item.icon className="w-5 h-5 text-primary" />

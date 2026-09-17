@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
+import { Outlet, useNavigate, useLocation, Link } from "@/lib/router-compat";
 import LiveChatWidget from "@/components/LiveChatWidget";
 import {
   LayoutDashboard, Server, FileText, HeadphonesIcon, Globe,
@@ -507,7 +507,7 @@ const DashboardLayout = () => {
                               </div>
                               <span className="flex-1">{child.label}</span>
                               {child.badge !== undefined && child.badge > 0 && (
-                                <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center shadow-sm">
+                                <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center shadow-xs">
                                   {child.badge}
                                 </span>
                               )}
@@ -638,7 +638,7 @@ const DashboardLayout = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 style={{ opacity: overlayOpacity }}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/60 backdrop-blur-xs"
                 onClick={() => setMobileOpen(false)}
               />
               <motion.aside

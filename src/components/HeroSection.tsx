@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock, ShoppingBag, Layers, HardDrive } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 
 import heroImg from "@/assets/hero-corporate.png";
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
@@ -163,7 +163,7 @@ const HeroSection = () => {
                 >
                   <Link
                     to={service.link}
-                    className="flex items-center gap-2 bg-card/95 backdrop-blur-sm border border-border rounded-xl px-3 py-2 shadow-md hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 group"
+                    className="flex items-center gap-2 bg-card/95 backdrop-blur-xs border border-border rounded-xl px-3 py-2 shadow-md hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 group"
                   >
                     <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
                       <service.icon className="w-3.5 h-3.5 text-primary" />
@@ -186,7 +186,7 @@ const HeroSection = () => {
           {stats.map((stat: any, i: number) => (
             <div
               key={i}
-              className="bg-card border border-border rounded-xl p-3.5 sm:p-4 text-center group hover:border-primary/25 hover:shadow-sm transition-all"
+              className="bg-card border border-border rounded-xl p-3.5 sm:p-4 text-center group hover:border-primary/25 hover:shadow-xs transition-all"
             >
               <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/12 transition-colors">
                 <stat.icon className="w-4 h-4 text-primary" />

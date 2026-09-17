@@ -45,7 +45,7 @@ const DataToolbar = ({
             onChange={e => onSearch(e.target.value)}
             placeholder={placeholder || (bn ? "খুঁজুন..." : "Search...")}
             aria-label={bn ? "খুঁজুন" : "Search"}
-            className="w-full h-11 pl-9 pr-9 rounded-xl border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full h-11 pl-9 pr-9 rounded-xl border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/30"
           />
           {search && (
             <button

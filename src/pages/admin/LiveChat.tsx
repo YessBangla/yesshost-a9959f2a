@@ -321,7 +321,7 @@ const AdminLiveChat = () => {
                       onFocus={() => setShowEmoji(false)}
                       placeholder="উত্তর লিখুন..."
                       maxLength={1000}
-                      className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                      className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                     />
                     <button
                       onClick={sendReply}

@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "@/lib/router-compat";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Clock, ChevronRight } from "lucide-react";
@@ -115,7 +115,7 @@ const KnowledgeBaseArticle = () => {
                   <p key={i} className="text-sm leading-relaxed my-2">
                     {parts.map((part: string, j: number) =>
                       part.startsWith("`") && part.endsWith("`")
-                        ? <code key={j} className="px-1.5 py-0.5 rounded bg-secondary text-primary text-xs font-mono">{part.slice(1, -1)}</code>
+                        ? <code key={j} className="px-1.5 py-0.5 rounded-sm bg-secondary text-primary text-xs font-mono">{part.slice(1, -1)}</code>
                         : part.replace(/\*\*([^*]+)\*\*/g, "").length !== part.length
                           ? <span key={j} dangerouslySetInnerHTML={{ __html: part.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>") }} />
                           : <span key={j}>{part}</span>

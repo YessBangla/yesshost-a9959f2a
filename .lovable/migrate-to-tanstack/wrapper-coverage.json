@@ -1,0 +1,38 @@
+[
+  {
+    "routePath": "/dashboard",
+    "routeFile": "src/routes/dashboard/route.tsx",
+    "wrappers": [
+      {
+        "name": "ProtectedRoute",
+        "openingTag": "<ProtectedRoute>",
+        "props": [],
+        "sourceUsage": { "file": "/tmp/migrate-to-tanstack/App.tsx.bak", "line": 186 }
+      }
+    ]
+  },
+  {
+    "routePath": "/admin",
+    "routeFile": "src/routes/admin/route.tsx",
+    "wrappers": [
+      {
+        "name": "AdminRoute",
+        "openingTag": "<AdminRoute>",
+        "props": [],
+        "sourceUsage": { "file": "/tmp/migrate-to-tanstack/App.tsx.bak", "line": 213 }
+      }
+    ]
+  },
+  {
+    "routePath": "/call-center",
+    "routeFile": "src/routes/call-center/route.tsx",
+    "wrappers": [
+      {
+        "name": "CallCenterRoute",
+        "openingTag": "<CallCenterRoute>",
+        "props": [],
+        "sourceUsage": { "file": "/tmp/migrate-to-tanstack/App.tsx.bak", "line": 242 }
+      }
+    ]
+  }
+]

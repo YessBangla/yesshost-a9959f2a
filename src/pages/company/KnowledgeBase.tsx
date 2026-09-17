@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Search, BookOpen, Server, Globe, Mail, Shield, HelpCircle } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/PublicLayout";
@@ -58,7 +58,7 @@ const KnowledgeBase = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder={bn ? "আর্টিকেল সার্চ করুন..." : "Search articles..."}
-                className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
             </div>
           </motion.div>
         </section>

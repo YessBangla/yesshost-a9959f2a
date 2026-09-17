@@ -183,7 +183,7 @@ const AdminThemes = () => {
     return matchSearch && matchCat;
   });
 
-  const inputClass = "w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30";
+  const inputClass = "w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30";
 
   const safeName = (n: string) => n.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
 
@@ -388,7 +388,7 @@ const AdminThemes = () => {
           <div className="flex flex-wrap gap-1.5">
             {(parseJson(form.screenshots ?? []) || []).map((url: string, i: number) => (
               <div key={i} className="relative">
-                <img src={url} alt={`screenshot ${i + 1}`} className="w-12 h-9 object-cover rounded border border-border" />
+                <img src={url} alt={`screenshot ${i + 1}`} className="w-12 h-9 object-cover rounded-sm border border-border" />
                 <button type="button" onClick={() => {
                   const list = (parseJson(form.screenshots ?? []) || []).filter((_: string, j: number) => j !== i);
                   setForm({ ...form, screenshots: JSON.stringify(list) });
@@ -410,8 +410,8 @@ const AdminThemes = () => {
           {form.file_path ? (
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <span className="truncate flex-1">{form.file_path}</span>
-              <button type="button" onClick={() => downloadThemeFile(form.file_path)} className="p-1 rounded hover:bg-secondary/60"><Download className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => setForm({ ...form, file_path: null })} className="p-1 rounded text-destructive hover:bg-destructive/10"><X className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => downloadThemeFile(form.file_path)} className="p-1 rounded-sm hover:bg-secondary/60"><Download className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => setForm({ ...form, file_path: null })} className="p-1 rounded-sm text-destructive hover:bg-destructive/10"><X className="w-3.5 h-3.5" /></button>
             </div>
           ) : (
             <p className="text-[11px] text-muted-foreground">সর্বোচ্চ ২০০ MB</p>
@@ -441,10 +441,10 @@ const AdminThemes = () => {
 
       <div className="flex items-center gap-6">
         <label className="flex items-center gap-2 text-sm text-foreground">
-          <input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} className="rounded" /> সক্রিয়
+          <input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} className="rounded-sm" /> সক্রিয়
         </label>
         <label className="flex items-center gap-2 text-sm text-foreground">
-          <input type="checkbox" checked={form.is_featured} onChange={e => setForm({ ...form, is_featured: e.target.checked })} className="rounded" /> ফিচার্ড
+          <input type="checkbox" checked={form.is_featured} onChange={e => setForm({ ...form, is_featured: e.target.checked })} className="rounded-sm" /> ফিচার্ড
         </label>
       </div>
 
@@ -484,10 +484,10 @@ const AdminThemes = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="থিম সার্চ করুন..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
         </div>
         <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30">
+          className="px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30">
           <option value="all">সব ক্যাটাগরি</option>
           {CATEGORIES.map(c => <option key={c} value={c}>{categoryLabels[c]?.[lang] || c}</option>)}
         </select>
@@ -522,7 +522,7 @@ const AdminThemes = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <span className="text-[13px] font-semibold text-foreground truncate">{theme.name}</span>
-                      <span className="text-[10px] px-1.5 py-px rounded bg-primary/10 text-primary font-medium shrink-0">
+                      <span className="text-[10px] px-1.5 py-px rounded-sm bg-primary/10 text-primary font-medium shrink-0">
                         {categoryLabels[theme.category]?.[lang] || theme.category}
                       </span>
                       {theme.is_featured && (
@@ -532,7 +532,7 @@ const AdminThemes = () => {
                         <EyeOff className="w-3 h-3 text-destructive shrink-0" />
                       )}
                       {(theme as any).seller_user_id && (
-                        <span className={`text-[10px] px-1.5 py-px rounded font-medium shrink-0 ${
+                        <span className={`text-[10px] px-1.5 py-px rounded-sm font-medium shrink-0 ${
                           (theme as any).approval_status === "approved" ? "bg-success/10 text-success"
                           : (theme as any).approval_status === "rejected" ? "bg-destructive/10 text-destructive"
                           : "bg-warning/10 text-warning"}`}>
@@ -658,7 +658,7 @@ const AdminThemes = () => {
 
       {/* Live preview (does not apply the theme) */}
       {previewTheme && (
-        <div className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm flex items-center justify-center p-3" onClick={() => setPreviewTheme(null)}>
+        <div className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-xs flex items-center justify-center p-3" onClick={() => setPreviewTheme(null)}>
           <div className="bg-popover border border-border rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
               <Monitor className="w-4 h-4 text-primary shrink-0" />

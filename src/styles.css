@@ -1,0 +1,394 @@
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition — ported from the Classic src/index.css + tailwind.config.ts.
+ *
+ * Tokens stay as HSL triplets (e.g. 220 20% 97%) because component CSS and
+ * class strings across the app use the hsl(var(--token)) convention.
+ * @theme inline wraps each triplet with hsl() to register the Tailwind color.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-ring-offset-background: hsl(var(--background));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* Fonts — ported from tailwind.config.ts fontFamily */
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'IBM Plex Mono', monospace;
+
+  /* Custom font scale — ported from tailwind.config.ts fontSize */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.15rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.6rem;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.3125rem;
+  --text-xl--line-height: 1.85rem;
+
+  /* Animations — ported from tailwind.config.ts */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.6s ease-out;
+  --animate-fade-in: fade-in 0.4s ease-out;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* Container — ported from tailwind.config.ts container config */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (min-width: 640px) {
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    padding-inline: 2rem;
+  }
+  @media (min-width: 1400px) {
+    max-width: 1400px;
+  }
+}
+
+:root {
+  --background: 220 20% 97%;
+  --foreground: 220 20% 10%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 220 20% 10%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 20% 10%;
+
+  --primary: 215 100% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 15% 93%;
+  --secondary-foreground: 220 20% 10%;
+
+  --muted: 220 15% 93%;
+  --muted-foreground: 220 10% 45%;
+
+  --accent: 215 100% 50%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 220 15% 90%;
+  --input: 220 15% 90%;
+  --ring: 215 100% 50%;
+
+  --radius: 1rem;
+
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 220 20% 10%;
+  --sidebar-primary: 215 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 15% 96%;
+  --sidebar-accent-foreground: 220 20% 10%;
+  --sidebar-border: 220 15% 90%;
+  --sidebar-ring: 215 100% 50%;
+
+  --glass-bg: 0 0% 100% / 0.65;
+  --glass-border: 0 0% 100% / 0.5;
+  --glass-shadow: 220 40% 50%;
+  --glow-primary: 215 100% 50%;
+  --success: 152 69% 40%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  --info: 200 98% 39%;
+  --info-foreground: 0 0% 100%;
+
+  --gradient-start: 215 100% 55%;
+  --gradient-end: 260 100% 60%;
+  --gradient-accent: 190 100% 45%;
+}
+
+.dark {
+  --background: 220 20% 6%;
+  --foreground: 0 0% 98%;
+
+  --card: 220 15% 10%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 220 15% 10%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 215 100% 55%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 15% 15%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 220 15% 18%;
+  --muted-foreground: 220 10% 55%;
+
+  --accent: 215 100% 55%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 220 15% 18%;
+  --input: 220 15% 18%;
+  --ring: 215 100% 55%;
+
+  --glass-bg: 220 15% 10% / 0.6;
+  --glass-border: 0 0% 100% / 0.08;
+  --glass-shadow: 220 40% 5%;
+  --success: 152 69% 53%;
+  --success-foreground: 220 20% 6%;
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    overscroll-behavior-y: none;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+  }
+
+  /* Bengali needs a larger optical size for comfortable reading */
+  html.lang-bn body,
+  html.lang-bn h1, html.lang-bn h2, html.lang-bn h3,
+  html.lang-bn h4, html.lang-bn h5, html.lang-bn h6 {
+    font-family: 'Noto Sans Bengali', 'Inter', system-ui, sans-serif;
+  }
+
+  html.lang-bn body {
+    font-size: 1.09375rem;
+    line-height: 1.7;
+  }
+
+  html.lang-bn .text-\[9px\],
+  html.lang-bn .text-\[10px\] {
+    font-size: 0.75rem;
+    line-height: 1.05rem;
+  }
+
+  html.lang-bn .text-\[11px\],
+  html.lang-bn .text-\[12px\],
+  html.lang-bn .text-\[13px\] {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .glass {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-card {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid hsl(var(--glass-border));
+    border-radius: var(--radius);
+    box-shadow: 
+      0 8px 32px hsl(var(--glass-shadow) / 0.08),
+      0 2px 8px hsl(var(--glass-shadow) / 0.04),
+      inset 0 1px 0 hsl(0 0% 100% / 0.15);
+  }
+
+  .glass-card-elevated {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid hsl(var(--glass-border));
+    border-radius: calc(var(--radius) + 4px);
+    box-shadow: 
+      0 20px 60px hsl(var(--glass-shadow) / 0.12),
+      0 8px 24px hsl(var(--glass-shadow) / 0.06),
+      inset 0 1px 0 hsl(0 0% 100% / 0.2);
+  }
+
+  .glass-surface {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-bottom: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-input {
+    background: hsl(0 0% 100% / 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) - 4px);
+  }
+
+  .glow-border {
+    box-shadow: 
+      0 0 0 1px hsl(var(--primary) / 0.2),
+      0 0 30px hsl(var(--primary) / 0.1),
+      0 20px 60px hsl(var(--glass-shadow) / 0.12);
+  }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--muted-foreground)));
+  }
+
+  .text-gradient-primary {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+  }
+
+  .gradient-mesh {
+    background: 
+      radial-gradient(ellipse 80% 50% at 20% 40%, hsl(215 100% 55% / 0.12), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 20%, hsl(260 100% 60% / 0.08), transparent),
+      radial-gradient(ellipse 50% 60% at 50% 80%, hsl(190 100% 45% / 0.06), transparent);
+  }
+
+  .hero-gradient {
+    background: 
+      linear-gradient(135deg, hsl(215 100% 50% / 0.06) 0%, transparent 50%),
+      linear-gradient(225deg, hsl(260 100% 60% / 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 100% 80% at 50% 0%, hsl(215 100% 55% / 0.1), transparent 60%);
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.15), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    animation: marquee 60s linear infinite;
+  }
+}

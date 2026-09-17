@@ -60,7 +60,7 @@ const TldPill = ({ d, onClick, lang }: { d: DomainPrice; onClick: () => void; la
     onClick={onClick}
     className={`group relative flex flex-col items-center gap-0.5 px-4 py-2.5 rounded-xl border transition-all duration-200 hover:scale-[1.04] hover:shadow-md ${
       d.popular
-        ? "border-primary/40 bg-primary/8 text-primary shadow-sm shadow-primary/10"
+        ? "border-primary/40 bg-primary/8 text-primary shadow-xs shadow-primary/10"
         : "border-border bg-card/60 text-muted-foreground hover:text-foreground hover:border-primary/20"
     }`}
   >
@@ -120,7 +120,7 @@ const WhoisPanel = ({ domain, whoisData, whoisLoading, lang }: {
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{lang === "bn" ? "নেমসার্ভার" : "Nameservers"}</p>
             <div className="flex flex-wrap gap-1.5 mt-1">
               {info.nameservers.map((ns) => (
-                <span key={ns} className="text-[10px] font-mono text-foreground bg-background px-2 py-0.5 rounded border border-border">{ns.toLowerCase()}</span>
+                <span key={ns} className="text-[10px] font-mono text-foreground bg-background px-2 py-0.5 rounded-sm border border-border">{ns.toLowerCase()}</span>
               ))}
             </div>
           </div>
@@ -133,7 +133,7 @@ const WhoisPanel = ({ domain, whoisData, whoisLoading, lang }: {
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{lang === "bn" ? "স্ট্যাটাস" : "Status"}</p>
             <div className="flex flex-wrap gap-1 mt-1">
               {info.status.map((s) => (
-                <span key={s} className="text-[10px] text-muted-foreground bg-background px-2 py-0.5 rounded border border-border">{s}</span>
+                <span key={s} className="text-[10px] text-muted-foreground bg-background px-2 py-0.5 rounded-sm border border-border">{s}</span>
               ))}
             </div>
           </div>
@@ -415,7 +415,7 @@ const DomainSearch = () => {
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   placeholder={lang === "bn" ? "আপনার ডোমেইন নাম লিখুন, যেমন: example.com" : "Enter your domain name, e.g. example.com"}
-                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/60 outline-none text-sm sm:text-base py-3 font-medium"
+                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/60 outline-hidden text-sm sm:text-base py-3 font-medium"
                 />
               </div>
               <button
@@ -445,7 +445,7 @@ const DomainSearch = () => {
                 className="mt-5"
               >
                 {loading ? (
-                  <div className="flex flex-col items-center justify-center gap-3 py-12 bg-card rounded-2xl border border-border/60 shadow-sm">
+                  <div className="flex flex-col items-center justify-center gap-3 py-12 bg-card rounded-2xl border border-border/60 shadow-xs">
                     <div className="relative">
                       <div className="w-12 h-12 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
                       <Globe className="w-5 h-5 text-primary absolute inset-0 m-auto" />
@@ -453,7 +453,7 @@ const DomainSearch = () => {
                     <span className="text-sm text-muted-foreground font-medium">{lang === "bn" ? "ডোমেইন চেক করা হচ্ছে..." : "Checking domain availability..."}</span>
                   </div>
                 ) : results.length > 0 ? (
-                  <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+                  <div className="bg-card rounded-2xl border border-border/60 shadow-xs overflow-hidden">
                     {/* Results header */}
                     <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-muted/30 border-b border-border/60">
                       <div className="flex items-center gap-2">
@@ -482,7 +482,7 @@ const DomainSearch = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-10 bg-card rounded-2xl border border-border/60 shadow-sm">
+                  <div className="text-center py-10 bg-card rounded-2xl border border-border/60 shadow-xs">
                     <Globe className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm font-medium text-muted-foreground">{lang === "bn" ? "কোনো ডোমেইন পাওয়া যায়নি" : "No domains found"}</p>
                     <p className="text-xs text-muted-foreground/60 mt-1">{lang === "bn" ? "অন্য একটি নাম দিয়ে চেষ্টা করুন" : "Try searching with a different name"}</p>
@@ -500,7 +500,7 @@ const DomainSearch = () => {
               transition={{ delay: 0.2 }}
               className="mt-4"
             >
-              <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+              <div className="bg-card rounded-2xl border border-border/60 shadow-xs overflow-hidden">
                 <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-border/60">
                   <div className="flex items-center gap-2">
                     <Lightbulb className="w-4 h-4 text-primary" />

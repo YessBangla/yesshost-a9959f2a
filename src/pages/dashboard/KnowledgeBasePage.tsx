@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { BookOpen, Search, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -52,7 +52,7 @@ const DashboardKnowledgeBase = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={bn ? "আর্টিকেল খুঁজুন..." : "Search articles..."}
-          className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+          className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm"
         />
       </div>
 

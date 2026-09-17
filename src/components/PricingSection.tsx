@@ -185,7 +185,7 @@ const PricingSection = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
                   activeTab === tab.key
-                    ? "gradient-primary text-primary-foreground shadow-sm"
+                    ? "gradient-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -314,7 +314,7 @@ const PricingSection = () => {
                       }}
                       className={`w-full py-2.5 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-sm ${
                         plan.highlighted
-                          ? "gradient-primary text-primary-foreground shadow-sm shadow-primary/15 hover:opacity-90"
+                          ? "gradient-primary text-primary-foreground shadow-xs shadow-primary/15 hover:opacity-90"
                           : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
                       }`}
                     >

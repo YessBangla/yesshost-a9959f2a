@@ -1,8 +1,8 @@
 import { Phone, MessageCircle, TicketCheck, Mail } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 
 const NeedHelpSection = () => {
   const { lang } = useLanguage();
@@ -50,9 +50,9 @@ const NeedHelpSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="bg-card border border-border rounded-xl p-4 md:p-5 text-center cursor-pointer hover:border-primary/25 hover:shadow-sm transition-all group"
+                className="bg-card border border-border rounded-xl p-4 md:p-5 text-center cursor-pointer hover:border-primary/25 hover:shadow-xs transition-all group"
               >
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-3 shadow-sm shadow-primary/15 group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-3 shadow-xs shadow-primary/15 group-hover:scale-105 transition-transform">
                   <Icon className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <h3 className="text-sm font-bold text-foreground mb-0.5">

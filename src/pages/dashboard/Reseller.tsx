@@ -52,7 +52,7 @@ const ResellerDashboard = () => {
     // Fall back to the user's reseller service price when the package has no linked service
     if (pkgs.length && pkgs.some(p => !p.service?.price_bdt)) {
       const { data: svc } = await supabase.from("services").select("id, price_bdt, billing_cycle, name").eq("user_id", user.id).eq("service_type", "reseller").order("created_at", { ascending: false }).limit(1);
-      if (svc?.[0]?.price_bdt > 0) pkgs = pkgs.map(p => (p.service?.price_bdt ? p : { ...p, service: svc[0] }));
+      if ((svc?.[0]?.price_bdt ?? 0) > 0) pkgs = pkgs.map(p => (p.service?.price_bdt ? p : { ...p, service: svc![0] }));
     }
     setPackages(pkgs);
     if (pkgs.length === 0) { setSelectedPkg(null); setAccounts([]); setLoading(false); return; }
@@ -233,7 +233,7 @@ const ResellerDashboard = () => {
             ].map(v => (
               <button key={v.key} onClick={() => setActiveView(v.key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  activeView === v.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  activeView === v.key ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
                 }`}>
                 <v.icon className="w-3.5 h-3.5" />
                 {v.label}
@@ -385,7 +385,7 @@ const ResellerDashboard = () => {
                     <Search className="w-4 h-4 text-muted-foreground shrink-0" />
                     <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
                       placeholder={bn ? "ডোমেইন, ইউজারনেম..." : "Domain, username..."}
-                      className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50" />
+                      className="flex-1 bg-transparent text-sm text-foreground outline-hidden placeholder:text-muted-foreground/50" />
                     {searchTerm && <button onClick={() => setSearchTerm("")} className="text-muted-foreground hover:text-foreground"><span className="text-xs">✕</span></button>}
                   </div>
                   <div className="flex gap-1">
@@ -648,7 +648,7 @@ const ResellerDashboard = () => {
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input value={createForm.domain} onChange={e => setCreateForm(p => ({ ...p, domain: e.target.value }))} placeholder="example.com"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 </div>
               </div>
               <div>
@@ -657,7 +657,7 @@ const ResellerDashboard = () => {
                   <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input value={createForm.username} onChange={e => setCreateForm(p => ({ ...p, username: e.target.value.replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 16) }))}
                     placeholder="username" maxLength={16}
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-1">{bn ? "৩-১৬ অক্ষর" : "3-16 chars, alphanumeric"}</p>
               </div>
@@ -670,7 +670,7 @@ const ResellerDashboard = () => {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input type={showPassword ? "text" : "password"} value={createForm.password}
                     onChange={e => setCreateForm(p => ({ ...p, password: e.target.value }))} placeholder="••••••••"
-                    className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                    className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -681,7 +681,7 @@ const ResellerDashboard = () => {
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input type="email" value={createForm.email} onChange={e => setCreateForm(p => ({ ...p, email: e.target.value }))} placeholder="client@example.com"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 </div>
               </div>
             </div>
@@ -695,7 +695,7 @@ const ResellerDashboard = () => {
                 <div>
                   <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "প্ল্যান" : "Plan"}</label>
                   <select value={createForm.plan_name} onChange={e => setCreateForm(p => ({ ...p, plan_name: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30">
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30">
                     <option value="Basic">Basic</option>
                     <option value="Standard">Standard</option>
                     <option value="Premium">Premium</option>
@@ -705,12 +705,12 @@ const ResellerDashboard = () => {
                 <div>
                   <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ডিস্ক (MB)" : "Disk (MB)"}</label>
                   <input type="number" value={createForm.disk_quota_mb} onChange={e => setCreateForm(p => ({ ...p, disk_quota_mb: +e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-foreground mb-1.5">{bn ? "ব্যান্ডউইথ" : "BW (MB)"}</label>
                   <input type="number" value={createForm.bandwidth_mb} onChange={e => setCreateForm(p => ({ ...p, bandwidth_mb: +e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 </div>
               </div>
               {selectedPkg && (

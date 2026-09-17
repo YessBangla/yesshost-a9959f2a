@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2, Smile, Phone, PhoneCall, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +20,9 @@ type Message = {
 };
 
 const LiveChatWidget = () => {
-  const [open, setOpen] = useState(() => localStorage.getItem(CHAT_OPEN_KEY) === "true");
+  const [open, setOpen] = useState(
+    () => typeof window !== "undefined" && window.localStorage.getItem(CHAT_OPEN_KEY) === "true",
+  );
   const [chatId, setChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -276,7 +278,7 @@ const LiveChatWidget = () => {
                     onChange={(e) => setName(e.target.value)}
                     placeholder={bn ? "আপনার নাম *" : "Your name *"}
                     maxLength={100}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                   />
                   <input
                     type="email"
@@ -284,7 +286,7 @@ const LiveChatWidget = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={bn ? "ইমেইল *" : "Email *"}
                     maxLength={255}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                   />
                   <input
                     type="tel"
@@ -292,7 +294,7 @@ const LiveChatWidget = () => {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder={bn ? "ফোন নাম্বার *" : "Phone number *"}
                     maxLength={20}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                   />
                   <button
                     onClick={startChat}
@@ -351,7 +353,7 @@ const LiveChatWidget = () => {
                       onFocus={() => setShowEmoji(false)}
                       placeholder={bn ? "মেসেজ লিখুন..." : "Type a message..."}
                       maxLength={1000}
-                      className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                      className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                     />
                     <button
                       onClick={sendMessage}

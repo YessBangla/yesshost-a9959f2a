@@ -188,7 +188,7 @@ const AdminCoupons = () => {
           onChange={e => setSearch(e.target.value)}
           placeholder={bn ? "কুপন খুঁজুন..." : "Search coupons..."}
           maxLength={50}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
         />
       </div>
 
@@ -223,7 +223,7 @@ const AdminCoupons = () => {
                           <Copy className="w-3.5 h-3.5" />
                         </button>
                         {!c.is_active && (
-                          <span className="text-[9px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded font-medium">
+                          <span className="text-[9px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm font-medium">
                             {bn ? "নিষ্ক্রিয়" : "Inactive"}
                           </span>
                         )}
@@ -285,7 +285,7 @@ const AdminCoupons = () => {
                 onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })}
                 placeholder="SAVE20"
                 maxLength={30}
-                className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30 font-mono"
+                className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-1 focus:ring-primary/30 font-mono"
               />
             </div>
             <div>
@@ -295,7 +295,7 @@ const AdminCoupons = () => {
                 onChange={e => setForm({ ...form, description: e.target.value })}
                 placeholder={bn ? "ঐচ্ছিক বিবরণ" : "Optional description"}
                 maxLength={200}
-                className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -304,7 +304,7 @@ const AdminCoupons = () => {
                 <select
                   value={form.discount_type}
                   onChange={e => setForm({ ...form, discount_type: e.target.value as any })}
-                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none"
+                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden"
                 >
                   <option value="percentage">{bn ? "শতকরা (%)" : "Percentage (%)"}</option>
                   <option value="fixed">{bn ? "নির্দিষ্ট (৳)" : "Fixed (৳)"}</option>
@@ -320,7 +320,7 @@ const AdminCoupons = () => {
                   onChange={e => setForm({ ...form, discount_value: Number(e.target.value) })}
                   min={0}
                   max={form.discount_type === "percentage" ? 100 : 999999}
-                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -332,7 +332,7 @@ const AdminCoupons = () => {
                   value={form.min_order_amount || ""}
                   onChange={e => setForm({ ...form, min_order_amount: Number(e.target.value) })}
                   min={0}
-                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -342,7 +342,7 @@ const AdminCoupons = () => {
                   value={form.max_discount_amount || ""}
                   onChange={e => setForm({ ...form, max_discount_amount: Number(e.target.value) })}
                   min={0}
-                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -355,7 +355,7 @@ const AdminCoupons = () => {
                   onChange={e => setForm({ ...form, max_uses: Number(e.target.value) })}
                   min={0}
                   placeholder={bn ? "০ = সীমাহীন" : "0 = unlimited"}
-                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -364,7 +364,7 @@ const AdminCoupons = () => {
                   type="datetime-local"
                   value={form.expires_at}
                   onChange={e => setForm({ ...form, expires_at: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                  className="w-full px-3 py-2.5 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -373,7 +373,7 @@ const AdminCoupons = () => {
                 type="checkbox"
                 checked={form.is_active}
                 onChange={e => setForm({ ...form, is_active: e.target.checked })}
-                className="rounded"
+                className="rounded-sm"
                 id="coupon-active"
               />
               <label htmlFor="coupon-active" className="text-sm text-foreground">{bn ? "সক্রিয়" : "Active"}</label>

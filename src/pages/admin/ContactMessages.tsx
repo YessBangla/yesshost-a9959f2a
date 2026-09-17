@@ -106,7 +106,7 @@ const ContactMessages = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={bn ? "নাম, ইমেইল বা বিষয় দিয়ে খুঁজুন..." : "Search by name, email or subject..."}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <div className="flex gap-2">
@@ -116,7 +116,7 @@ const ContactMessages = () => {
               onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                 filter === f
-                  ? "bg-primary text-primary-foreground shadow-sm"
+                  ? "bg-primary text-primary-foreground shadow-xs"
                   : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
               }`}
             >
@@ -143,9 +143,9 @@ const ContactMessages = () => {
                 onClick={() => markAsRead(msg)}
                 className={`p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md ${
                   selected?.id === msg.id
-                    ? "border-primary bg-primary/5 shadow-sm"
+                    ? "border-primary bg-primary/5 shadow-xs"
                     : !msg.is_read
-                    ? "border-border bg-card shadow-sm"
+                    ? "border-border bg-card shadow-xs"
                     : "border-border/50 bg-card/50"
                 }`}
               >
@@ -224,7 +224,7 @@ const ContactMessages = () => {
                     onChange={e => setReplyText(e.target.value)}
                     placeholder={bn ? `${selected.name}-কে রিপ্লাই লিখুন...` : `Write a reply to ${selected.name}...`}
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 resize-none"
                   />
                   <div className="flex items-center justify-between mt-3">
                     <p className="text-xs text-muted-foreground">

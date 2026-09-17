@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
+import { Outlet, useNavigate, useLocation, Link } from "@/lib/router-compat";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
   LogOut, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
@@ -246,7 +246,7 @@ const AdminLayout = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               style={{ opacity: overlayOpacity }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
@@ -310,7 +310,7 @@ const AdminLayout = () => {
           >
             <Search className="w-3.5 h-3.5" />
             <span>{bn ? "সার্চ..." : "Search..."}</span>
-            <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-background/80 border border-border/50 font-mono">⌘K</kbd>
+            <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded-sm bg-background/80 border border-border/50 font-mono">⌘K</kbd>
           </button>
           {/* Mobile search icon */}
           <button
@@ -403,7 +403,7 @@ const AdminLayout = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/50 backdrop-blur-xs"
             />
             <div className="relative flex justify-center pt-[15vh] px-4">
               <motion.div
@@ -435,9 +435,9 @@ const AdminLayout = () => {
                       }
                     }}
                     placeholder={bn ? "পেজ, মেনু বা ফিচার সার্চ করুন..." : "Search pages, menus or features..."}
-                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
+                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-hidden"
                   />
-                  <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 border border-border/50 text-muted-foreground font-mono">ESC</kbd>
+                  <kbd className="text-[10px] px-1.5 py-0.5 rounded-sm bg-secondary/80 border border-border/50 text-muted-foreground font-mono">ESC</kbd>
                 </div>
 
                 {/* Results */}

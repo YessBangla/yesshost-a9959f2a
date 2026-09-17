@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Tables } from "@/integrations/supabase/types";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { formatAmount } from "@/lib/formatPrice";
 
 const statusConfig: Record<string, { label_en: string; label_bn: string; color: string; dot: string }> = {
@@ -81,7 +81,7 @@ const DashboardServices = () => {
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setFilterStatus("all")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filterStatus === "all" ? "gradient-primary text-primary-foreground shadow-sm" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filterStatus === "all" ? "gradient-primary text-primary-foreground shadow-xs" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
         >
           {bn ? "সব" : "All"} ({services.length})
         </button>
@@ -91,7 +91,7 @@ const DashboardServices = () => {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${filterStatus === status ? "gradient-primary text-primary-foreground shadow-sm" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${filterStatus === status ? "gradient-primary text-primary-foreground shadow-xs" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${sc?.dot || "bg-muted-foreground"}`} />
               {bn ? sc?.label_bn : sc?.label_en} ({count})
@@ -107,7 +107,7 @@ const DashboardServices = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={bn ? "সার্ভিস বা ডোমেইন খুঁজুন..." : "Search services or domains..."}
-          className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm transition-all"
+          className="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm transition-all"
         />
       </div>
 
@@ -151,7 +151,7 @@ const DashboardServices = () => {
                         <div className="flex items-center gap-2">
                           <h3 className="text-sm font-bold text-foreground truncate">{service.name}</h3>
                           {expiring && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-warning/10 text-warning font-medium shrink-0">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-warning/10 text-warning font-medium shrink-0">
                               {bn ? "শীঘ্রই মেয়াদ শেষ" : "Expiring soon"}
                             </span>
                           )}

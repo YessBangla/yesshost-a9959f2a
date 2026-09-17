@@ -131,13 +131,13 @@ const AdminServices = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={isBn ? "সার্ভিস, ডোমেইন বা ক্লায়েন্ট দিয়ে সার্চ..." : "Search service, domain or client..."}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none"
+          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden"
         >
           <option value="all">{isBn ? "সকল স্ট্যাটাস" : "All Status"}</option>
           {statusOptions.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
@@ -145,7 +145,7 @@ const AdminServices = () => {
         <select
           value={typeFilter}
           onChange={e => setTypeFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none"
+          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden"
         >
           <option value="all">{isBn ? "সকল টাইপ" : "All Types"}</option>
           {serviceTypes.map(t => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}
@@ -199,7 +199,7 @@ const AdminServices = () => {
                       <select
                         value={s.status}
                         onChange={e => updateStatus(s.id, e.target.value)}
-                        className="text-xs px-2.5 py-1.5 rounded-lg bg-secondary/40 border border-border/50 text-foreground outline-none"
+                        className="text-xs px-2.5 py-1.5 rounded-lg bg-secondary/40 border border-border/50 text-foreground outline-hidden"
                       >
                         {statusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                       </select>

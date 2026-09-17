@@ -159,7 +159,7 @@ const AdminTickets = () => {
             <select
               value={selectedTicket.status}
               onChange={e => updateStatus(selectedTicket.id, e.target.value)}
-              className="text-sm px-4 py-2 rounded-xl bg-secondary/40 border border-border/50 text-foreground outline-none"
+              className="text-sm px-4 py-2 rounded-xl bg-secondary/40 border border-border/50 text-foreground outline-hidden"
             >
               {ticketStatuses.map(s => {
                 const cfg = statusConfig[s];
@@ -189,9 +189,9 @@ const AdminTickets = () => {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
                     {r.is_staff ? (
-                      <><span className="w-5 h-5 rounded bg-destructive/15 text-destructive flex items-center justify-center text-[10px]">🛡️</span> {isBn ? "সাপোর্ট টিম" : "Support Team"}</>
+                      <><span className="w-5 h-5 rounded-sm bg-destructive/15 text-destructive flex items-center justify-center text-[10px]">🛡️</span> {isBn ? "সাপোর্ট টিম" : "Support Team"}</>
                     ) : (
-                      <><span className="w-5 h-5 rounded bg-primary/10 text-primary flex items-center justify-center text-[10px]">👤</span> {selectedTicket.profiles?.full_name || (isBn ? "ক্লায়েন্ট" : "Client")}</>
+                      <><span className="w-5 h-5 rounded-sm bg-primary/10 text-primary flex items-center justify-center text-[10px]">👤</span> {selectedTicket.profiles?.full_name || (isBn ? "ক্লায়েন্ট" : "Client")}</>
                     )}
                   </span>
                   <span className="text-[10px] text-muted-foreground">{formatDate(r.created_at)} {formatTime(r.created_at)}</span>
@@ -207,7 +207,7 @@ const AdminTickets = () => {
               value={replyMsg}
               onChange={e => setReplyMsg(e.target.value)}
               placeholder={isBn ? "স্টাফ রিপ্লাই লিখুন..." : "Write staff reply..."}
-              className="flex-1 px-4 py-3 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+              className="flex-1 px-4 py-3 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 transition-all"
               onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendReply()}
             />
             <button
@@ -269,13 +269,13 @@ const AdminTickets = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={isBn ? "টিকেট নম্বর, বিষয় বা ক্লায়েন্ট দিয়ে সার্চ..." : "Search by ticket#, subject or client..."}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none"
+          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden"
         >
           <option value="all">{isBn ? "সকল স্ট্যাটাস" : "All Status"}</option>
           {ticketStatuses.map(s => {
@@ -286,7 +286,7 @@ const AdminTickets = () => {
         <select
           value={priorityFilter}
           onChange={e => setPriorityFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-none"
+          className="px-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground outline-hidden"
         >
           <option value="all">{isBn ? "সকল প্রায়োরিটি" : "All Priority"}</option>
           {(["low", "medium", "high", "urgent"] as const).map(p => {
@@ -346,7 +346,7 @@ const AdminTickets = () => {
                   <select
                     value={t.status}
                     onChange={e => updateStatus(t.id, e.target.value)}
-                    className="text-xs px-2.5 py-1.5 rounded-lg bg-secondary/40 border border-border/50 text-foreground outline-none"
+                    className="text-xs px-2.5 py-1.5 rounded-lg bg-secondary/40 border border-border/50 text-foreground outline-hidden"
                   >
                     {ticketStatuses.map(s => {
                       const cfg = statusConfig[s];

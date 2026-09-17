@@ -298,7 +298,7 @@ const ThemeSeller = () => {
     load();
   };
 
-  const inputClass = "w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30";
+  const inputClass = "w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30";
   const fmt = (n: number) => `৳${formatAmount(n, lang)}`;
 
   if (loading) return <BillingSkeleton />;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 
 import { HeadphonesIcon, Plus, Send } from "lucide-react";
 import { SupportSkeleton } from "@/components/DashboardSkeleton";
@@ -78,25 +78,25 @@ const DashboardSupport = () => {
           <form onSubmit={createTicket} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">{tr("dash.subject")}</label>
-              <input value={subject} onChange={e => setSubject(e.target.value)} required className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder={tr("dash.subjectPlaceholder")} />
+              <input value={subject} onChange={e => setSubject(e.target.value)} required className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm" placeholder={tr("dash.subjectPlaceholder")} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">{tr("dash.department")}</label>
-                <select value={department} onChange={e => setDepartment(e.target.value as any)} className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none text-sm">
+                <select value={department} onChange={e => setDepartment(e.target.value as any)} className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden text-sm">
                   <option value="general">General</option><option value="technical">Technical</option><option value="billing">Billing</option><option value="sales">Sales</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">{tr("dash.priority")}</label>
-                <select value={priority} onChange={e => setPriority(e.target.value as any)} className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none text-sm">
+                <select value={priority} onChange={e => setPriority(e.target.value as any)} className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden text-sm">
                   <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="urgent">Urgent</option>
                 </select>
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">{tr("dash.message")}</label>
-              <textarea value={message} onChange={e => setMessage(e.target.value)} rows={5} className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/30 text-sm resize-none" placeholder={tr("dash.messagePlaceholder")} />
+              <textarea value={message} onChange={e => setMessage(e.target.value)} rows={5} className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm resize-none" placeholder={tr("dash.messagePlaceholder")} />
             </div>
             <button type="submit" className="gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20">{tr("dash.submitTicket")}</button>
           </form>
@@ -132,7 +132,7 @@ const DashboardSupport = () => {
             ))}
           </div>
           <div className="flex gap-2">
-            <input value={replyMsg} onChange={e => setReplyMsg(e.target.value)} placeholder={tr("dash.replyPlaceholder")} className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-none text-sm" onKeyDown={e => e.key === "Enter" && !sendingReply && sendReply()} />
+            <input value={replyMsg} onChange={e => setReplyMsg(e.target.value)} placeholder={tr("dash.replyPlaceholder")} className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden text-sm" onKeyDown={e => e.key === "Enter" && !sendingReply && sendReply()} />
             <button onClick={sendReply} disabled={sendingReply || !replyMsg.trim()} className="gradient-primary text-primary-foreground px-4 py-3 rounded-xl hover:opacity-90 transition-all disabled:opacity-50">
               {sendingReply ? <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
             </button>

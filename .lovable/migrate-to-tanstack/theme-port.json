@@ -1,0 +1,21 @@
+{
+  "customizations": [
+    { "token": "--glass-bg / --glass-border / --glass-shadow / --glow-primary", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--success / --success-foreground", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--warning / --warning-foreground", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--info / --info-foreground", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--gradient-start / --gradient-end / --gradient-accent", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--sidebar-* palette (8 tokens)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "full light/dark HSL palette (background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring, --radius 1rem)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "color-success / color-warning / color-info Tailwind colors", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "custom font scale (text-xs..text-xl)", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "font-display / font-body / font-mono families", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "container (center, padding 1/1.5/2rem, 2xl 1400px)", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "animate-accordion-down / accordion-up / pulse-glow / slide-up / fade-in", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "Google Fonts import (Inter, SF Pro Display, Noto Sans Bengali)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "html.lang-bn Bengali font-size/line-height rules", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": ".glass / .glass-card / .glass-card-elevated / .glass-surface / .glass-input", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": ".glow-border / .text-gradient / .text-gradient-primary / .gradient-primary / .gradient-mesh / .hero-gradient", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": ".shimmer / .float / .animate-marquee / .no-scrollbar / .tabular-nums + keyframes", "source": "src/index.css", "reappliedIn": "src/styles.css" }
+  ]
+}

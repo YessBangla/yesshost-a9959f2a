@@ -157,7 +157,7 @@ const AdminKnowledgeBase = () => {
         </div>
         <button
           onClick={() => { setShowCatForm(true); setEditingCat(null); setCatForm({ slug: "", icon: "BookOpen", title_bn: "", title_en: "", sort_order: 0 }); }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-sm hover:opacity-90 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-xs hover:opacity-90 transition-all"
         >
           <Plus className="w-4 h-4" /> {bn ? "নতুন ক্যাটাগরি" : "New Category"}
         </button>
@@ -171,17 +171,17 @@ const AdminKnowledgeBase = () => {
             <h3 className="text-sm font-bold text-foreground">{editingCat ? (bn ? "ক্যাটাগরি এডিট" : "Edit Category") : (bn ? "নতুন ক্যাটাগরি" : "New Category")}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input value={catForm.title_en} onChange={e => setCatForm({ ...catForm, title_en: e.target.value })} placeholder="Title (English)"
-                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
               <input value={catForm.title_bn} onChange={e => setCatForm({ ...catForm, title_bn: e.target.value })} placeholder="টাইটেল (বাংলা)"
-                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
               <input value={catForm.slug} onChange={e => setCatForm({ ...catForm, slug: e.target.value })} placeholder="slug (e.g. hosting-guide)"
-                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
               <select value={catForm.icon} onChange={e => setCatForm({ ...catForm, icon: e.target.value })}
-                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30">
+                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30">
                 {iconOptions.map(ic => <option key={ic} value={ic}>{ic}</option>)}
               </select>
               <input type="number" value={catForm.sort_order} onChange={e => setCatForm({ ...catForm, sort_order: Number(e.target.value) })} placeholder="Sort Order"
-                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
             </div>
             <div className="flex gap-2">
               <button onClick={saveCat} disabled={saving || !catForm.slug || !catForm.title_en}
@@ -205,17 +205,17 @@ const AdminKnowledgeBase = () => {
             <h3 className="text-sm font-bold text-foreground">{isNew ? (bn ? "নতুন আর্টিকেল" : "New Article") : (bn ? "আর্টিকেল এডিট" : "Edit Article")}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input value={editingArticle.title_en} onChange={e => setEditingArticle({ ...editingArticle, title_en: e.target.value })} placeholder="Title (English)"
-                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
               <input value={editingArticle.title_bn} onChange={e => setEditingArticle({ ...editingArticle, title_bn: e.target.value })} placeholder="টাইটেল (বাংলা)"
-                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
               <input value={editingArticle.slug} onChange={e => setEditingArticle({ ...editingArticle, slug: e.target.value })} placeholder="slug (e.g. upload-via-cpanel)"
-                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                className="px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
               <div className="flex items-center gap-3">
                 <input type="number" value={editingArticle.sort_order} onChange={e => setEditingArticle({ ...editingArticle, sort_order: Number(e.target.value) })} placeholder="Sort"
-                  className="w-20 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+                  className="w-20 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
                 <label className="flex items-center gap-2 text-sm text-foreground">
                   <input type="checkbox" checked={editingArticle.is_active} onChange={e => setEditingArticle({ ...editingArticle, is_active: e.target.checked })}
-                    className="rounded" />
+                    className="rounded-sm" />
                   {bn ? "সক্রিয়" : "Active"}
                 </label>
               </div>
@@ -224,12 +224,12 @@ const AdminKnowledgeBase = () => {
               <div>
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Content (English) — Markdown</label>
                 <textarea value={editingArticle.content_en} onChange={e => setEditingArticle({ ...editingArticle, content_en: e.target.value })}
-                  rows={8} className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground font-mono outline-none focus:ring-2 focus:ring-primary/30 resize-y" />
+                  rows={8} className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground font-mono outline-hidden focus:ring-2 focus:ring-primary/30 resize-y" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">{bn ? "কন্টেন্ট (বাংলা) — মার্কডাউন" : "Content (Bengali) — Markdown"}</label>
                 <textarea value={editingArticle.content_bn} onChange={e => setEditingArticle({ ...editingArticle, content_bn: e.target.value })}
-                  rows={8} className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground font-mono outline-none focus:ring-2 focus:ring-primary/30 resize-y" />
+                  rows={8} className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground font-mono outline-hidden focus:ring-2 focus:ring-primary/30 resize-y" />
               </div>
             </div>
             <div className="flex gap-2">
@@ -261,7 +261,7 @@ const AdminKnowledgeBase = () => {
                   <FolderOpen className="w-4 h-4 text-primary" />
                   <span className="text-sm font-bold text-foreground">{bn ? cat.title_bn : cat.title_en}</span>
                   <span className="text-xs text-muted-foreground">({catArticles.length})</span>
-                  {!cat.is_active && <span className="text-[10px] px-1.5 py-0.5 bg-destructive/10 text-destructive rounded font-medium">Inactive</span>}
+                  {!cat.is_active && <span className="text-[10px] px-1.5 py-0.5 bg-destructive/10 text-destructive rounded-sm font-medium">Inactive</span>}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button onClick={e => { e.stopPropagation(); startEditCat(cat); }}
@@ -283,7 +283,7 @@ const AdminKnowledgeBase = () => {
                           <div className="flex items-center gap-2 min-w-0">
                             <BookOpen className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                             <span className="text-sm text-foreground truncate">{bn ? art.title_bn : art.title_en}</span>
-                            {!art.is_active && <span className="text-[9px] px-1 py-0.5 bg-destructive/10 text-destructive rounded shrink-0">Off</span>}
+                            {!art.is_active && <span className="text-[9px] px-1 py-0.5 bg-destructive/10 text-destructive rounded-sm shrink-0">Off</span>}
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
                             <button onClick={() => { setEditingArticle(art); setIsNew(false); }}

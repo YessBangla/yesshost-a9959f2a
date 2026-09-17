@@ -143,22 +143,22 @@ const AdminChatRooms = () => {
         <div className="glass-card rounded-xl p-4 border border-primary/20 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-foreground">{editingRoom ? (bn ? "রুম সম্পাদনা" : "Edit Room") : (bn ? "নতুন রুম তৈরি" : "Create New Room")}</h3>
-            <button onClick={() => setShowForm(false)} className="p-1 rounded hover:bg-secondary text-muted-foreground"><X className="w-4 h-4" /></button>
+            <button onClick={() => setShowForm(false)} className="p-1 rounded-sm hover:bg-secondary text-muted-foreground"><X className="w-4 h-4" /></button>
           </div>
           <input
             value={formName}
             onChange={(e) => setFormName(e.target.value)}
             placeholder={bn ? "রুমের নাম *" : "Room name *"}
-            className="w-full px-3 py-2 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+            className="w-full px-3 py-2 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
           />
           <input
             value={formDesc}
             onChange={(e) => setFormDesc(e.target.value)}
             placeholder={bn ? "বিবরণ (ঐচ্ছিক)" : "Description (optional)"}
-            className="w-full px-3 py-2 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+            className="w-full px-3 py-2 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
           />
           <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-            <input type="checkbox" checked={formActive} onChange={(e) => setFormActive(e.target.checked)} className="rounded" />
+            <input type="checkbox" checked={formActive} onChange={(e) => setFormActive(e.target.checked)} className="rounded-sm" />
             {bn ? "সক্রিয়" : "Active"}
           </label>
           <Button onClick={saveRoom} size="sm" disabled={!formName.trim()}>

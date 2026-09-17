@@ -4,7 +4,7 @@ import { ShoppingCart, Globe, Trash2, ArrowRight, CreditCard, Building2, CheckCi
 import { useCart, CartItem } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PublicLayout from "@/components/PublicLayout";
@@ -462,10 +462,10 @@ const Checkout = () => {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-foreground">{bn ? method.labelBn : method.label}</span>
                         {!method.ready && (
-                          <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded">{bn ? "শীঘ্রই আসছে" : "Coming Soon"}</span>
+                          <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm">{bn ? "শীঘ্রই আসছে" : "Coming Soon"}</span>
                         )}
                         {method.id === "sslcommerz" && (
-                          <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded">🧪 Sandbox</span>
+                          <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded-sm">🧪 Sandbox</span>
                         )}
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{method.desc}</p>
@@ -502,7 +502,7 @@ const Checkout = () => {
                 placeholder={bn ? "বিশেষ নির্দেশনা বা মন্তব্য লিখুন..." : "Any special instructions or comments..."}
                 maxLength={500}
                 rows={3}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30 resize-none"
+                className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30 resize-none"
               />
               <p className="text-[10px] text-muted-foreground mt-1 text-right">{orderNote.length}/500</p>
             </div>
@@ -537,7 +537,7 @@ const Checkout = () => {
                           : `৳${formatAmount(appliedCoupon.discount_value, lang)} ${bn ? "ছাড়" : "off"}`}
                       </p>
                     </div>
-                    <button onClick={removeCoupon} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                    <button onClick={removeCoupon} className="p-1 rounded-sm hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -549,7 +549,7 @@ const Checkout = () => {
                       onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
                       placeholder={bn ? "কোড লিখুন" : "Enter code"}
                       maxLength={30}
-                      className="flex-1 px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30"
+                      className="flex-1 px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                     />
                     <button
                       onClick={handleApplyCoupon}

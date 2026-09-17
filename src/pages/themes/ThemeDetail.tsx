@@ -3,7 +3,7 @@ import {
   ArrowLeft, Eye, ShoppingCart, Check, Star, Package, Server, Shield, Globe, ChevronRight,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "@/lib/router-compat";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,9 +81,9 @@ const ThemeDetail = () => {
       <PublicLayout>
         <div className="pt-24 pb-16 container mx-auto px-4">
           <div className="animate-pulse space-y-6 max-w-4xl mx-auto">
-            <div className="h-8 bg-secondary/50 rounded w-1/3" />
+            <div className="h-8 bg-secondary/50 rounded-sm w-1/3" />
             <div className="h-64 bg-secondary/50 rounded-2xl" />
-            <div className="h-6 bg-secondary/50 rounded w-2/3" />
+            <div className="h-6 bg-secondary/50 rounded-sm w-2/3" />
           </div>
         </div>
       </PublicLayout>

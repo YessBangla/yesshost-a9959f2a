@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { motion, AnimatePresence } from "framer-motion";
 import { Server, Globe, HardDrive, Shield, Mail, Layers, ArrowRight, Check, Star, Zap, Clock, Headphones, ChevronDown, ShoppingCart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -144,7 +144,7 @@ const PlanCard = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
       className={`relative rounded-xl border p-5 transition-all hover:shadow-md flex flex-col ${
-        plan.is_highlighted ? "border-primary bg-primary/[0.02] shadow-sm" : "border-border/70 hover:border-primary/20"
+        plan.is_highlighted ? "border-primary bg-primary/[0.02] shadow-xs" : "border-border/70 hover:border-primary/20"
       }`}
     >
       {plan.is_highlighted && (
@@ -238,7 +238,7 @@ const PlanCard = ({
           }}
           className={`w-full py-2.5 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-xs mt-auto ${
             plan.is_highlighted
-              ? "gradient-primary text-primary-foreground shadow-sm hover:opacity-90"
+              ? "gradient-primary text-primary-foreground shadow-xs hover:opacity-90"
               : "border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
           }`}
         >
@@ -368,7 +368,7 @@ const HostingPlans = () => {
 
         {/* Sticky Category Filter */}
         {!loading && grouped.length > 0 && (
-          <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40 shadow-sm">
+          <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40 shadow-xs">
             <div className="container mx-auto px-4">
               <div className="flex overflow-x-auto gap-1.5 py-2.5 max-w-5xl mx-auto no-scrollbar justify-start md:justify-center">
                 {grouped.map((cat) => {
@@ -381,7 +381,7 @@ const HostingPlans = () => {
                       onClick={() => handleFilterClick(cat.key)}
                       className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap shrink-0 ${
                         isActive
-                          ? "gradient-primary text-primary-foreground shadow-sm shadow-primary/20"
+                          ? "gradient-primary text-primary-foreground shadow-xs shadow-primary/20"
                           : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30"
                       }`}
                     >

@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "@/lib/router-compat";
 import {
   LayoutDashboard, LogOut, Menu, Globe, Headphones,
   ShoppingCart, MessageCircle, HeadphonesIcon, ChevronRight,
@@ -9,7 +9,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-mo
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import logoWhite from "@/assets/logo-white.png";
 
 const SIDEBAR_W = 260;
@@ -150,7 +150,7 @@ const CallCenterLayout = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               style={{ opacity: overlayOpacity }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside

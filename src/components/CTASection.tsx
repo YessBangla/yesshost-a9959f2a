@@ -37,7 +37,7 @@ const CTASection = () => {
           <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full bg-white/5 blur-3xl translate-x-1/3 translate-y-1/3" />
 
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-primary-foreground text-xs">
+            <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-xs text-primary-foreground text-xs">
               <Zap className="w-3.5 h-3.5" />
               {text("cta_badge", "cta.needHelp")}
             </div>

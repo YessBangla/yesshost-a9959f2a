@@ -111,7 +111,7 @@ const DomainPricing = () => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={bn ? ".com, .net, .xyz..." : "Search TLD e.g. .com, .net..."}
-                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm"
+                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-hidden text-sm"
                 />
               </div>
             </div>
@@ -203,7 +203,7 @@ const DomainPricing = () => {
                                 <Check className="w-3.5 h-3.5 text-primary" />{bn ? "কার্টে আছে" : "In Cart"}
                               </span>
                             ) : (
-                              <button onClick={() => addDomain(tld)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-sm">
+                              <button onClick={() => addDomain(tld)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-xs">
                                 <ShoppingCart className="w-3.5 h-3.5" />{bn ? "নিন" : "Register"}
                               </button>
                             )}

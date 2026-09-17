@@ -1,5 +1,5 @@
 import { type LucideIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { motion } from "framer-motion";
 
 interface EmptyStateProps {
