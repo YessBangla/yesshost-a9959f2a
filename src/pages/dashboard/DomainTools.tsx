@@ -54,6 +54,7 @@ import {
   submitDomainTransfer,
 } from "@/lib/domain-tools.functions";
 import { downloadInvoicePdf } from "@/lib/invoice-pdf";
+import { INVOICE_PAY_METHODS, payInvoice, type PayMethod } from "@/lib/invoice-payment";
 import type { RenewalResult } from "@/lib/domain-tools.server";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -97,6 +98,8 @@ const DashboardDomainTools = () => {
   const [renewError, setRenewError] = useState<string | null>(null);
   const [renewSubmitting, setRenewSubmitting] = useState(false);
   const [renewResult, setRenewResult] = useState<RenewalResult | null>(null);
+  const [payMethod, setPayMethod] = useState<PayMethod>("wallet");
+  const [payBusy, setPayBusy] = useState(false);
 
   // transfer form
   const [transferDomain, setTransferDomain] = useState("");
@@ -396,6 +399,64 @@ const DashboardDomainTools = () => {
   });
   const invoicePaid = !!invoiceQuery.data?.paid;
 
+  const handlePayRenewal = async () => {
+    if (!renewResult) return;
+    setPayBusy(true);
+    try {
+      const totals = sumPriceLines(renewResult.lines);
+      const res = await payInvoice({
+        invoiceId: renewResult.invoiceId,
+        invoiceNumber: renewResult.invoiceNumber,
+        amount: totals.total,
+        method: payMethod,
+        callbackUrl: `${window.location.origin}/dashboard/domain-tools?tab=renew`,
+        customerEmail: user?.email ?? null,
+        customerName: (user?.user_metadata as { full_name?: string } | undefined)?.full_name ?? null,
+      });
+      if (res.status === "redirect") {
+        window.location.href = res.url;
+        return;
+      }
+      if (res.status === "paid") {
+        toast({
+          title: bn ? "পেমেন্ট সফল" : "Payment successful",
+          description: bn ? "ইনভয়েসটি পরিশোধিত হিসেবে আপডেট হয়েছে।" : "The invoice has been marked as paid.",
+        });
+        await invoiceQuery.refetch();
+      } else if (res.status === "bank") {
+        toast({
+          title: bn ? "ব্যাংক ট্রান্সফার" : "Bank transfer",
+          description: bn
+            ? `রেফারেন্সে "${renewResult.invoiceNumber}" উল্লেখ করে ট্রান্সফার করুন — পেমেন্ট পেলে ইনভয়েস আপডেট হয়ে যাবে।`
+            : `Transfer with reference "${renewResult.invoiceNumber}" — the invoice updates once we receive it.`,
+        });
+      } else if (res.code === "not_live") {
+        toast({
+          title: bn ? "এই মাধ্যমটি এখনো চালু হয়নি" : "This method isn't live yet",
+          description: bn
+            ? "কার্ড/মোবাইল ব্যাংকিং, ওয়ালেট অথবা ব্যাংক ট্রান্সফার ব্যবহার করুন।"
+            : "Please use card/mobile banking, wallet or bank transfer for now.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: bn ? "পেমেন্ট ব্যর্থ" : "Payment failed",
+          description: res.detail || (bn ? "আবার চেষ্টা করুন।" : "Please try again."),
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      logApiError("payRenewalInvoice", err, { area: "billing" });
+      toast({
+        title: bn ? "ত্রুটি" : "Error",
+        description: bn ? "পেমেন্ট প্রক্রিয়ায় সমস্যা হয়েছে।" : "Payment processing problem.",
+        variant: "destructive",
+      });
+    } finally {
+      setPayBusy(false);
+    }
+  };
+
   const downloadRenewalPdf = () => {
     if (!renewResult) return;
     const totals = sumPriceLines(renewResult.lines);
@@ -655,12 +716,41 @@ const DashboardDomainTools = () => {
             </p>
           )}
 
+          {!invoicePaid && (
+            <div className="rounded-xl border border-border/60 p-4 space-y-3">
+              <p className="text-xs font-bold text-foreground">{bn ? "এখনই পরিশোধ করুন" : "Pay now"}</p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {INVOICE_PAY_METHODS.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setPayMethod(m.id)}
+                    className={`text-left rounded-xl border p-3 transition-colors min-h-11 ${
+                      payMethod === m.id ? "border-primary bg-primary/5" : "border-border/60 hover:bg-secondary/40"
+                    }`}
+                  >
+                    <span className="block text-xs font-semibold text-foreground">{bn ? m.bn : m.en}</span>
+                    <span className="block text-[11px] text-muted-foreground">{bn ? m.hintBn : m.hintEn}</span>
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handlePayRenewal}
+                disabled={payBusy}
+                className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 disabled:opacity-60"
+              >
+                {payBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+                {bn ? "পেমেন্ট করুন" : "Complete payment"} · {formatPriceBDT(sumPriceLines(renewResult.lines).total, lang)}
+              </button>
+              <p className="text-[11px] text-muted-foreground">
+                {bn
+                  ? "পেমেন্ট সম্পন্ন হলে ইনভয়েস ও পেমেন্ট হিস্ট্রি সার্ভারে সংরক্ষিত হয় এবং বিলিং পাতায় দেখা যায়।"
+                  : "Completed payments are stored on the server and appear on your billing page."}
+              </p>
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-2">
-            {!invoicePaid && (
-              <Link to="/dashboard/billing" className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-xs">
-                {bn ? "ইনভয়েস পরিশোধ করুন" : "Pay the invoice"}
-              </Link>
-            )}
             <button
               onClick={downloadRenewalPdf}
               className={`px-5 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 border ${
