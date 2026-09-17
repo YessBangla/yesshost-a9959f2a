@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import { HeadphonesIcon, Plus, Send } from "lucide-react";
 import { SupportSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
