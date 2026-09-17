@@ -40,7 +40,13 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
   "/dashboard/theme-seller": { en: "Sell Themes", bn: "থিম বিক্রি" },
   "/dashboard/troubleshoot": { en: "Troubleshoot", bn: "সমস্যা নির্ণয়" },
+  "/dashboard/order-service": { en: "Order New Services", bn: "নতুন সার্ভিস অর্ডার" },
+  "/dashboard/domain-tools": { en: "Domain Tools", bn: "ডোমেইন টুলস" },
+  "/dashboard/support-pin": { en: "Support PIN", bn: "সাপোর্ট পিন" },
+  "/dashboard/knowledge-base": { en: "Knowledgebase", bn: "নলেজবেস" },
+  "/dashboard/server-status": { en: "Server Status", bn: "সার্ভার স্ট্যাটাস" },
 };
+
 
 interface TopMenuChild {
   label: string;
