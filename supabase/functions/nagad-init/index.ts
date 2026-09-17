@@ -46,7 +46,8 @@ serve(async (req) => {
   try {
     const { invoice_id, amount } = await req.json();
 
-    if (!NAGAD_MERCHANT_ID) {
+    const cfg = await loadNagadCfg();
+    if (!cfg.enabled) {
       return new Response(
         JSON.stringify({
           error: "Nagad credentials not configured",
