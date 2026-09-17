@@ -91,16 +91,25 @@ serve(async (req) => {
     const checks: Check[] = [];
 
     // Nameservers
+    const isSubdomain = host.split(".").length > 2 && !/\.(com|net|org|edu|ac|gov)\.bd$/.test(host);
     checks.push({
       id: "ns",
-      status: ns.length ? "ok" : "fail",
+      status: ns.length ? "ok" : isSubdomain || a.length ? "warn" : "fail",
       values: ns,
       note_en: ns.length
         ? "Nameservers are set and answering."
-        : "No nameservers found. The domain may be unregistered, expired, or the registrar delegation is missing.",
+        : isSubdomain
+          ? "No nameservers of its own — normal for a subdomain, it inherits them from the root domain."
+          : a.length
+            ? "No nameservers answered directly, but the domain still resolves. Check the delegation at your registrar."
+            : "No nameservers found. The domain may be unregistered, expired, or the registrar delegation is missing.",
       note_bn: ns.length
         ? "নেমসার্ভার ঠিকভাবে সেট আছে ও সাড়া দিচ্ছে।"
-        : "কোনো নেমসার্ভার পাওয়া যায়নি। ডোমেইনটি রেজিস্টার করা নেই, মেয়াদ শেষ, অথবা রেজিস্ট্রারে নেমসার্ভার সেট করা হয়নি।",
+        : isSubdomain
+          ? "নিজস্ব নেমসার্ভার নেই — সাবডোমেইনের ক্ষেত্রে এটি স্বাভাবিক, মূল ডোমেইন থেকেই নেয়।"
+          : a.length
+            ? "সরাসরি কোনো নেমসার্ভার সাড়া দেয়নি, তবে ডোমেইনটি কাজ করছে। রেজিস্ট্রারে ডেলিগেশন দেখে নিন।"
+            : "কোনো নেমসার্ভার পাওয়া যায়নি। ডোমেইনটি রেজিস্টার করা নেই, মেয়াদ শেষ, অথবা রেজিস্ট্রারে নেমসার্ভার সেট করা হয়নি।",
     });
 
     // A record
