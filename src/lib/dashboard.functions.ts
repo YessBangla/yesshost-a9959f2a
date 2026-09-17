@@ -71,3 +71,23 @@ export const sendLiveChatMessage = createServerFn({ method: "POST" })
     const { postVisitorMessage } = await import("./live-chat.server");
     return postVisitorMessage(data);
   });
+
+export const startCallRecordFn = createServerFn({ method: "POST" })
+  .inputValidator((data: { chatId: string; callerRole: string; startedAt: string }) => {
+    if (!data?.chatId || !data?.callerRole || !data?.startedAt) throw new Error("invalid call data");
+    return data;
+  })
+  .handler(async ({ data }): Promise<{ id: string | null }> => {
+    const { startCallRecord } = await import("./live-chat.server");
+    return startCallRecord(data);
+  });
+
+export const updateCallRecordFn = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string; status: string; durationSeconds?: number; ended?: boolean }) => {
+    if (!data?.id || !data?.status) throw new Error("invalid call update");
+    return data;
+  })
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const { updateCallRecord } = await import("./live-chat.server");
+    return updateCallRecord(data);
+  });

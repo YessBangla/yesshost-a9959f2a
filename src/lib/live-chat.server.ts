@@ -68,3 +68,34 @@ export async function readChatMessages(chatId: string): Promise<ChatMessage[]> {
   if (error) throw new Error(error.message);
   return (data ?? []) as ChatMessage[];
 }
+
+export async function startCallRecord(input: {
+  chatId: string;
+  callerRole: string;
+  startedAt: string;
+}): Promise<{ id: string | null }> {
+  const { data } = await supabaseAdmin
+    .from("call_history")
+    .insert({
+      chat_id: input.chatId,
+      caller_role: input.callerRole,
+      started_at: input.startedAt,
+      status: "ringing",
+    })
+    .select("id")
+    .single();
+  return { id: data?.id ?? null };
+}
+
+export async function updateCallRecord(input: {
+  id: string;
+  status: string;
+  durationSeconds?: number;
+  ended?: boolean;
+}): Promise<{ ok: true }> {
+  const patch: Record<string, unknown> = { status: input.status };
+  if (input.ended) patch["ended_at"] = new Date().toISOString();
+  if (typeof input.durationSeconds === "number") patch["duration_seconds"] = input.durationSeconds;
+  await supabaseAdmin.from("call_history").update(patch).eq("id", input.id);
+  return { ok: true };
+}
