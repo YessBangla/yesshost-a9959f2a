@@ -283,12 +283,6 @@ const DashboardBilling = () => {
     });
   }, [paidInvoicesAll, isBn]);
 
-  if (loading) return <BillingSkeleton />;
-
-  const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
-  const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
-  const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
-
   const filteredInvoices = useMemo(() => {
     const q = invSearch.trim().toLowerCase();
     return invoices.filter(i => {
@@ -306,6 +300,12 @@ const DashboardBilling = () => {
     { value: "paid", label: isBn ? "পরিশোধিত" : "Paid", count: invoices.filter(i => i.status === "paid").length },
     { value: "cancelled", label: isBn ? "বাতিল" : "Cancelled", count: invoices.filter(i => i.status === "cancelled").length },
   ]), [invoices, isBn]);
+
+  if (loading) return <BillingSkeleton />;
+
+  const totalDue = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.amount_bdt), 0);
+  const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
+  const unpaidInvoices = invoices.filter(i => i.status === "unpaid" || i.status === "overdue");
 
   const exportInvoices = () => {
     downloadCsv(
