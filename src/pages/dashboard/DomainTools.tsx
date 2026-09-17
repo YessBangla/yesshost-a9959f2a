@@ -21,6 +21,8 @@ import {
   Ticket,
   ReceiptText,
   ArrowLeft,
+  Download,
+  MessageSquareWarning,
 } from "lucide-react";
 import DomainSearch from "@/components/DomainSearch";
 import EmptyState from "@/components/EmptyState";
