@@ -386,6 +386,13 @@ const DashboardWallet = () => {
               </div>
             );
           })}
+          <DataPagination
+            total={filteredTxns.length}
+            page={txnPage}
+            pageSize={txnPageSize}
+            onPage={setTxnPage}
+            onPageSize={setTxnPageSize}
+          />
         </div>
       )}
 

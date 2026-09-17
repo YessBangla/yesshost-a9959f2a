@@ -397,6 +397,13 @@ const OrdersPage = () => {
               </motion.div>
             );
           })}
+          <DataPagination
+            total={filteredOrders.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={setPageSize}
+          />
         </div>
       )}
     </div>
