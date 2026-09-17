@@ -10,10 +10,9 @@ import {
   useSearch as tsSearch,
   useRouter,
   Link as TSLink,
-  Navigate as TSNavigate,
   Outlet as TSOutlet,
 } from "@tanstack/react-router";
-import { useMemo, useCallback, forwardRef, type ComponentProps, type ReactNode } from "react";
+import { useMemo, useCallback, useEffect, useRef, forwardRef, type ComponentProps, type ReactNode } from "react";
 
 // ---------- shared URL parsing ----------
 
@@ -143,10 +142,20 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 
 
 // ---------- Navigate ----------
+// Navigates once per target. Using TSNavigate directly loops when callers
+// pass a fresh `state` object each render (its effect re-fires forever).
 
 export function Navigate({ to, replace, state }: { to: string; replace?: boolean; state?: unknown }) {
-  const { pathname, search, hash } = parseTo(to);
-  return <TSNavigate to={pathname as never} search={search as never} hash={hash} state={state as never} replace={replace} />;
+  const nav = tsNavigate();
+  const done = useRef<string | null>(null);
+  useEffect(() => {
+    if (done.current === to) return;
+    done.current = to;
+    const { pathname, search, hash } = parseTo(to);
+    nav({ to: pathname as never, search: search as never, hash, state: state as never, replace: replace ?? true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [to]);
+  return null;
 }
 
 // ---------- Outlet ----------

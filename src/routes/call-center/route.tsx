@@ -3,6 +3,7 @@ import CallCenterRoute from "@/components/CallCenterRoute";
 import CallCenterLayout from "@/components/CallCenterLayout";
 
 export const Route = createFileRoute("/call-center")({
+  ssr: false,
   component: CallCenterRouteComponent,
 });
 
