@@ -65,7 +65,7 @@ serve(async (req) => {
 
     // Step 1: Initialize payment
     const initRes = await fetch(
-      `${NAGAD_BASE}/check-out/initialize/${NAGAD_MERCHANT_ID}/${orderId}`,
+      `${cfg.base}/check-out/initialize/${cfg.merchantId}/${orderId}`,
       {
         method: "POST",
         headers: {
@@ -96,7 +96,7 @@ serve(async (req) => {
           success: true,
           data: initData,
           order_id: orderId,
-          is_sandbox: NAGAD_IS_SANDBOX,
+          is_sandbox: cfg.isSandbox,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
