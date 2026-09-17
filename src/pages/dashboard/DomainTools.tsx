@@ -431,6 +431,9 @@ const DashboardDomainTools = () => {
     setTouched({});
     setTransferFormError(null);
     setTransferTicket(null);
+    setFollowUpMessage("");
+    setFollowUpSent(false);
+    setFollowUpError(null);
   };
 
   const runWhois = async (e: React.FormEvent) => {
