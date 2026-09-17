@@ -121,7 +121,7 @@ serve(async (req) => {
           success: true,
           bkash_url: paymentData.bkashURL,
           payment_id: paymentData.paymentID,
-          is_sandbox: BKASH_IS_SANDBOX,
+          is_sandbox: cfg.isSandbox,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );

@@ -7,17 +7,36 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Nagad credentials (replace with live credentials via secrets)
-const NAGAD_MERCHANT_ID = Deno.env.get("NAGAD_MERCHANT_ID") || "";
-const NAGAD_MERCHANT_KEY = Deno.env.get("NAGAD_MERCHANT_PRIVATE_KEY") || "";
-const NAGAD_PG_PUBLIC_KEY = Deno.env.get("NAGAD_PG_PUBLIC_KEY") || "";
-const NAGAD_IS_SANDBOX = !Deno.env.get("NAGAD_MERCHANT_ID");
-const NAGAD_BASE = NAGAD_IS_SANDBOX
-  ? "http://sandbox.mynagad.com:10080/remote-payment-gateway-1.0/api/dfs"
-  : "https://api.mynagad.com/api/dfs";
-
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+// Credentials come from the admin Payment Gateway settings (server-only table),
+// with environment secrets as a fallback.
+async function loadNagadCfg() {
+  const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const { data } = await db
+    .from("payment_gateway_settings")
+    .select("enabled, is_sandbox, credentials")
+    .eq("gateway", "nagad")
+    .maybeSingle();
+
+  const creds = (data?.credentials ?? {}) as Record<string, string>;
+  const merchantId = creds.merchant_id || Deno.env.get("NAGAD_MERCHANT_ID") || "";
+  const merchantKey = creds.merchant_private_key || Deno.env.get("NAGAD_MERCHANT_PRIVATE_KEY") || "";
+  const pgPublicKey = creds.pg_public_key || Deno.env.get("NAGAD_PG_PUBLIC_KEY") || "";
+  const isSandbox = data ? !!data.is_sandbox : !merchantId;
+
+  return {
+    merchantId,
+    merchantKey,
+    pgPublicKey,
+    isSandbox,
+    enabled: (data ? !!data.enabled : !!merchantId) && !!merchantId,
+    base: isSandbox
+      ? "http://sandbox.mynagad.com:10080/remote-payment-gateway-1.0/api/dfs"
+      : "https://api.mynagad.com/api/dfs",
+  };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
