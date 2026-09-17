@@ -578,27 +578,96 @@ const DashboardDomainTools = () => {
 
       {tab === "renew" && renewStep === "done" && renewResult && (
         <div className="glass-card rounded-2xl p-6 space-y-5 max-w-2xl">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-success/10 flex items-center justify-center">
-              <CheckCircle2 className="w-6 h-6 text-success" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${invoicePaid ? "bg-success/10" : "bg-warning/10"}`}>
+                {invoicePaid ? <CheckCircle2 className="w-6 h-6 text-success" /> : <Clock className="w-6 h-6 text-warning" />}
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-foreground">
+                  {invoicePaid
+                    ? bn
+                      ? "পেমেন্ট সম্পন্ন — রিনিউ নিশ্চিত"
+                      : "Payment received — renewal confirmed"
+                    : bn
+                      ? "রিনিউ অনুরোধ নিশ্চিত হয়েছে"
+                      : "Renewal request confirmed"}
+                </h2>
+                <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5 mt-0.5">
+                  <ReceiptText className="w-3.5 h-3.5" /> {renewResult.invoiceNumber} ·{" "}
+                  {invoicePaid
+                    ? `${bn ? "পরিশোধের তারিখ" : "Paid on"} ${fmt(invoiceQuery.data?.paidAt)}`
+                    : `${bn ? "পরিশোধের শেষ তারিখ" : "Due"} ${fmt(renewResult.dueDate)}`}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                      invoicePaid ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
+                    }`}
+                  >
+                    {invoicePaid ? (bn ? "পরিশোধিত" : "Paid") : bn ? "অপেক্ষমাণ" : "Pending"}
+                  </span>
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base font-bold text-foreground">{bn ? "রিনিউ অনুরোধ নিশ্চিত হয়েছে" : "Renewal request confirmed"}</h2>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                <ReceiptText className="w-3.5 h-3.5" /> {renewResult.invoiceNumber} · {bn ? "পরিশোধের শেষ তারিখ" : "Due"} {fmt(renewResult.dueDate)}
-              </p>
-            </div>
+            <button
+              onClick={() => invoiceQuery.refetch()}
+              disabled={invoiceQuery.isFetching}
+              className="text-xs text-muted-foreground flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-secondary/40 disabled:opacity-50 shrink-0"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${invoiceQuery.isFetching ? "animate-spin" : ""}`} />
+              {bn ? "স্ট্যাটাস" : "Status"}
+            </button>
           </div>
+
           <Breakdown lines={renewResult.lines} />
-          <p className="text-[11px] text-muted-foreground">
-            {bn
-              ? "ইনভয়েস পরিশোধ হলে ডোমেইনের মেয়াদ স্বয়ংক্রিয়ভাবে বাড়ানো হবে।"
-              : "Your domains are extended automatically as soon as the invoice is paid."}
-          </p>
+
+          {invoicePaid ? (
+            <div className="rounded-xl border border-success/40 bg-success/5 p-4 space-y-1.5">
+              <p className="text-xs font-bold text-success flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4" /> {bn ? "রিসিপ্ট" : "Receipt"}
+              </p>
+              <div className="text-[11px] text-muted-foreground space-y-0.5">
+                <p>
+                  {bn ? "পরিশোধিত অর্থ" : "Amount paid"}:{" "}
+                  <span className="text-foreground font-semibold">{formatPriceBDT(invoiceQuery.data?.amount ?? 0, lang)}</span>
+                </p>
+                <p>
+                  {bn ? "পেমেন্ট মাধ্যম" : "Payment method"}:{" "}
+                  <span className="text-foreground font-semibold">{invoiceQuery.data?.paymentMethod || (bn ? "ওয়ালেট" : "Wallet")}</span>
+                </p>
+                {invoiceQuery.data?.transaction && (
+                  <p>
+                    {bn ? "ট্রানজ্যাকশন" : "Transaction"}:{" "}
+                    <span className="text-foreground font-mono">{invoiceQuery.data.transaction.id.slice(0, 8)}</span> ·{" "}
+                    {fmtTime(invoiceQuery.data.transaction.at)}
+                  </p>
+                )}
+                <p>{bn ? "আপনার ডোমেইনের মেয়াদ বাড়ানো হয়েছে।" : "Your domain terms have been extended."}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+              <Loader2 className="w-3.5 h-3.5 mt-0.5 animate-spin shrink-0" />
+              {bn
+                ? "পেমেন্ট সম্পন্ন হলে এই পাতাটি স্বয়ংক্রিয়ভাবে রিসিপ্ট দেখাবে (প্রতি ১৫ সেকেন্ডে স্ট্যাটাস যাচাই হচ্ছে)।"
+                : "This page checks the server every 15 seconds and will show your receipt automatically once the payment is completed."}
+            </p>
+          )}
+
           <div className="flex flex-wrap gap-2">
-            <Link to="/dashboard/billing" className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-xs">
-              {bn ? "ইনভয়েস পরিশোধ করুন" : "Pay the invoice"}
-            </Link>
+            {!invoicePaid && (
+              <Link to="/dashboard/billing" className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-xs">
+                {bn ? "ইনভয়েস পরিশোধ করুন" : "Pay the invoice"}
+              </Link>
+            )}
+            <button
+              onClick={downloadRenewalPdf}
+              className={`px-5 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 border ${
+                invoicePaid ? "gradient-primary text-primary-foreground border-transparent" : "bg-secondary/50 text-foreground border-border"
+              }`}
+            >
+              <Download className="w-3.5 h-3.5" />
+              {invoicePaid ? (bn ? "রিসিপ্ট ডাউনলোড (PDF)" : "Download receipt (PDF)") : bn ? "ইনভয়েস ডাউনলোড (PDF)" : "Download invoice (PDF)"}
+            </button>
             <button onClick={resetRenewal} className="bg-secondary/50 text-foreground px-5 py-2.5 rounded-xl font-semibold text-xs border border-border">
               {bn ? "আরও ডোমেইন রিনিউ" : "Renew more domains"}
             </button>
