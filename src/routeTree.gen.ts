@@ -80,6 +80,10 @@ import { Route as PaymentFailRouteImport } from './routes/payment/fail'
 import { Route as PaymentSuccessRouteImport } from './routes/payment/success'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as ThemesIndexRouteImport } from './routes/themes/index'
+import { Route as ApiDashboardBillingRouteImport } from './routes/api/dashboard/billing'
+import { Route as ApiDashboardDomainsRouteImport } from './routes/api/dashboard/domains'
+import { Route as ApiDashboardIncomeRouteImport } from './routes/api/dashboard/income'
+import { Route as ApiDashboardServicesRouteImport } from './routes/api/dashboard/services'
 import { Route as ThemesSlugIndexRouteImport } from './routes/themes/$slug/index'
 import { Route as ThemesSlugDemoRouteImport } from './routes/themes/$slug/demo'
 
@@ -439,6 +443,26 @@ const ThemesIndexRoute = ThemesIndexRouteImport.update({
   path: '/themes/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDashboardBillingRoute = ApiDashboardBillingRouteImport.update({
+  id: '/api/dashboard/billing',
+  path: '/api/dashboard/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardDomainsRoute = ApiDashboardDomainsRouteImport.update({
+  id: '/api/dashboard/domains',
+  path: '/api/dashboard/domains',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardIncomeRoute = ApiDashboardIncomeRouteImport.update({
+  id: '/api/dashboard/income',
+  path: '/api/dashboard/income',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardServicesRoute = ApiDashboardServicesRouteImport.update({
+  id: '/api/dashboard/services',
+  path: '/api/dashboard/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ThemesSlugIndexRoute = ThemesSlugIndexRouteImport.update({
   id: '/themes/$slug/',
   path: '/themes/$slug/',
@@ -522,6 +546,10 @@ export interface FileRoutesByFullPath {
   '/knowledge-base/': typeof KnowledgeBaseIndexRoute
   '/payment/': typeof PaymentIndexRoute
   '/themes/': typeof ThemesIndexRoute
+  '/api/dashboard/billing': typeof ApiDashboardBillingRoute
+  '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
+  '/api/dashboard/income': typeof ApiDashboardIncomeRoute
+  '/api/dashboard/services': typeof ApiDashboardServicesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug/': typeof ThemesSlugIndexRoute
 }
@@ -594,6 +622,10 @@ export interface FileRoutesByTo {
   '/knowledge-base': typeof KnowledgeBaseIndexRoute
   '/payment': typeof PaymentIndexRoute
   '/themes': typeof ThemesIndexRoute
+  '/api/dashboard/billing': typeof ApiDashboardBillingRoute
+  '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
+  '/api/dashboard/income': typeof ApiDashboardIncomeRoute
+  '/api/dashboard/services': typeof ApiDashboardServicesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug': typeof ThemesSlugIndexRoute
 }
@@ -670,6 +702,10 @@ export interface FileRoutesById {
   '/knowledge-base/': typeof KnowledgeBaseIndexRoute
   '/payment/': typeof PaymentIndexRoute
   '/themes/': typeof ThemesIndexRoute
+  '/api/dashboard/billing': typeof ApiDashboardBillingRoute
+  '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
+  '/api/dashboard/income': typeof ApiDashboardIncomeRoute
+  '/api/dashboard/services': typeof ApiDashboardServicesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug/': typeof ThemesSlugIndexRoute
 }
@@ -747,6 +783,10 @@ export interface FileRouteTypes {
     | '/knowledge-base/'
     | '/payment/'
     | '/themes/'
+    | '/api/dashboard/billing'
+    | '/api/dashboard/domains'
+    | '/api/dashboard/income'
+    | '/api/dashboard/services'
     | '/themes/$slug/demo'
     | '/themes/$slug/'
   fileRoutesByTo: FileRoutesByTo
@@ -819,6 +859,10 @@ export interface FileRouteTypes {
     | '/knowledge-base'
     | '/payment'
     | '/themes'
+    | '/api/dashboard/billing'
+    | '/api/dashboard/domains'
+    | '/api/dashboard/income'
+    | '/api/dashboard/services'
     | '/themes/$slug/demo'
     | '/themes/$slug'
   id:
@@ -894,6 +938,10 @@ export interface FileRouteTypes {
     | '/knowledge-base/'
     | '/payment/'
     | '/themes/'
+    | '/api/dashboard/billing'
+    | '/api/dashboard/domains'
+    | '/api/dashboard/income'
+    | '/api/dashboard/services'
     | '/themes/$slug/demo'
     | '/themes/$slug/'
   fileRoutesById: FileRoutesById
@@ -928,6 +976,10 @@ export interface RootRouteChildren {
   KnowledgeBaseIndexRoute: typeof KnowledgeBaseIndexRoute
   PaymentIndexRoute: typeof PaymentIndexRoute
   ThemesIndexRoute: typeof ThemesIndexRoute
+  ApiDashboardBillingRoute: typeof ApiDashboardBillingRoute
+  ApiDashboardDomainsRoute: typeof ApiDashboardDomainsRoute
+  ApiDashboardIncomeRoute: typeof ApiDashboardIncomeRoute
+  ApiDashboardServicesRoute: typeof ApiDashboardServicesRoute
   ThemesSlugDemoRoute: typeof ThemesSlugDemoRoute
   ThemesSlugIndexRoute: typeof ThemesSlugIndexRoute
 }
@@ -1431,6 +1483,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ThemesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/dashboard/billing': {
+      id: '/api/dashboard/billing'
+      path: '/api/dashboard/billing'
+      fullPath: '/api/dashboard/billing'
+      preLoaderRoute: typeof ApiDashboardBillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/domains': {
+      id: '/api/dashboard/domains'
+      path: '/api/dashboard/domains'
+      fullPath: '/api/dashboard/domains'
+      preLoaderRoute: typeof ApiDashboardDomainsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/income': {
+      id: '/api/dashboard/income'
+      path: '/api/dashboard/income'
+      fullPath: '/api/dashboard/income'
+      preLoaderRoute: typeof ApiDashboardIncomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/services': {
+      id: '/api/dashboard/services'
+      path: '/api/dashboard/services'
+      fullPath: '/api/dashboard/services'
+      preLoaderRoute: typeof ApiDashboardServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/themes/$slug/': {
       id: '/themes/$slug/'
       path: '/themes/$slug'
@@ -1592,6 +1672,10 @@ const rootRouteChildren: RootRouteChildren = {
   KnowledgeBaseIndexRoute: KnowledgeBaseIndexRoute,
   PaymentIndexRoute: PaymentIndexRoute,
   ThemesIndexRoute: ThemesIndexRoute,
+  ApiDashboardBillingRoute: ApiDashboardBillingRoute,
+  ApiDashboardDomainsRoute: ApiDashboardDomainsRoute,
+  ApiDashboardIncomeRoute: ApiDashboardIncomeRoute,
+  ApiDashboardServicesRoute: ApiDashboardServicesRoute,
   ThemesSlugDemoRoute: ThemesSlugDemoRoute,
   ThemesSlugIndexRoute: ThemesSlugIndexRoute,
 }
