@@ -120,6 +120,8 @@ const DashboardDomainTools = () => {
   const runRenewal = useServerFn(submitDomainRenewal);
   const runTransfer = useServerFn(submitDomainTransfer);
   const fetchTransferStatus = useServerFn(getTransferTicketStatus);
+  const fetchInvoiceStatus = useServerFn(getRenewalInvoiceStatus);
+  const runFollowUp = useServerFn(sendTransferFollowUp);
 
   const msg = (code: ValidationCode) => validationMessage(code, bn);
 
