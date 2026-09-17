@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import logoWhite from "@/assets/logo-white.png";
 import SEOHead from "@/components/SEOHead";
+import { logApiError } from "@/lib/errorReporting";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -33,7 +34,12 @@ const Login = () => {
         : error.message.includes("Too many requests")
         ? (bn ? "অনেক চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন" : "Too many attempts. Please try again later")
         : error.message;
-      toast({ title: bn ? "লগইন ব্যর্থ" : "Login Failed", description: msg, variant: "destructive" });
+      const entry = logApiError("auth.signInWithPassword", error, { area: "auth", status: (error as { status?: number }).status ?? null });
+      toast({
+        title: bn ? "লগইন ব্যর্থ" : "Login Failed",
+        description: entry ? `${msg} (${entry.code})` : msg,
+        variant: "destructive",
+      });
     }
     else {
       const refCode = localStorage.getItem("yh_ref");
