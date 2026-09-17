@@ -120,6 +120,9 @@ export type TransferResult = {
   ticketNumber: string;
   domain: string;
   quote: RenewalQuote;
+  invoiceId: string;
+  invoiceNumber: string;
+  dueDate: string;
 };
 
 export async function submitTransfer(
@@ -170,7 +173,37 @@ export async function submitTransfer(
     ].join("\n"),
   });
 
-  return { ticketId: ticket.id, ticketNumber: ticket.ticket_number, domain, quote };
+  // Every transfer request also gets a real invoice so the charge shows up in
+  // Billing and the payment history stays server-side.
+  const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
+  const dueDate = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
+  const { data: invoice, error: invErr } = await supabase
+    .from("invoices")
+    .insert({
+      user_id: userId,
+      invoice_number: invoiceNumber,
+      amount_bdt: quote.totals.total,
+      status: "unpaid",
+      due_date: dueDate,
+      description: [
+        "Domain transfer",
+        `${domain} — ${years}y @ ${lines[0]!.unitPrice}/yr = ${lines[0]!.total}`,
+        `Ticket ${ticket.ticket_number}`,
+      ].join("\n"),
+    })
+    .select("id, invoice_number, due_date")
+    .single();
+  if (invErr || !invoice) throw new DomainToolsError("server_error", invErr?.message);
+
+  return {
+    ticketId: ticket.id,
+    ticketNumber: ticket.ticket_number,
+    domain,
+    quote,
+    invoiceId: invoice.id,
+    invoiceNumber: invoice.invoice_number,
+    dueDate: invoice.due_date ?? dueDate,
+  };
 }
 
 export type TransferStage = {
