@@ -38,6 +38,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/reseller": { en: "Reseller", bn: "রিসেলার" },
   "/dashboard/affiliate": { en: "Affiliate", bn: "অ্যাফিলিয়েট" },
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
+  "/dashboard/income": { en: "Income & Payments", bn: "আয় ও পেমেন্ট" },
   "/dashboard/theme-seller": { en: "Sell Themes", bn: "থিম বিক্রি" },
   "/dashboard/troubleshoot": { en: "Troubleshoot", bn: "সমস্যা নির্ণয়" },
   "/dashboard/order-service": { en: "Order New Services", bn: "নতুন সার্ভিস অর্ডার" },

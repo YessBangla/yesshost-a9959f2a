@@ -75,13 +75,8 @@ const DashboardIncome = () => {
           onClick={() =>
             downloadCsv(
               "income-events",
-              (data?.recent ?? []).map((e) => ({
-                reference: e.reference,
-                source: e.source,
-                method: e.method ?? "",
-                amount_bdt: e.amount,
-                date: csvDate(e.at),
-              })),
+              ["Reference", "Source", "Method", "Amount (BDT)", "Date"],
+              (data?.recent ?? []).map((e) => [e.reference, e.source, e.method ?? "", e.amount, csvDate(e.at)]),
             )
           }
           disabled={!data?.recent.length}
