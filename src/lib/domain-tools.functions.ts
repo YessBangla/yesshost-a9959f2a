@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { ValidationCode } from "./domain-pricing";
-import type { RenewalResult, TransferResult, TransferStatus } from "./domain-tools.server";
+import type { InvoicePaymentStatus, RenewalResult, TransferResult, TransferStatus } from "./domain-tools.server";
+export type { InvoicePaymentStatus };
 
 export type ActionFailure = { ok: false; code: ValidationCode | "server_error" };
 export type ActionSuccess<T> = { ok: true; data: T };
@@ -66,4 +67,34 @@ export const getTransferTicketStatus = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<TransferStatus | null> => {
     const { transferStatus } = await import("./domain-tools.server");
     return transferStatus(context.supabase, context.userId, data.ticketNumber);
+  });
+
+export const getRenewalInvoiceStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { invoiceNumber: string }) => {
+    if (!data?.invoiceNumber) throw new Error("invoiceNumber is required");
+    return { invoiceNumber: String(data.invoiceNumber) };
+  })
+  .handler(async ({ data, context }) => {
+    const { invoicePaymentStatus } = await import("./domain-tools.server");
+    return invoicePaymentStatus(context.supabase, context.userId, data.invoiceNumber);
+  });
+
+export const sendTransferFollowUp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { ticketNumber: string; message: string }) => {
+    if (!data?.ticketNumber) throw new Error("ticketNumber is required");
+    return { ticketNumber: String(data.ticketNumber), message: String(data.message ?? "") };
+  })
+  .handler(async ({ data, context }): Promise<ActionResult<{ ticketNumber: string; at: string }>> => {
+    const { transferFollowUp, DomainToolsError } = await import("./domain-tools.server");
+    try {
+      return {
+        ok: true,
+        data: await transferFollowUp(context.supabase, context.userId, data.ticketNumber, data.message),
+      };
+    } catch (e) {
+      if (e instanceof DomainToolsError) return { ok: false, code: e.code };
+      return { ok: false, code: "server_error" };
+    }
   });
