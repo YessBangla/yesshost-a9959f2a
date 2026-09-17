@@ -77,6 +77,17 @@ const DashboardSupportPin = () => {
         </p>
       </div>
 
+      {!pin ? (
+        <div className="glass-card rounded-2xl p-6 text-center">
+          <Skeleton className="w-12 h-12 rounded-2xl mx-auto mb-4" />
+          <Skeleton className="h-12 w-56 mx-auto mb-4" />
+          <Skeleton className="h-3 w-32 mx-auto mb-5" />
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+            <Skeleton className="h-11 w-40" />
+            <Skeleton className="h-11 w-32" />
+          </div>
+        </div>
+      ) : (
       <div className="glass-card rounded-2xl p-6 text-center">
         <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
           <KeyRound className="w-6 h-6 text-primary" />
