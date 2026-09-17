@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { formatAmount } from "@/lib/formatPrice";
 import DataToolbar from "@/components/DataToolbar";
+import DataPagination from "@/components/DataPagination";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
 
 type Order = {
