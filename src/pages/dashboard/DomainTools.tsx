@@ -106,6 +106,10 @@ const DashboardDomainTools = () => {
   const [ack, setAck] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [transferFormError, setTransferFormError] = useState<string | null>(null);
+  const [followUpMessage, setFollowUpMessage] = useState("");
+  const [followUpSending, setFollowUpSending] = useState(false);
+  const [followUpSent, setFollowUpSent] = useState(false);
+  const [followUpError, setFollowUpError] = useState<string | null>(null);
 
   // whois
   const [whoisDomain, setWhoisDomain] = useState("");
