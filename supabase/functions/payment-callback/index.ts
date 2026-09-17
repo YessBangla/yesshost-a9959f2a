@@ -72,6 +72,61 @@ async function createPaymentNotification(
   }
 }
 
+/** Stores a payment-history row and extends domain terms for renewal invoices. */
+async function settlePaidInvoice(
+  supabase: any,
+  invoiceId: string,
+  method: string,
+  transactionId: string,
+) {
+  const { data: invoice } = await supabase
+    .from("invoices")
+    .select("id, user_id, invoice_number, amount_bdt, description, service_id")
+    .eq("id", invoiceId)
+    .single();
+  if (!invoice) return;
+
+  const { data: existing } = await supabase
+    .from("wallet_transactions")
+    .select("id")
+    .eq("user_id", invoice.user_id)
+    .eq("transaction_id", transactionId)
+    .maybeSingle();
+
+  if (!existing) {
+    await supabase.from("wallet_transactions").insert({
+      user_id: invoice.user_id,
+      type: "payment",
+      amount_bdt: Number(invoice.amount_bdt || 0),
+      status: "completed",
+      payment_method: method,
+      transaction_id: transactionId,
+      description: `Invoice ${invoice.invoice_number} paid via ${method}`,
+    });
+  }
+
+  const desc: string = invoice.description || "";
+  if (invoice.service_id && desc.toLowerCase().includes("domain renewal")) {
+    const yearsMatch = desc.match(/(\d+)y @/);
+    const years = yearsMatch ? Number(yearsMatch[1]) : 1;
+    const { data: service } = await supabase
+      .from("services")
+      .select("id, expiry_date")
+      .eq("id", invoice.service_id)
+      .single();
+    if (service) {
+      const base = service.expiry_date && new Date(service.expiry_date) > new Date()
+        ? new Date(service.expiry_date)
+        : new Date();
+      base.setFullYear(base.getFullYear() + years);
+      await supabase
+        .from("services")
+        .update({ status: "active", expiry_date: base.toISOString() })
+        .eq("id", service.id);
+    }
+  }
+}
+
 async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
   const { tran_id, val_id, status, amount } = body;
 
