@@ -25,8 +25,8 @@ const DataPagination = ({
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   useEffect(() => {
-    if (page > totalPages) onPage(totalPages);
-  }, [page, totalPages, onPage]);
+    if (total > 0 && page > totalPages) onPage(totalPages);
+  }, [total, page, totalPages, onPage]);
 
   const pages = useMemo(() => {
     const list: number[] = [];
