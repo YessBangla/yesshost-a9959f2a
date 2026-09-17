@@ -153,6 +153,14 @@ const OrdersPage = () => {
     });
   }, [orders, orderItems, search, statusFilter]);
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  useEffect(() => { setPage(1); }, [search, statusFilter]);
+  const pagedOrders = useMemo(
+    () => filteredOrders.slice((page - 1) * pageSize, page * pageSize),
+    [filteredOrders, page, pageSize]
+  );
+
   const exportOrders = () => {
     downloadCsv(
       "yesshost-orders",

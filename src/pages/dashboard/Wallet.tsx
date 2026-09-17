@@ -124,6 +124,14 @@ const DashboardWallet = () => {
     });
   }, [transactions, txnSearch, txnType]);
 
+  const [txnPage, setTxnPage] = useState(1);
+  const [txnPageSize, setTxnPageSize] = useState(10);
+  useEffect(() => { setTxnPage(1); }, [txnSearch, txnType]);
+  const pagedTxns = useMemo(
+    () => filteredTxns.slice((txnPage - 1) * txnPageSize, txnPage * txnPageSize),
+    [filteredTxns, txnPage, txnPageSize]
+  );
+
   const txnFilters = useMemo(() => ([
     { value: "all", label: isBn ? "সব" : "All", count: transactions.length },
     { value: "deposit", label: isBn ? "জমা" : "Deposit", count: transactions.filter(t => t.type === "deposit").length },
