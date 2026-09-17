@@ -293,7 +293,7 @@ const DashboardOverview = () => {
         >
           {[
             { to: "/hosting-plans", icon: ShoppingBag, label: bn ? "নতুন সার্ভিস অর্ডার" : "Order New Services" },
-            { to: "/domain-pricing", icon: Globe, label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain" },
+            { to: "/domain-search", icon: Globe, label: bn ? "নতুন ডোমেইন রেজিস্টার" : "Register New Domain" },
             { to: "/dashboard/wallet", icon: Wallet, label: bn ? "ফান্ড যোগ করুন" : "Add Fund" },
             { to: "/dashboard/support", icon: HeadphonesIcon, label: bn ? "সাপোর্ট টিকেট" : "Support Ticket" },
           ].map((action) => (
