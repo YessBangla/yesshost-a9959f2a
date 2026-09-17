@@ -391,7 +391,7 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((u) => {
+              {pagedUsers.map((u) => {
                 const isAdmin = u.roles.includes("admin");
                 return (
                   <tr key={u.id} className="border-b border-border/30 hover:bg-secondary/10 transition-colors">
@@ -475,9 +475,16 @@ const AdminUsers = () => {
         </div>
         <div className="px-4 py-3 border-t border-border/30 bg-secondary/10">
           <p className="text-xs text-muted-foreground">
-            {isBn ? `${filtered.length} জন ইউজার দেখাচ্ছে` : `Showing ${filtered.length} users`}
+            {isBn ? `মোট ${filtered.length} জন ইউজার` : `${filtered.length} users total`}
             {search && (isBn ? ` "${search}" এর জন্য` : ` for "${search}"`)}
           </p>
+          <DataPagination
+            total={filtered.length}
+            page={userPage}
+            pageSize={userPageSize}
+            onPage={setUserPage}
+            onPageSize={setUserPageSize}
+          />
         </div>
       </div>
 
