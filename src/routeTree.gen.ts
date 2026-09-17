@@ -44,6 +44,7 @@ import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
 import { Route as AdminKnowledgeBaseRouteImport } from './routes/admin/knowledge-base'
 import { Route as AdminLiveChatRouteImport } from './routes/admin/live-chat'
 import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
+import { Route as AdminPaymentGatewaysRouteImport } from './routes/admin/payment-gateways'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminStaffRouteImport } from './routes/admin/staff'
 import { Route as AdminThemesRouteImport } from './routes/admin/themes'
@@ -264,6 +265,11 @@ const AdminLiveChatRoute = AdminLiveChatRouteImport.update({
 const AdminMarketingRoute = AdminMarketingRouteImport.update({
   id: '/marketing',
   path: '/marketing',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPaymentGatewaysRoute = AdminPaymentGatewaysRouteImport.update({
+  id: '/payment-gateways',
+  path: '/payment-gateways',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminServicesRoute = AdminServicesRouteImport.update({
@@ -528,6 +534,7 @@ export interface FileRoutesByFullPath {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/live-chat': typeof AdminLiveChatRoute
   '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/payment-gateways': typeof AdminPaymentGatewaysRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/themes': typeof AdminThemesRoute
@@ -607,6 +614,7 @@ export interface FileRoutesByTo {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/live-chat': typeof AdminLiveChatRoute
   '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/payment-gateways': typeof AdminPaymentGatewaysRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/themes': typeof AdminThemesRoute
@@ -690,6 +698,7 @@ export interface FileRoutesById {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/live-chat': typeof AdminLiveChatRoute
   '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/payment-gateways': typeof AdminPaymentGatewaysRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/themes': typeof AdminThemesRoute
@@ -774,6 +783,7 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/live-chat'
     | '/admin/marketing'
+    | '/admin/payment-gateways'
     | '/admin/services'
     | '/admin/staff'
     | '/admin/themes'
@@ -853,6 +863,7 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/live-chat'
     | '/admin/marketing'
+    | '/admin/payment-gateways'
     | '/admin/services'
     | '/admin/staff'
     | '/admin/themes'
@@ -935,6 +946,7 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/live-chat'
     | '/admin/marketing'
+    | '/admin/payment-gateways'
     | '/admin/services'
     | '/admin/staff'
     | '/admin/themes'
@@ -1270,6 +1282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMarketingRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/payment-gateways': {
+      id: '/admin/payment-gateways'
+      path: '/payment-gateways'
+      fullPath: '/admin/payment-gateways'
+      preLoaderRoute: typeof AdminPaymentGatewaysRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/services': {
       id: '/admin/services'
       path: '/services'
@@ -1602,6 +1621,7 @@ interface AdminRouteRouteChildren {
   AdminKnowledgeBaseRoute: typeof AdminKnowledgeBaseRoute
   AdminLiveChatRoute: typeof AdminLiveChatRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
+  AdminPaymentGatewaysRoute: typeof AdminPaymentGatewaysRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminStaffRoute: typeof AdminStaffRoute
   AdminThemesRoute: typeof AdminThemesRoute
@@ -1625,6 +1645,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminKnowledgeBaseRoute: AdminKnowledgeBaseRoute,
   AdminLiveChatRoute: AdminLiveChatRoute,
   AdminMarketingRoute: AdminMarketingRoute,
+  AdminPaymentGatewaysRoute: AdminPaymentGatewaysRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminStaffRoute: AdminStaffRoute,
   AdminThemesRoute: AdminThemesRoute,
