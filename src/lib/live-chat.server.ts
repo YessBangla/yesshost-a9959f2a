@@ -93,9 +93,13 @@ export async function updateCallRecord(input: {
   durationSeconds?: number;
   ended?: boolean;
 }): Promise<{ ok: true }> {
-  const patch: Record<string, unknown> = { status: input.status };
-  if (input.ended) patch["ended_at"] = new Date().toISOString();
-  if (typeof input.durationSeconds === "number") patch["duration_seconds"] = input.durationSeconds;
+  const patch: {
+    status: string;
+    ended_at?: string;
+    duration_seconds?: number;
+  } = { status: input.status };
+  if (input.ended) patch.ended_at = new Date().toISOString();
+  if (typeof input.durationSeconds === "number") patch.duration_seconds = input.durationSeconds;
   await supabaseAdmin.from("call_history").update(patch).eq("id", input.id);
   return { ok: true };
 }
