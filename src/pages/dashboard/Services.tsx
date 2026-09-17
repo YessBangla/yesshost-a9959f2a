@@ -50,7 +50,7 @@ const DashboardServices = () => {
   });
 
   useEffect(() => {
-    if (servicesQuery.error) logApiError("dashboard.services", servicesQuery.error, { area: "services" });
+    if (servicesQuery.error) logApiError("dashboard.services", servicesQuery.error, { area: "api" });
   }, [servicesQuery.error]);
 
   const services: Tables<"services">[] = servicesQuery.data?.services ?? [];

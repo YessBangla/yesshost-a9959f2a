@@ -28,7 +28,7 @@ const DashboardIncome = () => {
   });
 
   useEffect(() => {
-    if (incomeQuery.error) logApiError("dashboard.income", incomeQuery.error, { area: "income" });
+    if (incomeQuery.error) logApiError("dashboard.income", incomeQuery.error, { area: "api" });
   }, [incomeQuery.error]);
 
   const data = incomeQuery.data;
