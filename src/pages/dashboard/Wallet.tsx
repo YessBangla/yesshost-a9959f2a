@@ -344,7 +344,7 @@ const DashboardWallet = () => {
         </div>
       ) : (
         <div className="space-y-2.5">
-          {filteredTxns.map(txn => {
+          {pagedTxns.map(txn => {
             const sc = statusConfig[txn.status] || statusConfig.pending;
             const tl = typeLabels[txn.type] || typeLabels.deposit;
             const TypeIcon = tl.icon;

@@ -250,7 +250,7 @@ const OrdersPage = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((order, i) => {
+          {pagedOrders.map((order, i) => {
             const sc = statusConfig[order.status] || statusConfig.pending;
             const isExpanded = expandedOrder === order.id;
             const items = orderItems[order.id] || [];
