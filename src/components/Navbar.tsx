@@ -189,12 +189,12 @@ const Navbar = () => {
         : "border-border/40"
     }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
-        <Link to="/" className="flex items-center shrink-0 mr-6 lg:mr-10">
+        <Link to="/" className="flex items-center shrink-0 mr-4 xl:mr-8">
           <img src={logoWhite} alt="Yess Host" className="h-8 lg:h-10" />
         </Link>
 
         {/* Desktop */}
-        <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
+        <div className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-0 xl:gap-0.5">
           {navLinks.map((link, idx) => (
             <div
               key={link.label}
@@ -205,7 +205,7 @@ const Navbar = () => {
               {isInternal(link.href) ? (
                 <Link
                   to={link.href}
-                  className={`flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-lg text-[15px] font-semibold hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1 px-2 xl:px-3 py-2 rounded-lg text-[14px] xl:text-[15px] font-semibold hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
                     link.blink ? "text-primary animate-pulse" : "text-muted-foreground"
                   }`}
                 >
@@ -215,7 +215,7 @@ const Navbar = () => {
               ) : (
                 <a
                   href={link.href}
-                  className={`flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-lg text-[15px] font-semibold hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1 px-2 xl:px-3 py-2 rounded-lg text-[14px] xl:text-[15px] font-semibold hover:text-foreground hover:bg-secondary/60 transition-all whitespace-nowrap ${
                     link.blink ? "text-primary animate-pulse" : "text-muted-foreground"
                   }`}
                 >
@@ -234,7 +234,7 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="hidden lg:flex items-center gap-2 shrink-0">
+        <div className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0 ml-2">
           <button
             onClick={() => setLang(lang === "bn" ? "en" : "bn")}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2.5 py-2 rounded-lg hover:bg-secondary/60"
@@ -256,17 +256,17 @@ const Navbar = () => {
           </button>
           {user ? (
             <Link to="/dashboard"
-              className="text-sm px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+              className="text-sm px-4 xl:px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
               {tr("nav.dashboard")}
             </Link>
           ) : (
             <>
               <Link to="/login"
-                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl font-semibold border border-border hover:bg-secondary/60 text-foreground transition-all">
+                className="flex items-center gap-2 text-sm px-3 xl:px-4 py-2.5 rounded-xl font-semibold border border-border hover:bg-secondary/60 text-foreground transition-all">
                 <LogIn className="w-4 h-4" /> {tr("nav.login")}
               </Link>
               <Link to="/signup"
-                className="text-sm px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                className="text-sm px-4 xl:px-5 py-2.5 rounded-xl font-semibold gradient-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20">
                 {tr("nav.signup")}
               </Link>
             </>
