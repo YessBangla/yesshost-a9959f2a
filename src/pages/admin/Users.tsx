@@ -254,6 +254,8 @@ const AdminUsers = () => {
     return matchSearch && matchRole;
   });
 
+  const pagedUsers = filtered.slice((userPage - 1) * userPageSize, userPage * userPageSize);
+
   const stats = {
     total: users.length,
     admins: users.filter(u => u.roles.includes("admin")).length,

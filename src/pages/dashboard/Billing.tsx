@@ -336,6 +336,22 @@ const DashboardBilling = () => {
     });
   }, [invoices, invSearch, invStatus]);
 
+  const [invPage, setInvPage] = useState(1);
+  const [invPageSize, setInvPageSize] = useState(10);
+  useEffect(() => { setInvPage(1); }, [invSearch, invStatus]);
+  const pagedInvoices = useMemo(
+    () => filteredInvoices.slice((invPage - 1) * invPageSize, invPage * invPageSize),
+    [filteredInvoices, invPage, invPageSize]
+  );
+
+  const [histPage, setHistPage] = useState(1);
+  const [histPageSize, setHistPageSize] = useState(10);
+  useEffect(() => { setHistPage(1); }, [dateFrom, dateTo, filterMethod]);
+  const pagedHistory = useMemo(
+    () => paidInvoices.slice((histPage - 1) * histPageSize, histPage * histPageSize),
+    [paidInvoices, histPage, histPageSize]
+  );
+
   const invoiceFilters = useMemo(() => ([
     { value: "all", label: isBn ? "সব" : "All", count: invoices.length },
     { value: "unpaid", label: isBn ? "অপরিশোধিত" : "Unpaid", count: invoices.filter(i => i.status === "unpaid").length },
