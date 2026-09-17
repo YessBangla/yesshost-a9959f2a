@@ -26,6 +26,7 @@ interface NavLink {
   href: string;
   children?: NavChild[];
   mega?: boolean;
+  minor?: boolean;
   cta?: { label: string; href: string };
   blink?: boolean;
 }
@@ -109,8 +110,8 @@ const Navbar = () => {
         { label: tr("nav.graphicsDesign"), href: "/services/graphics-design", icon: Palette, desc: isBn ? "লোগো, ব্যানার ও গ্রাফিক্স" : "Logo, banner & graphics" },
       ],
     },
-    { label: tr("nav.themes"), href: "/themes", blink: true },
-    { label: isBn ? "চ্যাট রুম" : "Chat Rooms", href: "/chat-rooms" },
+    { label: tr("nav.themes"), href: "/themes", blink: true, minor: true },
+    { label: isBn ? "চ্যাট রুম" : "Chat Rooms", href: "/chat-rooms", minor: true },
   ];
 
   const isInternal = (href: string) => href.startsWith("/");
@@ -198,7 +199,7 @@ const Navbar = () => {
           {navLinks.map((link, idx) => (
             <div
               key={link.label}
-              className="relative"
+              className={`relative ${link.minor ? "hidden xl:block" : ""}`}
               onMouseEnter={() => link.children && setActiveDropdown(link.label)}
               onMouseLeave={() => setActiveDropdown(null)}
             >
