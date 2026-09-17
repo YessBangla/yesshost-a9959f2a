@@ -70,18 +70,19 @@ serve(async (req) => {
   try {
     const { invoice_id, amount, payer_reference, callback_url } = await req.json();
 
-    if (!BKASH_APP_KEY) {
+    const cfg = await loadBkashCfg();
+    if (!cfg.enabled) {
       return new Response(
         JSON.stringify({
           error: "bKash credentials not configured",
           is_sandbox: true,
-          message: "bKash পেমেন্ট গেটওয়ে এখনো কনফিগার করা হয়নি। লাইভ credentials যোগ করুন।",
+          message: "bKash পেমেন্ট গেটওয়ে এখনো চালু হয়নি। অ্যাডমিন প্যানেলের পেমেন্ট গেটওয়ে সেটিংসে তথ্য দিন।",
         }),
         { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const token = await getToken();
+    const token = await getToken(cfg);
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Failed to get bKash token" }),
@@ -89,12 +90,12 @@ serve(async (req) => {
       );
     }
 
-    const paymentRes = await fetch(`${BKASH_BASE}/tokenized/checkout/create`, {
+    const paymentRes = await fetch(`${cfg.base}/tokenized/checkout/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: token,
-        "X-APP-Key": BKASH_APP_KEY,
+        "X-APP-Key": cfg.appKey,
       },
       body: JSON.stringify({
         mode: "0011",
