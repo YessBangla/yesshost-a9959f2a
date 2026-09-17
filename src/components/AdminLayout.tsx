@@ -121,6 +121,7 @@ const AdminLayout = () => {
       items: [
         { title: bn ? "অ্যানালিটিক্স" : "Analytics", url: "/admin/analytics", icon: BarChart3 },
         { title: bn ? "হিসাব/ফিন্যান্স" : "Finance", url: "/admin/finance", icon: Wallet },
+        { title: bn ? "পেমেন্ট গেটওয়ে" : "Payment Gateways", url: "/admin/payment-gateways", icon: CreditCard },
         { title: bn ? "মার্কেটিং" : "Marketing", url: "/admin/marketing", icon: Megaphone },
         { title: bn ? "স্টাফ" : "Staff", url: "/admin/staff", icon: UserCog },
       ],
