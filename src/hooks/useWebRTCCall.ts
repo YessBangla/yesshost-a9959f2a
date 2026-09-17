@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { startCallRecordFn, updateCallRecordFn } from "@/lib/dashboard.functions";
 
 export type CallStatus = "idle" | "requesting" | "ringing" | "connected" | "ended";
 
@@ -18,6 +20,8 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const callRecordIdRef = useRef<string | null>(null);
+  const startRecord = useServerFn(startCallRecordFn);
+  const updateRecord = useServerFn(updateCallRecordFn);
   const callStartTimeRef = useRef<string | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -45,25 +49,25 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
   const saveCallStart = useCallback(async () => {
     if (!chatId) return;
     callStartTimeRef.current = new Date().toISOString();
-    const { data } = await supabase.from("call_history").insert({
-      chat_id: chatId,
-      caller_role: role,
-      started_at: callStartTimeRef.current,
-      status: "ringing",
-    }).select("id").single();
-    if (data) callRecordIdRef.current = data.id;
-  }, [chatId, role]);
+    const { id } = await startRecord({
+      data: { chatId, callerRole: role, startedAt: callStartTimeRef.current },
+    });
+    if (id) callRecordIdRef.current = id;
+  }, [chatId, role, startRecord]);
 
   const saveCallEnd = useCallback(async (finalStatus: string, finalDuration: number) => {
     if (!callRecordIdRef.current) return;
-    await supabase.from("call_history").update({
-      ended_at: new Date().toISOString(),
-      duration_seconds: finalDuration,
-      status: finalStatus,
-    }).eq("id", callRecordIdRef.current);
+    await updateRecord({
+      data: {
+        id: callRecordIdRef.current,
+        status: finalStatus,
+        durationSeconds: finalDuration,
+        ended: true,
+      },
+    });
     callRecordIdRef.current = null;
     callStartTimeRef.current = null;
-  }, []);
+  }, [updateRecord]);
 
   // Create peer connection
   const createPC = useCallback(() => {
@@ -215,7 +219,7 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     setCallStatus("connected");
     // Update record status to connected
     if (callRecordIdRef.current) {
-      await supabase.from("call_history").update({ status: "connected" }).eq("id", callRecordIdRef.current);
+      await updateRecord({ data: { id: callRecordIdRef.current, status: "connected" } });
     }
   }, [chatId, createPC]);
 
