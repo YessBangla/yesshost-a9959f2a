@@ -52,21 +52,34 @@ const LiveChatWidget = () => {
     localStorage.setItem(CHAT_OPEN_KEY, open ? "true" : "false");
   }, [open]);
 
-  // Restore chat from localStorage
+  // Restore chat from localStorage; history is loaded through the server so the
+  // transcript is identical no matter which domain the widget is served from.
   useEffect(() => {
     const savedId = localStorage.getItem(CHAT_STORAGE_KEY);
     if (savedId) {
       setChatId(savedId);
       setStarted(true);
-      // Load existing messages
-      supabase
-        .from("live_chat_messages")
-        .select("*")
-        .eq("chat_id", savedId)
-        .order("created_at")
-        .then(({ data }) => setMessages((data as Message[]) || []));
     }
   }, []);
+
+  const loadMessages = useServerFn(getLiveChatMessages);
+  const historyQuery = useQuery({
+    queryKey: ["live-chat", "messages", chatId],
+    queryFn: () => loadMessages({ data: { chatId: chatId as string } }),
+    enabled: !!chatId,
+    staleTime: 10_000,
+  });
+
+  // Hydrate the server-rendered transcript into local state before the first
+  // interaction, then let realtime append to it.
+  const serverMessages = historyQuery.data?.messages;
+  useEffect(() => {
+    if (!serverMessages) return;
+    setMessages((prev) => {
+      const seen = new Set(serverMessages.map((m) => m.id));
+      return [...serverMessages, ...prev.filter((m) => !seen.has(m.id))];
+    });
+  }, [serverMessages]);
 
   // Realtime subscription + typing indicator
   useEffect(() => {
