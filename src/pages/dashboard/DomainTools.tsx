@@ -1099,7 +1099,7 @@ const DashboardDomainTools = () => {
                     </p>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>{transferInvoice.number}</span>
-                      <span className="font-semibold text-foreground">{formatPrice(transferInvoice.amount, lang)}</span>
+                      <span className="font-semibold text-foreground">{formatPriceBDT(transferInvoice.amount, lang)}</span>
                     </div>
                     <p className="text-[11px] text-muted-foreground">
                       {bn
