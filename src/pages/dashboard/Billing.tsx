@@ -23,6 +23,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import DataToolbar from "@/components/DataToolbar";
+import DataPagination from "@/components/DataPagination";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
