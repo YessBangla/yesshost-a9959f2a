@@ -126,6 +126,8 @@ const AdminTickets = () => {
     return matchSearch && matchStatus && matchPriority;
   });
 
+  useEffect(() => { setPage(1); }, [search, statusFilter, priorityFilter]);
+
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" });

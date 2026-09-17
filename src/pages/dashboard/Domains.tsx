@@ -41,6 +41,8 @@ const DashboardDomains = () => {
     !search || (d.domain || d.name).toLowerCase().includes(search.toLowerCase())
   );
 
+  useEffect(() => { setPage(1); }, [search]);
+
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const isExpiringSoon = (date: string | null) => {

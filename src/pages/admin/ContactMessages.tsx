@@ -77,6 +77,8 @@ const ContactMessages = () => {
     return matchSearch && matchFilter;
   });
 
+  useEffect(() => { setPage(1); }, [search, filter]);
+
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const unreadCount = messages.filter(m => !m.is_read).length;

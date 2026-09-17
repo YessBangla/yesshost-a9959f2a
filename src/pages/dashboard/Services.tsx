@@ -65,6 +65,8 @@ const DashboardServices = () => {
     return matchSearch && matchStatus;
   });
 
+  useEffect(() => { setPage(1); }, [search, filterStatus]);
+
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const statusCounts = services.reduce((acc, s) => {
