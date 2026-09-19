@@ -150,15 +150,16 @@ const WhyChooseUs = () => {
           className="text-center mb-6 md:mb-10"
         >
           <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
-            {lang === "bn" ? "কেন আমরা" : "Why Us"}
+            {(bn ? headingMeta.badge_bn : headingMeta.badge_en) || (bn ? "কেন আমরা" : "Why Us")}
           </span>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
-            {lang === "bn" ? "কেন Yess Host বেছে নেবেন?" : "Why Choose Yess Host?"}
+            {(bn ? heading?.title_bn : heading?.title_en) || (bn ? "কেন Yess Host বেছে নেবেন?" : "Why Choose Yess Host?")}
           </h2>
           <p className="text-muted-foreground text-sm max-w-lg mx-auto">
-            {lang === "bn"
-              ? "বাংলাদেশের সবচেয়ে নির্ভরযোগ্য ও দ্রুতগতির হোস্টিং সেবা"
-              : "Bangladesh's most reliable and fastest hosting service"}
+            {(bn ? heading?.content_bn : heading?.content_en) ||
+              (bn
+                ? "বাংলাদেশের সবচেয়ে নির্ভরযোগ্য ও দ্রুতগতির হোস্টিং সেবা"
+                : "Bangladesh's most reliable and fastest hosting service")}
           </p>
         </motion.div>
 
