@@ -184,6 +184,11 @@ const DashboardDomains = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Bills & payments from the central accounts ledger */}
+                <div className="mt-3">
+                  <ServiceInvoices invoices={invoices.filter(inv => inv.service_id === d.id)} compact />
+                </div>
               </motion.div>
             );
           })}
