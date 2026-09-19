@@ -86,15 +86,26 @@ const CallCenterTickets = () => {
   const filtered = tickets.filter((ticket) => {
     const query = search.toLowerCase();
     const active = ["open", "in_progress"].includes(ticket.status);
-    return (status === "all" || (status === "active" ? active : ticket.status === status)) && (priority === "all" || ticket.priority === priority) && [ticket.subject, ticket.ticket_number, ticket.user_name].some((value) => value?.toLowerCase().includes(query));
+    const statusOk = status === "all"
+      ? true
+      : status === "active" ? active
+      : status === "breached" ? ticketSla(ticket, bn).breached && active
+      : status === "unassigned" ? !ticket.assigned_to && active
+      : status === "mine" ? ticket.assigned_to === user?.id
+      : ticket.status === status;
+    return statusOk && (priority === "all" || ticket.priority === priority) && [ticket.subject, ticket.ticket_number, ticket.user_name].some((value) => value?.toLowerCase().includes(query));
   });
   const exportCsv = () => {
     downloadCsv(`tickets-${csvDate(new Date().toISOString())}`,
-      [bn ? "টিকেট" : "Ticket", bn ? "বিষয়" : "Subject", bn ? "গ্রাহক" : "Customer", bn ? "বিভাগ" : "Department", bn ? "অগ্রাধিকার" : "Priority", bn ? "স্ট্যাটাস" : "Status", bn ? "উত্তর" : "Replies", bn ? "সর্বশেষ আপডেট" : "Last update"],
-      filtered.map((ticket) => [ticket.ticket_number, ticket.subject, ticket.user_name || "", ticket.department, ticket.priority, ticket.status, ticket.replies.length, csvDate(ticket.updated_at)]));
+      [bn ? "টিকেট" : "Ticket", bn ? "বিষয়" : "Subject", bn ? "গ্রাহক" : "Customer", bn ? "বিভাগ" : "Department", bn ? "অগ্রাধিকার" : "Priority", bn ? "স্ট্যাটাস" : "Status", bn ? "উত্তর" : "Replies", bn ? "প্রথম উত্তরের সময় (মিনিট)" : "First response (min)", bn ? "SLA লক্ষ্য (মিনিট)" : "SLA target (min)", bn ? "SLA অতিক্রম" : "SLA breached", bn ? "সর্বশেষ আপডেট" : "Last update"],
+      filtered.map((ticket) => { const sla = ticketSla(ticket, bn); return [ticket.ticket_number, ticket.subject, ticket.user_name || "", ticket.department, ticket.priority, ticket.status, ticket.replies.length, sla.responseMinutes ?? "", slaMinutes(ticket.priority), sla.breached ? (bn ? "হ্যাঁ" : "Yes") : (bn ? "না" : "No"), csvDate(ticket.updated_at)]; }));
   };
   const highPriority = tickets.filter((ticket) => ["high", "urgent"].includes(ticket.priority) && ["open", "in_progress"].includes(ticket.status)).length;
-  const stale = tickets.filter((ticket) => ["open", "in_progress"].includes(ticket.status) && Date.now() - new Date(ticket.updated_at).getTime() > 24 * 60 * 60 * 1000).length;
+  const breachedCount = tickets.filter((ticket) => ["open", "in_progress"].includes(ticket.status) && ticketSla(ticket, bn).breached).length;
+  const answered = tickets.filter((ticket) => ticket.first_response_at);
+  const avgResponse = answered.length
+    ? Math.round(answered.reduce((sum, ticket) => sum + (ticketSla(ticket, bn).responseMinutes || 0), 0) / answered.length)
+    : 0;
   if (loading) return <div className="grid gap-4 lg:grid-cols-[340px_1fr]"><div className="staff-panel p-4"><Skeleton className="mb-4 h-10" />{[0,1,2,3,4].map((row) => <Skeleton key={row} className="mb-3 h-16" />)}</div><div className="staff-panel p-4"><Skeleton className="h-full min-h-96" /></div></div>;
 
   return (
