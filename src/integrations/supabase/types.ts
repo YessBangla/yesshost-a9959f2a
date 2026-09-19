@@ -1121,7 +1121,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           address: string | null
+          approved_at: string | null
+          approved_by: string | null
           avatar_url: string | null
           city: string | null
           company_name: string | null
@@ -1137,7 +1140,10 @@ export type Database = {
           vat_id: string | null
         }
         Insert: {
+          account_status?: string
           address?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           avatar_url?: string | null
           city?: string | null
           company_name?: string | null
@@ -1153,7 +1159,10 @@ export type Database = {
           vat_id?: string | null
         }
         Update: {
+          account_status?: string
           address?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           avatar_url?: string | null
           city?: string | null
           company_name?: string | null
