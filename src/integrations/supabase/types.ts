@@ -1607,6 +1607,48 @@ export type Database = {
         }
         Relationships: []
       }
+      theme_seller_profiles: {
+        Row: {
+          bio_bn: string | null
+          bio_en: string | null
+          created_at: string
+          display_name: string
+          id: string
+          is_public: boolean
+          logo_url: string | null
+          slug: string
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          bio_bn?: string | null
+          bio_en?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          is_public?: boolean
+          logo_url?: string | null
+          slug: string
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          bio_bn?: string | null
+          bio_en?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_public?: boolean
+          logo_url?: string | null
+          slug?: string
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       themes: {
         Row: {
           approval_note: string | null
