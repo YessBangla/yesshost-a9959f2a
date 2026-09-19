@@ -60,12 +60,15 @@ serve(async (req) => {
     const token = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
     const { data: auth } = token ? await authClient.auth.getUser(token) : { data: { user: null } };
     const source = is_wallet_deposit ? "wallet_transactions" : "invoices";
-    const amountField = is_wallet_deposit ? "amount_bdt" : "amount_bdt";
-    let payableQuery = authClient.from(source).select(`id,user_id,status,${amountField},share_token_hash,share_expires_at`).eq("id", invoice_id);
+    const fields = is_wallet_deposit
+      ? "id,user_id,status,amount_bdt"
+      : "id,user_id,status,amount_bdt,share_token_hash,share_expires_at";
+    let payableQuery = authClient.from(source).select(fields).eq("id", invoice_id);
     if (auth.user) payableQuery = payableQuery.eq("user_id", auth.user.id);
     payableQuery = is_wallet_deposit ? payableQuery.eq("status", "pending") : payableQuery.in("status", ["unpaid", "overdue"]);
     const { data: payable } = await payableQuery.maybeSingle();
-    const validShareToken = !is_wallet_deposit && !!share_token && payable?.share_token_hash === await sha256Hex(String(share_token)) && !!payable.share_expires_at && new Date(payable.share_expires_at).getTime() > Date.now();
+    const shareable = payable as { share_token_hash?: string | null; share_expires_at?: string | null } | null;
+    const validShareToken = !is_wallet_deposit && !!share_token && shareable?.share_token_hash === await sha256Hex(String(share_token)) && !!shareable.share_expires_at && new Date(shareable.share_expires_at).getTime() > Date.now();
     if (!auth.user && !validShareToken) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const amount = Number(payable?.amount_bdt);
     if (!payable || !Number.isFinite(amount) || amount <= 0) return new Response(JSON.stringify({ error: "Payable record not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });

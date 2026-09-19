@@ -201,6 +201,7 @@ async function settlePaidInvoice(
       payment_method: method,
       transaction_id: transactionId,
       description: `Invoice ${invoice.invoice_number} paid via ${method}`,
+      invoice_id: invoice.id,
     });
   }
 
@@ -215,6 +216,10 @@ async function settlePaidInvoice(
       .from("orders")
       .update({ payment_status: "paid", paid_at: paidAt, payment_method: method, status: "processing" })
       .eq("id", order.id);
+    const { error: provisionError } = await supabase.rpc("provision_order", { _order_id: order.id });
+    if (provisionError) {
+      console.error(`[payment-callback] provisioning failed for order ${order.id}:`, provisionError.message);
+    }
   }
 
   const desc: string = invoice.description || "";
