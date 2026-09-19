@@ -229,6 +229,71 @@ export type Database = {
           },
         ]
       }
+      cash_bank_transactions: {
+        Row: {
+          account_number: string | null
+          amount_bdt: number
+          bank_name: string | null
+          client_user_id: string | null
+          contra_code: string
+          counterparty: string | null
+          created_at: string
+          created_by: string | null
+          direction: string
+          id: string
+          invoice_id: string | null
+          method: string
+          note: string | null
+          reference: string | null
+          txn_date: string
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          amount_bdt: number
+          bank_name?: string | null
+          client_user_id?: string | null
+          contra_code?: string
+          counterparty?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction: string
+          id?: string
+          invoice_id?: string | null
+          method: string
+          note?: string | null
+          reference?: string | null
+          txn_date?: string
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          amount_bdt?: number
+          bank_name?: string | null
+          client_user_id?: string | null
+          contra_code?: string
+          counterparty?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction?: string
+          id?: string
+          invoice_id?: string | null
+          method?: string
+          note?: string | null
+          reference?: string | null
+          txn_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_bank_transactions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_room_members: {
         Row: {
           created_at: string
