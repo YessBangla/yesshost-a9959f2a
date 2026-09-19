@@ -170,6 +170,45 @@ const AdminFinance = () => {
       <aside className="staff-panel p-4"><p className="staff-eyebrow">{bn ? "অপারেশনাল সারাংশ" : "OPERATING POSITION"}</p><div className="mt-4 space-y-4"><div><p className="text-xs text-muted-foreground">{bn ? "ওয়ালেট জমা" : "Completed wallet deposits"}</p><p className="mt-1 text-xl font-semibold text-foreground">{money(sum(wallet.filter((item) => item.type === "deposit" && item.status === "completed")))}</p></div><div className="border-t border-border pt-4"><p className="text-xs text-muted-foreground">{bn ? "অ্যাফিলিয়েট দায়" : "Affiliate liability"}</p><p className="mt-1 text-xl font-semibold text-foreground">{money(liability)}</p></div><div className="border-t border-border pt-4"><p className="text-xs text-muted-foreground">{bn ? "অযাচাইকৃত পেমেন্ট" : "Unverified payment events"}</p><p className="mt-1 text-xl font-semibold text-destructive">{events.filter((item) => !item.verified || !item.settled).length}</p></div></div></aside>
     </div>
 
+    <section className="staff-panel p-4">
+      <div className="mb-4">
+        <h2 className="font-display font-semibold text-foreground">{bn ? "অপারেটিং খরচ" : "Operating expenses"}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{bn ? "সার্ভার, বেতন, মার্কেটিং ও অন্যান্য ব্যয় যোগ করুন — মুনাফার হিসাব স্বয়ংক্রিয়ভাবে আপডেট হবে" : "Record server, salary, marketing and other costs — profit figures update automatically"}</p>
+      </div>
+      <div className="grid gap-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_120px_150px_minmax(0,1fr)_auto]">
+        <Input value={expenseForm.title} onChange={(e) => setExpenseForm({ ...expenseForm, title: e.target.value })} placeholder={bn ? "খরচের শিরোনাম" : "Expense title"} className="h-11" />
+        <Select value={expenseForm.category} onValueChange={(value) => setExpenseForm({ ...expenseForm, category: value })}>
+          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+          <SelectContent>{expenseCategories.map((item) => <SelectItem key={item.value} value={item.value}>{bn ? item.bn : item.en}</SelectItem>)}</SelectContent>
+        </Select>
+        <Input value={expenseForm.amount} onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })} inputMode="decimal" placeholder={bn ? "টাকা" : "Amount"} className="h-11" />
+        <Input type="date" value={expenseForm.date} onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })} className="h-11" />
+        <Input value={expenseForm.vendor} onChange={(e) => setExpenseForm({ ...expenseForm, vendor: e.target.value })} placeholder={bn ? "সরবরাহকারী (ঐচ্ছিক)" : "Vendor (optional)"} className="h-11" />
+        <Button className="h-11" onClick={() => void addExpense()} disabled={savingExpense}><Plus className="size-4" />{bn ? "যোগ" : "Add"}</Button>
+      </div>
+      {loading ? <div className="mt-4"><StaffLoading rows={3} /></div> : !expenses.length ? (
+        <StaffEmpty icon={Receipt} title={bn ? "কোনো খরচ যোগ করা হয়নি" : "No expenses recorded"} description={bn ? "উপরের ফর্ম দিয়ে প্রথম খরচটি যোগ করুন।" : "Add your first operating cost with the form above."} />
+      ) : (
+        <div className="mt-4 divide-y divide-border">
+          {expenses.slice(0, 10).map((item) => (
+            <div key={item.id} className="flex items-center justify-between gap-3 py-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-foreground">{item.title}</p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  {(expenseCategories.find((c) => c.value === item.category) ? (bn ? expenseCategories.find((c) => c.value === item.category)!.bn : expenseCategories.find((c) => c.value === item.category)!.en) : item.category)}
+                  {item.vendor ? ` · ${item.vendor}` : ""} · {new Date(item.expense_date).toLocaleDateString(bn ? "bn-BD" : "en-US", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-semibold tabular-nums text-foreground">{money(Number(item.amount_bdt))}</span>
+                <Button variant="ghost" size="icon" onClick={() => void removeExpense(item.id)} aria-label={bn ? "মুছুন" : "Delete"}><Trash2 className="size-4 text-destructive" /></Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+
     <section className="staff-panel overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-border p-3 lg:flex-row lg:items-center"><StaffSearch value={search} onChange={setSearch} placeholder={bn ? "রেফারেন্স, মাধ্যম বা পরিমাণ খুঁজুন" : "Search reference, method or amount"} /><div className="grid grid-cols-2 gap-2 sm:flex"><Select value={source} onValueChange={setSource}><SelectTrigger className="h-11 min-w-36"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{bn ? "সব উৎস" : "All sources"}</SelectItem><SelectItem value="invoice">{bn ? "ইনভয়েস" : "Invoices"}</SelectItem><SelectItem value="wallet">{bn ? "ওয়ালেট" : "Wallet"}</SelectItem><SelectItem value="payment">{bn ? "পেমেন্ট" : "Payments"}</SelectItem></SelectContent></Select><Select value={status} onValueChange={setStatus}><SelectTrigger className="h-11 min-w-36"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{bn ? "সব স্ট্যাটাস" : "All statuses"}</SelectItem><SelectItem value="reconciled">{bn ? "রিকনসাইলড" : "Reconciled"}</SelectItem><SelectItem value="unreconciled">{bn ? "অমিল/অপেক্ষমাণ" : "Needs review"}</SelectItem><SelectItem value="paid">{bn ? "পরিশোধিত" : "Paid"}</SelectItem><SelectItem value="unpaid">{bn ? "অপরিশোধিত" : "Unpaid"}</SelectItem></SelectContent></Select></div></div>
       {loading ? <div className="p-4"><StaffLoading rows={7} /></div> : error && !rows.length ? <StaffEmpty icon={AlertTriangle} title={bn ? "তথ্য পাওয়া যায়নি" : "Finance data unavailable"} description={error} /> : !paged.length ? <StaffEmpty icon={SearchX} title={bn ? "কোনো লেনদেন পাওয়া যায়নি" : "No transactions found"} description={bn ? "সার্চ বা ফিল্টার পরিবর্তন করুন।" : "Try changing the search or filters."} /> : <div className="divide-y divide-border">{paged.map((row) => <article key={row.key} className="grid gap-3 p-4 md:grid-cols-[minmax(0,1fr)_130px_130px_130px] md:items-center"><div className="min-w-0"><div className="flex items-center gap-2"><p className="truncate font-semibold text-foreground">{row.reference}</p><span className="rounded-md bg-secondary px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">{row.source}</span></div><p className="mt-1 truncate text-xs text-muted-foreground">{row.description} · {row.method}</p></div><div><p className="staff-eyebrow">{bn ? "পরিমাণ" : "AMOUNT"}</p><p className="mt-1 font-semibold tabular-nums text-foreground">{money(row.amount)}</p></div><div><p className="staff-eyebrow">{bn ? "স্ট্যাটাস" : "STATUS"}</p><p className="mt-1 text-sm capitalize text-foreground">{row.status}</p></div><div className="md:text-right"><p className={row.reconciled ? "text-sm font-medium text-success" : "text-sm font-medium text-warning"}>{row.reconciled ? (bn ? "মিলেছে" : "Reconciled") : (bn ? "পর্যালোচনা প্রয়োজন" : "Needs review")}</p><p className="mt-1 text-xs text-muted-foreground">{new Date(row.createdAt).toLocaleDateString(bn ? "bn-BD" : "en-US")}</p></div></article>)}</div>}
