@@ -690,6 +690,14 @@ const DashboardBilling = () => {
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
+                              <button
+                                onClick={() => void copyInvoiceLink(inv)}
+                                className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors"
+                                title={isBn ? "ইনভয়েস লিংক কপি করুন" : "Copy invoice link"}
+                                aria-label={isBn ? "ইনভয়েস লিংক কপি করুন" : "Copy invoice link"}
+                              >
+                                <Link2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </td>
                         </tr>
