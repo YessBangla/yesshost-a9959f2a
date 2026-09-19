@@ -109,7 +109,7 @@ const AdminTickets = () => {
   useEffect(() => { fetchStats(); }, []);
 
   useEffect(() => {
-    setLoading(true);
+    // Keep the filter bar mounted while paging so typing never loses focus.
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, statusFilter, priorityFilter, page, pageSize]);
