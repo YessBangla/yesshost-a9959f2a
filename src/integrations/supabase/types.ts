@@ -633,6 +633,90 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entry_date: string
+          id: string
+          reference: string
+          source: string
+          source_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          id?: string
+          reference: string
+          source?: string
+          source_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          id?: string
+          reference?: string
+          source?: string
+          source_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      journal_lines: {
+        Row: {
+          account_id: string
+          created_at: string
+          credit_bdt: number
+          debit_bdt: number
+          entry_id: string
+          id: string
+          memo: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credit_bdt?: number
+          debit_bdt?: number
+          entry_id: string
+          id?: string
+          memo?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credit_bdt?: number
+          debit_bdt?: number
+          entry_id?: string
+          id?: string
+          memo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ledger_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_lines_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kb_articles: {
         Row: {
           category_id: string
@@ -713,6 +797,42 @@ export type Database = {
           sort_order?: number
           title_bn?: string
           title_en?: string
+        }
+        Relationships: []
+      }
+      ledger_accounts: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name_bn: string
+          name_en: string
+          sort_order: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_bn: string
+          name_en: string
+          sort_order?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_bn?: string
+          name_en?: string
+          sort_order?: number
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1894,6 +2014,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accounts_period_summary: {
+        Args: { _from?: string; _granularity?: string; _to?: string }
+        Returns: {
+          expense: number
+          income: number
+          net: number
+          period_start: string
+        }[]
+      }
+      accounts_trial_balance: {
+        Args: { _from?: string; _to?: string }
+        Returns: {
+          balance: number
+          code: string
+          credit_total: number
+          debit_total: number
+          name_bn: string
+          name_en: string
+          type: string
+        }[]
+      }
+      expense_account_code: { Args: { _category: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1904,6 +2046,20 @@ export type Database = {
       increment_coupon_usage: {
         Args: { coupon_id: string }
         Returns: undefined
+      }
+      post_journal_entry: {
+        Args: {
+          _amount: number
+          _credit_code: string
+          _debit_code: string
+          _description: string
+          _entry_date: string
+          _reference: string
+          _source: string
+          _source_id: string
+          _user_id: string
+        }
+        Returns: string
       }
       provision_order: { Args: { _order_id: string }; Returns: undefined }
     }
