@@ -2157,6 +2157,10 @@ export type Database = {
         Returns: undefined
       }
       pay_invoice_from_wallet: { Args: { _invoice_id: string }; Returns: Json }
+      pay_invoice_from_wallet_for_user: {
+        Args: { _invoice_id: string; _user_id: string }
+        Returns: Json
+      }
       post_journal_entry: {
         Args: {
           _amount: number
