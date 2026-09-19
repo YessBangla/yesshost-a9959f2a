@@ -134,18 +134,47 @@ const CallCenterTickets = () => {
         <div className="flex min-h-[520px] flex-col">
           {selectedTicket ? (
             <>
-               <div className="flex items-start justify-between gap-3 border-b border-border p-4">
-                 <div><p className="text-sm font-semibold text-foreground">{selectedTicket.subject}</p><p className="text-xs text-muted-foreground">#{selectedTicket.ticket_number} • {selectedTicket.department}</p></div><div className="text-right"><Badge className={`${statusColor(selectedTicket.status)} border-0`}>{selectedTicket.status}</Badge><p className="mt-1 text-[10px] text-muted-foreground">{bn?"আপডেট":"Updated"} {new Date(selectedTicket.updated_at).toLocaleString(bn?"bn-BD":"en-US")}</p></div>
+               <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-start sm:justify-between">
+                 <div className="min-w-0">
+                   <p className="text-sm font-semibold text-foreground">{selectedTicket.subject}</p>
+                   <p className="text-xs text-muted-foreground">#{selectedTicket.ticket_number} • {selectedTicket.department}</p>
+                   <div className="mt-2 flex flex-wrap items-center gap-1">
+                     <Badge className={`${statusColor(selectedTicket.status)} border-0`}>{selectedTicket.status}</Badge>
+                     <Badge className={`${slaToneClass[ticketSla(selectedTicket, bn).tone]} border-0 text-[10px]`}>{ticketSla(selectedTicket, bn).label}</Badge>
+                     <Badge className="border-0 bg-muted text-[10px] text-muted-foreground">{bn ? "লক্ষ্য" : "Target"} {formatMinutes(slaMinutes(selectedTicket.priority), bn)}</Badge>
+                   </div>
+                   <p className="mt-1 text-[10px] text-muted-foreground">{bn ? "তৈরি" : "Created"} {formatStamp(selectedTicket.created_at, bn)} • {bn ? "আপডেট" : "Updated"} {formatStamp(selectedTicket.updated_at, bn)}{selectedTicket.resolved_at ? ` • ${bn ? "সমাধান" : "Resolved"} ${formatStamp(selectedTicket.resolved_at, bn)}` : ""}</p>
+                 </div>
+                 <div className="flex shrink-0 flex-wrap items-center gap-2">
+                   {selectedTicket.assigned_to !== user?.id && (
+                     <Button size="sm" variant="outline" onClick={() => assignToMe(selectedTicket.id)}>{bn ? "আমি নিচ্ছি" : "Assign to me"}</Button>
+                   )}
+                   <Select value={selectedTicket.status} onValueChange={(next) => changeStatus(selectedTicket.id, next)}>
+                     <SelectTrigger className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="open">{bn ? "খোলা" : "Open"}</SelectItem>
+                       <SelectItem value="in_progress">{bn ? "চলমান" : "In progress"}</SelectItem>
+                       <SelectItem value="waiting">{bn ? "অপেক্ষমাণ" : "Waiting"}</SelectItem>
+                       <SelectItem value="resolved">{bn ? "সমাধান" : "Resolved"}</SelectItem>
+                       <SelectItem value="closed">{bn ? "বন্ধ" : "Closed"}</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
               </div>
               <div className="flex-1 overflow-auto p-4 space-y-3">
-                {selectedTicket.replies.map(r => (
+                {selectedTicket.replies.map((r, idx) => {
+                  const prev = idx === 0 ? selectedTicket.created_at : selectedTicket.replies[idx - 1]!.created_at;
+                  const gap = formatGap(prev, r.created_at, bn);
+                  const slow = isSlowGap(prev, r.created_at);
+                  return (
                   <div key={r.id} className={`flex ${r.is_staff ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[70%] p-3 rounded-xl text-sm ${r.is_staff ? "bg-primary text-primary-foreground" : "bg-secondary/60 text-foreground"}`}>
                       {r.message}
-                      <p className="text-[10px] opacity-70 mt-1">{new Date(r.created_at).toLocaleString(bn ? "bn-BD" : "en-US")}</p>
+                      <p className="text-[10px] opacity-70 mt-1">{formatStamp(r.created_at, bn)}{gap ? ` • ${gap}` : ""}</p>
+                      {slow && <span className="mt-1 inline-block rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] text-red-600">{bn ? "দেরিতে উত্তর" : "Delayed"}</span>}
                     </div>
                   </div>
-                ))}
+                );})}
               </div>
                 <div className="border-t border-border bg-secondary/20 p-3"><div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><UserRound className="size-3" />{selectedTicket.user_name} • {selectedTicket.priority}</div><div className="flex gap-2"><Input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === "Enter" && sendReply()} placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="h-11" /><Button onClick={sendReply} disabled={!reply.trim()} aria-label={bn?"উত্তর পাঠান":"Send reply"}><Send /></Button></div></div>
             </>
