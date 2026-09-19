@@ -12,6 +12,8 @@ import { getDashboardServices } from "@/lib/dashboard.functions";
 import { logApiError } from "@/lib/errorReporting";
 import DataPagination from "@/components/DataPagination";
 import { formatAmount } from "@/lib/formatPrice";
+import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
+import { RefreshCw, AlertTriangle, CheckCircle2, Wallet as WalletIcon } from "lucide-react";
 
 const statusConfig: Record<string, { label_en: string; label_bn: string; color: string; dot: string }> = {
   active: { label_en: "Active", label_bn: "সক্রিয়", color: "bg-success/10 text-success", dot: "bg-success" },
@@ -80,20 +82,45 @@ const DashboardServices = () => {
     return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000; // 30 days
   };
 
+  const activeCount = services.filter(s => s.status === "active").length;
+  const expiringCount = services.filter(s => isExpiringSoon(s.expiry_date)).length;
+  const monthlySpend = services
+    .filter(s => s.status === "active")
+    .reduce((sum, s) => sum + (s.billing_cycle === "yearly" ? Number(s.price_bdt) / 12 : Number(s.price_bdt)), 0);
+
+  const metrics: StaffMetric[] = [
+    { label: bn ? "মোট সার্ভিস" : "Total services", value: services.length, detail: bn ? "অ্যাকাউন্টে" : "on account", icon: Server },
+    { label: bn ? "সক্রিয়" : "Active", value: activeCount, detail: bn ? "চালু আছে" : "running", icon: CheckCircle2, tone: "success" },
+    { label: bn ? "শীঘ্রই মেয়াদ শেষ" : "Expiring soon", value: expiringCount, detail: bn ? "৩০ দিনের মধ্যে" : "within 30 days", icon: AlertTriangle, tone: "warning" },
+    { label: bn ? "মাসিক খরচ" : "Monthly spend", value: `৳${formatAmount(Math.round(monthlySpend), lang)}`, detail: bn ? "সক্রিয় সার্ভিস" : "active services", icon: WalletIcon },
+  ];
+
   if (loading) return <ServicesSkeleton />;
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{bn ? "আমার সার্ভিস" : "My Services"}</h1>
-          <p className="text-sm text-muted-foreground">{bn ? `মোট ${services.length}টি সার্ভিস` : `${services.length} total services`}</p>
-        </div>
-        <Link to="/hosting-plans" className="flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
-          {bn ? "নতুন সার্ভিস" : "New Service"} <ExternalLink className="w-4 h-4" />
-        </Link>
-      </div>
+      <StaffPageHeader
+        title={bn ? "আমার সার্ভিস" : "My Services"}
+        description={bn ? "আপনার হোস্টিং, সার্ভার ও অন্যান্য সেবার পূর্ণ তালিকা" : "Every hosting, server and add-on service on your account"}
+        actions={
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => servicesQuery.refetch()}
+              disabled={servicesQuery.isFetching}
+              className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${servicesQuery.isFetching ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">{bn ? "রিফ্রেশ" : "Refresh"}</span>
+            </button>
+            <Link to="/hosting-plans" className="inline-flex h-11 items-center gap-2 gradient-primary text-primary-foreground px-4 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
+              {bn ? "নতুন সার্ভিস" : "New Service"} <ExternalLink className="w-4 h-4" />
+            </Link>
+          </div>
+        }
+      />
+
+      <StaffMetricStrip metrics={metrics} />
 
       {/* Status Pills */}
       <div className="flex flex-wrap gap-2">
