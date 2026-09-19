@@ -2188,6 +2188,10 @@ export type Database = {
         Returns: string
       }
       provision_order: { Args: { _order_id: string }; Returns: undefined }
+      set_support_pin: {
+        Args: { _expires_at: string; _pin: string }
+        Returns: undefined
+      }
       verify_support_pin: {
         Args: { _pin: string; _user_id: string }
         Returns: string
