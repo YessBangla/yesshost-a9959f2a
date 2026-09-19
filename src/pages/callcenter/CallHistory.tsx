@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { PhoneIncoming, PhoneOff, PhoneMissed, Phone, RefreshCw, Clock, Search } from "lucide-react";
+import { PhoneIncoming, PhoneOff, PhoneMissed, Phone, RefreshCw, Clock, Search, NotebookPen, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import DataPagination from "@/components/DataPagination";
 import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
@@ -17,6 +20,8 @@ interface CallRecord {
   duration_seconds: number | null;
   status: string;
   created_at: string;
+  outcome?: string | null;
+  notes?: string | null;
   live_chats?: { visitor_name: string; visitor_email: string | null; visitor_phone: string | null } | null;
 }
 
@@ -36,6 +41,31 @@ const CallHistory = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draft, setDraft] = useState({ outcome: "resolved", notes: "" });
+  const [saving, setSaving] = useState(false);
+
+  const outcomes = [
+    { key: "resolved", label: bn ? "সমাধান হয়েছে" : "Resolved" },
+    { key: "callback", label: bn ? "কলব্যাক প্রয়োজন" : "Callback required" },
+    { key: "no_answer", label: bn ? "সাড়া পাওয়া যায়নি" : "No answer" },
+    { key: "escalated", label: bn ? "টিকেটে পাঠানো হয়েছে" : "Escalated to ticket" },
+  ];
+
+  const startEdit = (call: CallRecord) => {
+    setEditing(call.id);
+    setDraft({ outcome: call.outcome || "resolved", notes: call.notes || "" });
+  };
+
+  const saveLog = async (call: CallRecord) => {
+    setSaving(true);
+    const { error } = await supabase.from("call_history").update({ outcome: draft.outcome, notes: draft.notes.trim() || null } as never).eq("id", call.id);
+    setSaving(false);
+    if (error) { toast.error(bn ? "কল নোট সেভ করা যায়নি।" : "Call note could not be saved."); return; }
+    setCalls((rows) => rows.map((row) => row.id === call.id ? { ...row, outcome: draft.outcome, notes: draft.notes.trim() || null } : row));
+    setEditing(null);
+    toast.success(bn ? "কল নোট সংরক্ষিত হয়েছে।" : "Call note saved.");
+  };
 
   const fetchCalls = async () => {
     setLoading(true);
@@ -139,9 +169,9 @@ const CallHistory = () => {
             const cfg = statusConfig[call.status] || statusConfig.missed;
             const StatusIcon = cfg.icon;
             return (
+              <div key={call.id} className="border-b border-border/30">
               <div
-                key={call.id}
-                className="grid grid-cols-1 md:grid-cols-[1fr_120px_100px_100px_140px] gap-1 md:gap-4 px-4 py-3 border-b border-border/30 hover:bg-secondary/20 transition-colors"
+                className="grid grid-cols-1 md:grid-cols-[1fr_120px_100px_100px_140px] gap-1 md:gap-4 px-4 py-3 hover:bg-secondary/20 transition-colors"
               >
                 {/* Visitor */}
                 <div className="flex items-center gap-2.5">
@@ -177,9 +207,22 @@ const CallHistory = () => {
                 </div>
 
                 {/* Time */}
-                <div className="hidden md:flex items-center">
+                <div className="hidden md:flex items-center justify-between gap-2">
                   <span className="text-xs text-muted-foreground">{formatTime(call.started_at)}</span>
                 </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 px-4 pb-3">
+                {call.outcome && <span className="rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-foreground">{outcomes.find((item) => item.key === call.outcome)?.label || call.outcome}</span>}
+                {call.notes && <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{call.notes}</span>}
+                <Button size="sm" variant="ghost" className="ml-auto" onClick={() => editing === call.id ? setEditing(null) : startEdit(call)}><NotebookPen className="size-3.5" />{call.notes || call.outcome ? (bn ? "নোট সম্পাদনা" : "Edit log") : (bn ? "কল নোট যোগ করুন" : "Add call log")}</Button>
+              </div>
+
+              {editing === call.id && <div className="space-y-2 bg-secondary/30 px-4 py-3">
+                <Select value={draft.outcome} onValueChange={(value) => setDraft({ ...draft, outcome: value })}><SelectTrigger className="h-11 max-w-xs"><SelectValue /></SelectTrigger><SelectContent>{outcomes.map((item) => <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>)}</SelectContent></Select>
+                <Textarea rows={3} value={draft.notes} onChange={(event) => setDraft({ ...draft, notes: event.target.value })} placeholder={bn ? "কলে কী আলোচনা হয়েছে এবং পরবর্তী পদক্ষেপ" : "What was discussed and the next step"} />
+                <div className="flex gap-2"><Button size="sm" onClick={() => saveLog(call)} disabled={saving}>{saving ? <Loader2 className="size-3.5 animate-spin" /> : null}{bn ? "সেভ করুন" : "Save"}</Button><Button size="sm" variant="ghost" onClick={() => setEditing(null)}>{bn ? "বাতিল" : "Cancel"}</Button></div>
+              </div>}
               </div>
             );
           })

@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { Link } from "@/lib/router-compat";
-import { AlertTriangle, CreditCard, Globe, Headphones, Loader2, Search, ShoppingCart, User } from "lucide-react";
+import { AlertTriangle, BellRing, CreditCard, Globe, Headphones, Loader2, Plus, Search, ShoppingCart, User } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -27,6 +31,10 @@ const CustomerLookup = () => {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState("");
+  const { user } = useAuth();
+  const [ticketOpen, setTicketOpen] = useState(false);
+  const [form, setForm] = useState({ subject: "", department: "technical", priority: "medium", message: "" });
+  const [saving, setSaving] = useState(false);
 
   const search = async () => {
     const value = term.trim();
@@ -63,6 +71,36 @@ const CustomerLookup = () => {
   const date = (value: string | null) => value ? new Date(value).toLocaleDateString(bn ? "bn-BD" : "en-US", { day: "2-digit", month: "short", year: "numeric" }) : "—";
   const due = detail?.invoices.filter((item) => item.status === "unpaid" || item.status === "overdue") || [];
   const dueTotal = due.reduce((sum, item) => sum + Number(item.amount_bdt), 0);
+
+  const createTicket = async () => {
+    if (!selected) return;
+    if (form.subject.trim().length < 3 || form.message.trim().length < 5) { toast.error(bn ? "বিষয় ও বিবরণ লিখুন।" : "Enter a subject and description."); return; }
+    setSaving(true);
+    const ticketNumber = `TKT-${Date.now().toString(36).toUpperCase()}`;
+    const { data: ticket, error: ticketError } = await supabase.from("support_tickets").insert({
+      user_id: selected.user_id, ticket_number: ticketNumber, subject: form.subject.trim(),
+      department: form.department as Ticket["department"], priority: form.priority as Ticket["priority"],
+    }).select("id, ticket_number").single();
+    if (ticketError || !ticket) { setSaving(false); toast.error(bn ? "টিকেট তৈরি করা যায়নি।" : "Could not create the ticket."); return; }
+    await supabase.from("ticket_replies").insert({ ticket_id: ticket.id, user_id: user?.id as string, message: form.message.trim(), is_staff: true });
+    await supabase.from("notifications").insert({ user_id: selected.user_id, title: bn ? "আপনার জন্য একটি টিকেট খোলা হয়েছে" : "A support ticket was opened for you", message: `#${ticket.ticket_number} • ${form.subject.trim()}`, type: "ticket" });
+    setSaving(false); setTicketOpen(false); setForm({ subject: "", department: "technical", priority: "medium", message: "" });
+    toast.success(bn ? `টিকেট #${ticket.ticket_number} তৈরি হয়েছে` : `Ticket #${ticket.ticket_number} created`);
+    openCustomer(selected);
+  };
+
+  const sendReminder = async () => {
+    if (!selected) return;
+    setSaving(true);
+    const { error: notifyError } = await supabase.from("notifications").insert({
+      user_id: selected.user_id, type: "billing",
+      title: bn ? "পেমেন্ট রিমাইন্ডার" : "Payment reminder",
+      message: bn ? `আপনার ${due.length}টি বিলে মোট ৳${formatAmount(dueTotal, lang)} বকেয়া আছে। সেবা চালু রাখতে অনুগ্রহ করে পরিশোধ করুন।` : `You have ৳${formatAmount(dueTotal, lang)} due across ${due.length} invoices. Please pay to keep your services active.`,
+    });
+    setSaving(false);
+    if (notifyError) toast.error(bn ? "রিমাইন্ডার পাঠানো যায়নি।" : "Reminder could not be sent.");
+    else toast.success(bn ? "গ্রাহকের ড্যাশবোর্ডে রিমাইন্ডার পাঠানো হয়েছে।" : "Reminder sent to the customer dashboard.");
+  };
   const expiringSoon = detail?.services.filter((item) => item.expiry_date && new Date(item.expiry_date).getTime() - Date.now() < 30 * 864e5) || [];
 
   return <section className="staff-panel overflow-hidden">
@@ -119,10 +157,25 @@ const CustomerLookup = () => {
         </div>
 
         <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+          <Button onClick={() => setTicketOpen((value) => !value)}><Plus />{bn ? "গ্রাহকের পক্ষে টিকেট খুলুন" : "Open ticket for customer"}</Button>
+          {due.length > 0 && <Button variant="outline" onClick={sendReminder} disabled={saving}><BellRing />{bn ? "পেমেন্ট রিমাইন্ডার পাঠান" : "Send payment reminder"}</Button>}
           <Button asChild variant="outline"><Link to="/call-center/tickets"><Headphones />{bn ? "টিকেট কিউ" : "Ticket queue"}</Link></Button>
           <Button asChild variant="outline"><Link to="/call-center/orders"><ShoppingCart />{bn ? "অর্ডার কিউ" : "Order queue"}</Link></Button>
           {selected.phone && <Button asChild variant="outline"><a href={`tel:${selected.phone}`}><User />{bn ? "গ্রাহককে কল করুন" : "Call customer"}</a></Button>}
         </div>
+
+        {ticketOpen && <div className="space-y-3 rounded-md border border-border bg-secondary/30 p-3">
+          <p className="text-sm font-semibold text-foreground">{bn ? "গ্রাহকের পক্ষে নতুন টিকেট" : "New ticket on behalf of customer"}</p>
+          <Input value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} placeholder={bn ? "সমস্যার বিষয়" : "Issue subject"} className="h-11" />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Select value={form.department} onValueChange={(value) => setForm({ ...form, department: value })}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent>
+              <SelectItem value="technical">{bn ? "কারিগরি" : "Technical"}</SelectItem><SelectItem value="billing">{bn ? "বিলিং" : "Billing"}</SelectItem><SelectItem value="sales">{bn ? "সেলস" : "Sales"}</SelectItem><SelectItem value="general">{bn ? "সাধারণ" : "General"}</SelectItem></SelectContent></Select>
+            <Select value={form.priority} onValueChange={(value) => setForm({ ...form, priority: value })}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent>
+              <SelectItem value="low">{bn ? "কম" : "Low"}</SelectItem><SelectItem value="medium">{bn ? "মাঝারি" : "Medium"}</SelectItem><SelectItem value="high">{bn ? "উচ্চ" : "High"}</SelectItem><SelectItem value="urgent">{bn ? "জরুরি" : "Urgent"}</SelectItem></SelectContent></Select>
+          </div>
+          <Textarea value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} rows={4} placeholder={bn ? "কলে গ্রাহক যা জানিয়েছেন তা লিখুন" : "Summarise what the customer reported on the call"} />
+          <div className="flex gap-2"><Button onClick={createTicket} disabled={saving}>{saving ? <Loader2 className="animate-spin" /> : <Plus />}{bn ? "টিকেট তৈরি করুন" : "Create ticket"}</Button><Button variant="ghost" onClick={() => setTicketOpen(false)}>{bn ? "বাতিল" : "Cancel"}</Button></div>
+        </div>}
       </div>}
     </div>}
   </section>;
