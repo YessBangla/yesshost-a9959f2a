@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { generateSupportPin } from "@/lib/support-pin.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 const VALID_MS = 60 * 60 * 1000; // 1 hour
 
@@ -14,8 +16,6 @@ interface StoredPin {
   uid: string;
 }
 
-const makePin = () => String(Math.floor(100000 + Math.random() * 900000));
-
 const DashboardSupportPin = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
@@ -24,21 +24,26 @@ const DashboardSupportPin = () => {
   const [pin, setPin] = useState<StoredPin | null>(null);
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
+  const requestPin = useServerFn(generateSupportPin);
 
   const generate = useCallback(async (uid: string) => {
     setBusy(true);
-    const next: StoredPin = { pin: makePin(), expiresAt: Date.now() + VALID_MS, uid };
-    const { error } = await supabase.rpc("set_support_pin" as never, {
-      _pin: next.pin,
-      _expires_at: new Date(next.expiresAt).toISOString(),
-    } as never);
+    let next: StoredPin;
+    let error: unknown = null;
+    try {
+      const result = await requestPin();
+      next = { pin: result.pin, expiresAt: new Date(result.expiresAt).getTime(), uid };
+    } catch (cause) {
+      error = cause;
+      next = { pin: "", expiresAt: 0, uid };
+    }
     setBusy(false);
     if (error) {
       toast({ title: bn ? "পিন তৈরি করা যায়নি" : "Could not create PIN", description: bn ? "একটু পরে আবার চেষ্টা করুন।" : "Please try again in a moment.", variant: "destructive" });
       return;
     }
     setPin(next);
-  }, [bn, toast]);
+  }, [bn, toast, requestPin]);
 
   useEffect(() => {
     if (!user) return;
