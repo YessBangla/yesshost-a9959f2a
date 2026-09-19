@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Clock3, Headphones, MessageCircle, PhoneMissed, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, Clock3, CreditCard, Headphones, MessageCircle, PhoneMissed, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import CustomerLookup from "@/components/staff/CustomerLookup";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "@/lib/router-compat";
@@ -13,6 +14,8 @@ type Ticket = Tables<"support_tickets">;
 type Chat = Tables<"live_chats">;
 type Order = Tables<"orders">;
 type Call = Tables<"call_history">;
+type Invoice = Tables<"invoices">;
+type Service = Tables<"services">;
 type QueueItem = { id: string; title: string; detail: string; time: string; href: string; type: "chat" | "ticket" | "order" | "call"; urgent: boolean };
 
 const CallCenterDashboard = () => {
@@ -20,24 +23,30 @@ const CallCenterDashboard = () => {
   const bn = lang === "bn";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [data, setData] = useState<{ chats: Chat[]; tickets: Ticket[]; orders: Order[]; calls: Call[] }>({ chats: [], tickets: [], orders: [], calls: [] });
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [data, setData] = useState<{ chats: Chat[]; tickets: Ticket[]; orders: Order[]; calls: Call[]; invoices: Invoice[]; services: Service[] }>({ chats: [], tickets: [], orders: [], calls: [], invoices: [], services: [] });
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     setError("");
-    const [chats, tickets, orders, calls] = await Promise.all([
+    const soon = new Date(Date.now() + 30 * 864e5).toISOString();
+    const [chats, tickets, orders, calls, invoices, services] = await Promise.all([
       supabase.from("live_chats").select("*").order("updated_at", { ascending: false }).limit(30),
       supabase.from("support_tickets").select("*").order("updated_at", { ascending: false }).limit(30),
       supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(30),
       supabase.from("call_history").select("*").order("created_at", { ascending: false }).limit(30),
+      supabase.from("invoices").select("*").in("status", ["unpaid", "overdue"]).order("due_date", { ascending: true }).limit(30),
+      supabase.from("services").select("*").not("expiry_date", "is", null).lte("expiry_date", soon).order("expiry_date", { ascending: true }).limit(30),
     ]);
     const failed = [chats.error, tickets.error, orders.error, calls.error].find(Boolean);
     if (failed) setError(bn ? "অপারেশন ডেটা লোড করা যায়নি। আবার চেষ্টা করুন।" : "Operations data could not be loaded. Please try again.");
-    setData({ chats: chats.data || [], tickets: tickets.data || [], orders: orders.data || [], calls: calls.data || [] });
+    setData({ chats: chats.data || [], tickets: tickets.data || [], orders: orders.data || [], calls: calls.data || [], invoices: invoices.data || [], services: services.data || [] });
+    setLastSync(new Date());
     setLoading(false);
   };
 
   useEffect(() => { load(); }, [bn]);
+  useEffect(() => { const timer = setInterval(() => load(true), 60000); return () => clearInterval(timer); }, [bn]);
 
   const openChats = data.chats.filter((item) => item.status === "open");
   const openTickets = data.tickets.filter((item) => ["open", "in_progress"].includes(item.status));
@@ -46,6 +55,13 @@ const CallCenterDashboard = () => {
   const completedCalls = data.calls.filter((item) => item.status === "completed");
   const salesValue = data.orders.reduce((sum, item) => sum + Number(item.total_bdt), 0);
   const paidOrders = data.orders.filter((item) => item.payment_status === "paid").length;
+  const overdueInvoices = data.invoices.filter((item) => item.status === "overdue" || (item.due_date && new Date(item.due_date).getTime() < Date.now()));
+  const dueTotal = data.invoices.reduce((sum, item) => sum + Number(item.amount_bdt), 0);
+  const expiringServices = data.services;
+  const oldestTicket = openTickets.map((item) => Date.now() - new Date(item.created_at).getTime()).sort((a, b) => b - a)[0] || 0;
+  const oldestHours = Math.round(oldestTicket / 3600000);
+  const breachedTickets = openTickets.filter((item) => Date.now() - new Date(item.created_at).getTime() > 24 * 3600000).length;
+
 
   const queue = useMemo<QueueItem[]>(() => [
     ...openTickets.map((item) => ({ id: item.id, title: item.subject, detail: `${bn ? "টিকেট" : "Ticket"} #${item.ticket_number} • ${item.priority}`, time: item.updated_at, href: "/call-center/tickets", type: "ticket" as const, urgent: item.priority === "urgent" || item.priority === "high" })),
@@ -60,12 +76,15 @@ const CallCenterDashboard = () => {
     { label: bn ? "সাপোর্ট চাপ" : "Support workload", value: openTickets.length, detail: bn ? `${data.tickets.filter((t) => t.priority === "high" || t.priority === "urgent").length} জরুরি` : `${data.tickets.filter((t) => t.priority === "high" || t.priority === "urgent").length} priority`, icon: Headphones, tone: "warning" as const },
     { label: bn ? "সেলস ভ্যালু" : "Sales value", value: `৳${formatAmount(salesValue, lang)}`, detail: `${paidOrders}/${data.orders.length} ${bn ? "পরিশোধিত" : "paid"}`, icon: TrendingUp, tone: "success" as const },
     { label: bn ? "কল ফলাফল" : "Call outcome", value: completedCalls.length, detail: `${missedCalls.length} ${bn ? "মিসড" : "missed"}`, icon: PhoneMissed, tone: missedCalls.length ? "danger" as const : "success" as const },
+    { label: bn ? "বকেয়া বিল" : "Outstanding bills", value: `৳${formatAmount(dueTotal, lang)}`, detail: `${overdueInvoices.length} ${bn ? "মেয়াদোত্তীর্ণ" : "overdue"}`, icon: CreditCard, tone: overdueInvoices.length ? "danger" as const : "primary" as const },
+    { label: bn ? "মেয়াদ শেষের ঝুঁকি" : "Expiry risk", value: expiringServices.length, detail: bn ? "৩০ দিনের মধ্যে" : "within 30 days", icon: CalendarClock, tone: expiringServices.length ? "warning" as const : "success" as const },
+    { label: bn ? "সবচেয়ে পুরোনো টিকেট" : "Oldest open ticket", value: `${oldestHours}${bn ? " ঘন্টা" : "h"}`, detail: `${breachedTickets} ${bn ? "২৪ ঘন্টার বেশি" : "over 24h"}`, icon: Clock3, tone: breachedTickets ? "danger" as const : "success" as const },
   ];
 
   if (loading) return <div className="space-y-5"><StaffLoading rows={2} /><div className="grid gap-4 lg:grid-cols-[1.35fr_.65fr]"><StaffLoading rows={6} /><StaffLoading rows={4} /></div></div>;
 
   return <div className="space-y-5">
-    <StaffPageHeader title={bn ? "অপারেশনস কনসোল" : "Operations Console"} description={bn ? "সাপোর্ট, কল ও সেলসের আজকের লাইভ কার্যক্রম" : "Live support, call and sales activity for today"} actions={<Button variant="outline" onClick={load}><Clock3 />{bn ? "রিফ্রেশ" : "Refresh"}</Button>} />
+    <StaffPageHeader title={bn ? "অপারেশনস কনসোল" : "Operations Console"} description={bn ? "সাপোর্ট, কল ও সেলসের আজকের লাইভ কার্যক্রম" : "Live support, call and sales activity for today"} actions={<div className="flex items-center gap-3"><span className="text-xs text-muted-foreground">{lastSync ? `${bn ? "সর্বশেষ আপডেট" : "Updated"} ${lastSync.toLocaleTimeString(bn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" })}` : ""}</span><Button variant="outline" onClick={() => load()}><Clock3 />{bn ? "রিফ্রেশ" : "Refresh"}</Button></div>} />
     {error && <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">{error}</div>}
     <StaffMetricStrip metrics={metrics} />
     <div className="grid min-h-[480px] gap-4 xl:grid-cols-[1.35fr_.65fr]">
@@ -74,8 +93,27 @@ const CallCenterDashboard = () => {
       </section>
       <aside className="space-y-4"><section className="staff-panel p-4"><p className="staff-eyebrow">{bn ? "সেলস পালস" : "Sales pulse"}</p><p className="mt-2 text-3xl font-semibold tabular-nums text-foreground">৳{formatAmount(salesValue, lang)}</p><p className="mt-1 text-sm text-muted-foreground">{bn ? `সাম্প্রতিক ${data.orders.length}টি অর্ডার` : `${data.orders.length} recent orders`}</p><div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4"><div><p className="staff-eyebrow">{bn ? "অপেক্ষমাণ" : "Pending"}</p><p className="mt-1 text-xl font-semibold text-foreground">{pendingOrders.length}</p></div><div><p className="staff-eyebrow">{bn ? "পরিশোধিত" : "Paid"}</p><p className="mt-1 text-xl font-semibold text-success">{paidOrders}</p></div></div><Button asChild className="mt-4 w-full"><Link to="/call-center/orders">{bn ? "সেলস কিউ খুলুন" : "Open sales queue"}<ArrowRight /></Link></Button></section>
         <section className="staff-panel p-4"><p className="staff-eyebrow">{bn ? "দ্রুত কাজ" : "Quick actions"}</p><div className="mt-3 grid gap-2"><Button asChild variant="outline" className="justify-start"><Link to="/call-center/live-chat"><MessageCircle />{bn ? "লাইভ কথোপকথন" : "Live conversations"}</Link></Button><Button asChild variant="outline" className="justify-start"><Link to="/call-center/tickets"><Headphones />{bn ? "সাপোর্ট টিকেট" : "Support tickets"}</Link></Button><Button asChild variant="outline" className="justify-start"><Link to="/call-center/call-history"><PhoneMissed />{bn ? "মিসড কল দেখুন" : "Review missed calls"}</Link></Button></div></section>
+        <section className="staff-panel p-4"><p className="staff-eyebrow flex items-center gap-2"><Clock3 className="size-3.5" />{bn ? "সেবা মান (SLA)" : "Service level"}</p>
+          <div className="mt-3 space-y-2 text-sm"><div className="flex items-center justify-between"><span className="text-muted-foreground">{bn ? "সবচেয়ে পুরোনো ওপেন টিকেট" : "Oldest open ticket"}</span><strong className={breachedTickets ? "text-destructive" : "text-foreground"}>{oldestHours}{bn ? " ঘন্টা" : "h"}</strong></div>
+            <div className="flex items-center justify-between"><span className="text-muted-foreground">{bn ? "২৪ ঘন্টার বেশি অপেক্ষমাণ" : "Waiting over 24h"}</span><strong className={breachedTickets ? "text-destructive" : "text-success"}>{breachedTickets}</strong></div>
+            <div className="flex items-center justify-between"><span className="text-muted-foreground">{bn ? "অপেক্ষমাণ চ্যাট" : "Chats waiting"}</span><strong className="text-foreground">{openChats.length}</strong></div>
+            <div className="flex items-center justify-between"><span className="text-muted-foreground">{bn ? "মিসড কল ফলো-আপ" : "Missed call follow-ups"}</span><strong className={missedCalls.length ? "text-warning" : "text-success"}>{missedCalls.length}</strong></div></div></section>
       </aside>
     </div>
+
+    <div className="grid gap-4 xl:grid-cols-2">
+      <section className="staff-panel overflow-hidden"><div className="flex items-center justify-between border-b border-border px-4 py-3"><div><h2 className="text-sm font-semibold text-foreground">{bn ? "বকেয়া ও মেয়াদোত্তীর্ণ বিল" : "Outstanding & overdue bills"}</h2><p className="text-xs text-muted-foreground">{bn ? "সার্ভিস বন্ধ হওয়ার আগে গ্রাহককে জানান" : "Reach the customer before service suspension"}</p></div><Badge variant="secondary">{data.invoices.length}</Badge></div>
+        {data.invoices.length === 0 ? <StaffEmpty icon={CreditCard} title={bn ? "কোনো বকেয়া নেই" : "No dues pending"} description={bn ? "সব বিল পরিশোধিত আছে।" : "All invoices are settled."} />
+          : <div className="max-h-80 divide-y divide-border overflow-y-auto">{data.invoices.map((item) => { const late = item.status === "overdue" || (item.due_date && new Date(item.due_date).getTime() < Date.now()); return <div key={item.id} className="flex min-h-[60px] items-center gap-3 px-4 py-3"><div className={`flex size-9 shrink-0 items-center justify-center rounded-md ${late ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}><CreditCard className="size-4" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-foreground">{item.invoice_number}</p><p className="truncate text-xs text-muted-foreground">{item.description || (bn ? "বিল" : "Invoice")} • {item.due_date ? new Date(item.due_date).toLocaleDateString(bn ? "bn-BD" : "en-US", { day: "2-digit", month: "short" }) : "—"}</p></div><span className={`text-sm font-semibold tabular-nums ${late ? "text-destructive" : "text-foreground"}`}>৳{formatAmount(Number(item.amount_bdt), lang)}</span></div>; })}</div>}
+      </section>
+
+      <section className="staff-panel overflow-hidden"><div className="flex items-center justify-between border-b border-border px-4 py-3"><div><h2 className="text-sm font-semibold text-foreground">{bn ? "মেয়াদ শেষ হতে যাওয়া সার্ভিস" : "Services nearing expiry"}</h2><p className="text-xs text-muted-foreground">{bn ? "আগামী ৩০ দিনে নবায়ন প্রয়োজন" : "Renewal needed within 30 days"}</p></div><Badge variant="secondary">{expiringServices.length}</Badge></div>
+        {expiringServices.length === 0 ? <StaffEmpty icon={CalendarClock} title={bn ? "কোনো ঝুঁকি নেই" : "No expiry risk"} description={bn ? "৩০ দিনের মধ্যে কোনো সার্ভিসের মেয়াদ শেষ হচ্ছে না।" : "No service expires in the next 30 days."} />
+          : <div className="max-h-80 divide-y divide-border overflow-y-auto">{expiringServices.map((item) => { const days = Math.ceil((new Date(item.expiry_date as string).getTime() - Date.now()) / 864e5); return <div key={item.id} className="flex min-h-[60px] items-center gap-3 px-4 py-3"><div className={`flex size-9 shrink-0 items-center justify-center rounded-md ${days <= 7 ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}><AlertTriangle className="size-4" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-foreground">{item.domain || item.name}</p><p className="truncate text-xs text-muted-foreground">{item.plan || item.service_type} • {item.status}</p></div><span className={`text-xs font-semibold ${days <= 7 ? "text-destructive" : "text-warning"}`}>{days <= 0 ? (bn ? "মেয়াদ শেষ" : "Expired") : `${days} ${bn ? "দিন" : "days"}`}</span></div>; })}</div>}
+      </section>
+    </div>
+
+    <CustomerLookup />
   </div>;
 };
 
