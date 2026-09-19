@@ -417,6 +417,153 @@ const AdminAccounts = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="statement" className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={statementMonth} onValueChange={setStatementMonth}>
+                <SelectTrigger className="h-11 w-56"><SelectValue /></SelectTrigger>
+                <SelectContent>{monthOptions.map((key) => <SelectItem key={key} value={key}>{monthLabel(key)}</SelectItem>)}</SelectContent>
+              </Select>
+              <Button variant="outline" className="h-11" onClick={() => downloadCsv(`monthly-statement-${statementMonth}`, ["Section", "Code", "Account", "Amount"], [
+                ...statement.income.map((row) => [bn ? "আয়" : "Income", row.code, row.name, Math.round(row.amount)]),
+                ...statement.expense.map((row) => [bn ? "ব্যয়" : "Expense", row.code, row.name, Math.round(row.amount)]),
+                [bn ? "নিট" : "Net", "", "", Math.round(statement.net)],
+              ])}><Download className="mr-2 size-4" />CSV</Button>
+              <p className="text-xs text-muted-foreground">{bn ? "সব তথ্য হিসাব খাতা থেকে স্বয়ংক্রিয়ভাবে তৈরি — আলাদা করে লিখতে হবে না।" : "Generated automatically from the ledger — nothing to type in twice."}</p>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-lg border border-border bg-card">
+                <div className="border-b border-border p-3 font-medium">{bn ? "আয়" : "Income"}</div>
+                {statement.income.length === 0 ? <StaffEmpty icon={SearchX} title={bn ? "আয় নেই" : "No income"} description={bn ? "এই মাসে কোনো আয় রেকর্ড হয়নি।" : "No income recorded this month."} /> : (
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {statement.income.map((row) => (
+                        <tr key={row.code} className="border-t border-border"><td className="p-3 tabular-nums text-muted-foreground">{row.code}</td><td className="p-3">{row.name}</td><td className="p-3 text-right tabular-nums text-success">{money(row.amount)}</td></tr>
+                      ))}
+                    </tbody>
+                    <tfoot><tr className="border-t-2 border-border bg-secondary/40 font-semibold"><td className="p-3" colSpan={2}>{bn ? "মোট আয়" : "Total income"}</td><td className="p-3 text-right tabular-nums">{money(statement.incomeTotal)}</td></tr></tfoot>
+                  </table>
+                )}
+              </div>
+              <div className="rounded-lg border border-border bg-card">
+                <div className="border-b border-border p-3 font-medium">{bn ? "ব্যয়" : "Expense"}</div>
+                {statement.expense.length === 0 ? <StaffEmpty icon={SearchX} title={bn ? "ব্যয় নেই" : "No expense"} description={bn ? "এই মাসে কোনো খরচ রেকর্ড হয়নি।" : "No expense recorded this month."} /> : (
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {statement.expense.map((row) => (
+                        <tr key={row.code} className="border-t border-border"><td className="p-3 tabular-nums text-muted-foreground">{row.code}</td><td className="p-3">{row.name}</td><td className="p-3 text-right tabular-nums text-warning">{money(row.amount)}</td></tr>
+                      ))}
+                    </tbody>
+                    <tfoot><tr className="border-t-2 border-border bg-secondary/40 font-semibold"><td className="p-3" colSpan={2}>{bn ? "মোট ব্যয়" : "Total expense"}</td><td className="p-3 text-right tabular-nums">{money(statement.expenseTotal)}</td></tr></tfoot>
+                  </table>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-card p-4">
+              <p className="text-sm text-muted-foreground">{bn ? "নিট ফলাফল" : "Net result"} · {monthLabel(statementMonth)}</p>
+              <p className={`mt-1 text-2xl font-semibold tabular-nums ${statement.net >= 0 ? "text-success" : "text-destructive"}`}>{money(statement.net)}</p>
+            </div>
+
+            <div className="rounded-lg border border-border bg-card">
+              <div className="flex items-center justify-between gap-2 border-b border-border p-3">
+                <h2 className="font-medium">{bn ? "এই মাসের বিল ও পরিশোধ" : "Bills and payments this month"}</h2>
+                <Button variant="outline" size="sm" onClick={() => downloadCsv(`monthly-invoices-${statementMonth}`, ["Invoice", "Client", "Billed on", "Due date", "Paid on", "Method", "Amount"], statement.invoiceRows.map((row) => [row.invoice, row.client, csvDate(row.billed), row.due ? csvDate(row.due) : "", csvDate(row.paid), row.method, Math.round(row.amount)]))} disabled={!statement.invoiceRows.length}><Download className="mr-2 size-4" />CSV</Button>
+              </div>
+              {statement.invoiceRows.length === 0 ? <StaffEmpty icon={SearchX} title={bn ? "কোনো পরিশোধ নেই" : "No payments"} description={bn ? "এই মাসে কোনো বিল পরিশোধ হয়নি।" : "No invoice was paid this month."} /> : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-secondary/60 text-left text-xs uppercase text-muted-foreground">
+                      <tr><th className="p-3">{bn ? "ইনভয়েস" : "Invoice"}</th><th className="p-3">{bn ? "ক্লায়েন্ট" : "Client"}</th><th className="p-3">{bn ? "বিলের দিন" : "Billed on"}</th><th className="p-3">{bn ? "শেষ তারিখ" : "Due"}</th><th className="p-3">{bn ? "পরিশোধের দিন" : "Paid on"}</th><th className="p-3">{bn ? "মাধ্যম" : "Method"}</th><th className="p-3 text-right">{bn ? "পরিমাণ" : "Amount"}</th></tr>
+                    </thead>
+                    <tbody>
+                      {statement.invoiceRows.map((row) => (
+                        <tr key={row.id} className="border-t border-border">
+                          <td className="p-3 font-medium">{row.invoice}</td>
+                          <td className="p-3">{row.client}</td>
+                          <td className="p-3 text-muted-foreground">{new Date(row.billed).toLocaleDateString(bn ? "bn-BD" : "en-US")}</td>
+                          <td className="p-3 text-muted-foreground">{row.due ? new Date(row.due).toLocaleDateString(bn ? "bn-BD" : "en-US") : "—"}</td>
+                          <td className="p-3">{new Date(row.paid).toLocaleDateString(bn ? "bn-BD" : "en-US")}</td>
+                          <td className="p-3">{row.method}</td>
+                          <td className="p-3 text-right font-medium tabular-nums">{money(row.amount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot><tr className="border-t-2 border-border bg-secondary/40 font-semibold"><td className="p-3" colSpan={6}>{bn ? "মোট আদায়" : "Total collected"}</td><td className="p-3 text-right tabular-nums">{money(statement.invoiceRows.reduce((sum, row) => sum + row.amount, 0))}</td></tr></tfoot>
+                  </table>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="cashbank" className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-lg border border-border bg-card p-4"><p className="text-xs text-muted-foreground">{bn ? "ব্যাংক স্থিতি" : "Bank balance"}</p><p className="mt-1 text-xl font-semibold tabular-nums">{money(cashTotals.bankBalance)}</p></div>
+              <div className="rounded-lg border border-border bg-card p-4"><p className="text-xs text-muted-foreground">{bn ? "ক্যাশ স্থিতি" : "Cash balance"}</p><p className="mt-1 text-xl font-semibold tabular-nums">{money(cashTotals.cashBalance)}</p></div>
+              <div className="rounded-lg border border-border bg-card p-4"><p className="text-xs text-muted-foreground">{bn ? "মোট জমা" : "Total in"}</p><p className="mt-1 text-xl font-semibold tabular-nums text-success">{money(cashTotals.inflow)}</p></div>
+              <div className="rounded-lg border border-border bg-card p-4"><p className="text-xs text-muted-foreground">{bn ? "মোট উত্তোলন/প্রদান" : "Total out"}</p><p className="mt-1 text-xl font-semibold tabular-nums text-warning">{money(cashTotals.outflow)}</p></div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-card p-4">
+              <h2 className="font-medium">{bn ? "ব্যাংক ট্রানজেকশন ও ক্যাশ পেমেন্ট এন্ট্রি" : "Bank transaction & cash payment entry"}</h2>
+              <p className="mt-1 text-xs text-muted-foreground">{bn ? "প্রতিটি এন্ট্রি সংরক্ষণের সাথে সাথেই জার্নাল ও ট্রায়াল ব্যালেন্সে মিলে যাবে।" : "Each entry posts straight into the journal and trial balance."}</p>
+              <div className="mt-4 grid gap-3 lg:grid-cols-4">
+                <Select value={cbForm.direction} onValueChange={(value) => setCbForm({ ...cbForm, direction: value, contra_code: value === "in" ? "4000" : "5400" })}>
+                  <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="in">{bn ? "টাকা জমা (Receipt)" : "Money in (receipt)"}</SelectItem><SelectItem value="out">{bn ? "টাকা প্রদান (Payment)" : "Money out (payment)"}</SelectItem></SelectContent>
+                </Select>
+                <Select value={cbForm.method} onValueChange={(value) => setCbForm({ ...cbForm, method: value })}>
+                  <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="bank">{bn ? "ব্যাংক ট্রানজেকশন" : "Bank transaction"}</SelectItem><SelectItem value="cash">{bn ? "ক্যাশ" : "Cash"}</SelectItem></SelectContent>
+                </Select>
+                <Input value={cbForm.amount} onChange={(event) => setCbForm({ ...cbForm, amount: event.target.value })} inputMode="decimal" placeholder={bn ? "টাকার পরিমাণ" : "Amount"} className="h-11" />
+                <Input type="date" value={cbForm.date} onChange={(event) => setCbForm({ ...cbForm, date: event.target.value })} className="h-11" />
+                <Select value={cbForm.contra_code} onValueChange={(value) => setCbForm({ ...cbForm, contra_code: value })}>
+                  <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+                  <SelectContent>{contraOptions.map((item) => <SelectItem key={item.code} value={item.code}>{`${item.label} (${item.code})`}</SelectItem>)}</SelectContent>
+                </Select>
+                <Input value={cbForm.counterparty} onChange={(event) => setCbForm({ ...cbForm, counterparty: event.target.value })} placeholder={bn ? "যার সাথে লেনদেন" : "Counterparty"} className="h-11" />
+                {cbForm.method === "bank" ? <Input value={cbForm.bank_name} onChange={(event) => setCbForm({ ...cbForm, bank_name: event.target.value })} placeholder={bn ? "ব্যাংকের নাম" : "Bank name"} className="h-11" /> : null}
+                {cbForm.method === "bank" ? <Input value={cbForm.account_number} onChange={(event) => setCbForm({ ...cbForm, account_number: event.target.value })} placeholder={bn ? "হিসাব নম্বর" : "Account number"} className="h-11" /> : null}
+                <Input value={cbForm.reference} onChange={(event) => setCbForm({ ...cbForm, reference: event.target.value })} placeholder={bn ? "রেফারেন্স / ট্রানজেকশন আইডি" : "Reference / transaction id"} className="h-11" />
+              </div>
+              <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <Textarea value={cbForm.note} onChange={(event) => setCbForm({ ...cbForm, note: event.target.value })} rows={2} placeholder={bn ? "বিবরণ (ঐচ্ছিক)" : "Description (optional)"} />
+                <Button className="h-11 self-end" onClick={() => void saveCashEntry()} disabled={savingCb}><Plus className="mr-2 size-4" />{bn ? "এন্ট্রি সংরক্ষণ" : "Save entry"}</Button>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-card">
+              <div className="flex items-center justify-between gap-2 border-b border-border p-3">
+                <h2 className="font-medium">{bn ? "সব ব্যাংক ও ক্যাশ এন্ট্রি" : "All bank & cash entries"}</h2>
+                <Button variant="outline" size="sm" onClick={() => downloadCsv("bank-cash-entries", ["Date", "Direction", "Method", "Counterparty", "Bank", "Account", "Reference", "Contra", "Amount"], cash.map((row) => [row.txn_date, row.direction, row.method, row.counterparty || "", row.bank_name || "", row.account_number || "", row.reference || "", row.contra_code, row.amount_bdt]))} disabled={!cash.length}><Download className="mr-2 size-4" />CSV</Button>
+              </div>
+              {cash.length === 0 ? <StaffEmpty icon={Landmark} title={bn ? "কোনো এন্ট্রি নেই" : "No entries"} description={bn ? "উপরের ফর্ম দিয়ে প্রথম ব্যাংক বা ক্যাশ এন্ট্রি যোগ করুন।" : "Add your first bank or cash entry above."} /> : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-secondary/60 text-left text-xs uppercase text-muted-foreground">
+                      <tr><th className="p-3">{bn ? "তারিখ" : "Date"}</th><th className="p-3">{bn ? "ধরন" : "Type"}</th><th className="p-3">{bn ? "মাধ্যম" : "Method"}</th><th className="p-3">{bn ? "বিবরণ" : "Details"}</th><th className="p-3">{bn ? "হিসাব কোড" : "Contra"}</th><th className="p-3 text-right">{bn ? "পরিমাণ" : "Amount"}</th><th className="p-3" /></tr>
+                    </thead>
+                    <tbody>
+                      {cash.map((row) => (
+                        <tr key={row.id} className="border-t border-border">
+                          <td className="p-3 whitespace-nowrap">{new Date(row.txn_date).toLocaleDateString(bn ? "bn-BD" : "en-US")}</td>
+                          <td className={`p-3 font-medium ${row.direction === "in" ? "text-success" : "text-warning"}`}>{row.direction === "in" ? (bn ? "জমা" : "In") : (bn ? "প্রদান" : "Out")}</td>
+                          <td className="p-3">{row.method === "bank" ? <span className="inline-flex items-center gap-1"><Landmark className="size-3.5" />{bn ? "ব্যাংক" : "Bank"}</span> : <span className="inline-flex items-center gap-1"><Banknote className="size-3.5" />{bn ? "ক্যাশ" : "Cash"}</span>}</td>
+                          <td className="p-3 text-muted-foreground">{[row.counterparty, row.bank_name, row.account_number, row.reference, row.note].filter(Boolean).join(" · ") || "—"}</td>
+                          <td className="p-3 tabular-nums text-muted-foreground">{row.contra_code}</td>
+                          <td className="p-3 text-right font-semibold tabular-nums">{money(Number(row.amount_bdt))}</td>
+                          <td className="p-3 text-right"><Button variant="ghost" size="icon" onClick={() => void removeCashEntry(row.id)} aria-label={bn ? "মুছুন" : "Delete"}><Trash2 className="size-4 text-destructive" /></Button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+
           <TabsContent value="trial" className="space-y-4">
             <div className="rounded-lg border border-border bg-card">
               <div className="flex items-center justify-between gap-2 border-b border-border p-3">
