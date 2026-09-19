@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "@/lib/router-compat";
 
-import { HeadphonesIcon, Plus, Send } from "lucide-react";
+import { HeadphonesIcon, Plus, Send, Search, Clock, Loader2, CheckCircle2 } from "lucide-react";
+import DataPagination from "@/components/DataPagination";
+import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
 import { SupportSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +29,10 @@ const DashboardSupport = () => {
   const [department, setDepartment] = useState<"billing" | "technical" | "sales" | "general">("general");
   const [priority, setPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
   const [message, setMessage] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "closed">("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchTickets = async () => { if (!user) return; const { data } = await supabase.from("support_tickets").select("*").eq("user_id", user.id).order("created_at", { ascending: false }); setTickets(data || []); setLoading(false); };
   const fetchReplies = async (ticketId: string) => { const { data } = await supabase.from("ticket_replies").select("*").eq("ticket_id", ticketId).order("created_at", { ascending: true }); setReplies(data || []); };
@@ -233,6 +239,14 @@ const DashboardSupport = () => {
               </div>
             </button>
           ))}
+
+          <DataPagination
+            total={filteredTickets.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(n) => { setPageSize(n); setPage(1); }}
+          />
         </div>
       )}
     </div>
