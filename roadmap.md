@@ -35,3 +35,7 @@
 - [x] Add secure shareable invoice view with PDF/print download and payment actions
 - [x] Ensure verified gateway callbacks automatically settle invoices and provision/update services
 - [x] Verify header, navigation, service pages, invoice flow, and chat on 430px and 384px mobile screens
+
+# Mobile homepage hero refinement
+- [ ] Upgrade the mobile hero to a more polished international corporate composition
+- [ ] Verify the refined hero at 430px and 384px with navigation and chat unobstructed
