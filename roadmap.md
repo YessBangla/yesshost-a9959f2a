@@ -3,7 +3,7 @@
 # Dashboard modernization roadmap
 
 - [x] Step 1: Modernize Admin Staff Management and verify desktop/mobile behavior
-- [ ] Step 2: Modernize Affiliate Admin
+- [x] Step 2: Modernize Affiliate Admin
 - [ ] Step 3: Modernize Finance Dashboard
 - [ ] Step 4: Modernize Marketing and CMS
 - [ ] Step 5: Modernize Coupons and Theme Store
