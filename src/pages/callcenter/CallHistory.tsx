@@ -207,9 +207,22 @@ const CallHistory = () => {
                 </div>
 
                 {/* Time */}
-                <div className="hidden md:flex items-center">
+                <div className="hidden md:flex items-center justify-between gap-2">
                   <span className="text-xs text-muted-foreground">{formatTime(call.started_at)}</span>
                 </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 px-4 pb-3">
+                {call.outcome && <span className="rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-foreground">{outcomes.find((item) => item.key === call.outcome)?.label || call.outcome}</span>}
+                {call.notes && <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{call.notes}</span>}
+                <Button size="sm" variant="ghost" className="ml-auto" onClick={() => editing === call.id ? setEditing(null) : startEdit(call)}><NotebookPen className="size-3.5" />{call.notes || call.outcome ? (bn ? "নোট সম্পাদনা" : "Edit log") : (bn ? "কল নোট যোগ করুন" : "Add call log")}</Button>
+              </div>
+
+              {editing === call.id && <div className="space-y-2 bg-secondary/30 px-4 py-3">
+                <Select value={draft.outcome} onValueChange={(value) => setDraft({ ...draft, outcome: value })}><SelectTrigger className="h-11 max-w-xs"><SelectValue /></SelectTrigger><SelectContent>{outcomes.map((item) => <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>)}</SelectContent></Select>
+                <Textarea rows={3} value={draft.notes} onChange={(event) => setDraft({ ...draft, notes: event.target.value })} placeholder={bn ? "কলে কী আলোচনা হয়েছে এবং পরবর্তী পদক্ষেপ" : "What was discussed and the next step"} />
+                <div className="flex gap-2"><Button size="sm" onClick={() => saveLog(call)} disabled={saving}>{saving ? <Loader2 className="size-3.5 animate-spin" /> : null}{bn ? "সেভ করুন" : "Save"}</Button><Button size="sm" variant="ghost" onClick={() => setEditing(null)}>{bn ? "বাতিল" : "Cancel"}</Button></div>
+              </div>}
               </div>
             );
           })
