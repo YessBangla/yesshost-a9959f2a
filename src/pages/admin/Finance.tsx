@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, Download, FileText, RefreshCcw, Scale, SearchX, Wallet } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Download, FileText, Plus, Receipt, RefreshCcw, Scale, SearchX, Trash2, TrendingUp, Wallet } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,7 +14,16 @@ import { csvDate, downloadCsv } from "@/lib/export-csv";
 type Invoice = { id: string; invoice_number: string; amount_bdt: number; status: string; description: string | null; created_at: string; paid_at: string | null; due_date: string | null; payment_method: string | null };
 type WalletTransaction = { id: string; type: string; amount_bdt: number; status: string; payment_method: string | null; transaction_id: string | null; description: string | null; created_at: string };
 type PaymentEvent = { id: string; invoice_id: string; gateway: string; transaction_id: string; amount_bdt: number; status: string; verified: boolean; settled: boolean; created_at: string };
-type FinanceRow = { key: string; source: "invoice" | "wallet" | "payment"; reference: string; description: string; method: string; amount: number; status: string; createdAt: string; reconciled: boolean };
+type Expense = { id: string; title: string; category: string; amount_bdt: number; expense_date: string; vendor: string | null; note: string | null };
+const expenseCategories = [
+  { value: "server", bn: "সার্ভার ও ডেটাসেন্টার", en: "Servers & datacenter" },
+  { value: "salary", bn: "বেতন", en: "Salaries" },
+  { value: "marketing", bn: "মার্কেটিং", en: "Marketing" },
+  { value: "software", bn: "সফটওয়্যার ও লাইসেন্স", en: "Software & licences" },
+  { value: "office", bn: "অফিস", en: "Office" },
+  { value: "other", bn: "অন্যান্য", en: "Other" },
+];
+type FinanceRow =  { key: string; source: "invoice" | "wallet" | "payment"; reference: string; description: string; method: string; amount: number; status: string; createdAt: string; reconciled: boolean };
 
 const AdminFinance = () => {
   const { lang } = useLanguage();
