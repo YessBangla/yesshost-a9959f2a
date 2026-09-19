@@ -56,7 +56,15 @@ const Signup = () => {
         : error.message;
       toast({ title: bn ? "সাইনআপ ব্যর্থ" : "Signup Failed", description: msg, variant: "destructive" });
     }
-    else { toast({ title: "Success!", description: tr("auth.accountCreated") }); navigate("/login"); }
+    else {
+      toast({
+        title: bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created",
+        description: bn
+          ? "আপনার অ্যাকাউন্ট অনুমোদনের অপেক্ষায় আছে। অনুমোদন হলে ইমেইলে জানানো হবে।"
+          : "Your account is awaiting approval. We will email you as soon as it is approved.",
+      });
+      navigate("/login");
+    }
     setLoading(false);
   };
 
