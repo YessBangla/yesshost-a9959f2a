@@ -157,10 +157,25 @@ const CustomerLookup = () => {
         </div>
 
         <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+          <Button onClick={() => setTicketOpen((value) => !value)}><Plus />{bn ? "গ্রাহকের পক্ষে টিকেট খুলুন" : "Open ticket for customer"}</Button>
+          {due.length > 0 && <Button variant="outline" onClick={sendReminder} disabled={saving}><BellRing />{bn ? "পেমেন্ট রিমাইন্ডার পাঠান" : "Send payment reminder"}</Button>}
           <Button asChild variant="outline"><Link to="/call-center/tickets"><Headphones />{bn ? "টিকেট কিউ" : "Ticket queue"}</Link></Button>
           <Button asChild variant="outline"><Link to="/call-center/orders"><ShoppingCart />{bn ? "অর্ডার কিউ" : "Order queue"}</Link></Button>
           {selected.phone && <Button asChild variant="outline"><a href={`tel:${selected.phone}`}><User />{bn ? "গ্রাহককে কল করুন" : "Call customer"}</a></Button>}
         </div>
+
+        {ticketOpen && <div className="space-y-3 rounded-md border border-border bg-secondary/30 p-3">
+          <p className="text-sm font-semibold text-foreground">{bn ? "গ্রাহকের পক্ষে নতুন টিকেট" : "New ticket on behalf of customer"}</p>
+          <Input value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} placeholder={bn ? "সমস্যার বিষয়" : "Issue subject"} className="h-11" />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Select value={form.department} onValueChange={(value) => setForm({ ...form, department: value })}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent>
+              <SelectItem value="technical">{bn ? "কারিগরি" : "Technical"}</SelectItem><SelectItem value="billing">{bn ? "বিলিং" : "Billing"}</SelectItem><SelectItem value="sales">{bn ? "সেলস" : "Sales"}</SelectItem><SelectItem value="general">{bn ? "সাধারণ" : "General"}</SelectItem></SelectContent></Select>
+            <Select value={form.priority} onValueChange={(value) => setForm({ ...form, priority: value })}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent>
+              <SelectItem value="low">{bn ? "কম" : "Low"}</SelectItem><SelectItem value="medium">{bn ? "মাঝারি" : "Medium"}</SelectItem><SelectItem value="high">{bn ? "উচ্চ" : "High"}</SelectItem><SelectItem value="urgent">{bn ? "জরুরি" : "Urgent"}</SelectItem></SelectContent></Select>
+          </div>
+          <Textarea value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} rows={4} placeholder={bn ? "কলে গ্রাহক যা জানিয়েছেন তা লিখুন" : "Summarise what the customer reported on the call"} />
+          <div className="flex gap-2"><Button onClick={createTicket} disabled={saving}>{saving ? <Loader2 className="animate-spin" /> : <Plus />}{bn ? "টিকেট তৈরি করুন" : "Create ticket"}</Button><Button variant="ghost" onClick={() => setTicketOpen(false)}>{bn ? "বাতিল" : "Cancel"}</Button></div>
+        </div>}
       </div>}
     </div>}
   </section>;
