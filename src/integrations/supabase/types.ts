@@ -966,6 +966,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          offers_promotions: boolean
+          order_updates: boolean
+          payment_billing: boolean
+          service_status: boolean
+          support_tickets: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          offers_promotions?: boolean
+          order_updates?: boolean
+          payment_billing?: boolean
+          service_status?: boolean
+          support_tickets?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          offers_promotions?: boolean
+          order_updates?: boolean
+          payment_billing?: boolean
+          service_status?: boolean
+          support_tickets?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -2041,6 +2074,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          invoice_id: string | null
           payment_method: string | null
           status: string
           transaction_id: string | null
@@ -2053,6 +2087,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          invoice_id?: string | null
           payment_method?: string | null
           status?: string
           transaction_id?: string | null
@@ -2065,6 +2100,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          invoice_id?: string | null
           payment_method?: string | null
           status?: string
           transaction_id?: string | null
@@ -2072,7 +2108,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -2112,6 +2156,7 @@ export type Database = {
         Args: { coupon_id: string }
         Returns: undefined
       }
+      pay_invoice_from_wallet: { Args: { _invoice_id: string }; Returns: Json }
       post_journal_entry: {
         Args: {
           _amount: number
@@ -2127,6 +2172,10 @@ export type Database = {
         Returns: string
       }
       provision_order: { Args: { _order_id: string }; Returns: undefined }
+      verify_support_pin: {
+        Args: { _pin: string; _user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "call_center" | "reseller"

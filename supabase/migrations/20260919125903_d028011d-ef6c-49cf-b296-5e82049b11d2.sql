@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Staff can view support pins" ON public.support_pins;
