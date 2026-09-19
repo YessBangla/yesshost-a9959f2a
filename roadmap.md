@@ -29,3 +29,9 @@
 - [x] Refine the mobile public-site template to a more premium international corporate standard.
 - [x] Apply an iOS 27-inspired liquid-glass visual mode to the mobile public site.
 - [x] Keep the iOS 27-inspired liquid-glass mobile mode light and corporate, not dark.
+
+# Unified mobile design and invoice payment rollout
+- [ ] Standardize light corporate glass mobile layouts across public and client pages
+- [ ] Add secure shareable invoice view with PDF download and payment actions
+- [ ] Ensure verified gateway callbacks automatically settle invoices and provision/update services
+- [ ] Verify header, navigation, service pages, invoice flow, and chat on mobile
