@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PublicLayout from "@/components/PublicLayout";
 import { formatPrice, formatAmount } from "@/lib/formatPrice";
+import { getGatewayAvailability } from "@/lib/payment-gateways.functions";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
