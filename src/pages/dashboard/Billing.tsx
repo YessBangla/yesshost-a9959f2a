@@ -330,6 +330,77 @@ const DashboardBilling = () => {
     });
   }, [paidInvoicesAll, isBn]);
 
+  const payableInvoices = useMemo(
+    () => invoices.filter((i) => i.status === "unpaid" || i.status === "overdue"),
+    [invoices]
+  );
+  const selectedInvoices = payableInvoices.filter((i) => selectedIds.has(i.id));
+  const selectedTotal = selectedInvoices.reduce((sum, i) => sum + Number(i.amount_bdt), 0);
+
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+
+  const toggleSelectAll = () => {
+    const pagePayable = pagedInvoices.filter((i) => i.status === "unpaid" || i.status === "overdue");
+    const allSelected = pagePayable.length > 0 && pagePayable.every((i) => selectedIds.has(i.id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      pagePayable.forEach((i) => { if (allSelected) next.delete(i.id); else next.add(i.id); });
+      return next;
+    });
+  };
+
+  const handleMassPay = async () => {
+    if (!selectedInvoices.length) return;
+    if (walletBalance < selectedTotal) {
+      toast({
+        title: isBn ? "অপর্যাপ্ত ব্যালেন্স" : "Insufficient Balance",
+        description: isBn
+          ? `আপনার ওয়ালেটে ৳${formatAmount(walletBalance, lang)} আছে, কিন্তু ৳${formatAmount(selectedTotal, lang)} প্রয়োজন।`
+          : `Your wallet has ৳${formatAmount(walletBalance, lang)}, but ৳${formatAmount(selectedTotal, lang)} is required.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    setMassPaying(true);
+    let paidCount = 0;
+    let failedCount = 0;
+    for (const inv of selectedInvoices) {
+      try {
+        const { data, error } = await supabase.functions.invoke("wallet-pay-invoice", {
+          body: { invoice_id: inv.id },
+        });
+        if (error || !data?.success) failedCount += 1; else paidCount += 1;
+      } catch {
+        failedCount += 1;
+      }
+    }
+    setMassPaying(false);
+    setSelectedIds(new Set());
+    fetchInvoices();
+    fetchWalletBalance();
+    if (failedCount === 0) {
+      toast({
+        title: isBn ? "সফল!" : "Success!",
+        description: isBn
+          ? `${paidCount}টি ইনভয়েস (মোট ৳${formatAmount(selectedTotal, lang)}) ওয়ালেট থেকে পরিশোধ করা হয়েছে`
+          : `${paidCount} invoice(s) totaling ৳${formatAmount(selectedTotal, lang)} paid from wallet`,
+      });
+    } else {
+      toast({
+        title: isBn ? "আংশিক সফল" : "Partially completed",
+        description: isBn
+          ? `${paidCount}টি পরিশোধিত, ${failedCount}টি ব্যর্থ হয়েছে — ব্যর্থগুলো আবার চেষ্টা করুন`
+          : `${paidCount} paid, ${failedCount} failed — please retry the failed ones`,
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredInvoices = useMemo(() => {
     const q = invSearch.trim().toLowerCase();
     return invoices.filter(i => {
