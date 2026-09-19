@@ -75,7 +75,9 @@ serve(async (req) => {
     const { data: auth } = bearer ? await db.auth.getUser(bearer) : { data: { user: null } };
     if (!auth.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const source = is_wallet_deposit ? "wallet_transactions" : "invoices";
-    const { data: payable } = await db.from(source).select("id,user_id,status,amount_bdt").eq("id", invoice_id).eq("user_id", auth.user.id).eq("status", "pending").maybeSingle();
+    let payableQuery = db.from(source).select("id,user_id,status,amount_bdt").eq("id", invoice_id).eq("user_id", auth.user.id);
+    payableQuery = is_wallet_deposit ? payableQuery.eq("status", "pending") : payableQuery.in("status", ["pending", "overdue"]);
+    const { data: payable } = await payableQuery.maybeSingle();
     const amount = Number(payable?.amount_bdt);
     if (!payable || !Number.isFinite(amount) || amount <= 0) return new Response(JSON.stringify({ error: "Payable record not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
