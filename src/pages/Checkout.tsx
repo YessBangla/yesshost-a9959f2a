@@ -484,7 +484,7 @@ const Checkout = () => {
                         {!method.ready && (
                           <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm">{bn ? "শীঘ্রই আসছে" : "Coming Soon"}</span>
                         )}
-                        {method.id === "sslcommerz" && (
+                        {method.ready && (method as { isSandbox?: boolean }).isSandbox && (
                           <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded-sm">🧪 Sandbox</span>
                         )}
                       </div>
