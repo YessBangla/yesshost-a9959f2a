@@ -84,7 +84,7 @@ const CallCenterDashboard = () => {
   if (loading) return <div className="space-y-5"><StaffLoading rows={2} /><div className="grid gap-4 lg:grid-cols-[1.35fr_.65fr]"><StaffLoading rows={6} /><StaffLoading rows={4} /></div></div>;
 
   return <div className="space-y-5">
-    <StaffPageHeader title={bn ? "অপারেশনস কনসোল" : "Operations Console"} description={bn ? "সাপোর্ট, কল ও সেলসের আজকের লাইভ কার্যক্রম" : "Live support, call and sales activity for today"} actions={<Button variant="outline" onClick={load}><Clock3 />{bn ? "রিফ্রেশ" : "Refresh"}</Button>} />
+    <StaffPageHeader title={bn ? "অপারেশনস কনসোল" : "Operations Console"} description={bn ? "সাপোর্ট, কল ও সেলসের আজকের লাইভ কার্যক্রম" : "Live support, call and sales activity for today"} actions={<div className="flex items-center gap-3"><span className="text-xs text-muted-foreground">{lastSync ? `${bn ? "সর্বশেষ আপডেট" : "Updated"} ${lastSync.toLocaleTimeString(bn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" })}` : ""}</span><Button variant="outline" onClick={() => load()}><Clock3 />{bn ? "রিফ্রেশ" : "Refresh"}</Button></div>} />
     {error && <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">{error}</div>}
     <StaffMetricStrip metrics={metrics} />
     <div className="grid min-h-[480px] gap-4 xl:grid-cols-[1.35fr_.65fr]">
