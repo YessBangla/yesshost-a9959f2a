@@ -1530,6 +1530,7 @@ export type Database = {
           created_at: string
           id: string
           include_hosting: boolean | null
+          invoice_id: string | null
           paid_at: string | null
           payment_method: string | null
           status: string
@@ -1542,6 +1543,7 @@ export type Database = {
           created_at?: string
           id?: string
           include_hosting?: boolean | null
+          invoice_id?: string | null
           paid_at?: string | null
           payment_method?: string | null
           status?: string
@@ -1554,6 +1556,7 @@ export type Database = {
           created_at?: string
           id?: string
           include_hosting?: boolean | null
+          invoice_id?: string | null
           paid_at?: string | null
           payment_method?: string | null
           status?: string
@@ -1562,6 +1565,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "theme_orders_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "theme_orders_theme_id_fkey"
             columns: ["theme_id"]
