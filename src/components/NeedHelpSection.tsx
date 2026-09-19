@@ -1,24 +1,61 @@
-import { Phone, MessageCircle, TicketCheck, Mail } from "lucide-react";
-import { useNavigate } from "@/lib/router-compat";
+import { Phone, MessageCircle, TicketCheck, Mail, Headphones, LifeBuoy, Send, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "@/lib/router-compat";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+const iconMap: Record<string, typeof Phone> = {
+  Phone, MessageCircle, TicketCheck, Mail, Headphones, LifeBuoy, Send, Users,
+};
+
+type HelpOption = {
+  icon: typeof Phone;
+  titleBn: string;
+  titleEn: string;
+  descBn: string;
+  descEn: string;
+  href: string;
+  external?: boolean;
+};
+
+const fallbackOptions: HelpOption[] = [
+  { icon: Phone, titleBn: "কল করুন", titleEn: "Call Us", descBn: "১০AM - ৮PM (প্রতিদিন)", descEn: "10AM - 8PM (Everyday)", href: "tel:+8801805464343", external: true },
+  { icon: MessageCircle, titleBn: "লাইভ চ্যাট", titleEn: "Live Chat", descBn: "তাৎক্ষণিক সাহায্য পান", descEn: "Get instant help", href: "/chat-rooms" },
+  { icon: TicketCheck, titleBn: "সাপোর্ট টিকেট", titleEn: "Support Ticket", descBn: "বিস্তারিত সমস্যা জানান", descEn: "Submit detailed issues", href: "/dashboard/support" },
+  { icon: Mail, titleBn: "ইমেইল করুন", titleEn: "Email Us", descBn: "support@yesshost.com", descEn: "support@yesshost.com", href: "mailto:support@yesshost.com", external: true },
+];
 
 const NeedHelpSection = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
-  const navigate = useNavigate();
+  const [cms, setCms] = useState<any[]>([]);
 
-  const options = [
-    { icon: Phone, titleBn: "কল করুন", titleEn: "Call Us", descBn: "১০AM - ৮PM (প্রতিদিন)", descEn: "10AM - 8PM (Everyday)", href: "tel:+8801805464343", external: true },
-    { icon: MessageCircle, titleBn: "লাইভ চ্যাট", titleEn: "Live Chat", descBn: "তাৎক্ষণিক সাহায্য পান", descEn: "Get instant help", action: "livechat" },
-    { icon: TicketCheck, titleBn: "সাপোর্ট টিকেট", titleEn: "Support Ticket", descBn: "বিস্তারিত সমস্যা জানান", descEn: "Submit detailed issues", href: "/dashboard/support" },
-    { icon: Mail, titleBn: "ইমেইল করুন", titleEn: "Email Us", descBn: "support@yesshost.com", descEn: "support@yesshost.com", href: "mailto:support@yesshost.com", external: true },
-  ];
+  useEffect(() => {
+    supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
+      .in("section_key", ["help_heading", "help_options"])
+      .then(({ data }) => setCms(data || []));
+  }, []);
 
-  const handleClick = (opt: (typeof options)[0]) => {
-    if (opt.action === "livechat") navigate("/chat-rooms");
-  };
+  const get = (key: string) => cms.find(c => c.section_key === key);
+  const heading = get("help_heading");
+  const headingMeta = heading?.metadata || {};
+
+  const options: HelpOption[] = useMemo(() => {
+    const list = get("help_options")?.metadata?.options;
+    if (Array.isArray(list) && list.length) {
+      return list.map((o: any) => ({
+        icon: iconMap[o.icon] || LifeBuoy,
+        titleBn: o.title_bn,
+        titleEn: o.title_en,
+        descBn: o.desc_bn,
+        descEn: o.desc_en,
+        href: o.href || "/contact",
+        external: Boolean(o.external) || /^(tel:|mailto:|https?:)/.test(o.href || ""),
+      }));
+    }
+    return fallbackOptions;
+  }, [cms]);
 
   return (
     <section className="py-10 md:py-20">
@@ -31,13 +68,13 @@ const NeedHelpSection = () => {
           className="text-center mb-6 md:mb-10"
         >
           <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
-            {bn ? "সাহায্য" : "Support"}
+            {(bn ? headingMeta.badge_bn : headingMeta.badge_en) || (bn ? "সাহায্য" : "Support")}
           </span>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
-            {bn ? "সাহায্য দরকার? আমরা এখানে আছি" : "Need Help? We Are Here"}
+            {(bn ? heading?.title_bn : heading?.title_en) || (bn ? "সাহায্য দরকার? আমরা এখানে আছি" : "Need Help? We Are Here")}
           </h2>
           <p className="text-muted-foreground text-xs sm:text-sm max-w-lg mx-auto">
-            {bn ? "যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন" : "Contact us anytime — our team is always ready to help"}
+            {(bn ? heading?.content_bn : heading?.content_en) || (bn ? "যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন" : "Contact us anytime — our team is always ready to help")}
           </p>
         </motion.div>
 
@@ -64,9 +101,8 @@ const NeedHelpSection = () => {
               </motion.div>
             );
 
-            if (opt.action) return <div key={i} onClick={() => handleClick(opt)}>{inner}</div>;
             if (opt.external) return <a key={i} href={opt.href} target="_blank" rel="noopener noreferrer">{inner}</a>;
-            return <Link key={i} to={opt.href!}>{inner}</Link>;
+            return <Link key={i} to={opt.href as any}>{inner}</Link>;
           })}
         </div>
       </div>
