@@ -28,9 +28,10 @@ const DashboardSupportPin = () => {
   const generate = useCallback(async (uid: string) => {
     setBusy(true);
     const next: StoredPin = { pin: makePin(), expiresAt: Date.now() + VALID_MS, uid };
-    const { error } = await supabase
-      .from("support_pins")
-      .upsert({ user_id: uid, pin: next.pin, expires_at: new Date(next.expiresAt).toISOString() }, { onConflict: "user_id" });
+    const { error } = await supabase.rpc("set_support_pin" as never, {
+      _pin: next.pin,
+      _expires_at: new Date(next.expiresAt).toISOString(),
+    } as never);
     setBusy(false);
     if (error) {
       toast({ title: bn ? "পিন তৈরি করা যায়নি" : "Could not create PIN", description: bn ? "একটু পরে আবার চেষ্টা করুন।" : "Please try again in a moment.", variant: "destructive" });
@@ -42,17 +43,7 @@ const DashboardSupportPin = () => {
   useEffect(() => {
     if (!user) return;
     let active = true;
-    supabase
-      .from("support_pins")
-      .select("pin, expires_at")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!active) return;
-        const expiresAt = data?.expires_at ? new Date(data.expires_at).getTime() : 0;
-        if (data?.pin && expiresAt > Date.now()) setPin({ pin: data.pin, expiresAt, uid: user.id });
-        else void generate(user.id);
-      });
+    void generate(user.id).then(() => { if (!active) return; });
     return () => { active = false; };
   }, [user, generate]);
 
