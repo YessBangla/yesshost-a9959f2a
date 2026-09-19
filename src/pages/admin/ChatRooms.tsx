@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, Plus, Trash2, Edit2, CheckCircle, XCircle, Clock, Users, Save, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StaffLoading } from "@/components/staff/StaffConsole";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -120,8 +122,9 @@ const AdminChatRooms = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="space-y-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-20 w-full" />)}</div>
+        <StaffLoading rows={5} />
       </div>
     );
   }
