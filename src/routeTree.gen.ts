@@ -81,6 +81,7 @@ import { Route as PaymentIndexRouteImport } from './routes/payment/index'
 import { Route as PaymentCancelRouteImport } from './routes/payment/cancel'
 import { Route as PaymentFailRouteImport } from './routes/payment/fail'
 import { Route as PaymentSuccessRouteImport } from './routes/payment/success'
+import { Route as SellersSlugRouteImport } from './routes/sellers/$slug'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as ThemesIndexRouteImport } from './routes/themes/index'
 import { Route as ApiDashboardBillingRouteImport } from './routes/api/dashboard/billing'
@@ -453,6 +454,11 @@ const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
   path: '/payment/success',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SellersSlugRoute = SellersSlugRouteImport.update({
+  id: '/sellers/$slug',
+  path: '/sellers/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
   id: '/services/$slug',
   path: '/services/$slug',
@@ -573,6 +579,7 @@ export interface FileRoutesByFullPath {
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/sellers/$slug': typeof SellersSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/call-center/': typeof CallCenterIndexRoute
@@ -654,6 +661,7 @@ export interface FileRoutesByTo {
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/sellers/$slug': typeof SellersSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/call-center': typeof CallCenterIndexRoute
@@ -739,6 +747,7 @@ export interface FileRoutesById {
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/sellers/$slug': typeof SellersSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/call-center/': typeof CallCenterIndexRoute
@@ -825,6 +834,7 @@ export interface FileRouteTypes {
     | '/payment/cancel'
     | '/payment/fail'
     | '/payment/success'
+    | '/sellers/$slug'
     | '/services/$slug'
     | '/admin/'
     | '/call-center/'
@@ -906,6 +916,7 @@ export interface FileRouteTypes {
     | '/payment/cancel'
     | '/payment/fail'
     | '/payment/success'
+    | '/sellers/$slug'
     | '/services/$slug'
     | '/admin'
     | '/call-center'
@@ -990,6 +1001,7 @@ export interface FileRouteTypes {
     | '/payment/cancel'
     | '/payment/fail'
     | '/payment/success'
+    | '/sellers/$slug'
     | '/services/$slug'
     | '/admin/'
     | '/call-center/'
@@ -1033,6 +1045,7 @@ export interface RootRouteChildren {
   PaymentCancelRoute: typeof PaymentCancelRoute
   PaymentFailRoute: typeof PaymentFailRoute
   PaymentSuccessRoute: typeof PaymentSuccessRoute
+  SellersSlugRoute: typeof SellersSlugRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   KnowledgeBaseIndexRoute: typeof KnowledgeBaseIndexRoute
   PaymentIndexRoute: typeof PaymentIndexRoute
@@ -1553,6 +1566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaymentSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sellers/$slug': {
+      id: '/sellers/$slug'
+      path: '/sellers/$slug'
+      fullPath: '/sellers/$slug'
+      preLoaderRoute: typeof SellersSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services/$slug': {
       id: '/services/$slug'
       path: '/services/$slug'
@@ -1772,6 +1792,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaymentCancelRoute: PaymentCancelRoute,
   PaymentFailRoute: PaymentFailRoute,
   PaymentSuccessRoute: PaymentSuccessRoute,
+  SellersSlugRoute: SellersSlugRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   KnowledgeBaseIndexRoute: KnowledgeBaseIndexRoute,
   PaymentIndexRoute: PaymentIndexRoute,
