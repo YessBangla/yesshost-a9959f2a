@@ -63,6 +63,7 @@ import { Route as DashboardDomainToolsRouteImport } from './routes/dashboard/dom
 import { Route as DashboardDomainsRouteImport } from './routes/dashboard/domains'
 import { Route as DashboardIncomeRouteImport } from './routes/dashboard/income'
 import { Route as DashboardKnowledgeBaseRouteImport } from './routes/dashboard/knowledge-base'
+import { Route as DashboardMyThemesRouteImport } from './routes/dashboard/my-themes'
 import { Route as DashboardOrderServiceRouteImport } from './routes/dashboard/order-service'
 import { Route as DashboardOrdersRouteImport } from './routes/dashboard/orders'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
@@ -362,6 +363,11 @@ const DashboardKnowledgeBaseRoute = DashboardKnowledgeBaseRouteImport.update({
   path: '/knowledge-base',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardMyThemesRoute = DashboardMyThemesRouteImport.update({
+  id: '/my-themes',
+  path: '/my-themes',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardOrderServiceRoute = DashboardOrderServiceRouteImport.update({
   id: '/order-service',
   path: '/order-service',
@@ -551,6 +557,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/my-themes': typeof DashboardMyThemesRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -631,6 +638,7 @@ export interface FileRoutesByTo {
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/my-themes': typeof DashboardMyThemesRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -715,6 +723,7 @@ export interface FileRoutesById {
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/my-themes': typeof DashboardMyThemesRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -800,6 +809,7 @@ export interface FileRouteTypes {
     | '/dashboard/domains'
     | '/dashboard/income'
     | '/dashboard/knowledge-base'
+    | '/dashboard/my-themes'
     | '/dashboard/order-service'
     | '/dashboard/orders'
     | '/dashboard/profile'
@@ -880,6 +890,7 @@ export interface FileRouteTypes {
     | '/dashboard/domains'
     | '/dashboard/income'
     | '/dashboard/knowledge-base'
+    | '/dashboard/my-themes'
     | '/dashboard/order-service'
     | '/dashboard/orders'
     | '/dashboard/profile'
@@ -963,6 +974,7 @@ export interface FileRouteTypes {
     | '/dashboard/domains'
     | '/dashboard/income'
     | '/dashboard/knowledge-base'
+    | '/dashboard/my-themes'
     | '/dashboard/order-service'
     | '/dashboard/orders'
     | '/dashboard/profile'
@@ -1415,6 +1427,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardKnowledgeBaseRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/my-themes': {
+      id: '/dashboard/my-themes'
+      path: '/my-themes'
+      fullPath: '/dashboard/my-themes'
+      preLoaderRoute: typeof DashboardMyThemesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/order-service': {
       id: '/dashboard/order-service'
       path: '/order-service'
@@ -1686,6 +1705,7 @@ interface DashboardRouteRouteChildren {
   DashboardDomainsRoute: typeof DashboardDomainsRoute
   DashboardIncomeRoute: typeof DashboardIncomeRoute
   DashboardKnowledgeBaseRoute: typeof DashboardKnowledgeBaseRoute
+  DashboardMyThemesRoute: typeof DashboardMyThemesRoute
   DashboardOrderServiceRoute: typeof DashboardOrderServiceRoute
   DashboardOrdersRoute: typeof DashboardOrdersRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
@@ -1707,6 +1727,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardDomainsRoute: DashboardDomainsRoute,
   DashboardIncomeRoute: DashboardIncomeRoute,
   DashboardKnowledgeBaseRoute: DashboardKnowledgeBaseRoute,
+  DashboardMyThemesRoute: DashboardMyThemesRoute,
   DashboardOrderServiceRoute: DashboardOrderServiceRoute,
   DashboardOrdersRoute: DashboardOrdersRoute,
   DashboardProfileRoute: DashboardProfileRoute,
