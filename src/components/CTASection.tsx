@@ -55,8 +55,9 @@ const CTASection = () => {
                 <Phone className="w-4 h-4" />
                 {lang === "bn" ? (contacts.phone_label_bn || tr("cta.callUs")) : (contacts.phone_label_en || tr("cta.callUs"))}
               </a>
-              <a
-                href="#"
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("yesshost:open-chat"))}
                 className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/25 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold text-sm hover:bg-white/10 transition-all"
               >
                 <MessageCircle className="w-4 h-4" />
