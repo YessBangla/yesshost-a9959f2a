@@ -77,11 +77,41 @@ const ContactMessages = () => {
     }
   };
 
+  const loadReplies = async (messageId: string) => {
+    setRepliesLoading(true);
+    try {
+      const rows = await getContactReplies({ data: { messageId } });
+      setReplies(rows);
+    } catch {
+      setReplies([]);
+    }
+    setRepliesLoading(false);
+  };
+
   const sendReply = async () => {
-    if (!selected || !replyText.trim()) return;
+    if (!selected || replyText.trim().length < 2) {
+      toast.error(bn ? "রিপ্লাই লিখুন" : "Please write a reply first");
+      return;
+    }
     setSending(true);
-    toast.success(bn ? `${selected.email}-এ রিপ্লাই পাঠানো হয়েছে (সিমুলেটেড)` : `Reply sent to ${selected.email} (simulated)`);
-    setReplyText("");
+    try {
+      const res = await replyReq({ data: { messageId: selected.id, reply: replyText.trim() } });
+      if (res.ok) {
+        toast.success(bn ? `${selected.email}-এ রিপ্লাই পাঠানো হয়েছে` : `Reply sent to ${selected.email}`);
+        setReplyText("");
+        setMessages(prev => prev.map(m => m.id === selected.id ? { ...m, is_read: true } : m));
+      } else if (res.status === "queued") {
+        toast.warning(bn
+          ? "রিপ্লাই সংরক্ষিত হয়েছে, তবে ইমেইল সার্ভিস চালু নেই — Communication Settings থেকে চালু করুন"
+          : "Reply saved, but no email provider is active — enable one in Communication Settings");
+        setReplyText("");
+      } else {
+        toast.error(bn ? `পাঠানো যায়নি: ${res.detail || ""}` : `Could not send: ${res.detail || ""}`);
+      }
+      await loadReplies(selected.id);
+    } catch (e) {
+      toast.error(bn ? "রিপ্লাই পাঠাতে সমস্যা হয়েছে" : "Failed to send the reply");
+    }
     setSending(false);
   };
 
