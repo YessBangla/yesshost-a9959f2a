@@ -2147,6 +2147,15 @@ export type Database = {
           type: string
         }[]
       }
+      create_order_secure: {
+        Args: {
+          _coupon_code?: string
+          _items: Json
+          _order_note?: string
+          _payment_method?: string
+        }
+        Returns: Json
+      }
       expense_account_code: { Args: { _category: string }; Returns: string }
       has_role: {
         Args: {
