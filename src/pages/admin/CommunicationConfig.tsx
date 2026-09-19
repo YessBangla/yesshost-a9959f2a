@@ -9,8 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Mail, Phone, Key, Shield, Loader2, Save, Eye, EyeOff, CheckCircle2, AlertCircle, PlayCircle, XCircle } from "lucide-react";
+import { Mail, Phone, Key, Shield, Loader2, Save, Eye, EyeOff, CheckCircle2, AlertCircle, PlayCircle, XCircle, RefreshCw, Radio } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { StaffPageHeader, StaffMetricStrip, StaffLoading, type StaffMetric } from "@/components/staff/StaffConsole";
+
 
 interface ConfigRow {
   id: string;
@@ -118,12 +120,9 @@ const CommunicationConfig = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <div className="space-y-6"><StaffLoading rows={6} /></div>;
   }
+
 
   const smtpConfig = getConfig("smtp_email");
   const emailApiConfig = getConfig("email_api");
@@ -159,14 +158,32 @@ const CommunicationConfig = () => {
     </Badge>
   );
 
+  const activeChannels = configs.filter(c => c.is_active).length;
+  const emailReady = !!(smtpConfig?.is_active || emailApiConfig?.is_active);
+  const metrics: StaffMetric[] = [
+    { label: bn ? "সক্রিয় চ্যানেল" : "Active channels", value: activeChannels, detail: bn ? `মোট ${configs.length}টির মধ্যে` : `of ${configs.length} configured`, icon: Radio, tone: activeChannels ? "success" : "warning" },
+    { label: bn ? "ইমেইল ডেলিভারি" : "Email delivery", value: emailReady ? (bn ? "প্রস্তুত" : "Ready") : (bn ? "বন্ধ" : "Off"), detail: smtpConfig?.is_active ? "SMTP" : emailApiConfig?.is_active ? "API" : (bn ? "কনফিগার করুন" : "needs setup"), icon: Mail, tone: emailReady ? "success" : "danger" },
+    { label: bn ? "SMS OTP" : "SMS OTP", value: smsConfig?.is_active ? (bn ? "চালু" : "On") : (bn ? "বন্ধ" : "Off"), detail: smsConfig?.config_value?.provider || (bn ? "প্রোভাইডার নেই" : "no provider"), icon: Phone, tone: smsConfig?.is_active ? "success" : "warning" },
+    { label: bn ? "ইমেইল OTP" : "Email OTP", value: emailOtpConfig?.is_active ? (bn ? "চালু" : "On") : (bn ? "বন্ধ" : "Off"), detail: `${emailOtpConfig?.config_value?.length || 6} ${bn ? "ডিজিট" : "digits"}`, icon: Shield, tone: emailOtpConfig?.is_active ? "success" : "warning" },
+  ];
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{bn ? "কমিউনিকেশন কনফিগারেশন" : "Communication Config"}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {bn ? "ইমেইল, SMS এবং OTP সার্ভিসের API কনফিগারেশন পরিচালনা করুন" : "Manage API configurations for email, SMS, and OTP services"}
-        </p>
-      </div>
+      <StaffPageHeader
+        title={bn ? "কমিউনিকেশন অপারেশনস" : "Communication Operations"}
+        description={bn
+          ? "ইমেইল, SMS ও OTP ডেলিভারি চ্যানেল কনফিগার করুন এবং লাইভ টেস্ট চালান"
+          : "Configure email, SMS and OTP delivery channels, then verify them with a live test"}
+        actions={
+          <Button variant="outline" size="sm" className="h-11 gap-2" onClick={fetchConfigs} disabled={loading}>
+            <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} />
+            {bn ? "রিফ্রেশ" : "Refresh"}
+          </Button>
+        }
+      />
+
+      <StaffMetricStrip metrics={metrics} />
+
 
       {/* Live delivery test */}
       <Card className="border-primary/20">
