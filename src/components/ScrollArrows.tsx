@@ -29,7 +29,7 @@ const ScrollArrows = () => {
   };
 
   return (
-    <div className="fixed left-4 bottom-20 md:bottom-6 z-40 flex flex-col gap-2">
+    <div className="fixed left-3 z-40 flex flex-col gap-2 bottom-[calc(6rem+env(safe-area-inset-bottom))] md:left-4 md:bottom-6">
       <AnimatePresence>
         {showUp && (
           <MotionButton
@@ -38,7 +38,7 @@ const ScrollArrows = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => scrollTo("up")}
-            className="w-10 h-10 rounded-full glass-card border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors shadow-lg"
+            className="flex w-10 h-10 rounded-full glass-card border border-border/50 items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors shadow-lg"
             aria-label="Scroll up"
           >
             <ChevronUp className="w-5 h-5" />
@@ -53,7 +53,7 @@ const ScrollArrows = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => scrollTo("down")}
-            className="w-10 h-10 rounded-full glass-card border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors shadow-lg"
+            className="hidden md:flex w-10 h-10 rounded-full glass-card border border-border/50 items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors shadow-lg"
             aria-label="Scroll down"
           >
             <ChevronDown className="w-5 h-5" />

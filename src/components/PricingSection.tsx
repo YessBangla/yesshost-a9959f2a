@@ -173,17 +173,17 @@ const PricingSection = () => {
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
             {tr("pricing.title")}
           </h2>
-          <p className="text-muted-foreground text-base max-w-lg mx-auto mb-6">
+          <p className="text-muted-foreground text-sm sm:text-base max-w-lg mx-auto mb-6">
             {tr("pricing.subtitle")}
           </p>
 
           {/* Tabs */}
-          <div className="flex overflow-x-auto gap-1 p-1 rounded-xl bg-card border border-border mb-4 no-scrollbar max-w-fit mx-auto">
+          <div className="flex overflow-x-auto gap-1 p-1 rounded-xl bg-card border border-border mb-4 no-scrollbar snap-x snap-mandatory w-full sm:w-auto sm:max-w-fit mx-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
+                className={`px-3 md:px-4 py-2 rounded-lg text-[13px] sm:text-sm font-semibold transition-all whitespace-nowrap shrink-0 snap-start min-h-11 ${
                   activeTab === tab.key
                     ? "gradient-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
@@ -201,7 +201,7 @@ const PricingSection = () => {
               <button
                 key={d.key}
                 onClick={() => setAllDurations(d)}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
+                className="px-3 py-2 min-h-11 rounded-lg text-xs font-semibold border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
               >
                 {isBn ? d.shortBn : d.shortEn}
                 {d.discount > 0 && <span className="ml-1 text-primary">-{d.discount}%</span>}
