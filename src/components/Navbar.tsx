@@ -55,6 +55,7 @@ const Navbar = () => {
       href: "/services/domain",
       cta: { label: isBn ? "সকল ডোমেইন দেখুন" : "View All Domains", href: "/domain-pricing" },
       children: [
+        { label: isBn ? "ডোমেইন খুঁজুন" : "Search Domains", href: "/domain-search", icon: Search, desc: isBn ? "পছন্দের ডোমেইনটি এখনই খুঁজুন" : "Find your preferred domain instantly" },
         { label: isBn ? "ডোমেইন রেজিস্ট্রেশন" : "Domain Registration", href: "/services/domain", icon: Globe2, desc: isBn ? ".com .net .org .info রেজিস্টার করুন" : "Register .com .net .org .info" },
         { label: isBn ? "ডোমেইন মূল্য তালিকা" : "Domain Pricing", href: "/domain-pricing", icon: ListOrdered, desc: isBn ? "সকল ডোমেইনের মূল্য দেখুন" : "View all domain prices" },
       ],
