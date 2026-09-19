@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { StaffPageHeader } from "@/components/staff/StaffConsole";
+import { StaffPageHeader, StaffLoading, StaffEmpty } from "@/components/staff/StaffConsole";
 
 
 const formatSize = (mb: number) => mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${mb} MB`;
@@ -135,34 +135,32 @@ const ResellerDashboard = () => {
   };
 
   // ── Loading ──
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-muted-foreground">{bn ? "লোড হচ্ছে..." : "Loading..."}</p>
+  if (loading) return <div className="space-y-4"><StaffLoading rows={5} /></div>;
+
+  // ── Empty State ──
+  if (packages.length === 0) return (
+    <div className="space-y-6">
+      <StaffPageHeader
+        title={bn ? "রিসেলার প্যানেল" : "Reseller Panel"}
+        description={bn ? "হোস্টিং প্যাকেজ, রিসোর্স ও ক্লায়েন্ট অ্যাকাউন্ট ম্যানেজমেন্ট" : "Manage hosting packages, resources and client accounts"}
+        actions={
+          <Button variant="outline" size="sm" className="h-11 gap-2" onClick={fetchPackages}>
+            <RefreshCw className="size-4" /> {bn ? "রিফ্রেশ" : "Refresh"}
+          </Button>
+        }
+      />
+      <div className="rounded-xl border border-border bg-card">
+        <StaffEmpty
+          icon={Server}
+          title={loadError ? (bn ? "লোড করা যায়নি" : "Failed to load") : (bn ? "রিসেলার প্যাকেজ নেই" : "No reseller package")}
+          description={loadError
+            ? (bn ? "ডেটা পড়তে সমস্যা হয়েছে, আবার চেষ্টা করুন।" : "There was a problem reading your data — try refreshing.")
+            : (bn ? "রিসেলার হোস্টিং ক্রয় করলে এখানে ক্লায়েন্ট অ্যাকাউন্ট পরিচালনা করতে পারবেন।" : "Purchase a reseller plan to manage client accounts here.")}
+        />
       </div>
     </div>
   );
 
-  // ── Empty State ──
-  if (packages.length === 0) return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-      <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mb-6">
-        <Server className="w-12 h-12 text-primary/40" />
-      </motion.div>
-      <h2 className="text-xl font-bold text-foreground mb-2">
-        {loadError ? (bn ? "লোড করা যায়নি" : "Failed to load") : (bn ? "রিসেলার প্যাকেজ নেই" : "No Reseller Package")}
-      </h2>
-      <p className="text-sm text-muted-foreground max-w-sm mb-6">
-        {loadError ? (bn ? "ডেটা পড়তে সমস্যা হয়েছে।" : "Problem reading data.") : (bn ? "রিসেলার হোস্টিং ক্রয় করলে এখানে ক্লায়েন্ট অ্যাকাউন্ট পরিচালনা করতে পারবেন।" : "Purchase a reseller plan to manage client accounts.")}
-      </p>
-      {loadError && (
-        <button onClick={fetchPackages} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
-          <RefreshCw className="w-4 h-4" /> {bn ? "আবার চেষ্টা করুন" : "Try again"}
-        </button>
-      )}
-    </div>
-  );
 
   const accPct = pct(selectedPkg?.used_accounts || 0, selectedPkg?.max_accounts || 1);
   const diskPct = pct(selectedPkg?.used_disk_mb || 0, selectedPkg?.max_disk_mb || 1);
