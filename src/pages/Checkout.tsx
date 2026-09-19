@@ -50,6 +50,26 @@ const Checkout = () => {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrderNumber, setPlacedOrderNumber] = useState("");
 
+  // Which online gateways the admin has switched on (server-provided, no credentials).
+  const [gatewayState, setGatewayState] = useState<Record<string, { enabled: boolean; isSandbox: boolean }>>({});
+  useEffect(() => {
+    let active = true;
+    getGatewayAvailability()
+      .then((res) => {
+        if (!active) return;
+        const map: Record<string, { enabled: boolean; isSandbox: boolean }> = {};
+        for (const g of res.gateways) map[g.gateway] = { enabled: g.enabled, isSandbox: g.isSandbox };
+        setGatewayState(map);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  const paymentMethods = basePaymentMethods.map((m) => {
+    const gw = gatewayState[m.id];
+    return gw ? { ...m, ready: gw.enabled, isSandbox: gw.isSandbox } : { ...m, isSandbox: false };
+  });
+
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
