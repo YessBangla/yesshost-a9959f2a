@@ -5,7 +5,7 @@ import ChatCallSummaryWidget from "@/components/ChatCallSummaryWidget";
 import {
   Server, FileText, HeadphonesIcon, Globe, AlertCircle,
   Bell, Clock, TrendingUp, Zap, ChevronRight, CreditCard, Activity,
-  Copy, RefreshCw, ShoppingBag,
+  RefreshCw, ShoppingBag,
   CheckCircle2, Calendar, MapPin, Mail, User, LogIn, Wallet,
   AlertTriangle, ChevronDown, ChevronUp
 } from "lucide-react";
@@ -32,21 +32,6 @@ const DashboardOverview = () => {
   const [expiringServices, setExpiringServices] = useState<any[]>([]);
   const [expiringDomains, setExpiringDomains] = useState<any[]>([]);
   const [clientActivitiesOpen, setClientActivitiesOpen] = useState(true);
-
-  const supportPin = useMemo(() => {
-    if (!user?.id) return "000000";
-    let hash = 0;
-    for (let i = 0; i < user.id.length; i++) {
-      hash = ((hash << 5) - hash) + user.id.charCodeAt(i);
-      hash |= 0;
-    }
-    return String(Math.abs(hash) % 1000000).padStart(6, "0");
-  }, [user?.id]);
-
-  const copyPin = () => {
-    navigator.clipboard.writeText(supportPin);
-    toast.success(bn ? "কপি করা হয়েছে" : "Copied!");
-  };
 
   useEffect(() => {
     if (!user) return;
@@ -193,19 +178,11 @@ const DashboardOverview = () => {
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
                 {bn ? "আইডেন্টিটি পিন" : "IDENTITY PIN"}
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                {bn ? "সক্রিয়" : "Active"}
-              </span>
+              <ShieldCheck className="size-4 text-primary" />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold text-foreground tracking-wider tabular-nums">
-                {supportPin}
-              </span>
-              <button onClick={copyPin} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors" title="Copy">
-                <Copy className="w-4 h-4" />
-              </button>
-            </div>
+            <Link to="/dashboard/support-pin" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary hover:underline">
+              {bn ? "নিরাপদ PIN দেখুন" : "View secure PIN"}<ChevronRight className="size-4" />
+            </Link>
           </div>
         </motion.div>
 

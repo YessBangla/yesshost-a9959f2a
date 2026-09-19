@@ -239,6 +239,7 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0 ml-2">
           <button
             onClick={() => setLang(lang === "bn" ? "en" : "bn")}
+            aria-label={isBn ? "Switch language to English" : "বাংলায় ভাষা পরিবর্তন করুন"}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2.5 py-2 rounded-lg hover:bg-secondary/60"
           >
             <Globe className="w-4 h-4" />
@@ -247,6 +248,7 @@ const Navbar = () => {
           {user && <NotificationBell />}
           <button
             onClick={() => setCartOpen(true)}
+            aria-label={isBn ? `কার্ট খুলুন, ${itemCount}টি আইটেম` : `Open cart, ${itemCount} items`}
             className="relative flex items-center text-muted-foreground hover:text-foreground transition-colors px-2.5 py-2 rounded-lg hover:bg-secondary/60"
           >
             <ShoppingCart className="w-4 h-4" />
@@ -278,6 +280,9 @@ const Navbar = () => {
         <button
           className="lg:hidden text-foreground p-1.5 rounded-lg hover:bg-secondary/60 transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? (isBn ? "মেনু বন্ধ করুন" : "Close menu") : (isBn ? "মেনু খুলুন" : "Open menu")}
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-navigation"
         >
           {mobileOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
@@ -287,6 +292,7 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
+            id="mobile-navigation"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}

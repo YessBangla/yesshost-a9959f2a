@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
+import { useServerFn } from "@tanstack/react-start";
+import { verifyCustomerSupportPin } from "@/lib/secure-operations.functions";
 
 type Profile = Tables<"profiles">;
 type Service = Tables<"services">;
@@ -35,9 +37,9 @@ const CustomerLookup = () => {
   const [ticketOpen, setTicketOpen] = useState(false);
   const [form, setForm] = useState({ subject: "", department: "technical", priority: "medium", message: "" });
   const [saving, setSaving] = useState(false);
-  const [pinRow, setPinRow] = useState<{ pin: string; expires_at: string } | null>(null);
   const [pinInput, setPinInput] = useState("");
   const [pinResult, setPinResult] = useState<"match" | "wrong" | "expired" | null>(null);
+  const verifySupportPin = useServerFn(verifyCustomerSupportPin);
 
   const search = async () => {
     const value = term.trim();
@@ -61,9 +63,7 @@ const CustomerLookup = () => {
 
   const openCustomer = async (profile: Profile) => {
     setSelected(profile); setLoadingDetail(true); setDetail(null);
-    setPinInput(""); setPinResult(null); setPinRow(null);
-    supabase.from("support_pins").select("pin, expires_at").eq("user_id", profile.user_id).maybeSingle()
-      .then(({ data }) => setPinRow(data ?? null));
+    setPinInput(""); setPinResult(null);
     const [services, invoices, tickets, orders] = await Promise.all([
       supabase.from("services").select("*").eq("user_id", profile.user_id).order("expiry_date", { ascending: true }).limit(20),
       supabase.from("invoices").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(10),
@@ -107,11 +107,15 @@ const CustomerLookup = () => {
     if (notifyError) toast.error(bn ? "রিমাইন্ডার পাঠানো যায়নি।" : "Reminder could not be sent.");
     else toast.success(bn ? "গ্রাহকের ড্যাশবোর্ডে রিমাইন্ডার পাঠানো হয়েছে।" : "Reminder sent to the customer dashboard.");
   };
-  const verifyPin = () => {
+  const verifyPin = async () => {
     const value = pinInput.trim();
-    if (!pinRow) { setPinResult("expired"); return; }
-    if (new Date(pinRow.expires_at).getTime() < Date.now()) { setPinResult("expired"); return; }
-    setPinResult(value === pinRow.pin ? "match" : "wrong");
+    if (!selected || !/^\d{6}$/.test(value)) { setPinResult("wrong"); return; }
+    try {
+      const result = await verifySupportPin({ data: { userId: selected.user_id, pin: value } });
+      setPinResult(result.status === "valid" ? "match" : result.status === "expired" || result.status === "missing" ? "expired" : "wrong");
+    } catch {
+      setPinResult("wrong");
+    }
   };
 
   const expiringSoon = detail?.services.filter((item) => item.expiry_date && new Date(item.expiry_date).getTime() - Date.now() < 30 * 864e5) || [];

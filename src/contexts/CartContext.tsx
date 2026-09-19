@@ -39,19 +39,24 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const CART_KEY = "yesshost_cart";
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>(() => {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
     try {
       const saved = localStorage.getItem(CART_KEY);
-      return saved ? JSON.parse(saved) : [];
+      setItems(saved ? JSON.parse(saved) : []);
     } catch {
-      return [];
+      setItems([]);
     }
-  });
+    setHydrated(true);
+  }, []);
   const [isCartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem(CART_KEY, JSON.stringify(items));
-  }, [items]);
+  }, [hydrated, items]);
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {

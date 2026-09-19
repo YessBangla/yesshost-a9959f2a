@@ -24,9 +24,8 @@ type Message = {
 };
 
 const LiveChatWidget = () => {
-  const [open, setOpen] = useState(
-    () => typeof window !== "undefined" && window.localStorage.getItem(CHAT_OPEN_KEY) === "true",
-  );
+  const [open, setOpen] = useState(false);
+  const [openStateRestored, setOpenStateRestored] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -53,8 +52,14 @@ const LiveChatWidget = () => {
 
   // Persist open state
   useEffect(() => {
+    setOpen(window.localStorage.getItem(CHAT_OPEN_KEY) === "true");
+    setOpenStateRestored(true);
+  }, []);
+
+  useEffect(() => {
+    if (!openStateRestored) return;
     localStorage.setItem(CHAT_OPEN_KEY, open ? "true" : "false");
-  }, [open]);
+  }, [open, openStateRestored]);
 
   // Any page can open the chat with window.dispatchEvent(new CustomEvent("yesshost:open-chat"))
   useEffect(() => {
