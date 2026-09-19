@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock, ShoppingBag, Layers, HardDrive } from "lucide-react";
+import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock, ShoppingBag, Layers, HardDrive, Activity, Cloud } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@/lib/router-compat";
@@ -61,20 +61,61 @@ const HeroSection = () => {
     { icon: Layers, label: bn ? "রিসেলার" : "Reseller", link: "/services/linux-reseller", pos: "top-6 left-1/3", delay: 1.0 },
   ];
 
-  return (
-    <section className="relative overflow-hidden bg-background lg:bg-background">
-      <div className="absolute inset-0 lg:hidden bg-secondary/35" />
-      <div className="absolute inset-x-5 top-7 h-56 rounded-3xl border border-card/80 bg-card/45 shadow-[0_30px_80px_hsl(var(--primary)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.95)] backdrop-blur-3xl lg:hidden" />
+  const desktopBanner = (
+    <div className="relative mx-auto w-full max-w-[430px] lg:max-w-[560px]">
+      <div className="overflow-hidden rounded-2xl border border-border/80 bg-card/75 shadow-[0_24px_60px_hsl(var(--glass-shadow)/0.14),inset_0_1px_0_hsl(0_0%_100%/0.9)] backdrop-blur-2xl">
+        <div className="flex h-8 items-center justify-between border-b border-border/70 bg-card/80 px-3">
+          <div className="flex items-center gap-1.5" aria-hidden="true">
+            <span className="h-2 w-2 rounded-full bg-destructive/65" />
+            <span className="h-2 w-2 rounded-full bg-warning/70" />
+            <span className="h-2 w-2 rounded-full bg-success/70" />
+          </div>
+          <div className="flex min-w-0 items-center gap-1.5 text-[9px] font-semibold text-muted-foreground sm:text-[10px]">
+            <Lock className="h-2.5 w-2.5 text-success" />
+            <span className="truncate">yesshost.com</span>
+          </div>
+          <Activity className="h-3 w-3 text-success" aria-label="Online" />
+        </div>
 
-      <div className="relative z-10 container mx-auto px-4 pt-7 pb-8 sm:pt-14 sm:pb-10 md:pt-16 md:pb-12 lg:pt-20 lg:pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+        <div className="relative h-[126px] overflow-hidden bg-secondary/55 sm:h-[156px] lg:h-[330px]">
+          <div className="absolute inset-0 bg-[linear-gradient(120deg,hsl(var(--card)/0.96),hsl(var(--secondary)/0.72))]" />
+          <div className="absolute inset-y-0 left-0 z-10 flex w-[64%] flex-col justify-center px-4 text-left sm:px-5 lg:w-[60%] lg:px-9">
+            <div className="mb-2 flex w-fit items-center gap-1.5 rounded-md border border-success/20 bg-success/8 px-2 py-1 text-[9px] font-bold text-success sm:text-[10px]">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              {bn ? "ঢাকা বিডিআইএক্স অনলাইন" : "DHAKA BDIX ONLINE"}
+            </div>
+            <p className="font-display text-base font-extrabold leading-tight text-foreground sm:text-xl lg:text-4xl">
+              {bn ? "ব্যবসার জন্য দ্রুত ও নিরাপদ ক্লাউড" : "Cloud built for serious business"}
+            </p>
+            <div className="mt-2 flex items-center gap-3 text-[9px] font-semibold text-muted-foreground sm:text-[10px] lg:mt-4 lg:text-xs">
+              <span className="flex items-center gap-1"><Cloud className="h-3 w-3 text-primary" /> NVMe Cloud</span>
+              <span className="flex items-center gap-1"><Shield className="h-3 w-3 text-success" /> 99.9% SLA</span>
+            </div>
+          </div>
+          <img
+            src={heroImg}
+            alt={bn ? "ইয়েস হোস্ট কর্পোরেট ক্লাউড সেবা" : "Yess Host corporate cloud service"}
+            className="absolute bottom-0 right-[-2%] z-10 h-[118px] w-auto object-contain sm:h-[148px] lg:right-[2%] lg:h-[315px]"
+          />
+        </div>
+      </div>
+      <div className="mx-auto h-2.5 w-[38%] rounded-b-xl bg-foreground/12 lg:h-3" aria-hidden="true" />
+    </div>
+  );
+
+  return (
+    <section className="relative overflow-hidden bg-background">
+      <div className="absolute inset-0 bg-secondary/25 lg:bg-transparent" />
+
+      <div className="relative z-10 container mx-auto px-4 pb-7 pt-6 sm:pb-10 sm:pt-10 md:pt-14 lg:pb-16 lg:pt-16">
+        <div className="grid grid-cols-1 items-center gap-5 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12">
           {/* Left — Text Content */}
-          <div className="text-center lg:text-left">
+          <div className="text-left">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: brandCurve }}
-              className="inline-flex min-h-9 items-center gap-2 mb-4 px-3.5 py-1.5 rounded-2xl bg-card/60 backdrop-blur-xl border border-card/90 shadow-[0_8px_24px_hsl(var(--glass-shadow)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.95)]"
+              className="mb-3 inline-flex min-h-8 max-w-full items-center gap-2 rounded-lg border border-border/70 bg-card/70 px-3 py-1.5 shadow-sm backdrop-blur-xl sm:mb-4"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-muted-foreground text-xs font-medium">{getText("hero_offer", "hero.offer")}</span>
@@ -84,8 +125,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: brandCurve, delay: 0.08 }}
-              className="font-display font-extrabold tracking-normal leading-[1.15] mb-4"
-              style={{ fontSize: "clamp(1.6rem, 4.5vw, 3.2rem)" }}
+              className="mb-3 font-display text-[2rem] font-extrabold leading-[1.12] tracking-normal sm:text-[2.45rem] lg:mb-4 lg:text-[3.2rem]"
             >
               <span className="block text-foreground">{getText("hero_title1", "hero.title1")}</span>
               <span className="block text-primary mt-1">
@@ -97,17 +137,26 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: brandCurve, delay: 0.15 }}
-              className="text-sm md:text-[15px] text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-5 leading-relaxed"
+              className="mb-4 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-[15px] lg:mb-5"
             >
               {getText("hero_subtitle", "hero.subtitle")}
             </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: brandCurve, delay: 0.18 }}
+              className="mb-4 lg:hidden"
+            >
+              {desktopBanner}
+            </motion.div>
 
             {/* Feature highlights */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: brandCurve, delay: 0.2 }}
-              className="flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-2 mb-6"
+              className="mb-6 hidden flex-wrap gap-x-4 gap-y-2 sm:flex"
             >
               {highlights.map((h) => (
                 <div key={h} className="flex items-center gap-1.5">
@@ -122,33 +171,29 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: brandCurve, delay: 0.25 }}
-              className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3 max-w-md mx-auto lg:mx-0"
+              className="grid max-w-md grid-cols-2 gap-3"
             >
-              <Button asChild size="lg" className="h-12 rounded-2xl font-bold shadow-[0_12px_28px_hsl(var(--primary)/0.24),inset_0_1px_0_hsl(0_0%_100%/0.28)]">
+              <Button asChild size="lg" className="h-12 rounded-xl font-bold shadow-[0_12px_28px_hsl(var(--primary)/0.24),inset_0_1px_0_hsl(0_0%_100%/0.28)]">
                 <Link to="/hosting-plans">
                   {bn ? "প্ল্যান দেখুন" : "View Plans"}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-12 rounded-2xl border-card/90 bg-card/58 font-semibold shadow-[0_10px_25px_hsl(var(--glass-shadow)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.95)] backdrop-blur-xl">
+              <Button asChild size="lg" variant="outline" className="h-12 rounded-xl border-border/80 bg-card/70 font-semibold shadow-sm backdrop-blur-xl">
                 <Link to="/contact">{bn ? "যোগাযোগ করুন" : "Contact Us"}</Link>
               </Button>
             </motion.div>
           </div>
 
-          {/* Right — Hero Image with floating service icons */}
+          {/* Right — desktop-style corporate banner */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, ease: brandCurve, delay: 0.15 }}
-            className="hidden lg:block relative"
+            className="relative hidden lg:block"
           >
-            <div className="relative flex items-center justify-center min-h-[400px]">
-              <img
-                src={heroImg}
-                alt="Yess Host Corporate"
-                className="w-[360px] h-auto object-contain relative z-10 drop-shadow-xl"
-              />
+            <div className="relative flex min-h-[400px] items-center justify-center">
+              {desktopBanner}
               {serviceLinks.map((service, i) => (
                 <motion.div
                   key={i}
@@ -177,18 +222,18 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: brandCurve, delay: 0.35 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 md:mt-12"
+          className="mt-5 grid grid-cols-3 overflow-hidden rounded-xl border border-border/75 bg-card/72 shadow-[0_12px_32px_hsl(var(--glass-shadow)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.9)] backdrop-blur-2xl md:mt-10 md:grid-cols-4"
         >
           {stats.map((stat: any, i: number) => (
             <div
               key={i}
-              className="bg-card/58 backdrop-blur-2xl border border-card/90 rounded-2xl p-3.5 sm:p-4 text-center group shadow-[0_10px_30px_hsl(var(--glass-shadow)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.95)] hover:border-primary/25 transition-all"
+              className={`${i === 3 ? "hidden md:block" : "block"} group border-r border-border/65 px-2 py-3 text-center transition-colors last:border-r-0 hover:bg-primary/5 sm:p-4`}
             >
-              <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/12 transition-colors">
-                <stat.icon className="w-4 h-4 text-primary" />
+              <div className="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-md bg-primary/8 transition-colors group-hover:bg-primary/12 sm:h-9 sm:w-9">
+                <stat.icon className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" />
               </div>
-              <p className="text-base sm:text-lg font-extrabold tabular-nums text-foreground">{stat.value}</p>
-              <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 font-medium">{stat.label}</p>
+              <p className="text-sm font-extrabold tabular-nums text-foreground sm:text-lg">{stat.value}</p>
+              <p className="mt-0.5 truncate text-[9px] font-medium text-muted-foreground sm:text-[11px]">{stat.label}</p>
             </div>
           ))}
         </motion.div>
