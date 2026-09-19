@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { KeyRound, Copy, RefreshCw, ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const STORAGE_KEY = "yh_support_pin";
 const VALID_MS = 60 * 60 * 1000; // 1 hour
 
 interface StoredPin {
@@ -16,18 +16,6 @@ interface StoredPin {
 
 const makePin = () => String(Math.floor(100000 + Math.random() * 900000));
 
-const readPin = (uid: string): StoredPin | null => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredPin;
-    if (parsed.uid !== uid || parsed.expiresAt < Date.now()) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-};
-
 const DashboardSupportPin = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
@@ -35,26 +23,43 @@ const DashboardSupportPin = () => {
   const { toast } = useToast();
   const [pin, setPin] = useState<StoredPin | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [busy, setBusy] = useState(false);
+
+  const generate = useCallback(async (uid: string) => {
+    setBusy(true);
+    const next: StoredPin = { pin: makePin(), expiresAt: Date.now() + VALID_MS, uid };
+    const { error } = await supabase
+      .from("support_pins")
+      .upsert({ user_id: uid, pin: next.pin, expires_at: new Date(next.expiresAt).toISOString() }, { onConflict: "user_id" });
+    setBusy(false);
+    if (error) {
+      toast({ title: bn ? "পিন তৈরি করা যায়নি" : "Could not create PIN", description: bn ? "একটু পরে আবার চেষ্টা করুন।" : "Please try again in a moment.", variant: "destructive" });
+      return;
+    }
+    setPin(next);
+  }, [bn, toast]);
 
   useEffect(() => {
     if (!user) return;
-    const existing = readPin(user.id);
-    if (existing) setPin(existing);
-    else generate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    let active = true;
+    supabase
+      .from("support_pins")
+      .select("pin, expires_at")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!active) return;
+        const expiresAt = data?.expires_at ? new Date(data.expires_at).getTime() : 0;
+        if (data?.pin && expiresAt > Date.now()) setPin({ pin: data.pin, expiresAt, uid: user.id });
+        else void generate(user.id);
+      });
+    return () => { active = false; };
+  }, [user, generate]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-
-  const generate = () => {
-    if (!user) return;
-    const next: StoredPin = { pin: makePin(), expiresAt: Date.now() + VALID_MS, uid: user.id };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setPin(next);
-  };
 
   const copy = async () => {
     if (!pin) return;
@@ -114,7 +119,8 @@ const DashboardSupportPin = () => {
             <Copy className="w-4 h-4" /> {bn ? "পিন কপি করুন" : "Copy PIN"}
           </button>
           <button
-            onClick={generate}
+            onClick={() => user && generate(user.id)}
+            disabled={busy}
             className="flex items-center justify-center gap-2 gradient-primary text-primary-foreground px-4 py-3 rounded-xl text-sm font-semibold hover:opacity-90"
           >
             <RefreshCw className="w-4 h-4" /> {bn ? "নতুন পিন" : "New PIN"}
@@ -130,7 +136,7 @@ const DashboardSupportPin = () => {
         </div>
         <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5">
           <li>{bn ? "পিন শুধু Yess Host টিমকে দিন, অন্য কাউকে নয়।" : "Share the PIN only with the Yess Host team."}</li>
-          <li>{bn ? "পিন এক ঘণ্টা পর নিজে থেকেই অকার্যকর হয়ে যায়।" : "The PIN automatically expires after one hour."}</li>
+          <li>{bn ? "পিন এক ঘণ্টা পর নিজে থেকেই অকার্যকর হয়ে যায় এবং আমাদের টিম সার্ভারে সেটি যাচাই করতে পারে।" : "The PIN expires after one hour and our team can verify it on the server."}</li>
           <li>{bn ? "কখনো অ্যাকাউন্টের পাসওয়ার্ড শেয়ার করবেন না।" : "Never share your account password."}</li>
         </ul>
       </div>
