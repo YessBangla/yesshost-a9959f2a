@@ -55,6 +55,13 @@ const LiveChatWidget = () => {
     localStorage.setItem(CHAT_OPEN_KEY, open ? "true" : "false");
   }, [open]);
 
+  // Any page can open the chat with window.dispatchEvent(new CustomEvent("yesshost:open-chat"))
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("yesshost:open-chat", handler);
+    return () => window.removeEventListener("yesshost:open-chat", handler);
+  }, []);
+
   // Restore chat from localStorage; history is loaded through the server so the
   // transcript is identical no matter which domain the widget is served from.
   useEffect(() => {
