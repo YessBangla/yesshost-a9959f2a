@@ -213,7 +213,7 @@ const LiveChatWidget = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ delay: 0.05 }}
-              className="fixed right-3 z-50 bottom-[calc(10.5rem+env(safe-area-inset-bottom))] md:right-6 md:bottom-[6rem]"
+              className="fixed right-3 z-50 hidden bottom-[calc(10.5rem+env(safe-area-inset-bottom))] sm:block md:right-6 md:bottom-[6rem]"
             >
               <Link
                 to="/contact"
