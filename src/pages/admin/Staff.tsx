@@ -6,12 +6,14 @@ import {
   MessageSquareReply,
   Plus,
   RefreshCw,
+  Download,
   Shield,
   Trash2,
   UserCog,
   Users as UsersIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -120,6 +122,9 @@ const AdminStaff = () => {
     });
   }, [allStaff, query, roleFilter]);
 
+  const exportCsv = () => downloadCsv(`staff-${csvDate(new Date().toISOString())}`,
+    [bn ? "নাম" : "Name", bn ? "ইমেইল" : "Email", bn ? "ভূমিকা" : "Role", bn ? "যোগদান" : "Joined"],
+    filteredStaff.map((member: any) => [member.full_name || "", member.email || "", member.role || "", csvDate(member.created_at)]));
   const pagedStaff = useMemo(
     () => filteredStaff.slice((page - 1) * pageSize, page * pageSize),
     [filteredStaff, page, pageSize],
@@ -189,7 +194,7 @@ const AdminStaff = () => {
       <StaffPageHeader
         title={bn ? "স্টাফ ও অনুমতি" : "Staff & Access"}
         description={bn ? "দলের ভূমিকা, অ্যাক্সেস ও সাপোর্ট কার্যক্রম পরিচালনা করুন" : "Manage team roles, access and support activity"}
-        actions={<div className="flex gap-2"><Button variant="outline" onClick={() => void load(true)} disabled={refreshing}><RefreshCw className={refreshing ? "animate-spin" : ""} />{bn ? "রিফ্রেশ" : "Refresh"}</Button><Button onClick={() => setAddOpen((open) => !open)}><Plus />{bn ? "স্টাফ যোগ করুন" : "Add staff"}</Button></div>}
+        actions={<div className="flex gap-2"><Button variant="outline" onClick={exportCsv} disabled={filteredStaff.length === 0}><Download />{bn ? "CSV" : "CSV"}</Button><Button variant="outline" onClick={() => void load(true)} disabled={refreshing}><RefreshCw className={refreshing ? "animate-spin" : ""} />{bn ? "রিফ্রেশ" : "Refresh"}</Button><Button onClick={() => setAddOpen((open) => !open)}><Plus />{bn ? "স্টাফ যোগ করুন" : "Add staff"}</Button></div>}
       />
 
       <StaffMetricStrip metrics={metrics} />
