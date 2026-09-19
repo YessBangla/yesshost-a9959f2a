@@ -190,6 +190,8 @@ export type Database = {
           duration_seconds: number | null
           ended_at: string | null
           id: string
+          notes: string | null
+          outcome: string | null
           started_at: string
           status: string
         }
@@ -200,6 +202,8 @@ export type Database = {
           duration_seconds?: number | null
           ended_at?: string | null
           id?: string
+          notes?: string | null
+          outcome?: string | null
           started_at?: string
           status?: string
         }
@@ -210,6 +214,8 @@ export type Database = {
           duration_seconds?: number | null
           ended_at?: string | null
           id?: string
+          notes?: string | null
+          outcome?: string | null
           started_at?: string
           status?: string
         }
