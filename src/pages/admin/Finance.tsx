@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, Download, FileText, RefreshCcw, Scale, SearchX, Wallet } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Download, FileText, Plus, Receipt, RefreshCcw, Scale, SearchX, Trash2, TrendingUp, Wallet } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,17 +14,30 @@ import { csvDate, downloadCsv } from "@/lib/export-csv";
 type Invoice = { id: string; invoice_number: string; amount_bdt: number; status: string; description: string | null; created_at: string; paid_at: string | null; due_date: string | null; payment_method: string | null };
 type WalletTransaction = { id: string; type: string; amount_bdt: number; status: string; payment_method: string | null; transaction_id: string | null; description: string | null; created_at: string };
 type PaymentEvent = { id: string; invoice_id: string; gateway: string; transaction_id: string; amount_bdt: number; status: string; verified: boolean; settled: boolean; created_at: string };
-type FinanceRow = { key: string; source: "invoice" | "wallet" | "payment"; reference: string; description: string; method: string; amount: number; status: string; createdAt: string; reconciled: boolean };
+type Expense = { id: string; title: string; category: string; amount_bdt: number; expense_date: string; vendor: string | null; note: string | null };
+const expenseCategories = [
+  { value: "server", bn: "সার্ভার ও ডেটাসেন্টার", en: "Servers & datacenter" },
+  { value: "salary", bn: "বেতন", en: "Salaries" },
+  { value: "marketing", bn: "মার্কেটিং", en: "Marketing" },
+  { value: "software", bn: "সফটওয়্যার ও লাইসেন্স", en: "Software & licences" },
+  { value: "office", bn: "অফিস", en: "Office" },
+  { value: "other", bn: "অন্যান্য", en: "Other" },
+];
+type FinanceRow =  { key: string; source: "invoice" | "wallet" | "payment"; reference: string; description: string; method: string; amount: number; status: string; createdAt: string; reconciled: boolean };
 
 const AdminFinance = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [wallet, setWallet] = useState<WalletTransaction[]>([]);
   const [events, setEvents] = useState<PaymentEvent[]>([]);
   const [liability, setLiability] = useState(0);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [savingExpense, setSavingExpense] = useState(false);
+  const [expenseForm, setExpenseForm] = useState({ title: "", category: "server", amount: "", date: new Date().toISOString().slice(0, 10), vendor: "" });
   const [search, setSearch] = useState("");
   const [source, setSource] = useState("all");
   const [status, setStatus] = useState("all");
@@ -47,6 +62,8 @@ const AdminFinance = () => {
     const payoutDue = (payoutResult.data || []).filter((item) => ["requested", "processing"].includes(item.status)).reduce((sum, item) => sum + Number(item.amount_bdt), 0);
     const commissionDue = (commissionResult.data || []).filter((item) => ["pending", "approved"].includes(item.status)).reduce((sum, item) => sum + Number(item.amount_bdt), 0);
     setLiability(payoutDue + commissionDue);
+    const expenseResult = await supabase.from("operating_expenses").select("id,title,category,amount_bdt,expense_date,vendor,note").order("expense_date", { ascending: false }).limit(1000);
+    setExpenses((expenseResult.data || []) as Expense[]);
     setLoading(false);
   }, [bn]);
 
@@ -79,25 +96,118 @@ const AdminFinance = () => {
       { label: bn ? "বকেয়া" : "OUTSTANDING", value: money(sum(unpaid)), detail: `${unpaid.length} ${bn ? "ইনভয়েস" : "invoices"}`, icon: FileText, tone: "warning" as const },
       { label: bn ? "মেয়াদোত্তীর্ণ" : "OVERDUE", value: money(sum(overdue)), detail: `${overdue.length} ${bn ? "ঝুঁকিতে" : "at risk"}`, icon: AlertTriangle, tone: "danger" as const },
       { label: bn ? "রিকনসাইলড" : "RECONCILED", value: `${reconciled}/${events.length}`, detail: bn ? "যাচাইকৃত পেমেন্ট" : "verified payments", icon: Scale },
+      { label: bn ? "অপারেটিং খরচ" : "OPERATING COST", value: money(sum(expenses.map((item) => ({ amount_bdt: item.amount_bdt })))), detail: `${expenses.length} ${bn ? "এন্ট্রি" : "entries"}`, icon: Receipt, tone: "warning" as const },
+      { label: bn ? "নিট মুনাফা" : "NET PROFIT", value: money(sum(paid) - sum(expenses.map((item) => ({ amount_bdt: item.amount_bdt })))), detail: bn ? "আদায় – খরচ" : "collected minus cost", icon: TrendingUp, tone: sum(paid) - sum(expenses.map((item) => ({ amount_bdt: item.amount_bdt }))) >= 0 ? ("success" as const) : ("danger" as const) },
     ];
-  }, [invoices, events, bn]);
+  }, [invoices, events, expenses, bn]);
 
-  const monthly = useMemo(() => Array.from({ length: 6 }, (_, index) => {
-    const date = new Date(); date.setDate(1); date.setMonth(date.getMonth() - (5 - index));
+  const monthly = useMemo(() => Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(); date.setDate(1); date.setMonth(date.getMonth() - (11 - index));
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    return { name: date.toLocaleString(bn ? "bn-BD" : "en-US", { month: "short" }), collected: sum(invoices.filter((item) => item.status === "paid" && (item.paid_at || item.created_at).startsWith(key))), outstanding: sum(invoices.filter((item) => ["unpaid", "overdue"].includes(item.status) && item.created_at.startsWith(key))) };
-  }), [invoices, bn]);
+    const collected = sum(invoices.filter((item) => item.status === "paid" && (item.paid_at || item.created_at).startsWith(key)));
+    const expense = sum(expenses.filter((item) => item.expense_date.startsWith(key)).map((item) => ({ amount_bdt: item.amount_bdt })));
+    return {
+      name: date.toLocaleString(bn ? "bn-BD" : "en-US", { month: "short" }),
+      key,
+      collected,
+      expense,
+      profit: collected - expense,
+      outstanding: sum(invoices.filter((item) => ["unpaid", "overdue"].includes(item.status) && item.created_at.startsWith(key))),
+    };
+  }), [invoices, expenses, bn]);
 
   const exportRows = () => downloadCsv("yesshost-finance-ledger", ["source", "reference", "description", "method", "amount_bdt", "status", "reconciled", "date"], filtered.map((row) => [row.source, row.reference, row.description, row.method, row.amount, row.status, row.reconciled ? "yes" : "no", csvDate(row.createdAt)]));
+  const exportReport = () => downloadCsv("yesshost-profit-loss-12m", ["month", "revenue_bdt", "operating_cost_bdt", "profit_bdt", "new_receivables_bdt"], monthly.map((row) => [row.key, Math.round(row.collected), Math.round(row.expense), Math.round(row.profit), Math.round(row.outstanding)]));
+
+  const addExpense = async () => {
+    const amount = Number(expenseForm.amount);
+    if (!expenseForm.title.trim() || !Number.isFinite(amount) || amount <= 0) {
+      toast({ title: bn ? "তথ্য অসম্পূর্ণ" : "Missing details", description: bn ? "খরচের শিরোনাম ও সঠিক পরিমাণ দিন।" : "Enter an expense title and a valid amount.", variant: "destructive" });
+      return;
+    }
+    setSavingExpense(true);
+    const { error: insertError } = await supabase.from("operating_expenses").insert({
+      title: expenseForm.title.trim(),
+      category: expenseForm.category,
+      amount_bdt: amount,
+      expense_date: expenseForm.date,
+      vendor: expenseForm.vendor.trim() || null,
+    });
+    setSavingExpense(false);
+    if (insertError) {
+      toast({ title: bn ? "সংরক্ষণ হয়নি" : "Not saved", description: insertError.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: bn ? "খরচ যোগ হয়েছে" : "Expense added" });
+    setExpenseForm({ title: "", category: expenseForm.category, amount: "", date: expenseForm.date, vendor: "" });
+    void load(true);
+  };
+
+  const removeExpense = async (id: string) => {
+    const { error: deleteError } = await supabase.from("operating_expenses").delete().eq("id", id);
+    if (deleteError) {
+      toast({ title: bn ? "মুছতে সমস্যা" : "Delete failed", description: deleteError.message, variant: "destructive" });
+      return;
+    }
+    setExpenses((prev) => prev.filter((item) => item.id !== id));
+  };
 
   return <div className="staff-console space-y-5">
     <StaffPageHeader title={bn ? "ফিন্যান্স কন্ট্রোল সেন্টার" : "Finance Control Center"} description={bn ? "আয়, বকেয়া, পেমেন্ট যাচাই এবং দায় পর্যবেক্ষণ করুন" : "Monitor revenue, receivables, payment verification and liabilities"} actions={<div className="flex gap-2"><Button variant="outline" onClick={() => void load()} disabled={loading}><RefreshCcw className="size-4" />{bn ? "রিফ্রেশ" : "Refresh"}</Button><Button onClick={exportRows} disabled={!filtered.length}><Download className="size-4" />CSV</Button></div>} />
     <StaffMetricStrip metrics={stats} />
 
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-      <section className="staff-panel p-4"><div className="mb-4"><h2 className="font-display font-semibold text-foreground">{bn ? "ছয় মাসের নগদ প্রবাহ" : "Six-month cash flow"}</h2><p className="mt-1 text-xs text-muted-foreground">{bn ? "আদায় বনাম নতুন বকেয়া" : "Collected revenue versus new receivables"}</p></div><div className="h-72 w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={monthly} margin={{ left: -18, right: 4 }}><CartesianGrid stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} /><YAxis fontSize={11} tickLine={false} axisLine={false} /><Tooltip formatter={(value) => money(Number(value))} /><Legend /><Bar dataKey="collected" name={bn ? "আদায়" : "Collected"} fill="hsl(var(--success))" radius={[4, 4, 0, 0]} /><Bar dataKey="outstanding" name={bn ? "বকেয়া" : "Outstanding"} fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></section>
+      <section className="staff-panel p-4">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display font-semibold text-foreground">{bn ? "১২ মাসের আয়-ব্যয় ও মুনাফা" : "12-month revenue, cost & profit"}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">{bn ? "প্রতি মাসে আদায় বনাম অপারেটিং খরচ ও নিট মুনাফা" : "Monthly collected revenue versus operating cost and net profit"}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={exportReport}><Download className="size-4" />{bn ? "রিপোর্ট CSV" : "Report CSV"}</Button>
+        </div>
+        <div className="h-72 w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={monthly} margin={{ left: -18, right: 4 }}><CartesianGrid stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} /><YAxis fontSize={11} tickLine={false} axisLine={false} /><Tooltip formatter={(value) => money(Number(value))} /><Legend /><Bar dataKey="collected" name={bn ? "আয়" : "Revenue"} fill="hsl(var(--success))" radius={[4, 4, 0, 0]} /><Bar dataKey="expense" name={bn ? "খরচ" : "Cost"} fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} /><Bar dataKey="profit" name={bn ? "মুনাফা" : "Profit"} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div>
+      </section>
       <aside className="staff-panel p-4"><p className="staff-eyebrow">{bn ? "অপারেশনাল সারাংশ" : "OPERATING POSITION"}</p><div className="mt-4 space-y-4"><div><p className="text-xs text-muted-foreground">{bn ? "ওয়ালেট জমা" : "Completed wallet deposits"}</p><p className="mt-1 text-xl font-semibold text-foreground">{money(sum(wallet.filter((item) => item.type === "deposit" && item.status === "completed")))}</p></div><div className="border-t border-border pt-4"><p className="text-xs text-muted-foreground">{bn ? "অ্যাফিলিয়েট দায়" : "Affiliate liability"}</p><p className="mt-1 text-xl font-semibold text-foreground">{money(liability)}</p></div><div className="border-t border-border pt-4"><p className="text-xs text-muted-foreground">{bn ? "অযাচাইকৃত পেমেন্ট" : "Unverified payment events"}</p><p className="mt-1 text-xl font-semibold text-destructive">{events.filter((item) => !item.verified || !item.settled).length}</p></div></div></aside>
     </div>
+
+    <section className="staff-panel p-4">
+      <div className="mb-4">
+        <h2 className="font-display font-semibold text-foreground">{bn ? "অপারেটিং খরচ" : "Operating expenses"}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{bn ? "সার্ভার, বেতন, মার্কেটিং ও অন্যান্য ব্যয় যোগ করুন — মুনাফার হিসাব স্বয়ংক্রিয়ভাবে আপডেট হবে" : "Record server, salary, marketing and other costs — profit figures update automatically"}</p>
+      </div>
+      <div className="grid gap-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_120px_150px_minmax(0,1fr)_auto]">
+        <Input value={expenseForm.title} onChange={(e) => setExpenseForm({ ...expenseForm, title: e.target.value })} placeholder={bn ? "খরচের শিরোনাম" : "Expense title"} className="h-11" />
+        <Select value={expenseForm.category} onValueChange={(value) => setExpenseForm({ ...expenseForm, category: value })}>
+          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+          <SelectContent>{expenseCategories.map((item) => <SelectItem key={item.value} value={item.value}>{bn ? item.bn : item.en}</SelectItem>)}</SelectContent>
+        </Select>
+        <Input value={expenseForm.amount} onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })} inputMode="decimal" placeholder={bn ? "টাকা" : "Amount"} className="h-11" />
+        <Input type="date" value={expenseForm.date} onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })} className="h-11" />
+        <Input value={expenseForm.vendor} onChange={(e) => setExpenseForm({ ...expenseForm, vendor: e.target.value })} placeholder={bn ? "সরবরাহকারী (ঐচ্ছিক)" : "Vendor (optional)"} className="h-11" />
+        <Button className="h-11" onClick={() => void addExpense()} disabled={savingExpense}><Plus className="size-4" />{bn ? "যোগ" : "Add"}</Button>
+      </div>
+      {loading ? <div className="mt-4"><StaffLoading rows={3} /></div> : !expenses.length ? (
+        <StaffEmpty icon={Receipt} title={bn ? "কোনো খরচ যোগ করা হয়নি" : "No expenses recorded"} description={bn ? "উপরের ফর্ম দিয়ে প্রথম খরচটি যোগ করুন।" : "Add your first operating cost with the form above."} />
+      ) : (
+        <div className="mt-4 divide-y divide-border">
+          {expenses.slice(0, 10).map((item) => (
+            <div key={item.id} className="flex items-center justify-between gap-3 py-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-foreground">{item.title}</p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  {(expenseCategories.find((c) => c.value === item.category) ? (bn ? expenseCategories.find((c) => c.value === item.category)!.bn : expenseCategories.find((c) => c.value === item.category)!.en) : item.category)}
+                  {item.vendor ? ` · ${item.vendor}` : ""} · {new Date(item.expense_date).toLocaleDateString(bn ? "bn-BD" : "en-US", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-semibold tabular-nums text-foreground">{money(Number(item.amount_bdt))}</span>
+                <Button variant="ghost" size="icon" onClick={() => void removeExpense(item.id)} aria-label={bn ? "মুছুন" : "Delete"}><Trash2 className="size-4 text-destructive" /></Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
 
     <section className="staff-panel overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-border p-3 lg:flex-row lg:items-center"><StaffSearch value={search} onChange={setSearch} placeholder={bn ? "রেফারেন্স, মাধ্যম বা পরিমাণ খুঁজুন" : "Search reference, method or amount"} /><div className="grid grid-cols-2 gap-2 sm:flex"><Select value={source} onValueChange={setSource}><SelectTrigger className="h-11 min-w-36"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{bn ? "সব উৎস" : "All sources"}</SelectItem><SelectItem value="invoice">{bn ? "ইনভয়েস" : "Invoices"}</SelectItem><SelectItem value="wallet">{bn ? "ওয়ালেট" : "Wallet"}</SelectItem><SelectItem value="payment">{bn ? "পেমেন্ট" : "Payments"}</SelectItem></SelectContent></Select><Select value={status} onValueChange={setStatus}><SelectTrigger className="h-11 min-w-36"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{bn ? "সব স্ট্যাটাস" : "All statuses"}</SelectItem><SelectItem value="reconciled">{bn ? "রিকনসাইলড" : "Reconciled"}</SelectItem><SelectItem value="unreconciled">{bn ? "অমিল/অপেক্ষমাণ" : "Needs review"}</SelectItem><SelectItem value="paid">{bn ? "পরিশোধিত" : "Paid"}</SelectItem><SelectItem value="unpaid">{bn ? "অপরিশোধিত" : "Unpaid"}</SelectItem></SelectContent></Select></div></div>
