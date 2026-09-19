@@ -66,10 +66,12 @@ const Checkout = () => {
     return () => { active = false; };
   }, []);
 
-  const paymentMethods = basePaymentMethods.map((m) => {
-    const gw = gatewayState[m.id];
-    return gw ? { ...m, ready: gw.enabled, isSandbox: gw.isSandbox } : { ...m, isSandbox: false };
-  });
+  const paymentMethods = basePaymentMethods
+    .map((m) => {
+      const gw = gatewayState[m.id];
+      return gw ? { ...m, ready: gw.enabled, isSandbox: gw.isSandbox } : { ...m, isSandbox: false };
+    })
+    .filter((m) => m.ready);
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
