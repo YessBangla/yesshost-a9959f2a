@@ -175,7 +175,7 @@ const AdminExpenses = () => {
 
       <section className="staff-panel overflow-hidden">
         <div className="flex flex-col gap-3 border-b border-border p-3 lg:flex-row lg:items-center">
-          <StaffSearch value={search} onChange={setSearch} placeholder={bn ? "শিরোনাম, সরবরাহকারী বা পরিমাণ খুঁজুন" : "Search title, vendor or amount"} />
+          <div className="min-w-0 flex-1"><StaffSearch value={search} onChange={setSearch} placeholder={bn ? "শিরোনাম, সরবরাহকারী বা পরিমাণ খুঁজুন" : "Search title, vendor or amount"} /></div>
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="h-11 min-w-44"><SelectValue /></SelectTrigger>
             <SelectContent>
