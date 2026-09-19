@@ -12,6 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DataPagination from "@/components/DataPagination";
 import { StaffEmpty, StaffLoading, StaffMetricStrip, StaffPageHeader, StaffSearch } from "@/components/staff/StaffConsole";
 import { csvDate, downloadCsv } from "@/lib/export-csv";
+import { useServerFn } from "@tanstack/react-start";
+import { getAccountsReportSettings, saveAccountsReportSettings, sendAccountsReportNow } from "@/lib/accounts-report.functions";
+import { Mail, Send } from "lucide-react";
 
 type Granularity = "day" | "week" | "month" | "year";
 type PeriodRow = { period_start: string; income: number; expense: number; net: number };
@@ -75,6 +78,61 @@ const AdminAccounts = () => {
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { setPage(1); }, [search, pageSize]);
   useEffect(() => { setJPage(1); }, [journalSearch]);
+
+  // Scheduled statement + trial balance email (monthly, to outside accountants)
+  const loadReportSettings = useServerFn(getAccountsReportSettings);
+  const persistReportSettings = useServerFn(saveAccountsReportSettings);
+  const sendReportNow = useServerFn(sendAccountsReportNow);
+  const [reportRecipients, setReportRecipients] = useState("");
+  const [reportEnabled, setReportEnabled] = useState(false);
+  const [reportBusy, setReportBusy] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const settings = await loadReportSettings();
+        setReportRecipients(settings.recipients.join(", "));
+        setReportEnabled(settings.enabled);
+      } catch {
+        /* non-admins never reach this page */
+      }
+    })();
+  }, [loadReportSettings]);
+
+  const parsedRecipients = () =>
+    reportRecipients.split(/[\s,;]+/).map((v) => v.trim()).filter(Boolean);
+
+  const saveReport = async (enabled: boolean) => {
+    setReportBusy(true);
+    try {
+      const settings = await persistReportSettings({
+        data: { recipients: parsedRecipients(), enabled, includeExpenses: true, includeCashbank: true },
+      });
+      setReportEnabled(settings.enabled);
+      setReportRecipients(settings.recipients.join(", "));
+      toast({ title: bn ? "সেটিংস সংরক্ষিত হয়েছে" : "Settings saved" });
+    } catch (e) {
+      toast({ title: bn ? "সংরক্ষণ করা যায়নি" : "Could not save", description: String((e as Error)?.message || e), variant: "destructive" });
+    }
+    setReportBusy(false);
+  };
+
+  const sendReport = async () => {
+    setReportBusy(true);
+    try {
+      const res = await sendReportNow({ data: { month: statementMonth } });
+      toast({
+        title: res.ok ? (bn ? "রিপোর্ট পাঠানো হয়েছে" : "Report sent") : (bn ? "পাঠানো যায়নি" : "Could not send"),
+        description: res.ok
+          ? `${res.sent.join(", ")}`
+          : res.detail || res.failed.map((f) => `${f.to}: ${f.detail || ""}`).join(" · "),
+        variant: res.ok ? undefined : "destructive",
+      });
+    } catch (e) {
+      toast({ title: bn ? "পাঠানো যায়নি" : "Could not send", description: String((e as Error)?.message || e), variant: "destructive" });
+    }
+    setReportBusy(false);
+  };
 
   const totals = useMemo(() => {
     const income = periods.reduce((sum, row) => sum + Number(row.income || 0), 0);
@@ -430,6 +488,41 @@ const AdminAccounts = () => {
               ])}><Download className="mr-2 size-4" />CSV</Button>
               <p className="text-xs text-muted-foreground">{bn ? "সব তথ্য হিসাব খাতা থেকে স্বয়ংক্রিয়ভাবে তৈরি — আলাদা করে লিখতে হবে না।" : "Generated automatically from the ledger — nothing to type in twice."}</p>
             </div>
+
+            {/* Scheduled email of statement + trial balance to outside accountants */}
+            <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Mail className="size-4 text-primary" />
+                <h3 className="text-sm font-semibold">{bn ? "নিয়মিত ইমেইল রিপোর্ট" : "Scheduled email report"}</h3>
+                <span className={`rounded-sm px-2 py-0.5 text-[10px] font-medium ${reportEnabled ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                  {reportEnabled ? (bn ? "চালু" : "On") : (bn ? "বন্ধ" : "Off")}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {bn
+                  ? "প্রতি মাসের ১ তারিখে আগের মাসের আয়–ব্যয় বিবরণী, অফিস খরচ, ব্যাংক ও ক্যাশ এন্ট্রি এবং ট্রায়াল ব্যালেন্স এই ঠিকানাগুলোতে চলে যাবে।"
+                  : "On the 1st of each month the previous month's statement, office expenses, bank & cash entries and trial balance are emailed to these addresses."}
+              </p>
+              <Input
+                value={reportRecipients}
+                onChange={(e) => setReportRecipients(e.target.value)}
+                placeholder={bn ? "accountant@example.com, auditor@example.com" : "accountant@example.com, auditor@example.com"}
+                className="h-11"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button className="h-11" disabled={reportBusy} onClick={() => void saveReport(true)}>
+                  {bn ? "সংরক্ষণ ও চালু করুন" : "Save & enable"}
+                </Button>
+                <Button variant="outline" className="h-11" disabled={reportBusy} onClick={() => void saveReport(false)}>
+                  {bn ? "বন্ধ করুন" : "Turn off"}
+                </Button>
+                <Button variant="outline" className="h-11" disabled={reportBusy || !reportRecipients.trim()} onClick={() => void sendReport()}>
+                  <Send className="mr-2 size-4" />{bn ? "এখনই পাঠান" : "Send now"}
+                </Button>
+              </div>
+            </div>
+
+
 
             <div className="grid gap-4 lg:grid-cols-2">
               <div className="rounded-lg border border-border bg-card">

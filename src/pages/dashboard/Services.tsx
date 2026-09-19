@@ -14,6 +14,7 @@ import DataPagination from "@/components/DataPagination";
 import { formatAmount } from "@/lib/formatPrice";
 import { csvDate, downloadCsv } from "@/lib/export-csv";
 import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
+import ServiceInvoices from "@/components/ServiceInvoices";
 import { Download, RefreshCw, AlertTriangle, CheckCircle2, Wallet as WalletIcon } from "lucide-react";
 
 const statusConfig: Record<string, { label_en: string; label_bn: string; color: string; dot: string }> = {
@@ -60,6 +61,7 @@ const DashboardServices = () => {
   }, [servicesQuery.error]);
 
   const services: Tables<"services">[] = servicesQuery.data?.services ?? [];
+  const invoices: Tables<"invoices">[] = servicesQuery.data?.invoices ?? [];
   const loading = !!user && servicesQuery.isPending;
 
   const filtered = services.filter(s => {
@@ -288,6 +290,11 @@ const DashboardServices = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Bills & payments from the central accounts ledger */}
+                        <div className="mt-3">
+                          <ServiceInvoices invoices={invoices.filter(inv => inv.service_id === service.id)} />
+                        </div>
                       </div>
                     </motion.div>
                   )}

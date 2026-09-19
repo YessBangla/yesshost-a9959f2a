@@ -67,8 +67,8 @@ export type BillingPayload = {
   fetchedAt: string;
 };
 
-export type ServicesPayload = { services: Service[]; fetchedAt: string };
-export type DomainsPayload = { domains: Service[]; fetchedAt: string };
+export type ServicesPayload = { services: Service[]; invoices: Invoice[]; fetchedAt: string };
+export type DomainsPayload = { domains: Service[]; invoices: Invoice[]; fetchedAt: string };
 
 export type IncomePayload = {
   signupAt: string | null;
@@ -108,25 +108,37 @@ export async function loadBilling(supabase: DashboardClient, userId: string): Pr
   };
 }
 
-export async function loadServices(supabase: DashboardClient, userId: string): Promise<ServicesPayload> {
-  const { data, error } = await supabase
-    .from("services")
+/** Every invoice of the client, so each service/domain can show its own bills and payments. */
+async function loadUserInvoices(supabase: DashboardClient, userId: string): Promise<Invoice[]> {
+  const { data } = await supabase
+    .from("invoices")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
+  return (data ?? []) as Invoice[];
+}
+
+export async function loadServices(supabase: DashboardClient, userId: string): Promise<ServicesPayload> {
+  const [{ data, error }, invoices] = await Promise.all([
+    supabase.from("services").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+    loadUserInvoices(supabase, userId),
+  ]);
   if (error) throw new Error(error.message);
-  return { services: (data ?? []) as Service[], fetchedAt: new Date().toISOString() };
+  return { services: (data ?? []) as Service[], invoices, fetchedAt: new Date().toISOString() };
 }
 
 export async function loadDomains(supabase: DashboardClient, userId: string): Promise<DomainsPayload> {
-  const { data, error } = await supabase
-    .from("services")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("service_type", "domain")
-    .order("created_at", { ascending: false });
+  const [{ data, error }, invoices] = await Promise.all([
+    supabase
+      .from("services")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("service_type", "domain")
+      .order("created_at", { ascending: false }),
+    loadUserInvoices(supabase, userId),
+  ]);
   if (error) throw new Error(error.message);
-  return { domains: (data ?? []) as Service[], fetchedAt: new Date().toISOString() };
+  return { domains: (data ?? []) as Service[], invoices, fetchedAt: new Date().toISOString() };
 }
 
 /**
