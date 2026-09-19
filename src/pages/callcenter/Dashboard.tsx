@@ -76,6 +76,9 @@ const CallCenterDashboard = () => {
     { label: bn ? "সাপোর্ট চাপ" : "Support workload", value: openTickets.length, detail: bn ? `${data.tickets.filter((t) => t.priority === "high" || t.priority === "urgent").length} জরুরি` : `${data.tickets.filter((t) => t.priority === "high" || t.priority === "urgent").length} priority`, icon: Headphones, tone: "warning" as const },
     { label: bn ? "সেলস ভ্যালু" : "Sales value", value: `৳${formatAmount(salesValue, lang)}`, detail: `${paidOrders}/${data.orders.length} ${bn ? "পরিশোধিত" : "paid"}`, icon: TrendingUp, tone: "success" as const },
     { label: bn ? "কল ফলাফল" : "Call outcome", value: completedCalls.length, detail: `${missedCalls.length} ${bn ? "মিসড" : "missed"}`, icon: PhoneMissed, tone: missedCalls.length ? "danger" as const : "success" as const },
+    { label: bn ? "বকেয়া বিল" : "Outstanding bills", value: `৳${formatAmount(dueTotal, lang)}`, detail: `${overdueInvoices.length} ${bn ? "মেয়াদোত্তীর্ণ" : "overdue"}`, icon: CreditCard, tone: overdueInvoices.length ? "danger" as const : "primary" as const },
+    { label: bn ? "মেয়াদ শেষের ঝুঁকি" : "Expiry risk", value: expiringServices.length, detail: bn ? "৩০ দিনের মধ্যে" : "within 30 days", icon: CalendarClock, tone: expiringServices.length ? "warning" as const : "success" as const },
+    { label: bn ? "সবচেয়ে পুরোনো টিকেট" : "Oldest open ticket", value: `${oldestHours}${bn ? " ঘন্টা" : "h"}`, detail: `${breachedTickets} ${bn ? "২৪ ঘন্টার বেশি" : "over 24h"}`, icon: Clock3, tone: breachedTickets ? "danger" as const : "success" as const },
   ];
 
   if (loading) return <div className="space-y-5"><StaffLoading rows={2} /><div className="grid gap-4 lg:grid-cols-[1.35fr_.65fr]"><StaffLoading rows={6} /><StaffLoading rows={4} /></div></div>;
