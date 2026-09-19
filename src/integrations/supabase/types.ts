@@ -2192,6 +2192,10 @@ export type Database = {
         Args: { _expires_at: string; _pin: string }
         Returns: undefined
       }
+      set_support_pin_for_user: {
+        Args: { _expires_at: string; _pin: string; _user_id: string }
+        Returns: undefined
+      }
       verify_support_pin: {
         Args: { _pin: string; _user_id: string }
         Returns: string
