@@ -186,14 +186,14 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`relative w-full transition-all duration-300 bg-background/95 backdrop-blur-xl border-b ${
+    <nav className={`relative w-full transition-all duration-300 bg-card/72 backdrop-blur-2xl border-b ${
       scrolled
         ? "border-border/60 shadow-lg shadow-black/5"
         : "border-border/40"
     }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
-        <Link to="/" className="flex items-center shrink-0 mr-4 xl:mr-8">
-          <img src={logoWhite} alt="Yess Host" className="h-8 lg:h-10" />
+        <Link to="/" className="flex min-h-11 items-center shrink-0 mr-4 xl:mr-8" aria-label="Yess Host home">
+          <img src={logoWhite} alt="Yess Host" className="h-8 lg:h-10 drop-shadow-sm" />
         </Link>
 
         {/* Desktop */}
@@ -279,7 +279,7 @@ const Navbar = () => {
         </div>
 
         <button
-          className="lg:hidden text-foreground p-1.5 rounded-lg hover:bg-secondary/60 transition-colors"
+          className="lg:hidden flex size-11 items-center justify-center rounded-2xl border border-card/90 bg-card/65 text-foreground shadow-[0_8px_24px_hsl(var(--glass-shadow)/0.10),inset_0_1px_0_hsl(0_0%_100%/0.85)] backdrop-blur-xl hover:bg-card/90 transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? (isBn ? "মেনু বন্ধ করুন" : "Close menu") : (isBn ? "মেনু খুলুন" : "Open menu")}
           aria-expanded={mobileOpen}
@@ -297,16 +297,16 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-popover border-t border-border overflow-hidden"
+          className="lg:hidden mx-3 mt-2 max-h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-card/90 bg-card/78 shadow-[0_20px_60px_hsl(var(--glass-shadow)/0.16),inset_0_1px_0_hsl(0_0%_100%/0.9)] backdrop-blur-3xl"
           >
-            <div className="px-4 py-3 space-y-0.5 max-h-[calc(100vh-4rem-5rem)] overflow-y-auto">
+            <div className="px-3 py-3 space-y-0.5 max-h-[calc(100vh-8rem)] overflow-y-auto">
               {navLinks.map((link) => (
                 <div key={link.label}>
                   {link.children ? (
                     <>
                       <button
                         onClick={() => setMobileAccordion(mobileAccordion === link.label ? null : link.label)}
-                        className="flex items-center justify-between w-full py-2.5 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                        className="flex min-h-11 items-center justify-between w-full py-2.5 px-3 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
                       >
                         {link.label}
                         <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileAccordion === link.label ? "rotate-180" : ""}`} />
@@ -342,7 +342,7 @@ const Navbar = () => {
                     </>
                   ) : (
                     <Link to={link.href}
-                      className="block py-2.5 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                      className="flex min-h-11 items-center py-2.5 px-3 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
                       onClick={() => setMobileOpen(false)}>
                       {link.label}
                     </Link>

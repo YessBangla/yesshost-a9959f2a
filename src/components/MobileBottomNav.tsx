@@ -259,9 +259,9 @@ const MobileBottomNav = () => {
       </AnimatePresence>
 
       {/* Bottom Nav Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
-        <div className="glass-surface border-t border-border/50 pb-[env(safe-area-inset-bottom)]">
-          <div className="flex items-center justify-around h-16">
+      <nav className="fixed inset-x-3 bottom-[calc(.65rem+env(safe-area-inset-bottom))] z-50 lg:hidden">
+        <div className="overflow-hidden rounded-2xl border border-card/90 bg-card/72 shadow-[0_18px_48px_hsl(var(--glass-shadow)/0.16),inset_0_1px_0_hsl(0_0%_100%/0.95)] backdrop-blur-3xl">
+          <div className="flex h-16 items-center justify-around">
             {tabs.map((tab) => {
               const active = tab.id === "services" ? servicesOpen : isActive(tab.href);
               const bouncing = tapped === tab.id;
@@ -274,7 +274,7 @@ const MobileBottomNav = () => {
                   }`}
                 >
                   <div
-                    className={`relative p-1.5 rounded-xl transition-all duration-200 ${active ? "bg-primary/10" : ""}`}
+                    className={`relative p-1.5 rounded-xl transition-all duration-200 ${active ? "bg-primary/12 shadow-[inset_0_1px_0_hsl(0_0%_100%/0.8)]" : ""}`}
                     style={{
                       transform: bouncing ? "scale(0.75)" : "scale(1)",
                       transition: bouncing

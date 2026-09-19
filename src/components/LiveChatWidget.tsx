@@ -247,7 +247,7 @@ const LiveChatWidget = () => {
               exit={{ scale: 0 }}
               onClick={() => setOpen(true)}
               data-livechat-trigger
-              className="fixed right-3 z-50 bottom-[calc(6rem+env(safe-area-inset-bottom))] md:right-6 md:bottom-6 w-13 h-13 md:w-14 md:h-14 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:opacity-90 transition-opacity"
+              className="fixed right-4 z-50 bottom-[calc(6rem+env(safe-area-inset-bottom))] md:right-6 md:bottom-6 w-13 h-13 md:w-14 md:h-14 rounded-2xl border border-primary-foreground/25 bg-primary/92 backdrop-blur-xl text-primary-foreground shadow-[0_14px_34px_hsl(var(--primary)/0.28),inset_0_1px_0_hsl(0_0%_100%/0.3)] flex items-center justify-center hover:bg-primary transition-colors"
             >
               <MessageCircle className="w-6 h-6" />
             </motion.button>
