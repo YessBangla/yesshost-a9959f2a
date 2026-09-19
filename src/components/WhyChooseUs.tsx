@@ -41,37 +41,74 @@ const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: str
 
 const WhyChooseUs = () => {
   const { lang } = useLanguage();
+  const bn = lang === "bn";
+  const [cms, setCms] = useState<any[]>([]);
 
-  const stats = [
-    { icon: Users, value: 50000, suffix: "+", labelBn: "সক্রিয় ওয়েবসাইট", labelEn: "Active Websites" },
-    { icon: Clock, value: 99.9, suffix: "%", labelBn: "আপটাইম গ্যারান্টি", labelEn: "Uptime Guarantee", isDecimal: true },
-    { icon: Headphones, value: 24, suffix: "/7", labelBn: "এক্সপার্ট সাপোর্ট", labelEn: "Expert Support" },
-    { icon: Award, value: 8, suffix: "+", labelBn: "বছরের অভিজ্ঞতা", labelEn: "Years Experience" },
-  ];
+  useEffect(() => {
+    supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
+      .in("section_key", ["why_heading", "why_stats", "why_reasons"])
+      .then(({ data }) => setCms(data || []));
+  }, []);
 
-  const reasons = [
-    {
-      icon: Server,
-      titleBn: "LiteSpeed ওয়েব সার্ভার",
-      titleEn: "LiteSpeed Web Server",
-      descBn: "Apache এর চেয়ে ৬ গুণ দ্রুত LiteSpeed সার্ভারে আপনার সাইট হোস্ট করুন।",
-      descEn: "Host your site on LiteSpeed servers, 6x faster than Apache.",
-    },
-    {
-      icon: Shield,
-      titleBn: "ফ্রি SSL ও DDoS প্রোটেকশন",
-      titleEn: "Free SSL & DDoS Protection",
-      descBn: "সকল প্ল্যানে ফ্রি SSL সার্টিফিকেট এবং এন্টারপ্রাইজ-গ্রেড সিকিউরিটি।",
-      descEn: "Free SSL certificates and enterprise-grade security on all plans.",
-    },
-    {
-      icon: Clock,
-      titleBn: "NVMe SSD স্টোরেজ",
-      titleEn: "NVMe SSD Storage",
-      descBn: "আলট্রা-ফাস্ট NVMe SSD ডিস্কে আপনার ডেটা সুরক্ষিত থাকবে।",
-      descEn: "Your data stays secure on ultra-fast NVMe SSD drives.",
-    },
-  ];
+  const get = (key: string) => cms.find(c => c.section_key === key);
+  const heading = get("why_heading");
+  const headingMeta = heading?.metadata || {};
+
+  const stats = useMemo(() => {
+    const list = get("why_stats")?.metadata?.stats;
+    if (Array.isArray(list) && list.length) {
+      return list.map((s: any) => ({
+        icon: iconMap[s.icon] || Users,
+        value: Number(s.value) || 0,
+        suffix: s.suffix || "",
+        display: s.display as string | undefined,
+        labelBn: s.label_bn,
+        labelEn: s.label_en,
+      }));
+    }
+    return [
+      { icon: Users, value: 50000, suffix: "+", display: undefined, labelBn: "সক্রিয় ওয়েবসাইট", labelEn: "Active Websites" },
+      { icon: Clock, value: 0, suffix: "", display: "99.9%", labelBn: "আপটাইম গ্যারান্টি", labelEn: "Uptime Guarantee" },
+      { icon: Headphones, value: 24, suffix: "/7", display: undefined, labelBn: "এক্সপার্ট সাপোর্ট", labelEn: "Expert Support" },
+      { icon: Award, value: 8, suffix: "+", display: undefined, labelBn: "বছরের অভিজ্ঞতা", labelEn: "Years Experience" },
+    ];
+  }, [cms]);
+
+  const reasons = useMemo(() => {
+    const list = get("why_reasons")?.metadata?.reasons;
+    if (Array.isArray(list) && list.length) {
+      return list.map((r: any) => ({
+        icon: iconMap[r.icon] || Server,
+        titleBn: r.title_bn,
+        titleEn: r.title_en,
+        descBn: r.desc_bn,
+        descEn: r.desc_en,
+      }));
+    }
+    return [
+      {
+        icon: Server,
+        titleBn: "LiteSpeed ওয়েব সার্ভার",
+        titleEn: "LiteSpeed Web Server",
+        descBn: "Apache এর চেয়ে ৬ গুণ দ্রুত LiteSpeed সার্ভারে আপনার সাইট হোস্ট করুন।",
+        descEn: "Host your site on LiteSpeed servers, 6x faster than Apache.",
+      },
+      {
+        icon: Shield,
+        titleBn: "ফ্রি SSL ও DDoS প্রোটেকশন",
+        titleEn: "Free SSL & DDoS Protection",
+        descBn: "সকল প্ল্যানে ফ্রি SSL সার্টিফিকেট এবং এন্টারপ্রাইজ-গ্রেড সিকিউরিটি।",
+        descEn: "Free SSL certificates and enterprise-grade security on all plans.",
+      },
+      {
+        icon: Clock,
+        titleBn: "NVMe SSD স্টোরেজ",
+        titleEn: "NVMe SSD Storage",
+        descBn: "আলট্রা-ফাস্ট NVMe SSD ডিস্কে আপনার ডেটা সুরক্ষিত থাকবে।",
+        descEn: "Your data stays secure on ultra-fast NVMe SSD drives.",
+      },
+    ];
+  }, [cms]);
 
   return (
     <section className="py-10 md:py-20 bg-secondary/30">
