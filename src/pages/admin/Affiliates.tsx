@@ -99,7 +99,10 @@ const AdminAffiliates = () => {
     setActing(id);
     const { error: actionError } = await supabase.from("affiliate_commissions").update({ status: nextStatus }).eq("id", id);
     setActing(null);
-    if (actionError) return toast({ title: bn ? "আপডেট ব্যর্থ" : "Update failed", description: bn ? "অনুমতি ও তথ্য যাচাই করে আবার চেষ্টা করুন।" : "Check access and try again.", variant: "destructive" });
+    if (actionError) {
+      toast({ title: bn ? "আপডেট ব্যর্থ" : "Update failed", description: bn ? "অনুমতি ও তথ্য যাচাই করে আবার চেষ্টা করুন।" : "Check access and try again.", variant: "destructive" });
+      return;
+    }
     toast({ title: nextStatus === "approved" ? (bn ? "কমিশন অনুমোদিত" : "Commission approved") : (bn ? "কমিশন বাতিল হয়েছে" : "Commission rejected") });
     await load(true);
   };
@@ -108,7 +111,10 @@ const AdminAffiliates = () => {
     setActing(id);
     const { error: actionError } = await supabase.from("affiliate_payouts").update({ status: nextStatus, processed_at: nextStatus === "paid" ? new Date().toISOString() : null, note: nextStatus === "rejected" ? "Rejected by admin" : null }).eq("id", id);
     setActing(null);
-    if (actionError) return toast({ title: bn ? "আপডেট ব্যর্থ" : "Update failed", description: bn ? "পেআউটটি আবার যাচাই করুন।" : "Review the payout and try again.", variant: "destructive" });
+    if (actionError) {
+      toast({ title: bn ? "আপডেট ব্যর্থ" : "Update failed", description: bn ? "পেআউটটি আবার যাচাই করুন।" : "Review the payout and try again.", variant: "destructive" });
+      return;
+    }
     toast({ title: nextStatus === "paid" ? (bn ? "পেআউট পরিশোধিত হয়েছে" : "Payout marked paid") : (bn ? "পেআউট বাতিল হয়েছে" : "Payout rejected") });
     await load(true);
   };
