@@ -115,14 +115,20 @@ const CallCenterTickets = () => {
 
       <div className="grid grid-cols-1 overflow-hidden staff-panel lg:grid-cols-[350px_1fr] lg:h-[calc(100vh-310px)]">
         <div className="flex min-h-[360px] flex-col overflow-hidden border-b border-border lg:border-b-0 lg:border-r"><div className="space-y-2 border-b border-border bg-secondary/30 p-3"><div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder={bn?"টিকেট বা গ্রাহক খুঁজুন":"Search ticket or customer"} className="pl-9" /></div><div className="grid grid-cols-2 gap-2"><Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">{bn?"সক্রিয়":"Active"}</SelectItem><SelectItem value="breached">{bn?"SLA অতিক্রম":"SLA breached"}</SelectItem><SelectItem value="unassigned">{bn?"দায়িত্বহীন":"Unassigned"}</SelectItem><SelectItem value="mine">{bn?"আমার টিকেট":"Assigned to me"}</SelectItem><SelectItem value="open">{bn?"খোলা":"Open"}</SelectItem><SelectItem value="resolved">{bn?"সমাধান":"Resolved"}</SelectItem><SelectItem value="all">{bn?"সব":"All"}</SelectItem></SelectContent></Select><Select value={priority} onValueChange={setPriority}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{bn?"সব অগ্রাধিকার":"All priority"}</SelectItem><SelectItem value="urgent">Urgent</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="normal">Normal</SelectItem></SelectContent></Select></div></div><div className="overflow-auto">
-          {filtered.map(t => (
+          {filtered.map(t => {
+            const sla = ticketSla(t, bn);
+            return (
             <button key={t.id} onClick={() => setSelected(t.id)}
               className={`min-h-[76px] w-full border-b border-border p-3 text-left transition-colors hover:bg-secondary/40 ${selected === t.id ? "bg-primary/10 shadow-[inset_3px_0_0_hsl(var(--primary))]" : ""}`}>
               <p className="text-sm font-medium text-foreground truncate">{t.subject}</p>
               <p className="text-xs text-muted-foreground">{t.user_name} • #{t.ticket_number}</p>
-              <Badge className={`${statusColor(t.status)} border-0 text-[10px] mt-1`}>{t.status}</Badge>
+              <div className="mt-1 flex flex-wrap items-center gap-1">
+                <Badge className={`${statusColor(t.status)} border-0 text-[10px]`}>{t.status}</Badge>
+                <Badge className={`${slaToneClass[sla.tone]} border-0 text-[10px]`}>{sla.label}</Badge>
+                {!t.assigned_to && <Badge className="border-0 bg-muted text-[10px] text-muted-foreground">{bn ? "দায়িত্বহীন" : "Unassigned"}</Badge>}
+              </div>
             </button>
-          ))}
+          );})}
           {filtered.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">{bn ? "কোনো টিকেট পাওয়া যায়নি" : "No matching tickets"}</p>}</div></div>
 
         <div className="flex min-h-[520px] flex-col">
