@@ -1694,10 +1694,13 @@ export type Database = {
       }
       support_tickets: {
         Row: {
+          assigned_to: string | null
           created_at: string
           department: Database["public"]["Enums"]["ticket_department"]
+          first_response_at: string | null
           id: string
           priority: Database["public"]["Enums"]["ticket_priority"]
+          resolved_at: string | null
           service_id: string | null
           status: Database["public"]["Enums"]["ticket_status"]
           subject: string
@@ -1706,10 +1709,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           department?: Database["public"]["Enums"]["ticket_department"]
+          first_response_at?: string | null
           id?: string
           priority?: Database["public"]["Enums"]["ticket_priority"]
+          resolved_at?: string | null
           service_id?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
           subject: string
@@ -1718,10 +1724,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           department?: Database["public"]["Enums"]["ticket_department"]
+          first_response_at?: string | null
           id?: string
           priority?: Database["public"]["Enums"]["ticket_priority"]
+          resolved_at?: string | null
           service_id?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
           subject?: string
@@ -2199,6 +2208,10 @@ export type Database = {
       set_support_pin_for_user: {
         Args: { _expires_at: string; _pin: string; _user_id: string }
         Returns: undefined
+      }
+      ticket_sla_minutes: {
+        Args: { _priority: Database["public"]["Enums"]["ticket_priority"] }
+        Returns: number
       }
       verify_support_pin: {
         Args: { _pin: string; _user_id: string }
