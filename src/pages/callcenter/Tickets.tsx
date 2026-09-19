@@ -53,11 +53,27 @@ const CallCenterTickets = () => {
     if (!reply.trim() || !selected || !user) return;
     const { error } = await supabase.from("ticket_replies").insert({ ticket_id: selected, user_id: user.id, message: reply.trim(), is_staff: true });
     if (error) { toast({ title: bn ? "উত্তর পাঠানো যায়নি" : "Reply could not be sent", description: bn ? "আবার চেষ্টা করুন।" : "Please try again.", variant: "destructive" }); return; }
-    await supabase.from("support_tickets").update({ status: "in_progress" as any, updated_at: new Date().toISOString() }).eq("id", selected);
+    await supabase.from("support_tickets").update({ status: "in_progress" as any, assigned_to: user.id, updated_at: new Date().toISOString() }).eq("id", selected);
     setReply("");
     toast({ title: bn ? "উত্তর পাঠানো হয়েছে" : "Reply sent" });
     fetchTickets();
   };
+
+  const changeStatus = async (ticketId: string, next: string) => {
+    const { error } = await supabase.from("support_tickets").update({ status: next as any, updated_at: new Date().toISOString() }).eq("id", ticketId);
+    if (error) { toast({ title: bn ? "স্ট্যাটাস বদলানো যায়নি" : "Status could not be changed", variant: "destructive" }); return; }
+    toast({ title: bn ? "স্ট্যাটাস হালনাগাদ হয়েছে" : "Status updated" });
+    fetchTickets();
+  };
+
+  const assignToMe = async (ticketId: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("support_tickets").update({ assigned_to: user.id, updated_at: new Date().toISOString() }).eq("id", ticketId);
+    if (error) { toast({ title: bn ? "দায়িত্ব নেওয়া যায়নি" : "Could not assign", variant: "destructive" }); return; }
+    toast({ title: bn ? "আপনি এই টিকেটের দায়িত্বে" : "Assigned to you" });
+    fetchTickets();
+  };
+
 
   const selectedTicket = tickets.find(t => t.id === selected);
   const statusColor = (s: string) => {
