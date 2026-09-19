@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   BookOpen, Plus, Pencil, Trash2, Save, X, ChevronDown, ChevronUp, FolderOpen,
-  RefreshCw, Eye, EyeOff, FileText, CheckCircle2, Languages,
+  RefreshCw, Eye, EyeOff, FileText, CheckCircle2, Languages, Download,
 } from "lucide-react";
+import { downloadCsv } from "@/lib/export-csv";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -230,6 +231,22 @@ const AdminKnowledgeBase = () => {
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" className="h-11" onClick={fetchData} disabled={loading}>
               <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} /> {bn ? "রিফ্রেশ" : "Refresh"}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-11"
+              disabled={!articles.length}
+              onClick={() => {
+                const catName = (id: string) => categories.find((c) => c.id === id)?.title_en || "";
+                downloadCsv(
+                  "yesshost-knowledge-base",
+                  ["title_en", "title_bn", "slug", "category", "status"],
+                  articles.map((a) => [a.title_en, a.title_bn, a.slug, catName(a.category_id), a.is_active ? "published" : "draft"]),
+                );
+                toast.success(bn ? "CSV ডাউনলোড হয়েছে" : "CSV downloaded");
+              }}
+            >
+              <Download className="size-4" /> CSV
             </Button>
             <Button
               className="h-11"
