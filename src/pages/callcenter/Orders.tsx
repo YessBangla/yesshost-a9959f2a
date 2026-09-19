@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import DataPagination from "@/components/DataPagination";
 import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 
 type Order = {
   id: string;
@@ -148,6 +149,11 @@ const CallCenterOrders = () => {
     orders.filter(o => ["active", "completed"].includes(o.status));
   const query = search.toLowerCase();
   const filteredOrders = byStatus.filter((order) => [order.order_number, order.user_name, order.payment_method, order.payment_status].some((value) => value?.toLowerCase().includes(query)));
+  const exportCsv = () => {
+    downloadCsv(`orders-${csvDate(new Date().toISOString())}`,
+      [bn ? "অর্ডার নম্বর" : "Order number", bn ? "গ্রাহক" : "Customer", bn ? "স্ট্যাটাস" : "Status", bn ? "পেমেন্ট" : "Payment", bn ? "পদ্ধতি" : "Method", bn ? "মোট (৳)" : "Total (BDT)", bn ? "তারিখ" : "Date"],
+      filteredOrders.map((order) => [order.order_number, order.user_name || "", order.status, order.payment_status, order.payment_method || "", order.total_bdt, csvDate(order.created_at)]));
+  };
   const pagedOrders = filteredOrders.slice((page - 1) * pageSize, page * pageSize);
 
   const stats = {
@@ -168,7 +174,7 @@ const CallCenterOrders = () => {
 
   return (
     <div className="space-y-5">
-      <StaffPageHeader title={bn ? "অর্ডার ও সেলস" : "Orders & Sales"} description={bn ? "পেমেন্ট, গ্রাহক ও প্রভিশনিংয়ের তথ্যভিত্তিক কিউ" : "A data-led queue for payments, customers and provisioning"} actions={<Button variant="outline" onClick={fetchData}><RefreshCw />{bn?"রিফ্রেশ":"Refresh"}</Button>} />
+      <StaffPageHeader title={bn ? "অর্ডার ও সেলস" : "Orders & Sales"} description={bn ? "পেমেন্ট, গ্রাহক ও প্রভিশনিংয়ের তথ্যভিত্তিক কিউ" : "A data-led queue for payments, customers and provisioning"} actions={<><Button variant="outline" onClick={exportCsv} disabled={filteredOrders.length === 0}><Download className="size-4" />{bn ? "CSV ডাউনলোড" : "Export CSV"}</Button><Button variant="outline" onClick={fetchData}><RefreshCw />{bn?"রিফ্রেশ":"Refresh"}</Button></>} />
 
       {/* Stats */}
       <StaffMetricStrip metrics={[{label:bn?"মোট ভ্যালু":"Order value",value:`৳${formatAmount(totalValue,lang)}`,detail:`${stats.total} ${bn?"অর্ডার":"orders"}`,icon:CircleDollarSign,tone:"primary"},{label:bn?"অপেক্ষমাণ ভ্যালু":"Pending value",value:`৳${formatAmount(pendingValue,lang)}`,detail:`${stats.pending+stats.processing} ${bn?"কাজ":"actions"}`,icon:Clock,tone:"warning"},{label:bn?"পরিশোধিত":"Paid orders",value:paidCount,detail:`${conversion}% ${bn?"হার":"rate"}`,icon:Check,tone:"success"},{label:bn?"সক্রিয়":"Active",value:stats.active,detail:bn?"প্রভিশন সম্পন্ন":"provisioned",icon:Package,tone:"success"}]} />
