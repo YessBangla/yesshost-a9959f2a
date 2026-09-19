@@ -290,6 +290,11 @@ const DashboardServices = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Bills & payments from the central accounts ledger */}
+                        <div className="mt-3">
+                          <ServiceInvoices invoices={invoices.filter(inv => inv.service_id === service.id)} />
+                        </div>
                       </div>
                     </motion.div>
                   )}
