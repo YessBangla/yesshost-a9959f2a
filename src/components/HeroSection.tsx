@@ -4,6 +4,7 @@ import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock,
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@/lib/router-compat";
+import { Button } from "@/components/ui/button";
 
 import heroImg from "@/assets/hero-corporate.png";
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
@@ -61,20 +62,19 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-background">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-accent/[0.02]" />
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/[0.04] blur-[100px]" />
+    <section className="relative overflow-hidden bg-background lg:bg-background">
+      <div className="absolute inset-0 lg:hidden bg-secondary/35" />
+      <div className="absolute inset-x-5 top-7 h-56 rounded-3xl border border-card/80 bg-card/45 shadow-[0_30px_80px_hsl(var(--primary)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.95)] backdrop-blur-3xl lg:hidden" />
 
-      <div className="relative z-10 container mx-auto px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 md:pt-16 md:pb-12 lg:pt-20 lg:pb-16">
+      <div className="relative z-10 container mx-auto px-4 pt-7 pb-8 sm:pt-14 sm:pb-10 md:pt-16 md:pb-12 lg:pt-20 lg:pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
           {/* Left — Text Content */}
-          <div>
+          <div className="text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: brandCurve }}
-              className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-primary/[0.06] border border-primary/[0.12]"
+              className="inline-flex min-h-9 items-center gap-2 mb-4 px-3.5 py-1.5 rounded-2xl bg-card/60 backdrop-blur-xl border border-card/90 shadow-[0_8px_24px_hsl(var(--glass-shadow)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.95)]"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-muted-foreground text-xs font-medium">{getText("hero_offer", "hero.offer")}</span>
@@ -84,7 +84,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: brandCurve, delay: 0.08 }}
-              className="font-display font-extrabold tracking-tight leading-[1.12] mb-4"
+              className="font-display font-extrabold tracking-normal leading-[1.15] mb-4"
               style={{ fontSize: "clamp(1.6rem, 4.5vw, 3.2rem)" }}
             >
               <span className="block text-foreground">{getText("hero_title1", "hero.title1")}</span>
@@ -97,7 +97,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: brandCurve, delay: 0.15 }}
-              className="text-sm md:text-[15px] text-muted-foreground max-w-lg mb-5 leading-relaxed"
+              className="text-sm md:text-[15px] text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-5 leading-relaxed"
             >
               {getText("hero_subtitle", "hero.subtitle")}
             </motion.p>
@@ -107,7 +107,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: brandCurve, delay: 0.2 }}
-              className="flex flex-wrap gap-x-4 gap-y-1.5 mb-6"
+              className="flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-2 mb-6"
             >
               {highlights.map((h) => (
                 <div key={h} className="flex items-center gap-1.5">
@@ -122,21 +122,17 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: brandCurve, delay: 0.25 }}
-              className="flex flex-wrap gap-3"
+              className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3 max-w-md mx-auto lg:mx-0"
             >
-              <Link
-                to="/hosting-plans"
-                className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-2.5 sm:px-7 sm:py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20"
-              >
-                {bn ? "প্ল্যান দেখুন" : "View Plans"}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 bg-card border border-border text-foreground px-6 py-2.5 sm:px-7 sm:py-3 rounded-xl font-semibold text-sm hover:bg-secondary transition-all"
-              >
-                {bn ? "যোগাযোগ করুন" : "Contact Us"}
-              </Link>
+              <Button asChild size="lg" className="h-12 rounded-2xl font-bold shadow-[0_12px_28px_hsl(var(--primary)/0.24),inset_0_1px_0_hsl(0_0%_100%/0.28)]">
+                <Link to="/hosting-plans">
+                  {bn ? "প্ল্যান দেখুন" : "View Plans"}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-12 rounded-2xl border-card/90 bg-card/58 font-semibold shadow-[0_10px_25px_hsl(var(--glass-shadow)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.95)] backdrop-blur-xl">
+                <Link to="/contact">{bn ? "যোগাযোগ করুন" : "Contact Us"}</Link>
+              </Button>
             </motion.div>
           </div>
 
@@ -186,7 +182,7 @@ const HeroSection = () => {
           {stats.map((stat: any, i: number) => (
             <div
               key={i}
-              className="bg-card border border-border rounded-xl p-3.5 sm:p-4 text-center group hover:border-primary/25 hover:shadow-xs transition-all"
+              className="bg-card/58 backdrop-blur-2xl border border-card/90 rounded-2xl p-3.5 sm:p-4 text-center group shadow-[0_10px_30px_hsl(var(--glass-shadow)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.95)] hover:border-primary/25 transition-all"
             >
               <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center mx-auto mb-2 group-hover:bg-primary/12 transition-colors">
                 <stat.icon className="w-4 h-4 text-primary" />

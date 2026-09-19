@@ -26,6 +26,6 @@
 - [ ] Phase 7: Standardize controls, Skeletons, mobile layouts, and bilingual presentation
 - [x] Phase 8: Run automated, browser, security, accounting, and release checks
 
-- [ ] Refine the mobile public-site template to a more premium international corporate standard.
-- [ ] Apply an iOS 27-inspired liquid-glass visual mode to the mobile public site.
-- [ ] Keep the iOS 27-inspired liquid-glass mobile mode light and corporate, not dark.
+- [x] Refine the mobile public-site template to a more premium international corporate standard.
+- [x] Apply an iOS 27-inspired liquid-glass visual mode to the mobile public site.
+- [x] Keep the iOS 27-inspired liquid-glass mobile mode light and corporate, not dark.

@@ -19,7 +19,7 @@ const PublicLayout = ({ children, hideFooter, showOfferBanner }: PublicLayoutPro
         {showOfferBanner && <OfferBanner />}
         <Navbar />
       </div>
-      <main id="main-content" role="main">
+      <main id="main-content" role="main" className={showOfferBanner ? "pt-[5.5rem] lg:pt-[6.25rem]" : "pt-14 lg:pt-16"}>
         {children}
       </main>
       {!hideFooter && <FooterSection />}
