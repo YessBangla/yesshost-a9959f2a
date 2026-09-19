@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatGap, formatStamp, isSlowGap } from "@/lib/time-gap";
 
 const statusColors: Record<string, string> = { open: "bg-primary/10 text-primary", in_progress: "bg-warning/10 text-warning", waiting: "bg-info/10 text-info", resolved: "bg-success/10 text-success", closed: "bg-muted text-muted-foreground" };
 const priorityColors: Record<string, string> = { low: "bg-muted text-muted-foreground", medium: "bg-info/10 text-info", high: "bg-warning/10 text-warning", urgent: "bg-destructive/10 text-destructive" };
