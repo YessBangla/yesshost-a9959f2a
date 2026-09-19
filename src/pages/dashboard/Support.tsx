@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "@/lib/router-compat";
 
-import { HeadphonesIcon, Plus, Send, Search, Clock, Loader2, CheckCircle2 } from "lucide-react";
+import { HeadphonesIcon, Plus, Send, Search, Clock, Loader2, CheckCircle2, Download } from "lucide-react";
 import DataPagination from "@/components/DataPagination";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
 import { SupportSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
@@ -163,6 +164,9 @@ const DashboardSupport = () => {
       (statusFilter === "closed" && (t.status === "resolved" || t.status === "closed"));
     return matchSearch && matchStatus;
   });
+  const exportCsv = () => downloadCsv(`my-tickets-${csvDate(new Date().toISOString())}`,
+    [bn ? "টিকিট" : "Ticket", bn ? "বিষয়" : "Subject", bn ? "বিভাগ" : "Department", bn ? "অগ্রাধিকার" : "Priority", bn ? "স্ট্যাটাস" : "Status", bn ? "সর্বশেষ আপডেট" : "Last update"],
+    filteredTickets.map(item => [item.ticket_number, item.subject, item.department, item.priority, item.status, csvDate(item.updated_at)]));
   const pagedTickets = filteredTickets.slice((page - 1) * pageSize, page * pageSize);
 
   return (
@@ -171,9 +175,14 @@ const DashboardSupport = () => {
         title={tr("dash.supportTitle")}
         description={tr("dash.supportSubtitle")}
         actions={
+          <div className="flex items-center gap-2">
+          <button type="button" onClick={exportCsv} disabled={filteredTickets.length === 0} className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-50">
+            <Download className="w-4 h-4" /><span className="hidden sm:inline">CSV</span>
+          </button>
           <button onClick={() => setShowCreate(true)} className="inline-flex h-11 items-center gap-2 gradient-primary text-primary-foreground px-4 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
             <Plus className="w-4 h-4" /> {tr("dash.newTicket")}
           </button>
+          </div>
         }
       />
 

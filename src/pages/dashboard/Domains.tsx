@@ -12,8 +12,9 @@ import { Link } from "@/lib/router-compat";
 import { getDashboardDomains } from "@/lib/dashboard.functions";
 import DataPagination from "@/components/DataPagination";
 import { logApiError } from "@/lib/errorReporting";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
-import { RefreshCw, CalendarClock } from "lucide-react";
+import { Download, RefreshCw, CalendarClock } from "lucide-react";
 
 const DashboardDomains = () => {
   const { user } = useAuth();
@@ -45,6 +46,9 @@ const DashboardDomains = () => {
 
   useEffect(() => { setPage(1); }, [search]);
 
+  const exportCsv = () => downloadCsv(`my-domains-${csvDate(new Date().toISOString())}`,
+    [bn ? "ডোমেইন" : "Domain", bn ? "স্ট্যাটাস" : "Status", bn ? "মেয়াদ শেষ" : "Expiry", bn ? "মূল্য (৳)" : "Price (BDT)"],
+    filtered.map(item => [item.domain || item.name, item.status, csvDate(item.expiry_date), item.price_bdt]));
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const isExpiringSoon = (date: string | null) => {
@@ -82,6 +86,9 @@ const DashboardDomains = () => {
             >
               <RefreshCw className={`w-4 h-4 ${domainsQuery.isFetching ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">{bn ? "রিফ্রেশ" : "Refresh"}</span>
+            </button>
+            <button type="button" onClick={exportCsv} disabled={filtered.length === 0} className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-50">
+              <Download className="w-4 h-4" /><span className="hidden sm:inline">CSV</span>
             </button>
             <Link to="/domain-search" className="inline-flex h-11 items-center gap-2 gradient-primary text-primary-foreground px-4 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
               {bn ? "নতুন ডোমেইন" : "Register Domain"}

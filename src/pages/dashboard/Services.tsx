@@ -12,8 +12,9 @@ import { getDashboardServices } from "@/lib/dashboard.functions";
 import { logApiError } from "@/lib/errorReporting";
 import DataPagination from "@/components/DataPagination";
 import { formatAmount } from "@/lib/formatPrice";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
-import { RefreshCw, AlertTriangle, CheckCircle2, Wallet as WalletIcon } from "lucide-react";
+import { Download, RefreshCw, AlertTriangle, CheckCircle2, Wallet as WalletIcon } from "lucide-react";
 
 const statusConfig: Record<string, { label_en: string; label_bn: string; color: string; dot: string }> = {
   active: { label_en: "Active", label_bn: "সক্রিয়", color: "bg-success/10 text-success", dot: "bg-success" },
@@ -69,6 +70,9 @@ const DashboardServices = () => {
 
   useEffect(() => { setPage(1); }, [search, filterStatus]);
 
+  const exportCsv = () => downloadCsv(`my-services-${csvDate(new Date().toISOString())}`,
+    [bn ? "সার্ভিস" : "Service", bn ? "ডোমেইন" : "Domain", bn ? "প্ল্যান" : "Plan", bn ? "স্ট্যাটাস" : "Status", bn ? "মূল্য (৳)" : "Price (BDT)", bn ? "মেয়াদ শেষ" : "Expiry"],
+    filtered.map(item => [item.name, item.domain || "", item.plan || "", item.status, item.price_bdt, csvDate(item.expiry_date)]));
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const statusCounts = services.reduce((acc, s) => {
@@ -112,6 +116,9 @@ const DashboardServices = () => {
             >
               <RefreshCw className={`w-4 h-4 ${servicesQuery.isFetching ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">{bn ? "রিফ্রেশ" : "Refresh"}</span>
+            </button>
+            <button type="button" onClick={exportCsv} disabled={filtered.length === 0} className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-50">
+              <Download className="w-4 h-4" /><span className="hidden sm:inline">{bn ? "CSV" : "CSV"}</span>
             </button>
             <Link to="/hosting-plans" className="inline-flex h-11 items-center gap-2 gradient-primary text-primary-foreground px-4 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
               {bn ? "নতুন সার্ভিস" : "New Service"} <ExternalLink className="w-4 h-4" />
