@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@/lib/router-compat";
-import { AlertTriangle, BellRing, CreditCard, Globe, Headphones, Loader2, Plus, Search, ShoppingCart, User } from "lucide-react";
+import { AlertTriangle, BellRing, CreditCard, Globe, Headphones, Loader2, Plus, Search, ShieldCheck, ShoppingCart, User } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -35,6 +35,9 @@ const CustomerLookup = () => {
   const [ticketOpen, setTicketOpen] = useState(false);
   const [form, setForm] = useState({ subject: "", department: "technical", priority: "medium", message: "" });
   const [saving, setSaving] = useState(false);
+  const [pinRow, setPinRow] = useState<{ pin: string; expires_at: string } | null>(null);
+  const [pinInput, setPinInput] = useState("");
+  const [pinResult, setPinResult] = useState<"match" | "wrong" | "expired" | null>(null);
 
   const search = async () => {
     const value = term.trim();
@@ -58,6 +61,9 @@ const CustomerLookup = () => {
 
   const openCustomer = async (profile: Profile) => {
     setSelected(profile); setLoadingDetail(true); setDetail(null);
+    setPinInput(""); setPinResult(null); setPinRow(null);
+    supabase.from("support_pins").select("pin, expires_at").eq("user_id", profile.user_id).maybeSingle()
+      .then(({ data }) => setPinRow(data ?? null));
     const [services, invoices, tickets, orders] = await Promise.all([
       supabase.from("services").select("*").eq("user_id", profile.user_id).order("expiry_date", { ascending: true }).limit(20),
       supabase.from("invoices").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(10),
@@ -101,6 +107,13 @@ const CustomerLookup = () => {
     if (notifyError) toast.error(bn ? "রিমাইন্ডার পাঠানো যায়নি।" : "Reminder could not be sent.");
     else toast.success(bn ? "গ্রাহকের ড্যাশবোর্ডে রিমাইন্ডার পাঠানো হয়েছে।" : "Reminder sent to the customer dashboard.");
   };
+  const verifyPin = () => {
+    const value = pinInput.trim();
+    if (!pinRow) { setPinResult("expired"); return; }
+    if (new Date(pinRow.expires_at).getTime() < Date.now()) { setPinResult("expired"); return; }
+    setPinResult(value === pinRow.pin ? "match" : "wrong");
+  };
+
   const expiringSoon = detail?.services.filter((item) => item.expiry_date && new Date(item.expiry_date).getTime() - Date.now() < 30 * 864e5) || [];
 
   return <section className="staff-panel overflow-hidden">
@@ -154,6 +167,17 @@ const CustomerLookup = () => {
           <div><p className="staff-eyebrow flex items-center gap-2"><ShoppingCart className="size-3.5" />{bn ? "অর্ডার" : "Orders"}</p>
             <div className="mt-2 space-y-2">{detail.orders.length === 0 ? <p className="text-xs text-muted-foreground">{bn ? "কোনো অর্ডার নেই।" : "No orders yet."}</p>
               : detail.orders.map((item) => <div key={item.id} className="rounded-md border border-border px-3 py-2"><div className="flex items-center justify-between gap-2"><p className="truncate text-sm font-medium text-foreground">{item.order_number}</p><Badge variant="outline">{item.status}</Badge></div><p className="text-xs text-muted-foreground">৳{formatAmount(Number(item.total_bdt), lang)} • {item.payment_status} • {date(item.created_at)}</p></div>)}</div></div>
+        </div>
+
+        <div className="space-y-2 rounded-md border border-border bg-secondary/20 p-3">
+          <p className="text-xs font-semibold text-foreground">{bn ? "সাপোর্ট পিন যাচাই" : "Verify support PIN"}</p>
+          {!pinRow ? <p className="text-xs text-muted-foreground">{bn ? "এই গ্রাহক এখনো কোনো সাপোর্ট পিন তৈরি করেননি — ড্যাশবোর্ডের সাপোর্ট পিন পাতা থেকে তৈরি করতে বলুন।" : "This customer has not generated a support PIN yet — ask them to create one from the Support PIN page."} </p> : <div className="flex flex-wrap items-center gap-2">
+            <Input value={pinInput} onChange={(event) => { setPinInput(event.target.value); setPinResult(null); }} inputMode="numeric" maxLength={6} placeholder={bn ? "৬ সংখ্যার পিন" : "6-digit PIN"} className="h-11 w-40" />
+            <Button variant="outline" onClick={verifyPin} disabled={pinInput.trim().length < 4}><ShieldCheck className="size-4" />{bn ? "যাচাই করুন" : "Verify"}</Button>
+            {pinResult === "match" && <Badge className="bg-success/15 text-success">{bn ? "পরিচয় নিশ্চিত" : "Identity verified"}</Badge>}
+            {pinResult === "wrong" && <Badge variant="destructive">{bn ? "পিন মেলেনি" : "PIN does not match"}</Badge>}
+            {pinResult === "expired" && <Badge variant="secondary">{bn ? "পিনের মেয়াদ শেষ" : "PIN expired"}</Badge>}
+          </div>}
         </div>
 
         <div className="flex flex-wrap gap-2 border-t border-border pt-3">
