@@ -62,12 +62,12 @@ serve(async (req) => {
     const source = is_wallet_deposit ? "wallet_transactions" : "invoices";
     const fields = is_wallet_deposit
       ? "id,user_id,status,amount_bdt"
-      : "id,user_id,status,amount_bdt,share_token_hash,share_expires_at";
+      : "id,user_id,status,amount_bdt,invoice_number,description,share_token_hash,share_expires_at";
     let payableQuery = authClient.from(source).select(fields).eq("id", invoice_id);
     if (auth.user) payableQuery = payableQuery.eq("user_id", auth.user.id);
     payableQuery = is_wallet_deposit ? payableQuery.eq("status", "pending") : payableQuery.in("status", ["unpaid", "overdue"]);
     const { data: payable } = await payableQuery.maybeSingle();
-    const shareable = payable as { share_token_hash?: string | null; share_expires_at?: string | null } | null;
+    const shareable = payable as { share_token_hash?: string | null; share_expires_at?: string | null; invoice_number?: string | null; description?: string | null } | null;
     const validShareToken = !is_wallet_deposit && !!share_token && shareable?.share_token_hash === await sha256Hex(String(share_token)) && !!shareable.share_expires_at && new Date(shareable.share_expires_at).getTime() > Date.now();
     if (!auth.user && !validShareToken) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const amount = Number(payable?.amount_bdt);
@@ -104,7 +104,10 @@ serve(async (req) => {
     formData.append("cus_city", "Dhaka");
     formData.append("cus_country", "Bangladesh");
     formData.append("shipping_method", "NO");
-    formData.append("product_name", description || "Domain Registration");
+    const safeProductName = is_wallet_deposit
+      ? "Wallet deposit"
+      : `Invoice ${shareable?.invoice_number || invoice_id}`;
+    formData.append("product_name", safeProductName);
     formData.append("product_category", "Digital Service");
     formData.append("product_profile", "non-physical-goods");
 
@@ -119,10 +122,9 @@ serve(async (req) => {
     if (data.status === "SUCCESS" && data.GatewayPageURL) {
       // Store transaction reference in invoice
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-      await supabase.from("invoices").update({
-        payment_method: "sslcommerz",
-        description: `${description || ""} | TXN: ${tran_id}`,
-      }).eq("id", invoice_id);
+      if (!is_wallet_deposit) {
+        await supabase.from("invoices").update({ payment_method: "sslcommerz" }).eq("id", invoice_id);
+      }
 
       return new Response(
         JSON.stringify({
