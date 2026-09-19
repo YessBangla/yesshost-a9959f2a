@@ -92,3 +92,46 @@ export const updateCallRecordFn = createServerFn({ method: "POST" })
     const { updateCallRecord } = await import("./live-chat.server");
     return updateCallRecord(data);
   });
+
+async function requireStaff(context: { supabase: any; userId: string }) {
+  const { data } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .in("role", ["admin", "call_center"])
+    .limit(1);
+  if (!data?.length) throw new Error("Forbidden");
+}
+
+export const startStaffCallRecordFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { chatId: string; startedAt: string }) => {
+    if (!data?.chatId || !data?.startedAt) throw new Error("invalid call data");
+    return data;
+  })
+  .handler(async ({ data, context }): Promise<{ id: string | null }> => {
+    await requireStaff(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin.from("call_history").insert({
+      chat_id: data.chatId, caller_role: "admin", started_at: data.startedAt, status: "ringing",
+    }).select("id").single();
+    if (error) throw new Error(error.message);
+    return { id: row?.id ?? null };
+  });
+
+export const updateStaffCallRecordFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string; chatId: string; status: string; durationSeconds?: number; ended?: boolean }) => {
+    if (!data?.id || !data?.chatId || !data?.status) throw new Error("invalid call update");
+    return data;
+  })
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await requireStaff(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: { status: string; ended_at?: string; duration_seconds?: number } = { status: data.status };
+    if (data.ended) patch.ended_at = new Date().toISOString();
+    if (typeof data.durationSeconds === "number") patch.duration_seconds = data.durationSeconds;
+    const { error } = await supabaseAdmin.from("call_history").update(patch).eq("id", data.id).eq("chat_id", data.chatId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
