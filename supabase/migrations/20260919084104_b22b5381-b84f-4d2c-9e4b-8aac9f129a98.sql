@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ALTER COLUMN account_status SET DEFAULT 'pending';

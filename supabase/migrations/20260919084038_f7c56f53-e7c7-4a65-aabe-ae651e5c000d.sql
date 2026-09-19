@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.validate_profile_account_status() FROM PUBLIC, anon, authenticated;
