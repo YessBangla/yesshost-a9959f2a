@@ -711,6 +711,133 @@ const AdminAccounts = () => {
               </div>
             </div>
           </TabsContent>
+
+          <TabsContent value="recon" className="space-y-4">
+            <div className="rounded-lg border border-border bg-card">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border p-3">
+                <div>
+                  <h2 className="font-medium">{bn ? "আয় মিলকরণ" : "Income reconciliation"}</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {bn ? `${from} থেকে ${to} পর্যন্ত বিল, খতিয়ান ও গেটওয়ে পেমেন্টের তুলনা` : `Invoices vs ledger vs gateway payments for ${from} – ${to}`}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => void runReconciliation()} disabled={reconBusy}>
+                    <RefreshCcw className="mr-2 size-4" />{bn ? "মিলকরণ চালান" : "Run reconciliation"}
+                  </Button>
+                  {recon && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => downloadCsv("reconciliation", ["Metric", "Amount"], [
+                        [bn ? "পরিশোধিত বিল" : "Paid invoices", recon.invoices_paid_total],
+                        [bn ? "খতিয়ান আয়" : "Ledger income", recon.ledger_income_total],
+                        [bn ? "গেটওয়ে পেমেন্ট" : "Gateway payments", recon.payment_events_total],
+                        [bn ? "বিল - খতিয়ান পার্থক্য" : "Invoice - ledger diff", recon.invoice_ledger_diff],
+                        [bn ? "বিল - পেমেন্ট পার্থক্য" : "Invoice - payment diff", recon.invoice_payment_diff],
+                      ])}
+                    >
+                      <Download className="mr-2 size-4" />CSV
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {!recon ? (
+                <div className="p-6 text-sm text-muted-foreground">
+                  {reconBusy
+                    ? (bn ? "মিলকরণ তৈরি হচ্ছে…" : "Generating reconciliation…")
+                    : (bn ? "\"মিলকরণ চালান\" চাপুন — নির্বাচিত সময়ের হিসাব মিলিয়ে দেখা হবে।" : "Press \"Run reconciliation\" to compare the selected period.")}
+                </div>
+              ) : (
+                <div className="space-y-4 p-3">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {[
+                      { label: bn ? "পরিশোধিত বিল" : "Paid invoices", value: recon.invoices_paid_total },
+                      { label: bn ? "খতিয়ানে আয়" : "Ledger income", value: recon.ledger_income_total },
+                      { label: bn ? "গেটওয়ে পেমেন্ট" : "Gateway payments", value: recon.payment_events_total },
+                    ].map((card) => (
+                      <div key={card.label} className="rounded-lg border border-border bg-secondary/30 p-3">
+                        <p className="text-xs text-muted-foreground">{card.label}</p>
+                        <p className="text-lg font-semibold tabular-nums">{money(Number(card.value))}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[
+                      { label: bn ? "বিল বনাম খতিয়ান" : "Invoices vs ledger", diff: Number(recon.invoice_ledger_diff) },
+                      { label: bn ? "বিল বনাম গেটওয়ে" : "Invoices vs gateway", diff: Number(recon.invoice_payment_diff) },
+                    ].map((row) => {
+                      const ok = Math.abs(row.diff) < 1;
+                      return (
+                        <div key={row.label} className={`rounded-lg border p-3 ${ok ? "border-success/40 bg-success/10" : "border-destructive/40 bg-destructive/10"}`}>
+                          <p className="text-xs text-muted-foreground">{row.label}</p>
+                          <p className="text-base font-semibold tabular-nums">
+                            {ok ? (bn ? "সম্পূর্ণ মিলেছে" : "Fully matched") : `${bn ? "পার্থক্য" : "Difference"}: ${money(row.diff)}`}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="rounded-lg border border-border">
+                    <div className="border-b border-border p-3 text-sm font-medium">
+                      {bn ? "খতিয়ানে ওঠেনি এমন পরিশোধিত বিল" : "Paid invoices missing from the ledger"}
+                      <span className="ml-2 text-xs text-muted-foreground">({recon.missing_ledger_entries.length})</span>
+                    </div>
+                    {recon.missing_ledger_entries.length === 0 ? (
+                      <p className="p-3 text-sm text-muted-foreground">{bn ? "সব বিল খতিয়ানে আছে।" : "Every paid invoice is posted."}</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-secondary/60 text-left text-xs uppercase text-muted-foreground">
+                            <tr><th className="p-3">{bn ? "ইনভয়েস" : "Invoice"}</th><th className="p-3 text-right">{bn ? "টাকা" : "Amount"}</th><th className="p-3">{bn ? "পরিশোধের তারিখ" : "Paid at"}</th></tr>
+                          </thead>
+                          <tbody>
+                            {recon.missing_ledger_entries.map((row) => (
+                              <tr key={row.id} className="border-t border-border">
+                                <td className="p-3">{row.invoice_number}</td>
+                                <td className="p-3 text-right tabular-nums">{money(Number(row.amount_bdt))}</td>
+                                <td className="p-3 text-muted-foreground">{row.paid_at ? new Date(row.paid_at).toLocaleDateString(bn ? "bn-BD" : "en-US") : "-"}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg border border-border">
+                    <div className="border-b border-border p-3 text-sm font-medium">
+                      {bn ? "বিল ছাড়া খতিয়ান এন্ট্রি" : "Ledger entries without a paid invoice"}
+                      <span className="ml-2 text-xs text-muted-foreground">({recon.orphan_ledger_entries.length})</span>
+                    </div>
+                    {recon.orphan_ledger_entries.length === 0 ? (
+                      <p className="p-3 text-sm text-muted-foreground">{bn ? "কোনো অমিল এন্ট্রি নেই।" : "No unmatched entries."}</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-secondary/60 text-left text-xs uppercase text-muted-foreground">
+                            <tr><th className="p-3">{bn ? "তারিখ" : "Date"}</th><th className="p-3">{bn ? "রেফারেন্স" : "Reference"}</th><th className="p-3">{bn ? "বিবরণ" : "Description"}</th></tr>
+                          </thead>
+                          <tbody>
+                            {recon.orphan_ledger_entries.map((row) => (
+                              <tr key={row.id} className="border-t border-border">
+                                <td className="p-3">{row.entry_date}</td>
+                                <td className="p-3">{row.reference}</td>
+                                <td className="p-3 text-muted-foreground">{row.description || "-"}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
       )}
     </div>
