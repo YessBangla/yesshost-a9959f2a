@@ -1,5 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { replyToContactMessage, getContactReplies } from "@/lib/contact-reply.functions";
+
+interface ContactReplyRow {
+  id: string;
+  message_id: string;
+  body: string;
+  to_email: string;
+  delivery_status: string;
+  delivery_detail: string | null;
+  created_at: string;
+}
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Mail, MailOpen, Trash2, Eye, Send, ArrowLeft, Clock, User, AtSign,
@@ -39,6 +51,9 @@ const ContactMessages = () => {
   const [sending, setSending] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [replies, setReplies] = useState<ContactReplyRow[]>([]);
+  const [repliesLoading, setRepliesLoading] = useState(false);
+  const replyReq = useServerFn(replyToContactMessage);
 
   const fetchMessages = async () => {
     setLoading(true);
@@ -64,6 +79,7 @@ const ContactMessages = () => {
     }
     setSelected(msg.is_read ? msg : { ...msg, is_read: true });
     setReplyText("");
+    void loadReplies(msg.id);
   };
 
   const deleteMessage = async (id: string) => {
@@ -77,11 +93,41 @@ const ContactMessages = () => {
     }
   };
 
+  const loadReplies = async (messageId: string) => {
+    setRepliesLoading(true);
+    try {
+      const rows = await getContactReplies({ data: { messageId } });
+      setReplies(rows);
+    } catch {
+      setReplies([]);
+    }
+    setRepliesLoading(false);
+  };
+
   const sendReply = async () => {
-    if (!selected || !replyText.trim()) return;
+    if (!selected || replyText.trim().length < 2) {
+      toast.error(bn ? "রিপ্লাই লিখুন" : "Please write a reply first");
+      return;
+    }
     setSending(true);
-    toast.success(bn ? `${selected.email}-এ রিপ্লাই পাঠানো হয়েছে (সিমুলেটেড)` : `Reply sent to ${selected.email} (simulated)`);
-    setReplyText("");
+    try {
+      const res = await replyReq({ data: { messageId: selected.id, reply: replyText.trim() } });
+      if (res.ok) {
+        toast.success(bn ? `${selected.email}-এ রিপ্লাই পাঠানো হয়েছে` : `Reply sent to ${selected.email}`);
+        setReplyText("");
+        setMessages(prev => prev.map(m => m.id === selected.id ? { ...m, is_read: true } : m));
+      } else if (res.status === "queued") {
+        toast.warning(bn
+          ? "রিপ্লাই সংরক্ষিত হয়েছে, তবে ইমেইল সার্ভিস চালু নেই — Communication Settings থেকে চালু করুন"
+          : "Reply saved, but no email provider is active — enable one in Communication Settings");
+        setReplyText("");
+      } else {
+        toast.error(bn ? `পাঠানো যায়নি: ${res.detail || ""}` : `Could not send: ${res.detail || ""}`);
+      }
+      await loadReplies(selected.id);
+    } catch (e) {
+      toast.error(bn ? "রিপ্লাই পাঠাতে সমস্যা হয়েছে" : "Failed to send the reply");
+    }
     setSending(false);
   };
 
@@ -272,6 +318,39 @@ const ContactMessages = () => {
                 <div className="p-5 min-h-[120px]">
                   <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{selected.message}</p>
                 </div>
+
+                {(repliesLoading || replies.length > 0) && (
+                  <div className="px-5 pb-5 space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {bn ? "আগের রিপ্লাই" : "Reply history"}
+                    </h3>
+                    {repliesLoading ? (
+                      <div className="h-16 rounded-lg bg-secondary/40 animate-pulse" />
+                    ) : (
+                      replies.map(r => (
+                        <div key={r.id} className="rounded-lg border border-border/60 bg-background p-3">
+                          <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                            <span>{format(new Date(r.created_at), "dd MMM yyyy, hh:mm a")}</span>
+                            <span className={
+                              r.delivery_status === "sent"
+                                ? "text-emerald-600 font-medium"
+                                : r.delivery_status === "queued"
+                                  ? "text-amber-600 font-medium"
+                                  : "text-destructive font-medium"
+                            }>
+                              {r.delivery_status === "sent"
+                                ? (bn ? "পাঠানো হয়েছে" : "Sent")
+                                : r.delivery_status === "queued"
+                                  ? (bn ? "অপেক্ষমাণ" : "Queued")
+                                  : (bn ? "ব্যর্থ" : "Failed")}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">{r.body}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
 
                 <div className="p-5 border-t border-border/50 bg-secondary/20">
                   <h3 className="text-sm font-semibold text-foreground mb-3">

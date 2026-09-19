@@ -377,6 +377,50 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_message_replies: {
+        Row: {
+          body: string
+          created_at: string
+          delivery_detail: string | null
+          delivery_status: string
+          id: string
+          message_id: string
+          replied_by: string | null
+          subject: string
+          to_email: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          delivery_detail?: string | null
+          delivery_status?: string
+          id?: string
+          message_id: string
+          replied_by?: string | null
+          subject: string
+          to_email: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          delivery_detail?: string | null
+          delivery_status?: string
+          id?: string
+          message_id?: string
+          replied_by?: string | null
+          subject?: string
+          to_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_message_replies_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "contact_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           created_at: string
