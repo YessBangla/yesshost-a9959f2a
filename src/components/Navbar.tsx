@@ -4,7 +4,7 @@ import {
   Menu, X, ChevronDown, LogIn, Globe, ShoppingCart,
   Globe2, ListOrdered, Server, Zap, Crown, Wifi,
   Users, WifiHigh, MonitorSmartphone, HardDrive, MapPin, Globe as GlobeIcon,
-  Mail, Radio, Palette, ArrowRight,
+  Mail, Radio, Palette, ArrowRight, Search,
   type LucideIcon
 } from "lucide-react";
 import { Link } from "@/lib/router-compat";
@@ -55,6 +55,7 @@ const Navbar = () => {
       href: "/services/domain",
       cta: { label: isBn ? "সকল ডোমেইন দেখুন" : "View All Domains", href: "/domain-pricing" },
       children: [
+        { label: isBn ? "ডোমেইন খুঁজুন" : "Search Domains", href: "/domain-search", icon: Search, desc: isBn ? "পছন্দের ডোমেইনটি এখনই খুঁজুন" : "Find your preferred domain instantly" },
         { label: isBn ? "ডোমেইন রেজিস্ট্রেশন" : "Domain Registration", href: "/services/domain", icon: Globe2, desc: isBn ? ".com .net .org .info রেজিস্টার করুন" : "Register .com .net .org .info" },
         { label: isBn ? "ডোমেইন মূল্য তালিকা" : "Domain Pricing", href: "/domain-pricing", icon: ListOrdered, desc: isBn ? "সকল ডোমেইনের মূল্য দেখুন" : "View all domain prices" },
       ],
@@ -239,6 +240,7 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0 ml-2">
           <button
             onClick={() => setLang(lang === "bn" ? "en" : "bn")}
+            aria-label={isBn ? "Switch language to English" : "বাংলায় ভাষা পরিবর্তন করুন"}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2.5 py-2 rounded-lg hover:bg-secondary/60"
           >
             <Globe className="w-4 h-4" />
@@ -247,6 +249,7 @@ const Navbar = () => {
           {user && <NotificationBell />}
           <button
             onClick={() => setCartOpen(true)}
+            aria-label={isBn ? `কার্ট খুলুন, ${itemCount}টি আইটেম` : `Open cart, ${itemCount} items`}
             className="relative flex items-center text-muted-foreground hover:text-foreground transition-colors px-2.5 py-2 rounded-lg hover:bg-secondary/60"
           >
             <ShoppingCart className="w-4 h-4" />
@@ -278,6 +281,9 @@ const Navbar = () => {
         <button
           className="lg:hidden text-foreground p-1.5 rounded-lg hover:bg-secondary/60 transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? (isBn ? "মেনু বন্ধ করুন" : "Close menu") : (isBn ? "মেনু খুলুন" : "Open menu")}
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-navigation"
         >
           {mobileOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
@@ -287,6 +293,7 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
+            id="mobile-navigation"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}

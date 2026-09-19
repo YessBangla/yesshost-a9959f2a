@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import PublicLayout from "@/components/PublicLayout";
 import { formatPrice, formatAmount } from "@/lib/formatPrice";
 import { getGatewayAvailability } from "@/lib/payment-gateways.functions";
+import { createSecureOrder } from "@/lib/checkout.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
@@ -46,6 +48,7 @@ const Checkout = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const createOrder = useServerFn(createSecureOrder);
   const [selectedPayment, setSelectedPayment] = useState("");
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -211,57 +214,17 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      // Generate order number
-      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
-
-      // 1. Create the order
-      const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          order_number: orderNumber,
-          user_id: user.id,
-          subtotal_bdt: subtotalBdt,
-          discount_bdt: discountAmount,
-          total_bdt: totalBdt,
-          payment_method: selectedPayment,
-          coupon_code: appliedCoupon?.code || null,
-          order_note: orderNote.trim() || null,
-          status: "pending" as const,
-          payment_status: "unpaid",
-        })
-        .select("id")
-        .single();
-
-      if (orderError) throw orderError;
-      const orderId = orderData.id;
-
-      // 2. Create order items
-      const orderItems = items.map(item => ({
-        order_id: orderId,
-        item_type: item.type,
-        item_name: item.name,
-        item_description: item.description || null,
-        price_bdt: parseBdtPrice(item.price_bdt),
-        domain_name: item.domain || null,
-        domain_ext: item.ext || null,
-        plan_id: item.plan_id || null,
-        billing_cycle: item.billing_cycle || null,
-        hosting_category: item.category || null,
-        theme_id: item.theme_id || null,
-        theme_slug: item.theme_slug || null,
-        include_hosting: item.include_hosting || false,
-      }));
-
-      const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-      if (itemsError) throw itemsError;
-
-      // 3. Increment coupon usage
-      if (appliedCoupon) {
-        await supabase.rpc("increment_coupon_usage" as any, { coupon_id: appliedCoupon.id });
-      }
-
-      // 4. Create invoice
-      const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
+      const result = await createOrder({ data: {
+        items: items.map(({ type, domain, ext, plan_id, billing_cycle, theme_id, theme_slug, include_hosting }) => ({
+          type, domain, ext, plan_id, billing_cycle, theme_id, theme_slug, include_hosting,
+        })),
+        couponCode: appliedCoupon?.code ?? null,
+        paymentMethod: selectedPayment as "wallet" | "sslcommerz" | "bkash" | "nagad" | "bank",
+        orderNote: orderNote.trim() || null,
+      } });
+      const orderId = result.order_id;
+      const orderNumber = result.order_number;
+      const authoritativeTotal = Number(result.total_bdt);
       const descParts: string[] = [];
       const domainItems = items.filter(i => i.type === "domain");
       const hostingItems = items.filter(i => i.type === "hosting");
@@ -271,45 +234,30 @@ const Checkout = () => {
       if (themeItems.length) descParts.push(`Theme: ${themeItems.map(i => i.name).join(", ")}`);
       if (appliedCoupon) descParts.push(`Coupon: ${appliedCoupon.code} (-৳${discountAmount})`);
 
-      const { data: invoiceData, error: invoiceError } = await supabase.from("invoices").insert({
-        user_id: user.id,
-        invoice_number: invoiceNumber,
-        amount_bdt: totalBdt,
-        description: descParts.join(" | "),
-        status: "unpaid" as const,
-        payment_method: selectedPayment,
-        due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-      }).select("id").single();
-
-      if (invoiceError) throw invoiceError;
-
-      // 5. Link invoice to order
-      await supabase.from("orders").update({ invoice_id: invoiceData.id }).eq("id", orderId);
-
-      // 6. Route to payment
+      const invoiceId = result.invoice_id;
       const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
       if (selectedPayment === "wallet") {
-        if (walletBalance < totalBdt) {
-          toast({ title: bn ? "অপর্যাপ্ত ব্যালেন্স" : "Insufficient Balance", description: bn ? `আপনার ওয়ালেটে ৳${walletBalance} আছে, প্রয়োজন ৳${totalBdt}` : `Wallet has ৳${walletBalance}, need ৳${totalBdt}`, variant: "destructive" });
+        if (walletBalance < authoritativeTotal) {
+          toast({ title: bn ? "অপর্যাপ্ত ব্যালেন্স" : "Insufficient Balance", description: bn ? `আপনার ওয়ালেটে ৳${walletBalance} আছে, প্রয়োজন ৳${authoritativeTotal}` : `Wallet has ৳${walletBalance}, need ৳${authoritativeTotal}`, variant: "destructive" });
           setLoading(false);
           return;
         }
         const { data, error } = await supabase.functions.invoke("wallet-pay-invoice", {
-          body: { invoice_id: invoiceData.id },
+          body: { invoice_id: invoiceId },
         });
         if (error || data?.error) throw new Error(data?.error || error?.message);
         setWalletBalance(data.new_balance);
         setPlacedOrderNumber(orderNumber);
         setOrderPlaced(true);
         clearCart();
-        toast({ title: bn ? "পেমেন্ট সফল!" : "Payment Successful!", description: bn ? `ওয়ালেট থেকে ৳${totalBdt} কেটে নেওয়া হয়েছে` : `৳${totalBdt} paid from wallet` });
+        toast({ title: bn ? "পেমেন্ট সফল!" : "Payment Successful!", description: bn ? `ওয়ালেট থেকে ৳${authoritativeTotal} কেটে নেওয়া হয়েছে` : `৳${authoritativeTotal} paid from wallet` });
         return;
       } else if (selectedPayment === "sslcommerz") {
         const { data, error } = await supabase.functions.invoke("sslcommerz-init", {
           body: {
-            invoice_id: invoiceData.id,
-            amount: totalBdt,
+            invoice_id: invoiceId,
+            amount: authoritativeTotal,
             customer_name: profile?.full_name || "Customer",
             customer_email: user.email,
             customer_phone: profile?.phone || "01700000000",
@@ -329,7 +277,7 @@ const Checkout = () => {
         }
       } else if (selectedPayment === "bkash") {
         const { data, error } = await supabase.functions.invoke("bkash-init", {
-          body: { invoice_id: invoiceData.id, amount: totalBdt, payer_reference: user.email },
+          body: { invoice_id: invoiceId, amount: authoritativeTotal, payer_reference: user.email },
         });
         if (error || data?.error) {
           if (data?.is_sandbox) {
@@ -342,7 +290,7 @@ const Checkout = () => {
         if (data?.bkash_url) { clearCart(); window.location.href = data.bkash_url; return; }
       } else if (selectedPayment === "nagad") {
         const { data, error } = await supabase.functions.invoke("nagad-init", {
-          body: { invoice_id: invoiceData.id, amount: totalBdt },
+          body: { invoice_id: invoiceId, amount: authoritativeTotal },
         });
         if (error || data?.error) {
           if (data?.is_sandbox) {
@@ -352,6 +300,11 @@ const Checkout = () => {
           }
           throw new Error(data?.error || error?.message);
         }
+        const gatewayUrl = data?.gateway_url || data?.callBackUrl || data?.payment_url;
+        if (!gatewayUrl) throw new Error(bn ? "নগদ পেমেন্ট লিংক পাওয়া যায়নি" : "Nagad payment link was not returned");
+        clearCart();
+        window.location.href = gatewayUrl;
+        return;
       } else if (selectedPayment === "bank") {
         // Mark order as confirmed (awaiting bank transfer)
         await supabase.from("orders").update({ status: "confirmed" as const, confirmed_at: new Date().toISOString() }).eq("id", orderId);

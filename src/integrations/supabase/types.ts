@@ -943,6 +943,7 @@ export type Database = {
           visitor_email: string | null
           visitor_name: string
           visitor_phone: string | null
+          visitor_token_hash: string | null
         }
         Insert: {
           created_at?: string
@@ -953,6 +954,7 @@ export type Database = {
           visitor_email?: string | null
           visitor_name?: string
           visitor_phone?: string | null
+          visitor_token_hash?: string | null
         }
         Update: {
           created_at?: string
@@ -963,6 +965,7 @@ export type Database = {
           visitor_email?: string | null
           visitor_name?: string
           visitor_phone?: string | null
+          visitor_token_hash?: string | null
         }
         Relationships: []
       }
@@ -2144,6 +2147,15 @@ export type Database = {
           type: string
         }[]
       }
+      create_order_secure: {
+        Args: {
+          _coupon_code?: string
+          _items: Json
+          _order_note?: string
+          _payment_method?: string
+        }
+        Returns: Json
+      }
       expense_account_code: { Args: { _category: string }; Returns: string }
       has_role: {
         Args: {
@@ -2157,6 +2169,10 @@ export type Database = {
         Returns: undefined
       }
       pay_invoice_from_wallet: { Args: { _invoice_id: string }; Returns: Json }
+      pay_invoice_from_wallet_for_user: {
+        Args: { _invoice_id: string; _user_id: string }
+        Returns: Json
+      }
       post_journal_entry: {
         Args: {
           _amount: number
@@ -2172,6 +2188,14 @@ export type Database = {
         Returns: string
       }
       provision_order: { Args: { _order_id: string }; Returns: undefined }
+      set_support_pin: {
+        Args: { _expires_at: string; _pin: string }
+        Returns: undefined
+      }
+      set_support_pin_for_user: {
+        Args: { _expires_at: string; _pin: string; _user_id: string }
+        Returns: undefined
+      }
       verify_support_pin: {
         Args: { _pin: string; _user_id: string }
         Returns: string

@@ -1,20 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { KeyRound, Copy, RefreshCw, ShieldCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const VALID_MS = 60 * 60 * 1000; // 1 hour
+import { generateSupportPin } from "@/lib/support-pin.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 interface StoredPin {
   pin: string;
   expiresAt: number;
   uid: string;
 }
-
-const makePin = () => String(Math.floor(100000 + Math.random() * 900000));
 
 const DashboardSupportPin = () => {
   const { user } = useAuth();
@@ -24,35 +21,31 @@ const DashboardSupportPin = () => {
   const [pin, setPin] = useState<StoredPin | null>(null);
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
+  const requestPin = useServerFn(generateSupportPin);
 
   const generate = useCallback(async (uid: string) => {
     setBusy(true);
-    const next: StoredPin = { pin: makePin(), expiresAt: Date.now() + VALID_MS, uid };
-    const { error } = await supabase
-      .from("support_pins")
-      .upsert({ user_id: uid, pin: next.pin, expires_at: new Date(next.expiresAt).toISOString() }, { onConflict: "user_id" });
+    let next: StoredPin;
+    let error: unknown = null;
+    try {
+      const result = await requestPin();
+      next = { pin: result.pin, expiresAt: new Date(result.expiresAt).getTime(), uid };
+    } catch (cause) {
+      error = cause;
+      next = { pin: "", expiresAt: 0, uid };
+    }
     setBusy(false);
     if (error) {
       toast({ title: bn ? "পিন তৈরি করা যায়নি" : "Could not create PIN", description: bn ? "একটু পরে আবার চেষ্টা করুন।" : "Please try again in a moment.", variant: "destructive" });
       return;
     }
     setPin(next);
-  }, [bn, toast]);
+  }, [bn, toast, requestPin]);
 
   useEffect(() => {
     if (!user) return;
     let active = true;
-    supabase
-      .from("support_pins")
-      .select("pin, expires_at")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!active) return;
-        const expiresAt = data?.expires_at ? new Date(data.expires_at).getTime() : 0;
-        if (data?.pin && expiresAt > Date.now()) setPin({ pin: data.pin, expiresAt, uid: user.id });
-        else void generate(user.id);
-      });
+    void generate(user.id).then(() => { if (!active) return; });
     return () => { active = false; };
   }, [user, generate]);
 

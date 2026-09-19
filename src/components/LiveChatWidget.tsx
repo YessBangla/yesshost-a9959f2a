@@ -14,6 +14,7 @@ import LiveChatCallUI from "@/components/LiveChatCallUI";
 import { formatGap, formatStamp, isSlowGap } from "@/lib/time-gap";
 
 const CHAT_STORAGE_KEY = "yesshost_live_chat_id";
+const CHAT_TOKEN_KEY = "yesshost_live_chat_token";
 const CHAT_OPEN_KEY = "yesshost_live_chat_open";
 
 type Message = {
@@ -24,10 +25,10 @@ type Message = {
 };
 
 const LiveChatWidget = () => {
-  const [open, setOpen] = useState(
-    () => typeof window !== "undefined" && window.localStorage.getItem(CHAT_OPEN_KEY) === "true",
-  );
+  const [open, setOpen] = useState(false);
+  const [openStateRestored, setOpenStateRestored] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
+  const [visitorToken, setVisitorToken] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -49,12 +50,18 @@ const LiveChatWidget = () => {
     startCall,
     endCall: endWebRTCCall,
     toggleMute,
-  } = useWebRTCCall({ chatId, role: "visitor" });
+  } = useWebRTCCall({ chatId, visitorToken, role: "visitor" });
 
   // Persist open state
   useEffect(() => {
+    setOpen(window.localStorage.getItem(CHAT_OPEN_KEY) === "true");
+    setOpenStateRestored(true);
+  }, []);
+
+  useEffect(() => {
+    if (!openStateRestored) return;
     localStorage.setItem(CHAT_OPEN_KEY, open ? "true" : "false");
-  }, [open]);
+  }, [open, openStateRestored]);
 
   // Any page can open the chat with window.dispatchEvent(new CustomEvent("yesshost:open-chat"))
   useEffect(() => {
@@ -67,9 +74,14 @@ const LiveChatWidget = () => {
   // transcript is identical no matter which domain the widget is served from.
   useEffect(() => {
     const savedId = localStorage.getItem(CHAT_STORAGE_KEY);
-    if (savedId) {
+    const savedToken = localStorage.getItem(CHAT_TOKEN_KEY);
+    if (savedId && savedToken) {
       setChatId(savedId);
+      setVisitorToken(savedToken);
       setStarted(true);
+    } else {
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+      localStorage.removeItem(CHAT_TOKEN_KEY);
     }
   }, []);
 
@@ -78,8 +90,8 @@ const LiveChatWidget = () => {
   const sendChatMessage = useServerFn(sendLiveChatMessage);
   const historyQuery = useQuery({
     queryKey: ["live-chat", "messages", chatId],
-    queryFn: () => loadMessages({ data: { chatId: chatId as string } }),
-    enabled: !!chatId,
+    queryFn: () => loadMessages({ data: { chatId: chatId as string, visitorToken: visitorToken as string } }),
+    enabled: !!chatId && !!visitorToken,
     staleTime: 3_000,
     // Visitor transcripts are private now, so the widget polls the server
     // instead of relying on an anonymous realtime subscription.
@@ -143,7 +155,7 @@ const LiveChatWidget = () => {
   const startChat = async () => {
     if (!name.trim() || !email.trim() || !phone.trim()) return;
     try {
-      const { chatId: id } = await startChatFn({
+      const { chatId: id, visitorToken: token } = await startChatFn({
         data: {
           name: name.trim(),
           email: email.trim(),
@@ -154,7 +166,9 @@ const LiveChatWidget = () => {
         },
       });
       localStorage.setItem(CHAT_STORAGE_KEY, id);
+      localStorage.setItem(CHAT_TOKEN_KEY, token);
       setChatId(id);
+      setVisitorToken(token);
       setStarted(true);
     } catch (err) {
       console.error("Could not start chat:", err);
@@ -163,11 +177,11 @@ const LiveChatWidget = () => {
 
   const sendMessage = async () => {
     const msg = input.trim();
-    if (!msg || !chatId) return;
+    if (!msg || !chatId || !visitorToken) return;
     setInput("");
     setSending(true);
     try {
-      const { message } = await sendChatMessage({ data: { chatId, message: msg } });
+      const { message } = await sendChatMessage({ data: { chatId, visitorToken, message: msg } });
       setMessages((prev) => (prev.some((m) => m.id === message.id) ? prev : [...prev, message]));
     } catch (err) {
       console.error("Could not send message:", err);
@@ -191,7 +205,9 @@ const LiveChatWidget = () => {
 
   const endChat = () => {
     localStorage.removeItem(CHAT_STORAGE_KEY);
+    localStorage.removeItem(CHAT_TOKEN_KEY);
     setChatId(null);
+    setVisitorToken(null);
     setMessages([]);
     setStarted(false);
     setName("");

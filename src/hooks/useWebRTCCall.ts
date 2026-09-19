@@ -1,12 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { startCallRecordFn, updateCallRecordFn } from "@/lib/dashboard.functions";
+import { startCallRecordFn, updateCallRecordFn, startStaffCallRecordFn, updateStaffCallRecordFn } from "@/lib/dashboard.functions";
 
 export type CallStatus = "idle" | "requesting" | "ringing" | "connected" | "ended";
 
 interface UseWebRTCCallProps {
   chatId: string | null;
+  visitorToken?: string | null;
   role: "visitor" | "admin";
 }
 
@@ -15,13 +16,15 @@ const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
-export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
+export function useWebRTCCall({ chatId, visitorToken, role }: UseWebRTCCallProps) {
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const callRecordIdRef = useRef<string | null>(null);
   const startRecord = useServerFn(startCallRecordFn);
   const updateRecord = useServerFn(updateCallRecordFn);
+  const startStaffRecord = useServerFn(startStaffCallRecordFn);
+  const updateStaffRecord = useServerFn(updateStaffCallRecordFn);
   const callStartTimeRef = useRef<string | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -49,25 +52,27 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
   const saveCallStart = useCallback(async () => {
     if (!chatId) return;
     callStartTimeRef.current = new Date().toISOString();
-    const { id } = await startRecord({
-      data: { chatId, callerRole: role, startedAt: callStartTimeRef.current },
-    });
+    const result = role === "visitor"
+      ? visitorToken
+        ? await startRecord({ data: { chatId, visitorToken, callerRole: role, startedAt: callStartTimeRef.current } })
+        : { id: null }
+      : await startStaffRecord({ data: { chatId, startedAt: callStartTimeRef.current } });
+    const { id } = result;
     if (id) callRecordIdRef.current = id;
-  }, [chatId, role, startRecord]);
+  }, [chatId, visitorToken, role, startRecord, startStaffRecord]);
 
   const saveCallEnd = useCallback(async (finalStatus: string, finalDuration: number) => {
-    if (!callRecordIdRef.current) return;
-    await updateRecord({
-      data: {
-        id: callRecordIdRef.current,
-        status: finalStatus,
-        durationSeconds: finalDuration,
-        ended: true,
-      },
-    });
+    if (!callRecordIdRef.current || !chatId) return;
+    const common = { id: callRecordIdRef.current, chatId, status: finalStatus, durationSeconds: finalDuration, ended: true };
+    if (role === "visitor") {
+      if (!visitorToken) return;
+      await updateRecord({ data: { ...common, visitorToken } });
+    } else {
+      await updateStaffRecord({ data: common });
+    }
     callRecordIdRef.current = null;
     callStartTimeRef.current = null;
-  }, [updateRecord]);
+  }, [chatId, visitorToken, role, updateRecord, updateStaffRecord]);
 
   // Create peer connection
   const createPC = useCallback(() => {
@@ -219,9 +224,13 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     setCallStatus("connected");
     // Update record status to connected
     if (callRecordIdRef.current) {
-      await updateRecord({ data: { id: callRecordIdRef.current, status: "connected" } });
+      if (role === "visitor" && visitorToken) {
+        await updateRecord({ data: { id: callRecordIdRef.current, chatId, visitorToken, status: "connected" } });
+      } else if (role === "admin") {
+        await updateStaffRecord({ data: { id: callRecordIdRef.current, chatId, status: "connected" } });
+      }
     }
-  }, [chatId, createPC]);
+  }, [chatId, visitorToken, role, createPC, updateRecord, updateStaffRecord]);
 
   // End call
   const endCall = useCallback(() => {

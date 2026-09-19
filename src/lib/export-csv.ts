@@ -4,7 +4,8 @@
  */
 const escapeCell = (value: unknown): string => {
   if (value === null || value === undefined) return "";
-  const str = String(value);
+  const raw = String(value);
+  const str = /^[=+\-@]/.test(raw) ? `'${raw}` : raw;
   return /[",\n;]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
 };
 
