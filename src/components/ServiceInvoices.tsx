@@ -6,6 +6,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { createInvoiceShareLink } from "@/lib/invoice-share.functions";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 type Invoice = Tables<"invoices">;
 
@@ -30,6 +31,7 @@ const ServiceInvoices = ({ invoices, compact = false }: { invoices: Invoice[]; c
   const { lang } = useLanguage();
   const bn = lang === "bn";
   const [sharingId, setSharingId] = useState<string | null>(null);
+  const createShareLink = useServerFn(createInvoiceShareLink);
   const fmtDate = (v: string | null) =>
     v ? new Date(v).toLocaleDateString(bn ? "bn-BD" : "en-US", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
@@ -39,7 +41,7 @@ const ServiceInvoices = ({ invoices, compact = false }: { invoices: Invoice[]; c
   const openInvoice = async (invoiceId: string) => {
     setSharingId(invoiceId);
     try {
-      const result = await createInvoiceShareLink({ data: { invoiceId } });
+      const result = await createShareLink({ data: { invoiceId } });
       window.open(`/invoice/${result.token}`, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : (bn ? "ইনভয়েস খোলা যায়নি" : "Could not open invoice"));
