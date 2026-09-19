@@ -41,7 +41,10 @@ const AdminTickets = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [tickets, setTickets] = useState<TicketWithUser[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [stats, setStats] = useState({ total: 0, open: 0, inProgress: 0, urgent: 0 });
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -52,20 +55,74 @@ const AdminTickets = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const fetchData = async () => {
-    const [tix, prof] = await Promise.all([
-      supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("*"),
+  // Server-side filtering keeps large ticket tables fast: only the visible page
+  // (and the matching profiles) travel over the wire.
+  const buildQuery = (term: string, status: string, priority: string) => {
+    let q = supabase.from("support_tickets").select("*", { count: "exact" });
+    if (term.trim()) {
+      const safe = term.trim().replace(/[,%()]/g, " ");
+      q = q.or(`subject.ilike.%${safe}%,ticket_number.ilike.%${safe}%`);
+    }
+    if (status !== "all") q = q.eq("status", status as any);
+    if (priority !== "all") q = q.eq("priority", priority as any);
+    return q.order("created_at", { ascending: false });
+  };
+
+  const attachProfiles = async (rows: Tables<"support_tickets">[]): Promise<TicketWithUser[]> => {
+    const ids = Array.from(new Set(rows.map(r => r.user_id).filter(Boolean))) as string[];
+    if (ids.length === 0) return rows.map(r => ({ ...r, profiles: null }));
+    const { data } = await supabase.from("profiles").select("*").in("user_id", ids);
+    return rows.map(r => ({ ...r, profiles: (data || []).find(p => p.user_id === r.user_id) || null }));
+  };
+
+  const fetchStats = async () => {
+    const counter = (build: (q: any) => any) =>
+      build(supabase.from("support_tickets").select("id", { count: "exact", head: true }));
+    const [all, open, inProgress, urgent] = await Promise.all([
+      counter((q: any) => q),
+      counter((q: any) => q.eq("status", "open")),
+      counter((q: any) => q.eq("status", "in_progress")),
+      counter((q: any) => q.eq("priority", "urgent").not("status", "in", "(closed,resolved)")),
     ]);
-    const ticketsWithUser = (tix.data || []).map(t => ({
-      ...t,
-      profiles: (prof.data || []).find(p => p.user_id === t.user_id) || null,
-    }));
-    setTickets(ticketsWithUser);
+    setStats({
+      total: all.count || 0,
+      open: open.count || 0,
+      inProgress: inProgress.count || 0,
+      urgent: urgent.count || 0,
+    });
+  };
+
+  const fetchData = async () => {
+    const from = (page - 1) * pageSize;
+    const { data, count } = await buildQuery(debouncedSearch, statusFilter, priorityFilter)
+      .range(from, from + pageSize - 1);
+    setTickets(await attachProfiles(data || []));
+    setTotalCount(count || 0);
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(id);
+  }, [search]);
+
+  useEffect(() => { fetchStats(); }, []);
+
+  useEffect(() => {
+    // Keep the filter bar mounted while paging so typing never loses focus.
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, statusFilter, priorityFilter, page, pageSize]);
+
+  const exportCsv = async () => {
+    const { data } = await buildQuery(debouncedSearch, statusFilter, priorityFilter).limit(5000);
+    const rows = await attachProfiles(data || []);
+    downloadCsv(
+      "yesshost-tickets",
+      ["ticket_number", "subject", "client", "status", "priority", "created"],
+      rows.map(t => [t.ticket_number, t.subject, t.profiles?.full_name || "", t.status, t.priority, csvDate(t.created_at)]),
+    );
+  };
 
   const openTicket = async (ticket: TicketWithUser) => {
     setSelectedTicket(ticket);
@@ -82,6 +139,7 @@ const AdminTickets = () => {
       toast({ title: "✅", description: isBn ? `টিকেট "${sc?.label_bn || status}" এ আপডেট হয়েছে` : `Ticket updated to "${sc?.label_en || status}"` });
     }
     fetchData();
+    fetchStats();
     if (selectedTicket?.id === id) setSelectedTicket({ ...selectedTicket, status: status as any });
   };
 
@@ -111,25 +169,9 @@ const AdminTickets = () => {
     setSending(false);
   };
 
-  const stats = {
-    total: tickets.length,
-    open: tickets.filter(t => t.status === "open").length,
-    inProgress: tickets.filter(t => t.status === "in_progress").length,
-    urgent: tickets.filter(t => t.priority === "urgent" && t.status !== "closed" && t.status !== "resolved").length,
-  };
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter, priorityFilter]);
 
-  const filtered = tickets.filter(t => {
-    const matchSearch = !search || t.subject.toLowerCase().includes(search.toLowerCase()) ||
-      t.ticket_number.includes(search) ||
-      (t.profiles?.full_name || "").toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || t.status === statusFilter;
-    const matchPriority = priorityFilter === "all" || t.priority === priorityFilter;
-    return matchSearch && matchStatus && matchPriority;
-  });
-
-  useEffect(() => { setPage(1); }, [search, statusFilter, priorityFilter]);
-
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const paged = tickets;
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" });
   const formatTime = (d: string) => new Date(d).toLocaleTimeString(isBn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" });
@@ -254,8 +296,7 @@ const AdminTickets = () => {
           <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল সাপোর্ট টিকেট পরিচালনা ও রিপ্লাই করুন" : "Manage and reply to all support tickets"}</p>
         </div>
         <button
-          onClick={() => downloadCsv("yesshost-tickets", ["ticket_number", "subject", "client", "status", "priority", "created"],
-            filtered.map((t: any) => [t.ticket_number, t.subject, t.profiles?.full_name || "", t.status, t.priority, csvDate(t.created_at)]))}
+          onClick={exportCsv}
           className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary shrink-0"
         >
           <Download className="w-4 h-4" />
@@ -318,7 +359,7 @@ const AdminTickets = () => {
 
       {/* Tickets - Card based for better mobile */}
       <div className="space-y-3">
-        {filtered.length === 0 && (
+        {tickets.length === 0 && (
           <EmptyState
             icon={Inbox}
             title={isBn ? "কোনো টিকেট পাওয়া যায়নি" : "No tickets found"}
@@ -380,9 +421,9 @@ const AdminTickets = () => {
         })}
       </div>
 
-      {filtered.length > 0 && (
+      {totalCount > 0 && (
         <DataPagination
-          total={filtered.length}
+          total={totalCount}
           page={page}
           pageSize={pageSize}
           onPage={setPage}
