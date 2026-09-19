@@ -117,38 +117,34 @@ const FooterSection = () => {
             <div className="lg:col-span-4">
               <img src={logoWhite} alt="Yess Host" className="h-9 sm:h-10 mb-5" />
               <p className="text-sm text-white/60 leading-relaxed mb-6 max-w-sm">
-                {tr("footer.desc")}
+                {(bn ? brand?.content_bn : brand?.content_en) || tr("footer.desc")}
               </p>
 
               {/* Contact info */}
               <div className="space-y-3 mb-6">
-                <a href="tel:+8801805464343" className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
+                <a href={`tel:${contact.phone || "+8801805464343"}`} className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors">
                     <Phone className="w-4 h-4" />
                   </div>
-                  +88 096 38 205 205
+                  {contact.phone_display || contact.phone || "+88 096 38 205 205"}
                 </a>
-                <a href="mailto:support@yesshost.com" className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
+                <a href={`mailto:${contact.email || "support@yesshost.com"}`} className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors">
                     <Mail className="w-4 h-4" />
                   </div>
-                  support@yesshost.com
+                  {contact.email || "support@yesshost.com"}
                 </a>
                 <div className="flex items-center gap-3 text-sm text-white/60">
                   <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center">
                     <MapPin className="w-4 h-4" />
                   </div>
-                  {bn ? "ঢাকা, বাংলাদেশ" : "Dhaka, Bangladesh"}
+                  {(bn ? contact.address_bn : contact.address_en) || (bn ? "ঢাকা, বাংলাদেশ" : "Dhaka, Bangladesh")}
                 </div>
               </div>
 
               {/* Social links */}
               <div className="flex items-center gap-2">
-              {[
-                  { icon: Facebook, label: "Facebook", href: "https://facebook.com/yesshost" },
-                  { icon: Youtube, label: "YouTube", href: "https://youtube.com/@yesshost" },
-                  { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/8801805464343" },
-                ].map((social) => (
+              {socials.map((social) => (
                   <a
                     key={social.label}
                     href={social.href}
