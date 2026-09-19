@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Send, RefreshCw, HeadphonesIcon } from "lucide-react";
+import { Send, RefreshCw, HeadphonesIcon, Search, Clock3, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import type { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
 
 type TicketWithReplies = Tables<"support_tickets"> & { replies: Tables<"ticket_replies">[]; user_name?: string };
 
@@ -19,6 +24,9 @@ const CallCenterTickets = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("active");
+  const [priority, setPriority] = useState("all");
 
   const fetchTickets = async () => {
     setLoading(true);
@@ -40,7 +48,8 @@ const CallCenterTickets = () => {
 
   const sendReply = async () => {
     if (!reply.trim() || !selected || !user) return;
-    await supabase.from("ticket_replies").insert({ ticket_id: selected, user_id: user.id, message: reply, is_staff: true });
+    const { error } = await supabase.from("ticket_replies").insert({ ticket_id: selected, user_id: user.id, message: reply.trim(), is_staff: true });
+    if (error) { toast({ title: bn ? "উত্তর পাঠানো যায়নি" : "Reply could not be sent", description: bn ? "আবার চেষ্টা করুন।" : "Please try again.", variant: "destructive" }); return; }
     await supabase.from("support_tickets").update({ status: "in_progress" as any, updated_at: new Date().toISOString() }).eq("id", selected);
     setReply("");
     toast({ title: bn ? "উত্তর পাঠানো হয়েছে" : "Reply sent" });
@@ -55,35 +64,37 @@ const CallCenterTickets = () => {
     return "bg-muted text-muted-foreground";
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  const filtered = tickets.filter((ticket) => {
+    const query = search.toLowerCase();
+    const active = ["open", "in_progress"].includes(ticket.status);
+    return (status === "all" || (status === "active" ? active : ticket.status === status)) && (priority === "all" || ticket.priority === priority) && [ticket.subject, ticket.ticket_number, ticket.user_name].some((value) => value?.toLowerCase().includes(query));
+  });
+  const highPriority = tickets.filter((ticket) => ["high", "urgent"].includes(ticket.priority) && ["open", "in_progress"].includes(ticket.status)).length;
+  const stale = tickets.filter((ticket) => ["open", "in_progress"].includes(ticket.status) && Date.now() - new Date(ticket.updated_at).getTime() > 24 * 60 * 60 * 1000).length;
+  if (loading) return <div className="grid gap-4 lg:grid-cols-[340px_1fr]"><div className="staff-panel p-4"><Skeleton className="mb-4 h-10" />{[0,1,2,3,4].map((row) => <Skeleton key={row} className="mb-3 h-16" />)}</div><div className="staff-panel p-4"><Skeleton className="h-full min-h-96" /></div></div>;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">{bn ? "সাপোর্ট টিকেট" : "Support Tickets"}</h1>
-        <button onClick={fetchTickets} className="p-2 rounded-xl hover:bg-secondary/60 text-muted-foreground"><RefreshCw className="w-5 h-5" /></button>
-      </div>
+      <StaffPageHeader title={bn ? "সাপোর্ট ও SLA" : "Support & SLA"} description={bn ? "অগ্রাধিকার, বিভাগ ও অপেক্ষার সময় অনুযায়ী টিকেট পরিচালনা" : "Manage tickets by priority, department and wait time"} actions={<Button variant="outline" onClick={fetchTickets}><RefreshCw />{bn ? "রিফ্রেশ" : "Refresh"}</Button>} />
+      <StaffMetricStrip metrics={[{label:bn?"সক্রিয়":"Active",value:tickets.filter((t)=>["open","in_progress"].includes(t.status)).length,detail:bn?"খোলা টিকেট":"open tickets",icon:HeadphonesIcon,tone:"primary"},{label:bn?"জরুরি":"Priority",value:highPriority,detail:bn?"দ্রুত উত্তর":"need attention",icon:Clock3,tone:"warning"},{label:bn?"২৪ ঘণ্টা+":"Over 24 hours",value:stale,detail:bn?"SLA ঝুঁকি":"SLA risk",icon:Clock3,tone:stale?"danger":"success"},{label:bn?"সমাধান":"Resolved",value:tickets.filter((t)=>["resolved","closed"].includes(t.status)).length,detail:bn?"সম্পন্ন":"completed",icon:HeadphonesIcon,tone:"success"}]} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-200px)]">
-        <div className="glass-card rounded-xl overflow-auto">
-          <div className="p-3 border-b border-border/50 text-sm font-semibold text-foreground">{bn ? "টিকেট তালিকা" : "Ticket List"}</div>
-          {tickets.map(t => (
+      <div className="grid grid-cols-1 overflow-hidden staff-panel lg:grid-cols-[350px_1fr] lg:h-[calc(100vh-310px)]">
+        <div className="flex min-h-[360px] flex-col overflow-hidden border-b border-border lg:border-b-0 lg:border-r"><div className="space-y-2 border-b border-border bg-secondary/30 p-3"><div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder={bn?"টিকেট বা গ্রাহক খুঁজুন":"Search ticket or customer"} className="pl-9" /></div><div className="grid grid-cols-2 gap-2"><Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">{bn?"সক্রিয়":"Active"}</SelectItem><SelectItem value="open">{bn?"খোলা":"Open"}</SelectItem><SelectItem value="resolved">{bn?"সমাধান":"Resolved"}</SelectItem><SelectItem value="all">{bn?"সব":"All"}</SelectItem></SelectContent></Select><Select value={priority} onValueChange={setPriority}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{bn?"সব অগ্রাধিকার":"All priority"}</SelectItem><SelectItem value="urgent">Urgent</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="normal">Normal</SelectItem></SelectContent></Select></div></div><div className="overflow-auto">
+          {filtered.map(t => (
             <button key={t.id} onClick={() => setSelected(t.id)}
-              className={`w-full text-left p-3 border-b border-border/30 hover:bg-secondary/40 transition-all ${selected === t.id ? "bg-primary/10" : ""}`}>
+              className={`min-h-[76px] w-full border-b border-border p-3 text-left transition-colors hover:bg-secondary/40 ${selected === t.id ? "bg-primary/10 shadow-[inset_3px_0_0_hsl(var(--primary))]" : ""}`}>
               <p className="text-sm font-medium text-foreground truncate">{t.subject}</p>
               <p className="text-xs text-muted-foreground">{t.user_name} • #{t.ticket_number}</p>
               <Badge className={`${statusColor(t.status)} border-0 text-[10px] mt-1`}>{t.status}</Badge>
             </button>
           ))}
-          {tickets.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">{bn ? "কোনো টিকেট নেই" : "No tickets"}</p>}
-        </div>
+          {filtered.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">{bn ? "কোনো টিকেট পাওয়া যায়নি" : "No matching tickets"}</p>}</div></div>
 
-        <div className="lg:col-span-2 glass-card rounded-xl flex flex-col">
+        <div className="flex min-h-[520px] flex-col">
           {selectedTicket ? (
             <>
-              <div className="p-3 border-b border-border/50">
-                <p className="text-sm font-semibold text-foreground">{selectedTicket.subject}</p>
-                <p className="text-xs text-muted-foreground">#{selectedTicket.ticket_number} • {selectedTicket.department} • {selectedTicket.priority}</p>
+               <div className="flex items-start justify-between gap-3 border-b border-border p-4">
+                 <div><p className="text-sm font-semibold text-foreground">{selectedTicket.subject}</p><p className="text-xs text-muted-foreground">#{selectedTicket.ticket_number} • {selectedTicket.department}</p></div><div className="text-right"><Badge className={`${statusColor(selectedTicket.status)} border-0`}>{selectedTicket.status}</Badge><p className="mt-1 text-[10px] text-muted-foreground">{bn?"আপডেট":"Updated"} {new Date(selectedTicket.updated_at).toLocaleString(bn?"bn-BD":"en-US")}</p></div>
               </div>
               <div className="flex-1 overflow-auto p-4 space-y-3">
                 {selectedTicket.replies.map(r => (
@@ -95,10 +106,7 @@ const CallCenterTickets = () => {
                   </div>
                 ))}
               </div>
-              <div className="p-3 border-t border-border/50 flex gap-2">
-                <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === "Enter" && sendReply()}
-                  placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="flex-1 px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
-                <button onClick={sendReply} className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground"><Send className="w-4 h-4" /></button>
+               <div className="border-t border-border bg-secondary/20 p-3"><div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><UserRound className="size-3" />{selectedTicket.user_name} • {selectedTicket.priority}</div><div className="flex gap-2"><Input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === "Enter" && sendReply()} placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="h-11" /><Button onClick={sendReply} disabled={!reply.trim()} aria-label={bn?"উত্তর পাঠান":"Send reply"}><Send /></Button></div></div>
               </div>
             </>
           ) : (
