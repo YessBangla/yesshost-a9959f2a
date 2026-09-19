@@ -49,6 +49,23 @@ const AdminAccounts = () => {
   const [cbForm, setCbForm] = useState({ direction: "in", method: "bank", amount: "", date: new Date().toISOString().slice(0, 10), counterparty: "", bank_name: "", account_number: "", reference: "", contra_code: "4000", note: "" });
   const [savingCb, setSavingCb] = useState(false);
   const loadSummaries = useServerFn(getAccountsSummaries);
+  const loadReconciliation = useServerFn(getAccountsReconciliation);
+  const [recon, setRecon] = useState<AccountsReconciliation | null>(null);
+  const [reconBusy, setReconBusy] = useState(false);
+
+  const runReconciliation = useCallback(async () => {
+    setReconBusy(true);
+    try {
+      setRecon(await loadReconciliation({ data: { from, to } }));
+    } catch (e) {
+      toast({
+        title: bn ? "মিলকরণ করা যায়নি" : "Reconciliation failed",
+        description: String((e as Error)?.message || e),
+        variant: "destructive",
+      });
+    }
+    setReconBusy(false);
+  }, [loadReconciliation, from, to, bn, toast]);
 
   const money = useCallback((value: number) => `৳${Math.round(value || 0).toLocaleString(bn ? "bn-BD" : "en-US")}`, [bn]);
 
