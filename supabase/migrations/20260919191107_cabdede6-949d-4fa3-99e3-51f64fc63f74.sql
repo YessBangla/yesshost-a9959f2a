@@ -1,0 +1,1 @@
+ALTER FUNCTION public.set_invoice_share_token(uuid, text, timestamptz) SECURITY INVOKER;
