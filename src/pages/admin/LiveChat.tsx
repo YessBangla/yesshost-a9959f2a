@@ -289,8 +289,12 @@ const AdminLiveChat = () => {
 
               {/* Messages */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-                {messages.map(m => (
-                  <div key={m.id} className={`flex ${m.sender_type === "admin" ? "justify-end" : "justify-start"}`}>
+                {messages.map((m, idx) => {
+                  const prev = idx > 0 ? messages[idx - 1]!.created_at : null;
+                  const gap = formatGap(prev, m.created_at, bn);
+                  const slow = isSlowGap(prev, m.created_at);
+                  return (
+                  <div key={m.id} className={`flex flex-col ${m.sender_type === "admin" ? "items-end" : "items-start"}`}>
                     <div className={`max-w-[75%] px-3.5 py-2 rounded-2xl text-sm ${
                       m.sender_type === "admin"
                         ? "gradient-primary text-primary-foreground rounded-br-md"
@@ -298,11 +302,17 @@ const AdminLiveChat = () => {
                     }`}>
                       <p className="break-words whitespace-pre-wrap">{m.message}</p>
                       <p className={`text-[9px] mt-1 ${m.sender_type === "admin" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                        {formatTime(m.created_at)}
+                        {formatStamp(m.created_at, bn)}
                       </p>
                     </div>
+                    {gap && (
+                      <span className={`mt-0.5 text-[9px] font-medium ${slow ? "text-warning" : "text-muted-foreground"}`}>
+                        {bn ? `উত্তরের ব্যবধান ${gap}` : `gap ${gap}`}
+                      </span>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
                 {visitorTyping && (
                   <div className="flex justify-start px-4 pb-2">
                     <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2 flex items-center gap-1.5">
