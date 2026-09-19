@@ -28,6 +28,7 @@ type FinanceRow =  { key: string; source: "invoice" | "wallet" | "payment"; refe
 const AdminFinance = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
