@@ -2,46 +2,90 @@ import { Link } from "@/lib/router-compat";
 import logoWhite from "@/assets/logo-white.png";
 import bkashLogo from "@/assets/partners/bkash.png";
 import nagadLogo from "@/assets/partners/nagad.png";
-import { Mail, Phone, CreditCard, Wallet, ChevronDown, MapPin, Facebook, Youtube, MessageCircle, ArrowUp } from "lucide-react";
+import { Mail, Phone, CreditCard, Wallet, ChevronDown, MapPin, Facebook, Youtube, MessageCircle, Instagram, Linkedin, Twitter, Send, ArrowUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+const socialIconMap: Record<string, typeof Facebook> = {
+  Facebook, Youtube, MessageCircle, Instagram, Linkedin, Twitter, Send, Mail,
+};
 
 const FooterSection = () => {
   const { tr, lang } = useLanguage();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const bn = lang === "bn";
+  const [cms, setCms] = useState<any[]>([]);
 
-  const footerLinks: Record<string, { label: string; href: string }[]> = {
-    [tr("footer.hosting")]: [
-      { label: tr("nav.basicHosting"), href: "/services/basic-hosting" },
-      { label: tr("nav.proHosting"), href: "/services/pro-hosting" },
-      { label: tr("nav.premiumHosting"), href: "/services/premium-hosting" },
-      { label: tr("nav.bdixHosting"), href: "/services/bdix-hosting" },
-      { label: tr("nav.reseller"), href: "/services/linux-reseller" },
-    ],
-    [tr("footer.services")]: [
-      { label: tr("footer.domainReg"), href: "/services/domain" },
-      { label: tr("footer.vpsServer"), href: "/services/usa-vps" },
-      { label: tr("footer.dedicatedServer"), href: "/services/dedicated" },
-      { label: tr("nav.emailHosting"), href: "/services/email-hosting" },
-      { label: tr("footer.radioHosting"), href: "/services/radio-hosting" },
-      { label: tr("footer.graphicsDesign"), href: "/services/graphics-design" },
-    ],
-    [tr("footer.support")]: [
-      { label: tr("footer.knowledgeBase"), href: "/knowledge-base" },
-      { label: tr("footer.contactUs"), href: "/contact" },
-      { label: bn ? "পেমেন্ট মেথড" : "Payment Methods", href: "/payment" },
-      { label: tr("footer.supportTicket"), href: "/dashboard/support" },
-      { label: tr("footer.liveChat"), href: "/contact" },
-    ],
-    [tr("footer.company")]: [
-      { label: tr("footer.aboutUs"), href: "/about" },
-      { label: tr("footer.affiliate"), href: "/affiliate" },
-      { label: tr("footer.tos"), href: "/terms" },
-      { label: tr("footer.refund"), href: "/refund" },
-      { label: tr("footer.privacy"), href: "/privacy" },
-    ],
-  };
+  useEffect(() => {
+    supabase.from("site_content").select("*").eq("page", "footer").eq("is_active", true).order("sort_order")
+      .then(({ data }) => setCms(data || []));
+  }, []);
+
+  const get = (key: string) => cms.find(c => c.section_key === key);
+  const brand = get("brand");
+  const contact = get("contact")?.metadata || {};
+  const bottom = get("bottom");
+  const bottomMeta = bottom?.metadata || {};
+
+  const socials = useMemo(() => {
+    const links = get("social")?.metadata?.links;
+    if (Array.isArray(links) && links.length) {
+      return links.map((s: any) => ({ icon: socialIconMap[s.icon] || MessageCircle, label: s.label, href: s.href }));
+    }
+    return [
+      { icon: Facebook, label: "Facebook", href: "https://facebook.com/yesshost" },
+      { icon: Youtube, label: "YouTube", href: "https://youtube.com/@yesshost" },
+      { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/8801805464343" },
+    ];
+  }, [cms]);
+
+  const footerLinks: Record<string, { label: string; href: string }[]> = useMemo(() => {
+    const columns = get("columns")?.metadata?.columns;
+    if (Array.isArray(columns) && columns.length) {
+      const built: Record<string, { label: string; href: string }[]> = {};
+      columns.forEach((col: any) => {
+        const title = (bn ? col.title_bn : col.title_en) || col.title_en || col.title_bn || "";
+        built[title] = (col.links || []).map((l: any) => ({
+          label: (bn ? l.label_bn : l.label_en) || l.label_en || l.label_bn || "",
+          href: l.href || "#",
+        }));
+      });
+      return built;
+    }
+    return {
+      [tr("footer.hosting")]: [
+        { label: tr("nav.basicHosting"), href: "/services/basic-hosting" },
+        { label: tr("nav.proHosting"), href: "/services/pro-hosting" },
+        { label: tr("nav.premiumHosting"), href: "/services/premium-hosting" },
+        { label: tr("nav.bdixHosting"), href: "/services/bdix-hosting" },
+        { label: tr("nav.reseller"), href: "/services/linux-reseller" },
+      ],
+      [tr("footer.services")]: [
+        { label: tr("footer.domainReg"), href: "/services/domain" },
+        { label: tr("footer.vpsServer"), href: "/services/usa-vps" },
+        { label: tr("footer.dedicatedServer"), href: "/services/dedicated" },
+        { label: tr("nav.emailHosting"), href: "/services/email-hosting" },
+        { label: tr("footer.radioHosting"), href: "/services/radio-hosting" },
+        { label: tr("footer.graphicsDesign"), href: "/services/graphics-design" },
+      ],
+      [tr("footer.support")]: [
+        { label: tr("footer.knowledgeBase"), href: "/knowledge-base" },
+        { label: tr("footer.contactUs"), href: "/contact" },
+        { label: bn ? "পেমেন্ট মেথড" : "Payment Methods", href: "/payment" },
+        { label: tr("footer.supportTicket"), href: "/dashboard/support" },
+        { label: tr("footer.liveChat"), href: "/contact" },
+      ],
+      [tr("footer.company")]: [
+        { label: tr("footer.aboutUs"), href: "/about" },
+        { label: tr("footer.affiliate"), href: "/affiliate" },
+        { label: tr("footer.tos"), href: "/terms" },
+        { label: tr("footer.refund"), href: "/refund" },
+        { label: tr("footer.privacy"), href: "/privacy" },
+      ],
+    };
+  }, [cms, lang]);
+
 
   const payments = [
     { name: "bKash", logo: bkashLogo, type: "logo" },
@@ -73,38 +117,34 @@ const FooterSection = () => {
             <div className="lg:col-span-4">
               <img src={logoWhite} alt="Yess Host" className="h-9 sm:h-10 mb-5" />
               <p className="text-sm text-white/60 leading-relaxed mb-6 max-w-sm">
-                {tr("footer.desc")}
+                {(bn ? brand?.content_bn : brand?.content_en) || tr("footer.desc")}
               </p>
 
               {/* Contact info */}
               <div className="space-y-3 mb-6">
-                <a href="tel:+8801805464343" className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
+                <a href={`tel:${contact.phone || "+8801805464343"}`} className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors">
                     <Phone className="w-4 h-4" />
                   </div>
-                  +88 096 38 205 205
+                  {contact.phone_display || contact.phone || "+88 096 38 205 205"}
                 </a>
-                <a href="mailto:support@yesshost.com" className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
+                <a href={`mailto:${contact.email || "support@yesshost.com"}`} className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors">
                     <Mail className="w-4 h-4" />
                   </div>
-                  support@yesshost.com
+                  {contact.email || "support@yesshost.com"}
                 </a>
                 <div className="flex items-center gap-3 text-sm text-white/60">
                   <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center">
                     <MapPin className="w-4 h-4" />
                   </div>
-                  {bn ? "ঢাকা, বাংলাদেশ" : "Dhaka, Bangladesh"}
+                  {(bn ? contact.address_bn : contact.address_en) || (bn ? "ঢাকা, বাংলাদেশ" : "Dhaka, Bangladesh")}
                 </div>
               </div>
 
               {/* Social links */}
               <div className="flex items-center gap-2">
-              {[
-                  { icon: Facebook, label: "Facebook", href: "https://facebook.com/yesshost" },
-                  { icon: Youtube, label: "YouTube", href: "https://youtube.com/@yesshost" },
-                  { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/8801805464343" },
-                ].map((social) => (
+              {socials.map((social) => (
                   <a
                     key={social.label}
                     href={social.href}
@@ -201,12 +241,12 @@ const FooterSection = () => {
         <div className="border-t border-white/[0.06] bg-black/20">
           <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-[11px] sm:text-xs text-white/35 text-center sm:text-left">
-              © {new Date().getFullYear()} YessHost.com — {tr("footer.allRights")}
+              © {new Date().getFullYear()} {bottomMeta.company || "YessHost.com"} — {(bn ? bottom?.content_bn : bottom?.content_en) || tr("footer.allRights")}
             </p>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[11px] text-white/40">{tr("footer.allSystems")}</span>
+                <span className="text-[11px] text-white/40">{(bn ? bottomMeta.status_bn : bottomMeta.status_en) || tr("footer.allSystems")}</span>
               </div>
               <button
                 onClick={scrollToTop}
