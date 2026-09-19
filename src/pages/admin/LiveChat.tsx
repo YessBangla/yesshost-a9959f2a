@@ -4,6 +4,7 @@ import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 
 const NOTIFICATION_SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
@@ -42,6 +43,8 @@ type Message = {
 
 const AdminLiveChat = () => {
   const { user } = useAuth();
+  const { lang } = useLanguage();
+  const bn = lang === "bn";
   const [chats, setChats] = useState<Chat[]>([]);
   const [selected, setSelected] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -90,7 +93,7 @@ const AdminLiveChat = () => {
         const msg = payload.new as Message;
         if (msg.sender_type === "visitor") {
           playNotificationSound();
-          showBrowserNotification("নতুন মেসেজ", msg.message.slice(0, 100));
+          showBrowserNotification(bn ? "নতুন মেসেজ" : "New message", msg.message.slice(0, 100));
         }
       })
       .subscribe();
@@ -177,15 +180,15 @@ const AdminLiveChat = () => {
   };
 
   const formatTime = (d: string) =>
-    new Date(d).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    new Date(d).toLocaleString(bn ? "bn-BD" : "en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
   const timeAgo = (d: string) => {
     const mins = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-    if (mins < 1) return "Just now";
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return bn ? "এইমাত্র" : "Just now";
+    if (mins < 60) return bn ? `${mins} মিনিট আগে` : `${mins}m ago`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
+    if (hrs < 24) return bn ? `${hrs} ঘণ্টা আগে` : `${hrs}h ago`;
+    return bn ? `${Math.floor(hrs / 24)} দিন আগে` : `${Math.floor(hrs / 24)}d ago`;
   };
 
   if (loading) {
@@ -199,21 +202,21 @@ const AdminLiveChat = () => {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Live Chat</h1>
-        <p className="text-sm text-muted-foreground">ভিজিটরদের সাথে রিয়েল-টাইম চ্যাট</p>
+        <h1 className="text-2xl font-bold text-foreground">{bn ? "লাইভ চ্যাট" : "Live Chat"}</h1>
+        <p className="text-sm text-muted-foreground">{bn ? "ভিজিটরদের সাথে রিয়েল-টাইম চ্যাট" : "Real-time chat with website visitors"}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ height: "calc(100vh - 180px)" }}>
         {/* Chat list */}
         <div className="glass-card rounded-xl overflow-hidden flex flex-col">
           <div className="p-3 border-b border-border shrink-0">
-            <p className="text-sm font-semibold text-foreground">{chats.length} চ্যাট</p>
+            <p className="text-sm font-semibold text-foreground">{chats.length} {bn ? "চ্যাট" : "chats"}</p>
           </div>
           <div className="flex-1 overflow-y-auto divide-y divide-border/50">
             {chats.length === 0 ? (
               <div className="p-8 text-center">
                 <MessageCircle className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">কোনো চ্যাট নেই</p>
+                <p className="text-sm text-muted-foreground">{bn ? "কোনো চ্যাট নেই" : "No chats yet"}</p>
               </div>
             ) : (
               chats.map(c => (
@@ -228,7 +231,7 @@ const AdminLiveChat = () => {
                       {c.visitor_name}
                     </span>
                     <Badge variant={c.status === "open" ? "default" : "secondary"} className="text-[9px]">
-                      {c.status === "open" ? "সক্রিয়" : "বন্ধ"}
+                      {c.status === "open" ? (bn ? "সক্রিয়" : "Active") : (bn ? "বন্ধ" : "Closed")}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
@@ -250,7 +253,7 @@ const AdminLiveChat = () => {
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <MessageCircle className="w-14 h-14 text-muted-foreground/20 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">একটি চ্যাট নির্বাচন করুন</p>
+                <p className="text-sm text-muted-foreground">{bn ? "একটি চ্যাট নির্বাচন করুন" : "Select a chat to start replying"}</p>
               </div>
             </div>
           ) : (
@@ -259,12 +262,12 @@ const AdminLiveChat = () => {
               <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
                 <div>
                   <p className="text-sm font-bold text-foreground">{selected.visitor_name}</p>
-                  <p className="text-[10px] text-muted-foreground">{selected.visitor_email || "ইমেইল নেই"} • {selected.visitor_phone || "ফোন নেই"} • {formatTime(selected.created_at)}</p>
+                  <p className="text-[10px] text-muted-foreground">{selected.visitor_email || (bn ? "ইমেইল নেই" : "No email")} • {selected.visitor_phone || (bn ? "ফোন নেই" : "No phone")} • {formatTime(selected.created_at)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {selected.status === "open" && (
                     <button onClick={() => closeChat(selected.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20 transition-colors">
-                      <X className="w-3 h-3" /> বন্ধ করুন
+                      <X className="w-3 h-3" /> {bn ? "বন্ধ করুন" : "Close chat"}
                     </button>
                   )}
                   <button onClick={() => setSelected(null)} className="lg:hidden p-1.5 rounded-lg hover:bg-secondary text-muted-foreground">
@@ -292,7 +295,7 @@ const AdminLiveChat = () => {
                 {visitorTyping && (
                   <div className="flex justify-start px-4 pb-2">
                     <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2 flex items-center gap-1.5">
-                      <span className="text-[10px] text-muted-foreground mr-1">টাইপ করছে</span>
+                      <span className="text-[10px] text-muted-foreground mr-1">{bn ? "টাইপ করছে" : "typing"}</span>
                       <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
                       <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
                       <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -319,7 +322,7 @@ const AdminLiveChat = () => {
                       onChange={(e) => { setInput(e.target.value); broadcastAdminTyping(); }}
                       onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendReply()}
                       onFocus={() => setShowEmoji(false)}
-                      placeholder="উত্তর লিখুন..."
+                      placeholder={bn ? "উত্তর লিখুন..." : "Write a reply..."}
                       maxLength={1000}
                       className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
                     />
