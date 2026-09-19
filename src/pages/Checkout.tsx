@@ -502,7 +502,7 @@ const Checkout = () => {
                   </button>
                 ))}
               </div>
-              {paymentMethods.some((m) => m.ready && (m as { isSandbox?: boolean }).isSandbox) && (
+              {paymentMethods.some((m) => (m as { isSandbox?: boolean }).isSandbox) && (
                 <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                   <p className="text-[11px] text-muted-foreground">
