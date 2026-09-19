@@ -447,14 +447,14 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="mobile-page-shell min-h-screen flex flex-col bg-background">
       {/* ===== TOP MENUBAR ===== */}
-      <div className="w-full glass-surface sticky top-0 z-40">
+      <div className="sticky top-0 z-40 w-full border-b border-card/90 bg-card/72 shadow-[0_10px_30px_hsl(var(--glass-shadow)/0.08),inset_0_1px_0_hsl(0_0%_100%/0.9)] backdrop-blur-3xl">
         <div className="flex items-center h-11 px-2 sm:px-4 lg:px-6 max-w-full">
           {/* Mobile hamburger (left) */}
           <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-primary/10 transition-colors shrink-0"
+            className="lg:hidden flex size-11 shrink-0 items-center justify-center rounded-2xl border border-card/90 bg-card/65 shadow-[inset_0_1px_0_hsl(0_0%_100%/0.9)] backdrop-blur-xl transition-colors hover:bg-primary/10"
           >
             <Menu className="w-5 h-5 text-foreground" />
           </button>

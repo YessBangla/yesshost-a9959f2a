@@ -5,12 +5,14 @@ import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const SSLCOMMERZ_STORE_ID = Deno.env.get("SSLCOMMERZ_STORE_ID") || "testbox";
-const SSLCOMMERZ_STORE_PASS = Deno.env.get("SSLCOMMERZ_STORE_PASS") || "qwerty";
-const SSLCOMMERZ_IS_SANDBOX = !Deno.env.get("SSLCOMMERZ_STORE_ID");
-const SSLCOMMERZ_BASE = SSLCOMMERZ_IS_SANDBOX
-  ? "https://sandbox.sslcommerz.com"
-  : "https://securepay.sslcommerz.com";
+async function loadSslCfg(supabase: any) {
+  const { data } = await supabase.from("payment_gateway_settings").select("enabled, is_sandbox, credentials").eq("gateway", "sslcommerz").maybeSingle();
+  const credentials = (data?.credentials ?? {}) as Record<string, string>;
+  const storeId = credentials.store_id || Deno.env.get("SSLCOMMERZ_STORE_ID") || "testbox";
+  const storePass = credentials.store_pass || Deno.env.get("SSLCOMMERZ_STORE_PASS") || "qwerty";
+  const isSandbox = data ? !!data.is_sandbox : !Deno.env.get("SSLCOMMERZ_STORE_ID");
+  return { storeId, storePass, base: isSandbox ? "https://sandbox.sslcommerz.com" : "https://securepay.sslcommerz.com" };
+}
 
 const BKASH_APP_KEY = Deno.env.get("BKASH_APP_KEY") || "";
 const BKASH_APP_SECRET = Deno.env.get("BKASH_APP_SECRET") || "";
@@ -75,12 +77,12 @@ async function md5Hex(input: string): Promise<string> {
  * verify_key fields plus the md5 of the store password). A payload whose
  * signature does not match was not produced by SSLCommerz.
  */
-async function verifySslcommerzSignature(body: Record<string, string>): Promise<boolean> {
+async function verifySslcommerzSignature(body: Record<string, string>, storePass: string): Promise<boolean> {
   const { verify_sign, verify_key } = body;
   if (!verify_sign || !verify_key) return false;
   const keys = verify_key.split(",").map((k) => k.trim()).filter(Boolean).sort();
   const parts = keys.map((k) => `${k}=${body[k] ?? ""}`);
-  parts.push(`store_passwd=${await md5Hex(SSLCOMMERZ_STORE_PASS)}`);
+  parts.push(`store_passwd=${await md5Hex(storePass)}`);
   parts.sort();
   const expected = await md5Hex(parts.join("&"));
   return expected === verify_sign.toLowerCase();
@@ -199,6 +201,7 @@ async function settlePaidInvoice(
       payment_method: method,
       transaction_id: transactionId,
       description: `Invoice ${invoice.invoice_number} paid via ${method}`,
+      invoice_id: invoice.id,
     });
   }
 
@@ -213,6 +216,10 @@ async function settlePaidInvoice(
       .from("orders")
       .update({ payment_status: "paid", paid_at: paidAt, payment_method: method, status: "processing" })
       .eq("id", order.id);
+    const { error: provisionError } = await supabase.rpc("provision_order", { _order_id: order.id });
+    if (provisionError) {
+      console.error(`[payment-callback] provisioning failed for order ${order.id}:`, provisionError.message);
+    }
   }
 
   const desc: string = invoice.description || "";
@@ -271,15 +278,15 @@ async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
 
   if (!tran_id) return redirectToFrontend("fail", "Missing transaction ID");
 
-  const parts = tran_id.split("-");
-  const invoiceId = parts.length >= 2 ? parts[1] : null;
+  const invoiceId = tran_id.match(/^TXN-([0-9a-f-]{36})-\d+$/i)?.[1] ?? null;
   const invoice = await loadInvoice(supabase, invoiceId);
+  const sslCfg = await loadSslCfg(supabase);
 
   let verified = false;
   let message = "";
 
   if (status === "VALID" || status === "VALIDATED") {
-    const signatureOk = await verifySslcommerzSignature(body);
+    const signatureOk = await verifySslcommerzSignature(body, sslCfg.storePass);
     if (!signatureOk) {
       message = "Signature verification failed";
     } else if (!val_id) {
@@ -287,7 +294,7 @@ async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
     } else {
       try {
         const verifyRes = await fetch(
-          `${SSLCOMMERZ_BASE}/validator/api/validationserverAPI.php?val_id=${val_id}&store_id=${SSLCOMMERZ_STORE_ID}&store_passwd=${SSLCOMMERZ_STORE_PASS}&format=json`,
+          `${sslCfg.base}/validator/api/validationserverAPI.php?val_id=${val_id}&store_id=${sslCfg.storeId}&store_passwd=${sslCfg.storePass}&format=json`,
         );
         const verifyData = await verifyRes.json();
         const statusOk = verifyData.status === "VALID" || verifyData.status === "VALIDATED";
@@ -320,13 +327,13 @@ async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
   });
 
   if (alreadyProcessed) {
-    return redirectToFrontend(verified ? "success" : "fail", tran_id);
+    return redirectToFrontend(verified ? "success" : "fail", tran_id, invoice?.invoice_number);
   }
 
   if (verified && invoice) {
     await settlePaidInvoice(supabase, invoice.id, "sslcommerz", tran_id);
     await createPaymentNotification(supabase, invoice.user_id, true, amount || String(invoice.amount_bdt), tran_id, "sslcommerz");
-    return redirectToFrontend("success", tran_id);
+    return redirectToFrontend("success", tran_id, invoice.invoice_number);
   }
 
   if (invoice && status === "FAILED") {
@@ -334,7 +341,7 @@ async function handleSSLCommerz(body: Record<string, string>, supabase: any) {
   }
 
   if (status === "VALID" || status === "VALIDATED" || status === "FAILED") {
-    return redirectToFrontend("fail", message || "Payment failed");
+    return redirectToFrontend("fail", message || "Payment failed", invoice?.invoice_number);
   }
   return redirectToFrontend("cancel", "Payment cancelled");
 }
@@ -522,10 +529,12 @@ async function handleNagad(body: Record<string, string>, supabase: any) {
   return redirectToFrontend("fail", message || "Nagad payment not verified");
 }
 
-function redirectToFrontend(status: string, ref: string) {
-  const redirectUrl = `${FRONTEND_URL}/payment/${status}?ref=${encodeURIComponent(ref)}`;
+function redirectToFrontend(status: string, ref: string, invoiceNumber?: string) {
+  const redirectUrl = new URL(`${FRONTEND_URL}/payment/${status}`);
+  redirectUrl.searchParams.set("ref", ref);
+  if (invoiceNumber) redirectUrl.searchParams.set("invoice", invoiceNumber);
   return new Response(null, {
     status: 302,
-    headers: { Location: redirectUrl },
+    headers: { Location: redirectUrl.toString() },
   });
 }

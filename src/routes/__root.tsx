@@ -135,8 +135,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 // Minimal loading fallback (ported from src/App.tsx)
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+  <div className="mx-auto flex min-h-[60vh] w-full max-w-6xl flex-col gap-4 px-4 py-8">
+    <div className="h-12 w-48 animate-pulse rounded-xl bg-secondary" />
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {[0, 1, 2].map((item) => <div key={item} className="h-52 animate-pulse rounded-2xl border border-card/90 bg-card/70" />)}
+    </div>
   </div>
 );
 

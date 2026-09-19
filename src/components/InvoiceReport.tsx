@@ -140,9 +140,9 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+      <DialogContent className="max-h-[90vh] max-w-[calc(100vw-1rem)] overflow-y-auto p-0 gap-0 sm:max-w-3xl">
         {/* Toolbar */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur-xs">
+        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-background/95 p-3 backdrop-blur-xs sm:p-4">
           <h2 className="text-lg font-bold text-foreground">
             {isBn ? "ইনভয়েস রিপোর্ট" : "Invoice Report"}
           </h2>
@@ -163,21 +163,21 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
 
         {/* Printable content */}
         <div ref={printRef}>
-          <div className="invoice-page" style={{ maxWidth: 800, margin: "0 auto", padding: 40 }}>
+          <div className="invoice-page !p-4 sm:!p-10" style={{ maxWidth: 800, margin: "0 auto", padding: 40 }}>
             {/* Watermark */}
             <div className="watermark" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 120, fontWeight: 900, opacity: 0.04, color: "#0ea5e9", pointerEvents: "none", textTransform: "uppercase", letterSpacing: 10 }}>
               {statusLabel}
             </div>
 
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40, paddingBottom: 20, borderBottom: "3px solid #0ea5e9" }}>
+            <div className="!mb-6 !flex-col !gap-4 sm:!mb-10 sm:!flex-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40, paddingBottom: 20, borderBottom: "3px solid #0ea5e9" }}>
               <div className="logo-section">
                 <img src={logoWhite} alt="Yess Host" style={{ height: 40, filter: "brightness(0) saturate(100%)" }} />
                 <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
                   Premium Hosting Solutions
                 </p>
               </div>
-              <div style={{ textAlign: "right", fontSize: 12, color: "#64748b", lineHeight: 1.8 }}>
+              <div className="!text-left sm:!text-right" style={{ textAlign: "right", fontSize: 12, color: "#64748b", lineHeight: 1.8 }}>
                 <strong style={{ color: "#1a1a2e", fontSize: 14 }}>Yess Host</strong><br />
                 House #12, Road #5, Sector #6<br />
                 Uttara, Dhaka-1230, Bangladesh<br />
@@ -209,7 +209,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
             </div>
 
             {/* Client & Invoice details */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 30, marginBottom: 30 }}>
+            <div className="!grid-cols-1 !gap-3 sm:!grid-cols-2 sm:!gap-7" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 30, marginBottom: 30 }}>
               <div style={{ padding: 20, background: "#f8fafc", borderRadius: 12, border: "1px solid #e2e8f0" }}>
                 <h3 style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, color: "#94a3b8", marginBottom: 10, fontWeight: 600 }}>
                   {isBn ? "বিল করা হয়েছে" : "BILL TO"}

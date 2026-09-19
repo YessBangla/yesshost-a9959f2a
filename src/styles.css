@@ -319,14 +319,12 @@
   .glass {
     background: hsl(var(--glass-bg));
     backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
     border: 1px solid hsl(var(--glass-border));
   }
 
   .glass-card {
     background: hsl(var(--glass-bg));
     backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
     border: 1px solid hsl(var(--glass-border));
     border-radius: var(--radius);
     box-shadow: 
@@ -338,7 +336,6 @@
   .glass-card-elevated {
     background: hsl(var(--glass-bg));
     backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
     border: 1px solid hsl(var(--glass-border));
     border-radius: calc(var(--radius) + 4px);
     box-shadow: 
@@ -350,14 +347,12 @@
   .glass-surface {
     background: hsl(var(--glass-bg));
     backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
     border-bottom: 1px solid hsl(var(--glass-border));
   }
 
   .glass-input {
     background: hsl(0 0% 100% / 0.8);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border: 1px solid hsl(var(--border));
     border-radius: calc(var(--radius) - 4px);
   }
@@ -437,5 +432,27 @@
 
   .animate-marquee {
     animation: marquee 60s linear infinite;
+  }
+
+  .mobile-page-shell {
+    background: hsl(var(--background));
+  }
+
+  .mobile-glass-panel {
+    border: 1px solid hsl(var(--card) / 0.9);
+    border-radius: 1.5rem;
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(28px) saturate(150%);
+    box-shadow: 0 18px 48px hsl(var(--glass-shadow) / 0.1), inset 0 1px 0 hsl(0 0% 100% / 0.9);
+  }
+
+  @media (max-width: 639px) {
+    .mobile-page-shell {
+      padding-inline: 0;
+    }
+
+    .mobile-glass-panel {
+      border-radius: 1.25rem;
+    }
   }
 }

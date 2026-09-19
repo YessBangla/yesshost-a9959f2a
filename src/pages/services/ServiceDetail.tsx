@@ -13,6 +13,8 @@ import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { formatPrice } from "@/lib/formatPrice";
 import { BILLING_DURATIONS, calcDurationPrice, toBengaliNum, type BillingDuration } from "@/lib/billingDurations";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const iconMap: Record<string, typeof Server> = { Server, Globe, Shield, Zap, Clock, Headphones };
@@ -285,8 +287,13 @@ const ServiceDetail = () => {
   if (loading) {
     return (
       <PublicLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="w-7 h-7 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="container mx-auto space-y-5 px-4 py-8">
+          <Skeleton className="mx-auto h-14 w-14 rounded-2xl" />
+          <Skeleton className="mx-auto h-9 w-56 rounded-xl" />
+          <Skeleton className="mx-auto h-5 w-full max-w-lg rounded-lg" />
+          <div className="grid gap-4 pt-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[0, 1, 2].map((item) => <Skeleton key={item} className="h-80 rounded-2xl" />)}
+          </div>
         </div>
       </PublicLayout>
     );
@@ -312,13 +319,13 @@ const ServiceDetail = () => {
       />
 
       {/* ─── Hero Banner ─── */}
-      <section className="relative pt-16 lg:pt-20 pb-12 bg-gradient-to-b from-primary/[0.04] to-transparent">
+      <section className="relative pb-10 pt-8 sm:pt-12 lg:pb-12 lg:pt-20">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease }}
-            className="text-center max-w-3xl mx-auto"
+            className="mobile-glass-panel mx-auto max-w-3xl p-5 text-center sm:p-8 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none"
           >
             <Link
               to="/"
@@ -417,13 +424,14 @@ const ServiceDetail = () => {
       {plans.length > 1 && (
         <section className="pb-12 container mx-auto px-4">
           <div className="text-center mb-6">
-            <button
+          <Button
+            variant="outline"
               onClick={() => setShowComparison(!showComparison)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-card border border-border text-sm font-semibold text-foreground hover:border-primary/20 transition-all"
+              className="h-11 gap-2 rounded-xl"
             >
               {isBn ? "ফিচার তুলনা করুন" : "Compare Features"}
               <ChevronDown className={`w-4 h-4 text-primary transition-transform duration-300 ${showComparison ? "rotate-180" : ""}`} />
-            </button>
+            </Button>
           </div>
 
           <motion.div
