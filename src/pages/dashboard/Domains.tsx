@@ -14,6 +14,7 @@ import DataPagination from "@/components/DataPagination";
 import { logApiError } from "@/lib/errorReporting";
 import { csvDate, downloadCsv } from "@/lib/export-csv";
 import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
+import ServiceInvoices from "@/components/ServiceInvoices";
 import { Download, RefreshCw, CalendarClock } from "lucide-react";
 
 const DashboardDomains = () => {
@@ -38,6 +39,7 @@ const DashboardDomains = () => {
   }, [domainsQuery.error]);
 
   const domains: Tables<"services">[] = domainsQuery.data?.domains ?? [];
+  const invoices: Tables<"invoices">[] = domainsQuery.data?.invoices ?? [];
   const loading = !!user && domainsQuery.isPending;
 
   const filtered = domains.filter(d =>
