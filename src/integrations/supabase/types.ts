@@ -808,6 +808,45 @@ export type Database = {
         }
         Relationships: []
       }
+      operating_expenses: {
+        Row: {
+          amount_bdt: number
+          category: string
+          created_at: string
+          created_by: string | null
+          expense_date: string
+          id: string
+          note: string | null
+          title: string
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          amount_bdt?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          note?: string | null
+          title: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          amount_bdt?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          note?: string | null
+          title?: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           billing_cycle: string | null
