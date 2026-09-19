@@ -586,6 +586,15 @@ const DashboardBilling = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-secondary/20">
+                      <th className="px-3 py-3 w-10">
+                        <input
+                          type="checkbox"
+                          aria-label={isBn ? "সব নির্বাচন" : "Select all"}
+                          className="w-4 h-4 accent-primary cursor-pointer"
+                          checked={pagedInvoices.some((i) => i.status === "unpaid" || i.status === "overdue") && pagedInvoices.filter((i) => i.status === "unpaid" || i.status === "overdue").every((i) => selectedIds.has(i.id))}
+                          onChange={toggleSelectAll}
+                        />
+                      </th>
                       <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{tr("dash.invoiceNo")}</th>
                       <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">{tr("dash.description")}</th>
                       <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{tr("dash.amount")}</th>
@@ -599,7 +608,18 @@ const DashboardBilling = () => {
                       const canPay = inv.status === "unpaid" || inv.status === "overdue";
                       const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
                       return (
-                        <tr key={inv.id} className="border-b border-border/30 hover:bg-secondary/10 transition-colors">
+                        <tr key={inv.id} className={`border-b border-border/30 hover:bg-secondary/10 transition-colors ${selectedIds.has(inv.id) ? "bg-primary/5" : ""}`}>
+                          <td className="px-3 py-3.5">
+                            {canPay && (
+                              <input
+                                type="checkbox"
+                                aria-label={isBn ? "ইনভয়েস নির্বাচন" : "Select invoice"}
+                                className="w-4 h-4 accent-primary cursor-pointer"
+                                checked={selectedIds.has(inv.id)}
+                                onChange={() => toggleSelect(inv.id)}
+                              />
+                            )}
+                          </td>
                           <td className="px-4 py-3.5">
                             <p className="font-mono text-xs text-primary font-semibold">{inv.invoice_number}</p>
                             <p className="text-[11px] text-muted-foreground md:hidden mt-0.5">{inv.description || "-"}</p>
