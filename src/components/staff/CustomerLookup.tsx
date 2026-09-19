@@ -71,6 +71,36 @@ const CustomerLookup = () => {
   const date = (value: string | null) => value ? new Date(value).toLocaleDateString(bn ? "bn-BD" : "en-US", { day: "2-digit", month: "short", year: "numeric" }) : "—";
   const due = detail?.invoices.filter((item) => item.status === "unpaid" || item.status === "overdue") || [];
   const dueTotal = due.reduce((sum, item) => sum + Number(item.amount_bdt), 0);
+
+  const createTicket = async () => {
+    if (!selected) return;
+    if (form.subject.trim().length < 3 || form.message.trim().length < 5) { toast.error(bn ? "বিষয় ও বিবরণ লিখুন।" : "Enter a subject and description."); return; }
+    setSaving(true);
+    const ticketNumber = `TKT-${Date.now().toString(36).toUpperCase()}`;
+    const { data: ticket, error: ticketError } = await supabase.from("support_tickets").insert({
+      user_id: selected.user_id, ticket_number: ticketNumber, subject: form.subject.trim(),
+      department: form.department as Ticket["department"], priority: form.priority as Ticket["priority"],
+    }).select("id, ticket_number").single();
+    if (ticketError || !ticket) { setSaving(false); toast.error(bn ? "টিকেট তৈরি করা যায়নি।" : "Could not create the ticket."); return; }
+    await supabase.from("ticket_replies").insert({ ticket_id: ticket.id, user_id: user?.id as string, message: form.message.trim(), is_staff: true });
+    await supabase.from("notifications").insert({ user_id: selected.user_id, title: bn ? "আপনার জন্য একটি টিকেট খোলা হয়েছে" : "A support ticket was opened for you", message: `#${ticket.ticket_number} • ${form.subject.trim()}`, type: "ticket" });
+    setSaving(false); setTicketOpen(false); setForm({ subject: "", department: "technical", priority: "medium", message: "" });
+    toast.success(bn ? `টিকেট #${ticket.ticket_number} তৈরি হয়েছে` : `Ticket #${ticket.ticket_number} created`);
+    openCustomer(selected);
+  };
+
+  const sendReminder = async () => {
+    if (!selected) return;
+    setSaving(true);
+    const { error: notifyError } = await supabase.from("notifications").insert({
+      user_id: selected.user_id, type: "billing",
+      title: bn ? "পেমেন্ট রিমাইন্ডার" : "Payment reminder",
+      message: bn ? `আপনার ${due.length}টি বিলে মোট ৳${formatAmount(dueTotal, lang)} বকেয়া আছে। সেবা চালু রাখতে অনুগ্রহ করে পরিশোধ করুন।` : `You have ৳${formatAmount(dueTotal, lang)} due across ${due.length} invoices. Please pay to keep your services active.`,
+    });
+    setSaving(false);
+    if (notifyError) toast.error(bn ? "রিমাইন্ডার পাঠানো যায়নি।" : "Reminder could not be sent.");
+    else toast.success(bn ? "গ্রাহকের ড্যাশবোর্ডে রিমাইন্ডার পাঠানো হয়েছে।" : "Reminder sent to the customer dashboard.");
+  };
   const expiringSoon = detail?.services.filter((item) => item.expiry_date && new Date(item.expiry_date).getTime() - Date.now() < 30 * 864e5) || [];
 
   return <section className="staff-panel overflow-hidden">
