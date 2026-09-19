@@ -55,6 +55,13 @@ const CallCenterDashboard = () => {
   const completedCalls = data.calls.filter((item) => item.status === "completed");
   const salesValue = data.orders.reduce((sum, item) => sum + Number(item.total_bdt), 0);
   const paidOrders = data.orders.filter((item) => item.payment_status === "paid").length;
+  const overdueInvoices = data.invoices.filter((item) => item.status === "overdue" || (item.due_date && new Date(item.due_date).getTime() < Date.now()));
+  const dueTotal = data.invoices.reduce((sum, item) => sum + Number(item.amount_bdt), 0);
+  const expiringServices = data.services;
+  const oldestTicket = openTickets.map((item) => Date.now() - new Date(item.created_at).getTime()).sort((a, b) => b - a)[0] || 0;
+  const oldestHours = Math.round(oldestTicket / 3600000);
+  const breachedTickets = openTickets.filter((item) => Date.now() - new Date(item.created_at).getTime() > 24 * 3600000).length;
+
 
   const queue = useMemo<QueueItem[]>(() => [
     ...openTickets.map((item) => ({ id: item.id, title: item.subject, detail: `${bn ? "টিকেট" : "Ticket"} #${item.ticket_number} • ${item.priority}`, time: item.updated_at, href: "/call-center/tickets", type: "ticket" as const, urgent: item.priority === "urgent" || item.priority === "high" })),
