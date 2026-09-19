@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { Link } from "@/lib/router-compat";
-import { AlertTriangle, CreditCard, Globe, Headphones, Loader2, Search, ShoppingCart, User } from "lucide-react";
+import { AlertTriangle, BellRing, CreditCard, Globe, Headphones, Loader2, Plus, Search, ShoppingCart, User } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
 
