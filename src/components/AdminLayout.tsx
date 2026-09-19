@@ -4,7 +4,7 @@ import {
   LogOut, Menu, Globe, Shield, Layers, Palette, Tag, MessageCircle, Mail, BookOpen,
   Search, ChevronRight, PanelLeftClose, PanelLeft, HardDrive, User, KeyRound, ChevronDown, Share2,
   UserCircle, Package, Receipt, TicketCheck, Loader2, History, Settings,
-  BarChart3, Wallet, Megaphone, UserCog, CreditCard
+  BarChart3, Wallet, Megaphone, UserCog, CreditCard, Scale
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
