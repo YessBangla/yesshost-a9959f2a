@@ -319,6 +319,39 @@ const ContactMessages = () => {
                   <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{selected.message}</p>
                 </div>
 
+                {(repliesLoading || replies.length > 0) && (
+                  <div className="px-5 pb-5 space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {bn ? "আগের রিপ্লাই" : "Reply history"}
+                    </h3>
+                    {repliesLoading ? (
+                      <div className="h-16 rounded-lg bg-secondary/40 animate-pulse" />
+                    ) : (
+                      replies.map(r => (
+                        <div key={r.id} className="rounded-lg border border-border/60 bg-background p-3">
+                          <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                            <span>{format(new Date(r.created_at), "dd MMM yyyy, hh:mm a")}</span>
+                            <span className={
+                              r.delivery_status === "sent"
+                                ? "text-emerald-600 font-medium"
+                                : r.delivery_status === "queued"
+                                  ? "text-amber-600 font-medium"
+                                  : "text-destructive font-medium"
+                            }>
+                              {r.delivery_status === "sent"
+                                ? (bn ? "পাঠানো হয়েছে" : "Sent")
+                                : r.delivery_status === "queued"
+                                  ? (bn ? "অপেক্ষমাণ" : "Queued")
+                                  : (bn ? "ব্যর্থ" : "Failed")}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">{r.body}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
                 <div className="p-5 border-t border-border/50 bg-secondary/20">
                   <h3 className="text-sm font-semibold text-foreground mb-3">
                     {bn ? "রিপ্লাই পাঠান" : "Send Reply"}
