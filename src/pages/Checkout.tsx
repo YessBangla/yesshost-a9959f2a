@@ -66,10 +66,20 @@ const Checkout = () => {
     return () => { active = false; };
   }, []);
 
-  const paymentMethods = basePaymentMethods.map((m) => {
-    const gw = gatewayState[m.id];
-    return gw ? { ...m, ready: gw.enabled, isSandbox: gw.isSandbox } : { ...m, isSandbox: false };
-  });
+  const paymentMethods = basePaymentMethods
+    .map((m) => {
+      const gw = gatewayState[m.id];
+      return gw ? { ...m, ready: gw.enabled, isSandbox: gw.isSandbox } : { ...m, isSandbox: false };
+    })
+    .filter((m) => m.ready);
+
+  // Keep the selection valid when gateway availability changes
+  useEffect(() => {
+    if (paymentMethods.length === 0) return;
+    if (!paymentMethods.some((m) => m.id === selectedPayment)) {
+      setSelectedPayment(paymentMethods[0].id);
+    }
+  }, [paymentMethods, selectedPayment]);
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
@@ -482,10 +492,7 @@ const Checkout = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-foreground">{bn ? method.labelBn : method.label}</span>
-                        {!method.ready && (
-                          <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm">{bn ? "শীঘ্রই আসছে" : "Coming Soon"}</span>
-                        )}
-                        {method.ready && (method as { isSandbox?: boolean }).isSandbox && (
+                        {(method as { isSandbox?: boolean }).isSandbox && (
                           <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded-sm">🧪 Sandbox</span>
                         )}
                       </div>
@@ -503,7 +510,7 @@ const Checkout = () => {
                   </button>
                 ))}
               </div>
-              {paymentMethods.some((m) => m.ready && (m as { isSandbox?: boolean }).isSandbox) && (
+              {paymentMethods.some((m) => (m as { isSandbox?: boolean }).isSandbox) && (
                 <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                   <p className="text-[11px] text-muted-foreground">
