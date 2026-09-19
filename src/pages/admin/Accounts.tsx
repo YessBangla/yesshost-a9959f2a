@@ -13,9 +13,10 @@ import { csvDate, downloadCsv } from "@/lib/export-csv";
 type Granularity = "day" | "week" | "month" | "year";
 type PeriodRow = { period_start: string; income: number; expense: number; net: number };
 type TrialRow = { code: string; name_bn: string; name_en: string; type: string; debit_total: number; credit_total: number; balance: number };
-type JournalLine = { debit_bdt: number; credit_bdt: number; ledger_accounts: { code: string; name_bn: string; name_en: string } | null };
+type JournalLine = { debit_bdt: number; credit_bdt: number; ledger_accounts: { code: string; name_bn: string; name_en: string; type: string } | null };
 type JournalRow = { id: string; entry_date: string; reference: string; description: string | null; source: string; journal_lines: JournalLine[] };
-type ClientPayment = { id: string; invoice_number: string; amount_bdt: number; paid_at: string | null; created_at: string; payment_method: string | null; description: string | null; user_id: string };
+type ClientPayment = { id: string; invoice_number: string; amount_bdt: number; paid_at: string | null; created_at: string; payment_method: string | null; description: string | null; user_id: string; due_date: string | null };
+type CashRow = { id: string; direction: string; method: string; amount_bdt: number; txn_date: string; counterparty: string | null; bank_name: string | null; account_number: string | null; reference: string | null; contra_code: string; note: string | null };
 
 const AdminAccounts = () => {
   const { lang } = useLanguage();
