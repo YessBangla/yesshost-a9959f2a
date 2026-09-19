@@ -25,9 +25,9 @@ export const createSecureOrder = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: result, error } = await supabaseAdmin.rpc("create_order_secure", {
       _items: data.items,
-      _coupon_code: data.couponCode ?? null,
+      _coupon_code: data.couponCode ?? undefined,
       _payment_method: data.paymentMethod,
-      _order_note: data.orderNote ?? null,
+      _order_note: data.orderNote ?? undefined,
     });
     if (error) throw new Error(error.message);
     if (!result || typeof result !== "object" || Array.isArray(result)) throw new Error("Order creation failed");
