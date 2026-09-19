@@ -364,6 +364,16 @@ const DashboardLayout = () => {
             {!collapsed && <span className="truncate">{bn ? "অ্যাফিলিয়েট" : "Affiliate"}</span>}
           </NavLink>
 
+          {/* My Themes */}
+          <NavLink
+            to="/dashboard/my-themes"
+            className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
+          >
+            <Palette className="w-[18px] h-[18px] shrink-0" />
+            {!collapsed && <span className="truncate">{bn ? "আমার থিম" : "My Themes"}</span>}
+          </NavLink>
+
           {/* Theme Seller */}
           <NavLink
             to="/dashboard/theme-seller"
