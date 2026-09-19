@@ -15,6 +15,8 @@ import { downloadCsv, csvDate } from "@/lib/export-csv";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
+
 
 const CATEGORIES = ["business", "ecommerce", "portfolio", "restaurant", "blog", "landing", "education", "healthcare", "news", "agency", "realestate", "travel"] as const;
 
@@ -303,46 +305,34 @@ const ThemeSeller = () => {
 
   if (loading) return <BillingSkeleton />;
 
-  const stats = [
-    { label: bn ? "মোট বিক্রি" : "Total Sales", value: String(paidSales.length), icon: ShoppingBag, color: "text-primary", bg: "bg-primary/10" },
-    { label: bn ? "মোট আয় (গ্রস)" : "Gross Revenue", value: fmt(gross), icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
-    { label: bn ? "আপনার আয় (নিট)" : "Your Earnings", value: fmt(net), icon: Wallet, color: "text-primary", bg: "bg-primary/10" },
-    { label: bn ? "উত্তোলনযোগ্য" : "Available", value: fmt(available), icon: CheckCircle2, color: "text-warning", bg: "bg-warning/10" },
+  const metrics: StaffMetric[] = [
+    { label: bn ? "মোট বিক্রি" : "Total sales", value: String(paidSales.length), detail: bn ? "পরিশোধিত অর্ডার" : "paid orders", icon: ShoppingBag, tone: "primary" },
+    { label: bn ? "মোট আয় (গ্রস)" : "Gross revenue", value: fmt(gross), detail: bn ? "কমিশনের আগে" : "before commission", icon: TrendingUp, tone: "success" },
+    { label: bn ? "আপনার আয় (নিট)" : "Your earnings", value: fmt(net), detail: bn ? "কমিশন বাদে" : "after commission", icon: Wallet, tone: "primary" },
+    { label: bn ? "উত্তোলনযোগ্য" : "Available", value: fmt(available), detail: `${bn ? "সর্বনিম্ন" : "min"} ৳${MIN_PAYOUT}`, icon: CheckCircle2, tone: available >= MIN_PAYOUT ? "success" : "warning" },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{bn ? "থিম বিক্রেতা ড্যাশবোর্ড" : "Theme Seller Dashboard"}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {bn ? "নিজের থিম দাম দিয়ে বিক্রি করুন, বিক্রির রিপোর্ট ও আয় দেখুন" : "Sell your own themes, track sales and earnings"}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setShowPayout(true)} className="gap-2">
-            <Send className="w-4 h-4" />
-            {bn ? "আয় উত্তোলন" : "Withdraw"}
-          </Button>
-          <Button onClick={() => setShowAdd(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            {bn ? "থিম বিক্রি করুন" : "Sell a Theme"}
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {stats.map((s, i) => (
-          <div key={i} className="glass-card rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className={`p-1.5 rounded-lg ${s.bg}`}><s.icon className={`w-4 h-4 ${s.color}`} /></div>
-              <span className="text-xs text-muted-foreground">{s.label}</span>
-            </div>
-            <p className="text-xl font-bold text-foreground">{s.value}</p>
+      <StaffPageHeader
+        title={bn ? "থিম বিক্রেতা ড্যাশবোর্ড" : "Theme Seller Dashboard"}
+        description={bn ? "নিজের থিম দাম দিয়ে বিক্রি করুন, বিক্রির রিপোর্ট ও আয় দেখুন" : "Sell your own themes, track sales and earnings"}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" className="h-11 gap-2" onClick={() => setShowPayout(true)}>
+              <Send className="w-4 h-4" />
+              {bn ? "আয় উত্তোলন" : "Withdraw"}
+            </Button>
+            <Button className="h-11 gap-2" onClick={() => setShowAdd(true)}>
+              <Plus className="w-4 h-4" />
+              {bn ? "থিম বিক্রি করুন" : "Sell a Theme"}
+            </Button>
           </div>
-        ))}
-      </div>
+        }
+      />
+
+      <StaffMetricStrip metrics={metrics} />
+
 
       <div className="glass-card rounded-xl p-4 text-xs text-muted-foreground flex items-start gap-2">
         <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-primary" />

@@ -9,4 +9,4 @@
 - [x] Step 5: Modernize Coupons and Theme Store
 - [x] Step 6: Modernize Knowledge Base Admin
 - [x] Step 7: Modernize Contact Messages and Communication Settings
-- [ ] Step 8: Unify Client, Reseller, Theme Seller, and Affiliate dashboards
+- [x] Step 8: Unify Client, Reseller, Theme Seller, and Affiliate dashboards

@@ -318,14 +318,14 @@ const DashboardOverview = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+          <h1 className="font-display text-xl font-semibold text-foreground">
             {bn ? "স্বাগতম," : "Welcome,"}{" "}
             <span className="text-primary">{profile?.full_name || "User"}</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             {bn ? "আজ আপনার অ্যাকাউন্টে কী হচ্ছে তা দেখুন।" : "Here's what's happening with your account today."}
           </p>
-          <div className="h-1 w-16 bg-primary rounded-full mt-3" />
+
         </motion.div>
 
         {/* Stat Cards */}
