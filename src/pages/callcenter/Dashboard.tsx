@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Clock3, Headphones, MessageCircle, PhoneMissed, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, Clock3, CreditCard, Headphones, MessageCircle, PhoneMissed, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import CustomerLookup from "@/components/staff/CustomerLookup";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "@/lib/router-compat";
