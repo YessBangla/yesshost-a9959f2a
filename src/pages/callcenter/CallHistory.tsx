@@ -41,6 +41,31 @@ const CallHistory = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draft, setDraft] = useState({ outcome: "resolved", notes: "" });
+  const [saving, setSaving] = useState(false);
+
+  const outcomes = [
+    { key: "resolved", label: bn ? "সমাধান হয়েছে" : "Resolved" },
+    { key: "callback", label: bn ? "কলব্যাক প্রয়োজন" : "Callback required" },
+    { key: "no_answer", label: bn ? "সাড়া পাওয়া যায়নি" : "No answer" },
+    { key: "escalated", label: bn ? "টিকেটে পাঠানো হয়েছে" : "Escalated to ticket" },
+  ];
+
+  const startEdit = (call: CallRecord) => {
+    setEditing(call.id);
+    setDraft({ outcome: call.outcome || "resolved", notes: call.notes || "" });
+  };
+
+  const saveLog = async (call: CallRecord) => {
+    setSaving(true);
+    const { error } = await supabase.from("call_history").update({ outcome: draft.outcome, notes: draft.notes.trim() || null } as never).eq("id", call.id);
+    setSaving(false);
+    if (error) { toast.error(bn ? "কল নোট সেভ করা যায়নি।" : "Call note could not be saved."); return; }
+    setCalls((rows) => rows.map((row) => row.id === call.id ? { ...row, outcome: draft.outcome, notes: draft.notes.trim() || null } : row));
+    setEditing(null);
+    toast.success(bn ? "কল নোট সংরক্ষিত হয়েছে।" : "Call note saved.");
+  };
 
   const fetchCalls = async () => {
     setLoading(true);
