@@ -157,7 +157,16 @@ const AdminFinance = () => {
     <StaffMetricStrip metrics={stats} />
 
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-      <section className="staff-panel p-4"><div className="mb-4"><h2 className="font-display font-semibold text-foreground">{bn ? "ছয় মাসের নগদ প্রবাহ" : "Six-month cash flow"}</h2><p className="mt-1 text-xs text-muted-foreground">{bn ? "আদায় বনাম নতুন বকেয়া" : "Collected revenue versus new receivables"}</p></div><div className="h-72 w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={monthly} margin={{ left: -18, right: 4 }}><CartesianGrid stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} /><YAxis fontSize={11} tickLine={false} axisLine={false} /><Tooltip formatter={(value) => money(Number(value))} /><Legend /><Bar dataKey="collected" name={bn ? "আদায়" : "Collected"} fill="hsl(var(--success))" radius={[4, 4, 0, 0]} /><Bar dataKey="outstanding" name={bn ? "বকেয়া" : "Outstanding"} fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></section>
+      <section className="staff-panel p-4">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display font-semibold text-foreground">{bn ? "১২ মাসের আয়-ব্যয় ও মুনাফা" : "12-month revenue, cost & profit"}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">{bn ? "প্রতি মাসে আদায় বনাম অপারেটিং খরচ ও নিট মুনাফা" : "Monthly collected revenue versus operating cost and net profit"}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={exportReport}><Download className="size-4" />{bn ? "রিপোর্ট CSV" : "Report CSV"}</Button>
+        </div>
+        <div className="h-72 w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={monthly} margin={{ left: -18, right: 4 }}><CartesianGrid stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} /><YAxis fontSize={11} tickLine={false} axisLine={false} /><Tooltip formatter={(value) => money(Number(value))} /><Legend /><Bar dataKey="collected" name={bn ? "আয়" : "Revenue"} fill="hsl(var(--success))" radius={[4, 4, 0, 0]} /><Bar dataKey="expense" name={bn ? "খরচ" : "Cost"} fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} /><Bar dataKey="profit" name={bn ? "মুনাফা" : "Profit"} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div>
+      </section>
       <aside className="staff-panel p-4"><p className="staff-eyebrow">{bn ? "অপারেশনাল সারাংশ" : "OPERATING POSITION"}</p><div className="mt-4 space-y-4"><div><p className="text-xs text-muted-foreground">{bn ? "ওয়ালেট জমা" : "Completed wallet deposits"}</p><p className="mt-1 text-xl font-semibold text-foreground">{money(sum(wallet.filter((item) => item.type === "deposit" && item.status === "completed")))}</p></div><div className="border-t border-border pt-4"><p className="text-xs text-muted-foreground">{bn ? "অ্যাফিলিয়েট দায়" : "Affiliate liability"}</p><p className="mt-1 text-xl font-semibold text-foreground">{money(liability)}</p></div><div className="border-t border-border pt-4"><p className="text-xs text-muted-foreground">{bn ? "অযাচাইকৃত পেমেন্ট" : "Unverified payment events"}</p><p className="mt-1 text-xl font-semibold text-destructive">{events.filter((item) => !item.verified || !item.settled).length}</p></div></div></aside>
     </div>
 
