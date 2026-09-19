@@ -354,6 +354,16 @@ const DashboardLayout = () => {
             {!collapsed && <span className="truncate">{bn ? "ওয়ালেট" : "Wallet"}</span>}
           </NavLink>
 
+          {/* Income */}
+          <NavLink
+            to="/dashboard/income"
+            className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
+          >
+            <DollarSign className="w-[18px] h-[18px] shrink-0" />
+            {!collapsed && <span className="truncate">{bn ? "আয় ও পেমেন্ট" : "Income"}</span>}
+          </NavLink>
+
           {/* Affiliate */}
           <NavLink
             to="/dashboard/affiliate"
