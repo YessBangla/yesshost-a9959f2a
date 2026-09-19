@@ -41,7 +41,10 @@ const AdminTickets = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [tickets, setTickets] = useState<TicketWithUser[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [stats, setStats] = useState({ total: 0, open: 0, inProgress: 0, urgent: 0 });
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -52,20 +55,74 @@ const AdminTickets = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const fetchData = async () => {
-    const [tix, prof] = await Promise.all([
-      supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("*"),
+  // Server-side filtering keeps large ticket tables fast: only the visible page
+  // (and the matching profiles) travel over the wire.
+  const buildQuery = (term: string, status: string, priority: string) => {
+    let q = supabase.from("support_tickets").select("*", { count: "exact" });
+    if (term.trim()) {
+      const safe = term.trim().replace(/[,%()]/g, " ");
+      q = q.or(`subject.ilike.%${safe}%,ticket_number.ilike.%${safe}%`);
+    }
+    if (status !== "all") q = q.eq("status", status as any);
+    if (priority !== "all") q = q.eq("priority", priority as any);
+    return q.order("created_at", { ascending: false });
+  };
+
+  const attachProfiles = async (rows: Tables<"support_tickets">[]): Promise<TicketWithUser[]> => {
+    const ids = Array.from(new Set(rows.map(r => r.user_id).filter(Boolean))) as string[];
+    if (ids.length === 0) return rows.map(r => ({ ...r, profiles: null }));
+    const { data } = await supabase.from("profiles").select("*").in("user_id", ids);
+    return rows.map(r => ({ ...r, profiles: (data || []).find(p => p.user_id === r.user_id) || null }));
+  };
+
+  const fetchStats = async () => {
+    const counter = (build: (q: any) => any) =>
+      build(supabase.from("support_tickets").select("id", { count: "exact", head: true }));
+    const [all, open, inProgress, urgent] = await Promise.all([
+      counter((q: any) => q),
+      counter((q: any) => q.eq("status", "open")),
+      counter((q: any) => q.eq("status", "in_progress")),
+      counter((q: any) => q.eq("priority", "urgent").not("status", "in", "(closed,resolved)")),
     ]);
-    const ticketsWithUser = (tix.data || []).map(t => ({
-      ...t,
-      profiles: (prof.data || []).find(p => p.user_id === t.user_id) || null,
-    }));
-    setTickets(ticketsWithUser);
+    setStats({
+      total: all.count || 0,
+      open: open.count || 0,
+      inProgress: inProgress.count || 0,
+      urgent: urgent.count || 0,
+    });
+  };
+
+  const fetchData = async () => {
+    const from = (page - 1) * pageSize;
+    const { data, count } = await buildQuery(debouncedSearch, statusFilter, priorityFilter)
+      .range(from, from + pageSize - 1);
+    setTickets(await attachProfiles(data || []));
+    setTotalCount(count || 0);
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(id);
+  }, [search]);
+
+  useEffect(() => { fetchStats(); }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, statusFilter, priorityFilter, page, pageSize]);
+
+  const exportCsv = async () => {
+    const { data } = await buildQuery(debouncedSearch, statusFilter, priorityFilter).limit(5000);
+    const rows = await attachProfiles(data || []);
+    downloadCsv(
+      "yesshost-tickets",
+      ["ticket_number", "subject", "client", "status", "priority", "created"],
+      rows.map(t => [t.ticket_number, t.subject, t.profiles?.full_name || "", t.status, t.priority, csvDate(t.created_at)]),
+    );
+  };
 
   const openTicket = async (ticket: TicketWithUser) => {
     setSelectedTicket(ticket);
