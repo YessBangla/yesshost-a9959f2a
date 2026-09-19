@@ -87,6 +87,8 @@ const DashboardBilling = () => {
   const [filterMethod, setFilterMethod] = useState<string>("all");
   const [invSearch, setInvSearch] = useState("");
   const [invStatus, setInvStatus] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [massPaying, setMassPaying] = useState(false);
 
   // Billing data is fetched on the server (server function -> Supabase) so the
   // page renders with real data and stays identical across domains/environments.
@@ -328,6 +330,77 @@ const DashboardBilling = () => {
     });
   }, [paidInvoicesAll, isBn]);
 
+  const payableInvoices = useMemo(
+    () => invoices.filter((i) => i.status === "unpaid" || i.status === "overdue"),
+    [invoices]
+  );
+  const selectedInvoices = payableInvoices.filter((i) => selectedIds.has(i.id));
+  const selectedTotal = selectedInvoices.reduce((sum, i) => sum + Number(i.amount_bdt), 0);
+
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+
+  const toggleSelectAll = () => {
+    const pagePayable = pagedInvoices.filter((i) => i.status === "unpaid" || i.status === "overdue");
+    const allSelected = pagePayable.length > 0 && pagePayable.every((i) => selectedIds.has(i.id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      pagePayable.forEach((i) => { if (allSelected) next.delete(i.id); else next.add(i.id); });
+      return next;
+    });
+  };
+
+  const handleMassPay = async () => {
+    if (!selectedInvoices.length) return;
+    if (walletBalance < selectedTotal) {
+      toast({
+        title: isBn ? "অপর্যাপ্ত ব্যালেন্স" : "Insufficient Balance",
+        description: isBn
+          ? `আপনার ওয়ালেটে ৳${formatAmount(walletBalance, lang)} আছে, কিন্তু ৳${formatAmount(selectedTotal, lang)} প্রয়োজন।`
+          : `Your wallet has ৳${formatAmount(walletBalance, lang)}, but ৳${formatAmount(selectedTotal, lang)} is required.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    setMassPaying(true);
+    let paidCount = 0;
+    let failedCount = 0;
+    for (const inv of selectedInvoices) {
+      try {
+        const { data, error } = await supabase.functions.invoke("wallet-pay-invoice", {
+          body: { invoice_id: inv.id },
+        });
+        if (error || !data?.success) failedCount += 1; else paidCount += 1;
+      } catch {
+        failedCount += 1;
+      }
+    }
+    setMassPaying(false);
+    setSelectedIds(new Set());
+    fetchInvoices();
+    fetchWalletBalance();
+    if (failedCount === 0) {
+      toast({
+        title: isBn ? "সফল!" : "Success!",
+        description: isBn
+          ? `${paidCount}টি ইনভয়েস (মোট ৳${formatAmount(selectedTotal, lang)}) ওয়ালেট থেকে পরিশোধ করা হয়েছে`
+          : `${paidCount} invoice(s) totaling ৳${formatAmount(selectedTotal, lang)} paid from wallet`,
+      });
+    } else {
+      toast({
+        title: isBn ? "আংশিক সফল" : "Partially completed",
+        description: isBn
+          ? `${paidCount}টি পরিশোধিত, ${failedCount}টি ব্যর্থ হয়েছে — ব্যর্থগুলো আবার চেষ্টা করুন`
+          : `${paidCount} paid, ${failedCount} failed — please retry the failed ones`,
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredInvoices = useMemo(() => {
     const q = invSearch.trim().toLowerCase();
     return invoices.filter(i => {
@@ -481,6 +554,22 @@ const DashboardBilling = () => {
               />
             </div>
           )}
+          {selectedIds.size > 0 && (
+            <div className="mb-4 glass-card rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 border-primary/30">
+              <p className="text-sm text-foreground">
+                <span className="font-bold">{selectedInvoices.length}</span> {isBn ? "টি ইনভয়েস নির্বাচিত" : "invoice(s) selected"} — {isBn ? "মোট" : "Total"} <span className="font-bold text-primary">৳{formatAmount(selectedTotal, lang)}</span>
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="h-9" onClick={() => setSelectedIds(new Set())} disabled={massPaying}>
+                  {isBn ? "বাতিল" : "Clear"}
+                </Button>
+                <Button size="sm" className="h-9 gap-1.5" onClick={handleMassPay} disabled={massPaying}>
+                  {massPaying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wallet className="w-3.5 h-3.5" />}
+                  {isBn ? "ওয়ালেট থেকে সব পরিশোধ করুন" : "Pay All with Wallet"}
+                </Button>
+              </div>
+            </div>
+          )}
           {invoices.length === 0 ? (
             <EmptyState
               icon={FileText}
@@ -497,6 +586,15 @@ const DashboardBilling = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-secondary/20">
+                      <th className="px-3 py-3 w-10">
+                        <input
+                          type="checkbox"
+                          aria-label={isBn ? "সব নির্বাচন" : "Select all"}
+                          className="w-4 h-4 accent-primary cursor-pointer"
+                          checked={pagedInvoices.some((i) => i.status === "unpaid" || i.status === "overdue") && pagedInvoices.filter((i) => i.status === "unpaid" || i.status === "overdue").every((i) => selectedIds.has(i.id))}
+                          onChange={toggleSelectAll}
+                        />
+                      </th>
                       <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{tr("dash.invoiceNo")}</th>
                       <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">{tr("dash.description")}</th>
                       <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">{tr("dash.amount")}</th>
@@ -510,7 +608,18 @@ const DashboardBilling = () => {
                       const canPay = inv.status === "unpaid" || inv.status === "overdue";
                       const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
                       return (
-                        <tr key={inv.id} className="border-b border-border/30 hover:bg-secondary/10 transition-colors">
+                        <tr key={inv.id} className={`border-b border-border/30 hover:bg-secondary/10 transition-colors ${selectedIds.has(inv.id) ? "bg-primary/5" : ""}`}>
+                          <td className="px-3 py-3.5">
+                            {canPay && (
+                              <input
+                                type="checkbox"
+                                aria-label={isBn ? "ইনভয়েস নির্বাচন" : "Select invoice"}
+                                className="w-4 h-4 accent-primary cursor-pointer"
+                                checked={selectedIds.has(inv.id)}
+                                onChange={() => toggleSelect(inv.id)}
+                              />
+                            )}
+                          </td>
                           <td className="px-4 py-3.5">
                             <p className="font-mono text-xs text-primary font-semibold">{inv.invoice_number}</p>
                             <p className="text-[11px] text-muted-foreground md:hidden mt-0.5">{inv.description || "-"}</p>
