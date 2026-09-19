@@ -205,11 +205,19 @@ const AdminTickets = () => {
                       <><span className="w-5 h-5 rounded-sm bg-primary/10 text-primary flex items-center justify-center text-[10px]">👤</span> {selectedTicket.profiles?.full_name || (isBn ? "ক্লায়েন্ট" : "Client")}</>
                     )}
                   </span>
-                  <span className="text-[10px] text-muted-foreground">{formatDate(r.created_at)} {formatTime(r.created_at)}</span>
+                  <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                    {formatDate(r.created_at)} {formatTime(r.created_at)}
+                    {gap && (
+                      <span className={`rounded-sm px-1.5 py-0.5 font-medium ${slow ? "bg-warning/10 text-warning" : "bg-secondary text-muted-foreground"}`}>
+                        {isBn ? `ব্যবধান ${gap}` : `gap ${gap}`}
+                      </span>
+                    )}
+                  </span>
                 </div>
                 <p className="text-foreground whitespace-pre-wrap leading-relaxed">{r.message}</p>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Reply input */}
