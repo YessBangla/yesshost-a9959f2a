@@ -1,5 +1,20 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { ChatMessage } from "./dashboard-data.server";
+import { createHash, randomBytes } from "crypto";
+
+const hashVisitorToken = (token: string) => createHash("sha256").update(token).digest("hex");
+
+async function requireVisitorChat(chatId: string, visitorToken: string) {
+  if (!visitorToken || visitorToken.length < 32) throw new Error("Unauthorized chat session");
+  const { data } = await supabaseAdmin
+    .from("live_chats")
+    .select("id, status")
+    .eq("id", chatId)
+    .eq("visitor_token_hash", hashVisitorToken(visitorToken))
+    .maybeSingle();
+  if (!data || data.status === "closed") throw new Error("Unauthorized chat session");
+  return data;
+}
 
 /**
  * Live chat is written and read with the service-role client only. Visitor
@@ -12,13 +27,15 @@ export async function createVisitorChat(input: {
   email: string;
   phone: string;
   greeting: string;
-}): Promise<{ chatId: string }> {
+}): Promise<{ chatId: string; visitorToken: string }> {
+  const visitorToken = randomBytes(32).toString("base64url");
   const { data, error } = await supabaseAdmin
     .from("live_chats")
     .insert({
       visitor_name: input.name,
       visitor_email: input.email,
       visitor_phone: input.phone,
+      visitor_token_hash: hashVisitorToken(visitorToken),
     })
     .select("id")
     .single();
@@ -30,19 +47,15 @@ export async function createVisitorChat(input: {
     message: input.greeting,
   });
 
-  return { chatId: data.id };
+  return { chatId: data.id, visitorToken };
 }
 
 export async function postVisitorMessage(input: {
   chatId: string;
+  visitorToken: string;
   message: string;
 }): Promise<{ message: ChatMessage }> {
-  const { data: chat } = await supabaseAdmin
-    .from("live_chats")
-    .select("id")
-    .eq("id", input.chatId)
-    .maybeSingle();
-  if (!chat) throw new Error("Chat not found");
+  await requireVisitorChat(input.chatId, input.visitorToken);
 
   const { data, error } = await supabaseAdmin
     .from("live_chat_messages")
@@ -59,7 +72,8 @@ export async function postVisitorMessage(input: {
   return { message: data as ChatMessage };
 }
 
-export async function readChatMessages(chatId: string): Promise<ChatMessage[]> {
+export async function readChatMessages(chatId: string, visitorToken: string): Promise<ChatMessage[]> {
+  await requireVisitorChat(chatId, visitorToken);
   const { data, error } = await supabaseAdmin
     .from("live_chat_messages")
     .select("id, sender_type, message, created_at")
@@ -71,9 +85,11 @@ export async function readChatMessages(chatId: string): Promise<ChatMessage[]> {
 
 export async function startCallRecord(input: {
   chatId: string;
+  visitorToken: string;
   callerRole: string;
   startedAt: string;
 }): Promise<{ id: string | null }> {
+  await requireVisitorChat(input.chatId, input.visitorToken);
   const { data } = await supabaseAdmin
     .from("call_history")
     .insert({
@@ -89,10 +105,13 @@ export async function startCallRecord(input: {
 
 export async function updateCallRecord(input: {
   id: string;
+  chatId: string;
+  visitorToken: string;
   status: string;
   durationSeconds?: number;
   ended?: boolean;
 }): Promise<{ ok: true }> {
+  await requireVisitorChat(input.chatId, input.visitorToken);
   const patch: {
     status: string;
     ended_at?: string;
@@ -100,6 +119,6 @@ export async function updateCallRecord(input: {
   } = { status: input.status };
   if (input.ended) patch.ended_at = new Date().toISOString();
   if (typeof input.durationSeconds === "number") patch.duration_seconds = input.durationSeconds;
-  await supabaseAdmin.from("call_history").update(patch).eq("id", input.id);
+  await supabaseAdmin.from("call_history").update(patch).eq("id", input.id).eq("chat_id", input.chatId);
   return { ok: true };
 }

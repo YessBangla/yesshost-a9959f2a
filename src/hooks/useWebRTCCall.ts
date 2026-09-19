@@ -7,6 +7,7 @@ export type CallStatus = "idle" | "requesting" | "ringing" | "connected" | "ende
 
 interface UseWebRTCCallProps {
   chatId: string | null;
+  visitorToken?: string | null;
   role: "visitor" | "admin";
 }
 
@@ -15,7 +16,7 @@ const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
-export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
+export function useWebRTCCall({ chatId, visitorToken, role }: UseWebRTCCallProps) {
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -47,19 +48,21 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
 
   // Save call record to database
   const saveCallStart = useCallback(async () => {
-    if (!chatId) return;
+    if (!chatId || !visitorToken || role !== "visitor") return;
     callStartTimeRef.current = new Date().toISOString();
     const { id } = await startRecord({
-      data: { chatId, callerRole: role, startedAt: callStartTimeRef.current },
+      data: { chatId, visitorToken, callerRole: role, startedAt: callStartTimeRef.current },
     });
     if (id) callRecordIdRef.current = id;
-  }, [chatId, role, startRecord]);
+  }, [chatId, visitorToken, role, startRecord]);
 
   const saveCallEnd = useCallback(async (finalStatus: string, finalDuration: number) => {
-    if (!callRecordIdRef.current) return;
+    if (!callRecordIdRef.current || !chatId || !visitorToken || role !== "visitor") return;
     await updateRecord({
       data: {
         id: callRecordIdRef.current,
+        chatId,
+        visitorToken,
         status: finalStatus,
         durationSeconds: finalDuration,
         ended: true,
@@ -67,7 +70,7 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
     });
     callRecordIdRef.current = null;
     callStartTimeRef.current = null;
-  }, [updateRecord]);
+  }, [chatId, visitorToken, role, updateRecord]);
 
   // Create peer connection
   const createPC = useCallback(() => {

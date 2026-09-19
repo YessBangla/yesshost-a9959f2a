@@ -18,7 +18,7 @@
 
 # Full-site reliability and modernization audit
 - [x] Phase 1: Secure payments, Support PIN, staff permissions, invoice guards, cron, and CSV
-- [ ] Phase 2: Complete checkout redirects, retry/idempotency, and reconciliation
+- [ ] Phase 2: Complete checkout redirects, retry/idempotency, and reconciliation (server-authoritative order pricing complete)
 - [ ] Phase 3: Complete client dashboard preferences and invoice deep-links (preferences complete)
 - [ ] Phase 4: Add server pagination and accounting reconciliation
 - [ ] Phase 5: Correct support SLA timing and call-center workflows
