@@ -77,9 +77,56 @@ const ThemeSeller = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  const [sellerProfile, setSellerProfile] = useState({
+    displayName: "", slug: "", logoUrl: "", bioBn: "", bioEn: "", website: "", isPublic: true,
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+  const saveProfileFn = useServerFn(saveThemeSellerProfile);
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      await saveProfileFn({
+        data: {
+          displayName: sellerProfile.displayName.trim(),
+          slug: sellerProfile.slug.trim().toLowerCase(),
+          logoUrl: sellerProfile.logoUrl.trim() || null,
+          bioBn: sellerProfile.bioBn.trim() || null,
+          bioEn: sellerProfile.bioEn.trim() || null,
+          website: sellerProfile.website.trim() || null,
+          isPublic: sellerProfile.isPublic,
+        },
+      });
+      toast({ title: bn ? "সেলার প্রোফাইল সংরক্ষিত হয়েছে" : "Seller profile saved" });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "";
+      toast({
+        variant: "destructive",
+        title: msg.includes("slug_taken")
+          ? bn ? "এই লিংক নামটি অন্য কেউ নিয়েছে" : "That profile link is already taken"
+          : bn ? "নাম কমপক্ষে ২ অক্ষর ও লিংক নাম ছোট হাতের অক্ষর/সংখ্যা/হাইফেন হতে হবে" : "Name needs 2+ characters and the link may use lowercase letters, numbers and hyphens only",
+      });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   const load = async () => {
     if (!user) return;
     setLoading(true);
+    const { data: profileRow } = await supabase
+      .from("theme_seller_profiles").select("*").eq("user_id", user.id).maybeSingle();
+    if (profileRow) {
+      setSellerProfile({
+        displayName: profileRow.display_name ?? "",
+        slug: profileRow.slug ?? "",
+        logoUrl: profileRow.logo_url ?? "",
+        bioBn: profileRow.bio_bn ?? "",
+        bioEn: profileRow.bio_en ?? "",
+        website: profileRow.website ?? "",
+        isPublic: profileRow.is_public,
+      });
+    }
     const { data: myThemes } = await supabase
       .from("themes").select("*").eq("seller_user_id", user.id)
       .order("created_at", { ascending: false });
