@@ -40,6 +40,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
   "/dashboard/income": { en: "Income & Payments", bn: "আয় ও পেমেন্ট" },
   "/dashboard/theme-seller": { en: "Sell Themes", bn: "থিম বিক্রি" },
+  "/dashboard/my-themes": { en: "My Themes", bn: "আমার থিম" },
   "/dashboard/troubleshoot": { en: "Troubleshoot", bn: "সমস্যা নির্ণয়" },
   "/dashboard/order-service": { en: "Order New Services", bn: "নতুন সার্ভিস অর্ডার" },
   "/dashboard/domain-tools": { en: "Domain Tools", bn: "ডোমেইন টুলস" },
@@ -217,6 +218,7 @@ const DashboardLayout = () => {
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
     { title: bn ? "অ্যাফিলিয়েট" : "Affiliate", url: "/dashboard/affiliate", icon: Share2 },
+    { title: bn ? "আমার থিম" : "My Themes", url: "/dashboard/my-themes", icon: Palette },
     { title: bn ? "থিম বিক্রি" : "Sell Themes", url: "/dashboard/theme-seller", icon: Palette },
     { title: bn ? "সমস্যা নির্ণয়" : "Troubleshoot", url: "/dashboard/troubleshoot", icon: LifeBuoy },
     ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),
@@ -360,6 +362,16 @@ const DashboardLayout = () => {
           >
             <Share2 className="w-[18px] h-[18px] shrink-0" />
             {!collapsed && <span className="truncate">{bn ? "অ্যাফিলিয়েট" : "Affiliate"}</span>}
+          </NavLink>
+
+          {/* My Themes */}
+          <NavLink
+            to="/dashboard/my-themes"
+            className="group flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
+            activeClassName="!bg-primary/8 !text-primary font-semibold"
+          >
+            <Palette className="w-[18px] h-[18px] shrink-0" />
+            {!collapsed && <span className="truncate">{bn ? "আমার থিম" : "My Themes"}</span>}
           </NavLink>
 
           {/* Theme Seller */}

@@ -10,3 +10,9 @@
 - [x] Step 6: Modernize Knowledge Base Admin
 - [x] Step 7: Modernize Contact Messages and Communication Settings
 - [x] Step 8: Unify Client, Reseller, Theme Seller, and Affiliate dashboards
+
+# Client onboarding → theme marketplace (4 steps)
+- [x] Step 1: Client onboarding (account status, admin create/approve)
+- [x] Step 2: Client dashboard corporate experience (6 pages)
+- [x] Step 3: Finance dashboard operating expenses + 12-month report
+- [x] Step 4: Theme store purchase/download + seller storefront profile

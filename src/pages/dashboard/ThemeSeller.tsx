@@ -16,6 +16,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
+import { useServerFn } from "@tanstack/react-start";
+import { saveThemeSellerProfile } from "@/lib/theme-store.functions";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 
 const CATEGORIES = ["business", "ecommerce", "portfolio", "restaurant", "blog", "landing", "education", "healthcare", "news", "agency", "realestate", "travel"] as const;
@@ -77,9 +83,56 @@ const ThemeSeller = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  const [sellerProfile, setSellerProfile] = useState({
+    displayName: "", slug: "", logoUrl: "", bioBn: "", bioEn: "", website: "", isPublic: true,
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+  const saveProfileFn = useServerFn(saveThemeSellerProfile);
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      await saveProfileFn({
+        data: {
+          displayName: sellerProfile.displayName.trim(),
+          slug: sellerProfile.slug.trim().toLowerCase(),
+          logoUrl: sellerProfile.logoUrl.trim() || null,
+          bioBn: sellerProfile.bioBn.trim() || null,
+          bioEn: sellerProfile.bioEn.trim() || null,
+          website: sellerProfile.website.trim() || null,
+          isPublic: sellerProfile.isPublic,
+        },
+      });
+      toast({ title: bn ? "সেলার প্রোফাইল সংরক্ষিত হয়েছে" : "Seller profile saved" });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "";
+      toast({
+        variant: "destructive",
+        title: msg.includes("slug_taken")
+          ? bn ? "এই লিংক নামটি অন্য কেউ নিয়েছে" : "That profile link is already taken"
+          : bn ? "নাম কমপক্ষে ২ অক্ষর ও লিংক নাম ছোট হাতের অক্ষর/সংখ্যা/হাইফেন হতে হবে" : "Name needs 2+ characters and the link may use lowercase letters, numbers and hyphens only",
+      });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   const load = async () => {
     if (!user) return;
     setLoading(true);
+    const { data: profileRow } = await supabase
+      .from("theme_seller_profiles").select("*").eq("user_id", user.id).maybeSingle();
+    if (profileRow) {
+      setSellerProfile({
+        displayName: profileRow.display_name ?? "",
+        slug: profileRow.slug ?? "",
+        logoUrl: profileRow.logo_url ?? "",
+        bioBn: profileRow.bio_bn ?? "",
+        bioEn: profileRow.bio_en ?? "",
+        website: profileRow.website ?? "",
+        isPublic: profileRow.is_public,
+      });
+    }
     const { data: myThemes } = await supabase
       .from("themes").select("*").eq("seller_user_id", user.id)
       .order("created_at", { ascending: false });
@@ -332,6 +385,60 @@ const ThemeSeller = () => {
       />
 
       <StaffMetricStrip metrics={metrics} />
+
+      <div className="glass-card rounded-xl p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-semibold text-foreground">{bn ? "সেলার প্রোফাইল" : "Seller profile"}</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              {bn ? "স্টোরে থিমের পাশে আপনার নাম ও প্রোফাইল দেখা যাবে।" : "Your name and storefront appear next to your themes in the store."}
+            </p>
+          </div>
+          {sellerProfile.slug && (
+            <a href={`/sellers/${sellerProfile.slug}`} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+              /sellers/{sellerProfile.slug}
+            </a>
+          )}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>{bn ? "প্রদর্শন নাম" : "Display name"}</Label>
+            <Input className="h-11" value={sellerProfile.displayName} onChange={(e) => setSellerProfile(p => ({ ...p, displayName: e.target.value }))} placeholder={bn ? "যেমন: Dhaka Studio" : "e.g. Dhaka Studio"} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{bn ? "প্রোফাইল লিংক নাম" : "Profile link"}</Label>
+            <Input className="h-11" value={sellerProfile.slug} onChange={(e) => setSellerProfile(p => ({ ...p, slug: e.target.value.toLowerCase() }))} placeholder="dhaka-studio" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{bn ? "লোগো লিংক" : "Logo URL"}</Label>
+            <Input className="h-11" value={sellerProfile.logoUrl} onChange={(e) => setSellerProfile(p => ({ ...p, logoUrl: e.target.value }))} placeholder="https://..." />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{bn ? "ওয়েবসাইট" : "Website"}</Label>
+            <Input className="h-11" value={sellerProfile.website} onChange={(e) => setSellerProfile(p => ({ ...p, website: e.target.value }))} placeholder="https://..." />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{bn ? "পরিচিতি (বাংলা)" : "Bio (Bengali)"}</Label>
+            <Textarea value={sellerProfile.bioBn} onChange={(e) => setSellerProfile(p => ({ ...p, bioBn: e.target.value }))} rows={3} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{bn ? "পরিচিতি (ইংরেজি)" : "Bio (English)"}</Label>
+            <Textarea value={sellerProfile.bioEn} onChange={(e) => setSellerProfile(p => ({ ...p, bioEn: e.target.value }))} rows={3} />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex items-center gap-2">
+            <Switch checked={sellerProfile.isPublic} onCheckedChange={(v) => setSellerProfile(p => ({ ...p, isPublic: v }))} />
+            <span className="text-sm text-muted-foreground">{bn ? "প্রোফাইল প্রকাশ্য" : "Profile is public"}</span>
+          </div>
+          <Button className="h-11 gap-2" disabled={savingProfile} onClick={() => void saveProfile()}>
+            {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {bn ? "প্রোফাইল সংরক্ষণ" : "Save profile"}
+          </Button>
+        </div>
+      </div>
+
+
 
 
       <div className="glass-card rounded-xl p-4 text-xs text-muted-foreground flex items-start gap-2">

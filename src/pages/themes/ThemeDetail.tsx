@@ -1,12 +1,16 @@
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Eye, ShoppingCart, Check, Star, Package, Server, Shield, Globe, ChevronRight,
+  ArrowLeft, Eye, ShoppingCart, Check, Star, Package, Server, Shield, Globe, ChevronRight, Zap, Store,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useParams, Link } from "@/lib/router-compat";
+import { useParams, Link, useNavigate } from "@/lib/router-compat";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { buyTheme } from "@/lib/theme-store.functions";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +39,11 @@ const ThemeDetail = () => {
   const [theme, setTheme] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [includeHosting, setIncludeHosting] = useState(false);
+  const [seller, setSeller] = useState<{ display_name: string; slug: string; logo_url: string | null } | null>(null);
+  const [buying, setBuying] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const buy = useServerFn(buyTheme);
 
   useEffect(() => {
     if (!slug) return;
@@ -44,11 +53,48 @@ const ThemeDetail = () => {
       .eq("slug", slug)
       .eq("is_active", true)
       .single()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         setTheme(data);
         setLoading(false);
+        if (data?.seller_user_id) {
+          const { data: sp } = await supabase
+            .from("theme_seller_profiles")
+            .select("display_name,slug,logo_url")
+            .eq("user_id", data.seller_user_id)
+            .eq("is_public", true)
+            .maybeSingle();
+          setSeller(sp ?? null);
+        }
       });
   }, [slug]);
+
+  const handleBuyNow = async () => {
+    if (!theme) return;
+    if (!user) {
+      toast.error(bn ? "কেনার জন্য প্রথমে লগইন করুন" : "Please sign in to purchase");
+      navigate("/login");
+      return;
+    }
+    setBuying(true);
+    try {
+      const res = await buy({ data: { themeId: theme.id, includeHosting } });
+      toast.success(
+        bn
+          ? `ইনভয়েস ${res.invoiceNumber} তৈরি হয়েছে — পরিশোধ করলেই ডাউনলোড খুলে যাবে`
+          : `Invoice ${res.invoiceNumber} created — download unlocks after payment`,
+      );
+      navigate("/dashboard/billing");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "";
+      toast.error(
+        msg.includes("already_owned")
+          ? bn ? "আপনি ইতিমধ্যে এই থিমটি কিনেছেন" : "You already own this theme"
+          : bn ? "কেনা সম্পন্ন করা যায়নি, আবার চেষ্টা করুন" : "Could not complete the purchase, please try again",
+      );
+    } finally {
+      setBuying(false);
+    }
+  };
 
   const currentPrice = theme?.discount_price_bdt || theme?.price_bdt || 0;
   const totalPrice = includeHosting && theme?.hosting_bundle_price_bdt
@@ -209,6 +255,30 @@ const ThemeDetail = () => {
                   >
                     <Eye className="w-5 h-5" />
                     {bn ? "ডেমো দেখুন" : "View Demo"}
+                  </Link>
+                )}
+
+                {/* Buy Now */}
+                <button
+                  onClick={() => void handleBuyNow()}
+                  disabled={buying}
+                  className="w-full bg-primary text-primary-foreground py-4 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-60"
+                >
+                  <Zap className="w-5 h-5" />
+                  {buying ? (bn ? "প্রসেস হচ্ছে..." : "Processing...") : bn ? "এখনই কিনুন" : "Buy Now"}
+                </button>
+
+                {seller && (
+                  <Link
+                    to={`/sellers/${seller.slug}`}
+                    className="flex items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    {seller.logo_url ? (
+                      <img src={seller.logo_url} alt={seller.display_name} className="w-6 h-6 rounded-full object-cover" />
+                    ) : (
+                      <Store className="w-4 h-4 text-primary" />
+                    )}
+                    <span>{bn ? "সেলার: " : "Seller: "}<strong className="text-foreground">{seller.display_name}</strong></span>
                   </Link>
                 )}
 

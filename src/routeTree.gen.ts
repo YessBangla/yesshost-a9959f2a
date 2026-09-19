@@ -63,6 +63,7 @@ import { Route as DashboardDomainToolsRouteImport } from './routes/dashboard/dom
 import { Route as DashboardDomainsRouteImport } from './routes/dashboard/domains'
 import { Route as DashboardIncomeRouteImport } from './routes/dashboard/income'
 import { Route as DashboardKnowledgeBaseRouteImport } from './routes/dashboard/knowledge-base'
+import { Route as DashboardMyThemesRouteImport } from './routes/dashboard/my-themes'
 import { Route as DashboardOrderServiceRouteImport } from './routes/dashboard/order-service'
 import { Route as DashboardOrdersRouteImport } from './routes/dashboard/orders'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
@@ -80,6 +81,7 @@ import { Route as PaymentIndexRouteImport } from './routes/payment/index'
 import { Route as PaymentCancelRouteImport } from './routes/payment/cancel'
 import { Route as PaymentFailRouteImport } from './routes/payment/fail'
 import { Route as PaymentSuccessRouteImport } from './routes/payment/success'
+import { Route as SellersSlugRouteImport } from './routes/sellers/$slug'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as ThemesIndexRouteImport } from './routes/themes/index'
 import { Route as ApiDashboardBillingRouteImport } from './routes/api/dashboard/billing'
@@ -362,6 +364,11 @@ const DashboardKnowledgeBaseRoute = DashboardKnowledgeBaseRouteImport.update({
   path: '/knowledge-base',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardMyThemesRoute = DashboardMyThemesRouteImport.update({
+  id: '/my-themes',
+  path: '/my-themes',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardOrderServiceRoute = DashboardOrderServiceRouteImport.update({
   id: '/order-service',
   path: '/order-service',
@@ -445,6 +452,11 @@ const PaymentFailRoute = PaymentFailRouteImport.update({
 const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
   id: '/payment/success',
   path: '/payment/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellersSlugRoute = SellersSlugRouteImport.update({
+  id: '/sellers/$slug',
+  path: '/sellers/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
@@ -551,6 +563,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/my-themes': typeof DashboardMyThemesRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -566,6 +579,7 @@ export interface FileRoutesByFullPath {
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/sellers/$slug': typeof SellersSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/call-center/': typeof CallCenterIndexRoute
@@ -631,6 +645,7 @@ export interface FileRoutesByTo {
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/my-themes': typeof DashboardMyThemesRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -646,6 +661,7 @@ export interface FileRoutesByTo {
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/sellers/$slug': typeof SellersSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/call-center': typeof CallCenterIndexRoute
@@ -715,6 +731,7 @@ export interface FileRoutesById {
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/income': typeof DashboardIncomeRoute
   '/dashboard/knowledge-base': typeof DashboardKnowledgeBaseRoute
+  '/dashboard/my-themes': typeof DashboardMyThemesRoute
   '/dashboard/order-service': typeof DashboardOrderServiceRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -730,6 +747,7 @@ export interface FileRoutesById {
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/sellers/$slug': typeof SellersSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/call-center/': typeof CallCenterIndexRoute
@@ -800,6 +818,7 @@ export interface FileRouteTypes {
     | '/dashboard/domains'
     | '/dashboard/income'
     | '/dashboard/knowledge-base'
+    | '/dashboard/my-themes'
     | '/dashboard/order-service'
     | '/dashboard/orders'
     | '/dashboard/profile'
@@ -815,6 +834,7 @@ export interface FileRouteTypes {
     | '/payment/cancel'
     | '/payment/fail'
     | '/payment/success'
+    | '/sellers/$slug'
     | '/services/$slug'
     | '/admin/'
     | '/call-center/'
@@ -880,6 +900,7 @@ export interface FileRouteTypes {
     | '/dashboard/domains'
     | '/dashboard/income'
     | '/dashboard/knowledge-base'
+    | '/dashboard/my-themes'
     | '/dashboard/order-service'
     | '/dashboard/orders'
     | '/dashboard/profile'
@@ -895,6 +916,7 @@ export interface FileRouteTypes {
     | '/payment/cancel'
     | '/payment/fail'
     | '/payment/success'
+    | '/sellers/$slug'
     | '/services/$slug'
     | '/admin'
     | '/call-center'
@@ -963,6 +985,7 @@ export interface FileRouteTypes {
     | '/dashboard/domains'
     | '/dashboard/income'
     | '/dashboard/knowledge-base'
+    | '/dashboard/my-themes'
     | '/dashboard/order-service'
     | '/dashboard/orders'
     | '/dashboard/profile'
@@ -978,6 +1001,7 @@ export interface FileRouteTypes {
     | '/payment/cancel'
     | '/payment/fail'
     | '/payment/success'
+    | '/sellers/$slug'
     | '/services/$slug'
     | '/admin/'
     | '/call-center/'
@@ -1021,6 +1045,7 @@ export interface RootRouteChildren {
   PaymentCancelRoute: typeof PaymentCancelRoute
   PaymentFailRoute: typeof PaymentFailRoute
   PaymentSuccessRoute: typeof PaymentSuccessRoute
+  SellersSlugRoute: typeof SellersSlugRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   KnowledgeBaseIndexRoute: typeof KnowledgeBaseIndexRoute
   PaymentIndexRoute: typeof PaymentIndexRoute
@@ -1415,6 +1440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardKnowledgeBaseRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/my-themes': {
+      id: '/dashboard/my-themes'
+      path: '/my-themes'
+      fullPath: '/dashboard/my-themes'
+      preLoaderRoute: typeof DashboardMyThemesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/order-service': {
       id: '/dashboard/order-service'
       path: '/order-service'
@@ -1532,6 +1564,13 @@ declare module '@tanstack/react-router' {
       path: '/payment/success'
       fullPath: '/payment/success'
       preLoaderRoute: typeof PaymentSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sellers/$slug': {
+      id: '/sellers/$slug'
+      path: '/sellers/$slug'
+      fullPath: '/sellers/$slug'
+      preLoaderRoute: typeof SellersSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services/$slug': {
@@ -1686,6 +1725,7 @@ interface DashboardRouteRouteChildren {
   DashboardDomainsRoute: typeof DashboardDomainsRoute
   DashboardIncomeRoute: typeof DashboardIncomeRoute
   DashboardKnowledgeBaseRoute: typeof DashboardKnowledgeBaseRoute
+  DashboardMyThemesRoute: typeof DashboardMyThemesRoute
   DashboardOrderServiceRoute: typeof DashboardOrderServiceRoute
   DashboardOrdersRoute: typeof DashboardOrdersRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
@@ -1707,6 +1747,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardDomainsRoute: DashboardDomainsRoute,
   DashboardIncomeRoute: DashboardIncomeRoute,
   DashboardKnowledgeBaseRoute: DashboardKnowledgeBaseRoute,
+  DashboardMyThemesRoute: DashboardMyThemesRoute,
   DashboardOrderServiceRoute: DashboardOrderServiceRoute,
   DashboardOrdersRoute: DashboardOrdersRoute,
   DashboardProfileRoute: DashboardProfileRoute,
@@ -1751,6 +1792,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaymentCancelRoute: PaymentCancelRoute,
   PaymentFailRoute: PaymentFailRoute,
   PaymentSuccessRoute: PaymentSuccessRoute,
+  SellersSlugRoute: SellersSlugRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   KnowledgeBaseIndexRoute: KnowledgeBaseIndexRoute,
   PaymentIndexRoute: PaymentIndexRoute,
