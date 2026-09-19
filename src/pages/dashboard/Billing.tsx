@@ -23,6 +23,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useSearch } from "@tanstack/react-router";
+import { Link2 } from "lucide-react";
 import DataToolbar from "@/components/DataToolbar";
 import DataPagination from "@/components/DataPagination";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
@@ -110,6 +112,43 @@ const DashboardBilling = () => {
 
   const fetchInvoices = () => { void billingQuery.refetch(); };
   const fetchWalletBalance = () => { void billingQuery.refetch(); };
+
+  // Deep link support: /dashboard/billing?invoice=<id|number>&action=pay
+  const search = useSearch({ from: "/dashboard/billing" });
+  const [deepLinkDone, setDeepLinkDone] = useState(false);
+  useEffect(() => {
+    if (deepLinkDone || !search.invoice || invoices.length === 0) return;
+    const target = invoices.find(
+      (i) => i.id === search.invoice || i.invoice_number === search.invoice
+    );
+    if (!target) return;
+    setDeepLinkDone(true);
+    const payable = target.status === "unpaid" || target.status === "overdue";
+    if (search.action === "pay" && payable) {
+      setPayInvoice(target);
+      setSelectedPayment("");
+    } else {
+      setReportInvoice(target);
+    }
+  }, [search.invoice, search.action, invoices, deepLinkDone]);
+
+  const copyInvoiceLink = async (inv: Tables<"invoices">) => {
+    const url = `${window.location.origin}/dashboard/billing?invoice=${encodeURIComponent(inv.invoice_number)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: isBn ? "লিংক কপি হয়েছে" : "Link copied",
+        description: inv.invoice_number,
+      });
+    } catch {
+      toast({
+        title: isBn ? "কপি করা যায়নি" : "Copy failed",
+        description: url,
+        variant: "destructive",
+      });
+    }
+  };
+
 
 
   const handlePay = async () => {
@@ -650,6 +689,14 @@ const DashboardBilling = () => {
                                 title={isBn ? "রিপোর্ট দেখুন" : "View Report"}
                               >
                                 <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => void copyInvoiceLink(inv)}
+                                className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors"
+                                title={isBn ? "ইনভয়েস লিংক কপি করুন" : "Copy invoice link"}
+                                aria-label={isBn ? "ইনভয়েস লিংক কপি করুন" : "Copy invoice link"}
+                              >
+                                <Link2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
