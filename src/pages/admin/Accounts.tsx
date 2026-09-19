@@ -12,6 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DataPagination from "@/components/DataPagination";
 import { StaffEmpty, StaffLoading, StaffMetricStrip, StaffPageHeader, StaffSearch } from "@/components/staff/StaffConsole";
 import { csvDate, downloadCsv } from "@/lib/export-csv";
+import { useServerFn } from "@tanstack/react-start";
+import { getAccountsReportSettings, saveAccountsReportSettings, sendAccountsReportNow } from "@/lib/accounts-report.functions";
+import { Mail, Send } from "lucide-react";
 
 type Granularity = "day" | "week" | "month" | "year";
 type PeriodRow = { period_start: string; income: number; expense: number; net: number };
