@@ -169,9 +169,9 @@ const CallHistory = () => {
             const cfg = statusConfig[call.status] || statusConfig.missed;
             const StatusIcon = cfg.icon;
             return (
+              <div key={call.id} className="border-b border-border/30">
               <div
-                key={call.id}
-                className="grid grid-cols-1 md:grid-cols-[1fr_120px_100px_100px_140px] gap-1 md:gap-4 px-4 py-3 border-b border-border/30 hover:bg-secondary/20 transition-colors"
+                className="grid grid-cols-1 md:grid-cols-[1fr_120px_100px_100px_140px] gap-1 md:gap-4 px-4 py-3 hover:bg-secondary/20 transition-colors"
               >
                 {/* Visitor */}
                 <div className="flex items-center gap-2.5">
