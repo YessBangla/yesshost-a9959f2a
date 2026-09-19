@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { MessageCircle, Send, Loader2, User, Clock, X, BellRing, Smile } from "lucide-react";
+import { MessageCircle, Send, Loader2, User, Clock, X, BellRing, RefreshCw, Smile } from "lucide-react";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { StaffLoading } from "@/components/staff/StaffConsole";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const NOTIFICATION_SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
 
@@ -55,6 +56,7 @@ const AdminLiveChat = () => {
   const [loading, setLoading] = useState(true);
   const [visitorTyping, setVisitorTyping] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -65,16 +67,17 @@ const AdminLiveChat = () => {
     }
   }, []);
 
+  const refreshChats = useCallback(async () => {
+    setRefreshing(true);
+    const { data } = await supabase.from("live_chats").select("*").order("updated_at", { ascending: false });
+    setChats((data as Chat[]) || []);
+    setRefreshing(false);
+    setLoading(false);
+  }, []);
+
   // Fetch all chats
   useEffect(() => {
-    supabase
-      .from("live_chats")
-      .select("*")
-      .order("updated_at", { ascending: false })
-      .then(({ data }) => {
-        setChats((data as Chat[]) || []);
-        setLoading(false);
-      });
+    void refreshChats();
 
     // Realtime for new chats & visitor messages
     const chatChannel = supabase
@@ -204,9 +207,14 @@ const AdminLiveChat = () => {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{bn ? "লাইভ চ্যাট" : "Live Chat"}</h1>
-        <p className="text-sm text-muted-foreground">{bn ? "ভিজিটরদের সাথে রিয়েল-টাইম চ্যাট" : "Real-time chat with website visitors"}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{bn ? "লাইভ চ্যাট" : "Live Chat"}</h1>
+          <p className="text-sm text-muted-foreground">{bn ? "ভিজিটরদের সাথে রিয়েল-টাইম চ্যাট" : "Real-time chat with website visitors"}</p>
+        </div>
+        <Button variant="outline" onClick={() => void refreshChats()} disabled={refreshing}>
+          <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} />{bn ? "রিফ্রেশ" : "Refresh"}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ height: "calc(100vh - 180px)" }}>
