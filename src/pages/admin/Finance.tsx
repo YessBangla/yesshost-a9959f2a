@@ -95,16 +95,61 @@ const AdminFinance = () => {
       { label: bn ? "বকেয়া" : "OUTSTANDING", value: money(sum(unpaid)), detail: `${unpaid.length} ${bn ? "ইনভয়েস" : "invoices"}`, icon: FileText, tone: "warning" as const },
       { label: bn ? "মেয়াদোত্তীর্ণ" : "OVERDUE", value: money(sum(overdue)), detail: `${overdue.length} ${bn ? "ঝুঁকিতে" : "at risk"}`, icon: AlertTriangle, tone: "danger" as const },
       { label: bn ? "রিকনসাইলড" : "RECONCILED", value: `${reconciled}/${events.length}`, detail: bn ? "যাচাইকৃত পেমেন্ট" : "verified payments", icon: Scale },
+      { label: bn ? "অপারেটিং খরচ" : "OPERATING COST", value: money(sum(expenses.map((item) => ({ amount_bdt: item.amount_bdt })))), detail: `${expenses.length} ${bn ? "এন্ট্রি" : "entries"}`, icon: Receipt, tone: "warning" as const },
+      { label: bn ? "নিট মুনাফা" : "NET PROFIT", value: money(sum(paid) - sum(expenses.map((item) => ({ amount_bdt: item.amount_bdt })))), detail: bn ? "আদায় – খরচ" : "collected minus cost", icon: TrendingUp, tone: sum(paid) - sum(expenses.map((item) => ({ amount_bdt: item.amount_bdt }))) >= 0 ? ("success" as const) : ("danger" as const) },
     ];
-  }, [invoices, events, bn]);
+  }, [invoices, events, expenses, bn]);
 
-  const monthly = useMemo(() => Array.from({ length: 6 }, (_, index) => {
-    const date = new Date(); date.setDate(1); date.setMonth(date.getMonth() - (5 - index));
+  const monthly = useMemo(() => Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(); date.setDate(1); date.setMonth(date.getMonth() - (11 - index));
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    return { name: date.toLocaleString(bn ? "bn-BD" : "en-US", { month: "short" }), collected: sum(invoices.filter((item) => item.status === "paid" && (item.paid_at || item.created_at).startsWith(key))), outstanding: sum(invoices.filter((item) => ["unpaid", "overdue"].includes(item.status) && item.created_at.startsWith(key))) };
-  }), [invoices, bn]);
+    const collected = sum(invoices.filter((item) => item.status === "paid" && (item.paid_at || item.created_at).startsWith(key)));
+    const expense = sum(expenses.filter((item) => item.expense_date.startsWith(key)).map((item) => ({ amount_bdt: item.amount_bdt })));
+    return {
+      name: date.toLocaleString(bn ? "bn-BD" : "en-US", { month: "short" }),
+      key,
+      collected,
+      expense,
+      profit: collected - expense,
+      outstanding: sum(invoices.filter((item) => ["unpaid", "overdue"].includes(item.status) && item.created_at.startsWith(key))),
+    };
+  }), [invoices, expenses, bn]);
 
   const exportRows = () => downloadCsv("yesshost-finance-ledger", ["source", "reference", "description", "method", "amount_bdt", "status", "reconciled", "date"], filtered.map((row) => [row.source, row.reference, row.description, row.method, row.amount, row.status, row.reconciled ? "yes" : "no", csvDate(row.createdAt)]));
+  const exportReport = () => downloadCsv("yesshost-profit-loss-12m", ["month", "revenue_bdt", "operating_cost_bdt", "profit_bdt", "new_receivables_bdt"], monthly.map((row) => [row.key, Math.round(row.collected), Math.round(row.expense), Math.round(row.profit), Math.round(row.outstanding)]));
+
+  const addExpense = async () => {
+    const amount = Number(expenseForm.amount);
+    if (!expenseForm.title.trim() || !Number.isFinite(amount) || amount <= 0) {
+      toast({ title: bn ? "তথ্য অসম্পূর্ণ" : "Missing details", description: bn ? "খরচের শিরোনাম ও সঠিক পরিমাণ দিন।" : "Enter an expense title and a valid amount.", variant: "destructive" });
+      return;
+    }
+    setSavingExpense(true);
+    const { error: insertError } = await supabase.from("operating_expenses").insert({
+      title: expenseForm.title.trim(),
+      category: expenseForm.category,
+      amount_bdt: amount,
+      expense_date: expenseForm.date,
+      vendor: expenseForm.vendor.trim() || null,
+    });
+    setSavingExpense(false);
+    if (insertError) {
+      toast({ title: bn ? "সংরক্ষণ হয়নি" : "Not saved", description: insertError.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: bn ? "খরচ যোগ হয়েছে" : "Expense added" });
+    setExpenseForm({ title: "", category: expenseForm.category, amount: "", date: expenseForm.date, vendor: "" });
+    void load(true);
+  };
+
+  const removeExpense = async (id: string) => {
+    const { error: deleteError } = await supabase.from("operating_expenses").delete().eq("id", id);
+    if (deleteError) {
+      toast({ title: bn ? "মুছতে সমস্যা" : "Delete failed", description: deleteError.message, variant: "destructive" });
+      return;
+    }
+    setExpenses((prev) => prev.filter((item) => item.id !== id));
+  };
 
   return <div className="staff-console space-y-5">
     <StaffPageHeader title={bn ? "ফিন্যান্স কন্ট্রোল সেন্টার" : "Finance Control Center"} description={bn ? "আয়, বকেয়া, পেমেন্ট যাচাই এবং দায় পর্যবেক্ষণ করুন" : "Monitor revenue, receivables, payment verification and liabilities"} actions={<div className="flex gap-2"><Button variant="outline" onClick={() => void load()} disabled={loading}><RefreshCcw className="size-4" />{bn ? "রিফ্রেশ" : "Refresh"}</Button><Button onClick={exportRows} disabled={!filtered.length}><Download className="size-4" />CSV</Button></div>} />
