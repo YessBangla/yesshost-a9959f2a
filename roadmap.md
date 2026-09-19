@@ -39,3 +39,4 @@
 # Mobile homepage hero refinement
 - [ ] Upgrade the mobile hero to a more polished international corporate composition
 - [ ] Verify the refined hero at 430px and 384px with navigation and chat unobstructed
+- [ ] Add a desktop-screen-style corporate banner inside the mobile homepage hero
