@@ -34,6 +34,9 @@ const AdminFinance = () => {
   const [wallet, setWallet] = useState<WalletTransaction[]>([]);
   const [events, setEvents] = useState<PaymentEvent[]>([]);
   const [liability, setLiability] = useState(0);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [savingExpense, setSavingExpense] = useState(false);
+  const [expenseForm, setExpenseForm] = useState({ title: "", category: "server", amount: "", date: new Date().toISOString().slice(0, 10), vendor: "" });
   const [search, setSearch] = useState("");
   const [source, setSource] = useState("all");
   const [status, setStatus] = useState("all");
@@ -58,6 +61,8 @@ const AdminFinance = () => {
     const payoutDue = (payoutResult.data || []).filter((item) => ["requested", "processing"].includes(item.status)).reduce((sum, item) => sum + Number(item.amount_bdt), 0);
     const commissionDue = (commissionResult.data || []).filter((item) => ["pending", "approved"].includes(item.status)).reduce((sum, item) => sum + Number(item.amount_bdt), 0);
     setLiability(payoutDue + commissionDue);
+    const expenseResult = await supabase.from("operating_expenses").select("id,title,category,amount_bdt,expense_date,vendor,note").order("expense_date", { ascending: false }).limit(1000);
+    setExpenses((expenseResult.data || []) as Expense[]);
     setLoading(false);
   }, [bn]);
 
