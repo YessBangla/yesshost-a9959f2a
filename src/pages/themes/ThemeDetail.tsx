@@ -39,6 +39,11 @@ const ThemeDetail = () => {
   const [theme, setTheme] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [includeHosting, setIncludeHosting] = useState(false);
+  const [seller, setSeller] = useState<{ display_name: string; slug: string; logo_url: string | null } | null>(null);
+  const [buying, setBuying] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const buy = useServerFn(buyTheme);
 
   useEffect(() => {
     if (!slug) return;
@@ -48,11 +53,48 @@ const ThemeDetail = () => {
       .eq("slug", slug)
       .eq("is_active", true)
       .single()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         setTheme(data);
         setLoading(false);
+        if (data?.seller_user_id) {
+          const { data: sp } = await supabase
+            .from("theme_seller_profiles")
+            .select("display_name,slug,logo_url")
+            .eq("user_id", data.seller_user_id)
+            .eq("is_public", true)
+            .maybeSingle();
+          setSeller(sp ?? null);
+        }
       });
   }, [slug]);
+
+  const handleBuyNow = async () => {
+    if (!theme) return;
+    if (!user) {
+      toast.error(bn ? "কেনার জন্য প্রথমে লগইন করুন" : "Please sign in to purchase");
+      navigate("/login");
+      return;
+    }
+    setBuying(true);
+    try {
+      const res = await buy({ data: { themeId: theme.id, includeHosting } });
+      toast.success(
+        bn
+          ? `ইনভয়েস ${res.invoiceNumber} তৈরি হয়েছে — পরিশোধ করলেই ডাউনলোড খুলে যাবে`
+          : `Invoice ${res.invoiceNumber} created — download unlocks after payment`,
+      );
+      navigate("/dashboard/billing");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "";
+      toast.error(
+        msg.includes("already_owned")
+          ? bn ? "আপনি ইতিমধ্যে এই থিমটি কিনেছেন" : "You already own this theme"
+          : bn ? "কেনা সম্পন্ন করা যায়নি, আবার চেষ্টা করুন" : "Could not complete the purchase, please try again",
+      );
+    } finally {
+      setBuying(false);
+    }
+  };
 
   const currentPrice = theme?.discount_price_bdt || theme?.price_bdt || 0;
   const totalPrice = includeHosting && theme?.hosting_bundle_price_bdt
