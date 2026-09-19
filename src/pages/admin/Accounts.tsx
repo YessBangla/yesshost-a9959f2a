@@ -24,6 +24,7 @@ type CashRow = { id: string; direction: string; method: string; amount_bdt: numb
 const AdminAccounts = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [granularity, setGranularity] = useState<Granularity>("day");
@@ -277,6 +278,8 @@ const AdminAccounts = () => {
             <TabsTrigger value="overview">{bn ? "আয়–ব্যয়" : "Income & Expense"}</TabsTrigger>
             <TabsTrigger value="clients">{bn ? "ক্লায়েন্ট পেমেন্ট" : "Client Payments"}</TabsTrigger>
             <TabsTrigger value="journal">{bn ? "জার্নাল খাতা" : "Journal"}</TabsTrigger>
+            <TabsTrigger value="statement">{bn ? "মাসিক বিবরণী" : "Monthly Statement"}</TabsTrigger>
+            <TabsTrigger value="cashbank">{bn ? "ব্যাংক ও ক্যাশ" : "Bank & Cash"}</TabsTrigger>
             <TabsTrigger value="trial">{bn ? "ট্রায়াল ব্যালেন্স" : "Trial Balance"}</TabsTrigger>
           </TabsList>
 
