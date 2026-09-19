@@ -357,6 +357,7 @@ const AdminAccounts = () => {
             <TabsTrigger value="statement">{bn ? "মাসিক বিবরণী" : "Monthly Statement"}</TabsTrigger>
             <TabsTrigger value="cashbank">{bn ? "ব্যাংক ও ক্যাশ" : "Bank & Cash"}</TabsTrigger>
             <TabsTrigger value="trial">{bn ? "ট্রায়াল ব্যালেন্স" : "Trial Balance"}</TabsTrigger>
+            <TabsTrigger value="recon">{bn ? "মিলকরণ" : "Reconciliation"}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
