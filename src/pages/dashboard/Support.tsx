@@ -128,15 +128,25 @@ const DashboardSupport = () => {
           <div className="space-y-4 max-h-96 overflow-y-auto mb-4">
             {replies.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">{tr("dash.noMessages")}</p>
-            ) : replies.map(r => (
+            ) : replies.map((r, idx) => {
+              const prev = idx > 0 ? replies[idx - 1]!.created_at : ticket?.created_at ?? null;
+              const gap = formatGap(prev, r.created_at, lang === "bn");
+              const slow = isSlowGap(prev, r.created_at);
+              return (
               <div key={r.id} className={`p-4 rounded-xl ${r.is_staff ? "bg-primary/5 border border-primary/20" : "bg-secondary/50"}`}>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
                   <span className="text-xs font-bold text-foreground">{r.is_staff ? tr("dash.supportTeam") : tr("dash.you")}</span>
-                  <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}</span>
+                  <span className="text-xs text-muted-foreground">{formatStamp(r.created_at, lang === "bn")}</span>
+                  {gap && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-sm font-medium ${slow ? "bg-warning/10 text-warning" : "bg-secondary text-muted-foreground"}`}>
+                      {gap}
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-foreground whitespace-pre-wrap">{r.message}</p>
               </div>
-            ))}
+              );
+            })}
           </div>
           <div className="flex gap-2">
             <input value={replyMsg} onChange={e => setReplyMsg(e.target.value)} placeholder={tr("dash.replyPlaceholder")} className="flex-1 px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground outline-hidden text-sm" onKeyDown={e => e.key === "Enter" && !sendingReply && sendReply()} />
