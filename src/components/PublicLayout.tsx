@@ -14,7 +14,7 @@ interface PublicLayoutProps {
 
 const PublicLayout = ({ children, hideFooter, showOfferBanner }: PublicLayoutProps) => {
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-0">
+    <div className="min-h-screen bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div className="fixed top-0 left-0 right-0 z-50">
         {showOfferBanner && <OfferBanner />}
         <Navbar />

@@ -414,14 +414,14 @@ const DomainSearch = () => {
                   onChange={(e) => setQuery(e.target.value)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  placeholder={lang === "bn" ? "আপনার ডোমেইন নাম লিখুন, যেমন: example.com" : "Enter your domain name, e.g. example.com"}
+                  placeholder={lang === "bn" ? "যেমন: example.com" : "yourdomain.com"}
                   className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/60 outline-hidden text-sm sm:text-base py-3 font-medium"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="shrink-0 flex items-center justify-center gap-2 gradient-primary text-primary-foreground px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]"
+                className="shrink-0 flex w-full sm:w-auto items-center justify-center gap-2 gradient-primary text-primary-foreground px-6 sm:px-8 py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

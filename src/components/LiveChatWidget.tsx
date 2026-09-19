@@ -213,11 +213,11 @@ const LiveChatWidget = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ delay: 0.05 }}
-              className="fixed bottom-[10rem] right-4 md:bottom-[6rem] md:right-6 z-50"
+              className="fixed right-3 z-50 hidden bottom-[calc(10.5rem+env(safe-area-inset-bottom))] sm:block md:right-6 md:bottom-[6rem]"
             >
               <Link
                 to="/contact"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-secondary border border-border text-foreground text-xs font-semibold shadow-lg hover:border-primary/40 hover:bg-secondary/80 transition-all"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-card border border-border text-foreground text-xs font-semibold shadow-lg hover:border-primary/40 hover:bg-secondary/80 transition-all"
               >
                 <Phone className="w-3.5 h-3.5 text-primary" />
                 {bn ? "যোগাযোগ" : "Contact"}
@@ -230,7 +230,7 @@ const LiveChatWidget = () => {
               exit={{ scale: 0 }}
               onClick={() => setOpen(true)}
               data-livechat-trigger
-              className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:opacity-90 transition-opacity"
+              className="fixed right-3 z-50 bottom-[calc(6rem+env(safe-area-inset-bottom))] md:right-6 md:bottom-6 w-13 h-13 md:w-14 md:h-14 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:opacity-90 transition-opacity"
             >
               <MessageCircle className="w-6 h-6" />
             </motion.button>
@@ -245,7 +245,7 @@ const LiveChatWidget = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-[340px] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden glass-card-elevated border border-border shadow-2xl flex flex-col"
+            className="fixed right-3 z-50 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:right-6 md:bottom-6 w-[340px] max-w-[calc(100vw-1.5rem)] rounded-2xl overflow-hidden glass-card-elevated border border-border shadow-2xl flex flex-col"
             style={{ height: "460px" }}
           >
             {/* Header */}
