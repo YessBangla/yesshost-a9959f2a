@@ -16,6 +16,9 @@ import type { Tables } from "@/integrations/supabase/types";
 import { Download } from "lucide-react";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
 import DataPagination from "@/components/DataPagination";
+import { useServerFn } from "@tanstack/react-start";
+import { updateClientAccountStatus } from "@/lib/client-accounts.functions";
+import { CheckCircle2, PauseCircle } from "lucide-react";
 
 type UserWithRoles = Tables<"profiles"> & { roles: string[]; permissions: string[]; services_count?: number; invoices_total?: number };
 
@@ -59,6 +62,9 @@ const AdminUsers = () => {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user" | "call_center">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "suspended">("all");
+  const [statusBusy, setStatusBusy] = useState<string | null>(null);
+  const statusReq = useServerFn(updateClientAccountStatus);
   const [userPage, setUserPage] = useState(1);
   const [userPageSize, setUserPageSize] = useState(25);
   const [loading, setLoading] = useState(true);
@@ -133,6 +139,32 @@ const AdminUsers = () => {
     fetchUsers();
   };
 
+  const changeStatus = async (userId: string, status: "pending" | "approved" | "suspended") => {
+    setStatusBusy(userId);
+    try {
+      const res = await statusReq({ data: { userId, status } });
+      const labels = {
+        approved: isBn ? "অ্যাকাউন্ট অনুমোদিত হয়েছে" : "Account approved",
+        suspended: isBn ? "অ্যাকাউন্ট স্থগিত করা হয়েছে" : "Account suspended",
+        pending: isBn ? "অ্যাকাউন্ট পর্যালোচনায় ফেরানো হয়েছে" : "Account moved back to review",
+      } as const;
+      toast({
+        title: "✅",
+        description:
+          labels[status] +
+          (res.emailStatus === "skipped"
+            ? isBn ? " (ইমেইল পাঠানো হয়নি — ইমেইল সার্ভিস চালু নেই)" : " (email not sent — no active email provider)"
+            : res.emailStatus === "failed"
+              ? isBn ? " (ইমেইল পাঠানো যায়নি)" : " (email delivery failed)"
+              : isBn ? " ও ক্লায়েন্টকে ইমেইল পাঠানো হয়েছে" : " and the client was emailed"),
+      });
+      await fetchUsers();
+    } catch (err: any) {
+      toast({ title: isBn ? "ত্রুটি" : "Error", description: err?.message, variant: "destructive" });
+    }
+    setStatusBusy(null);
+  };
+
   // Create user
   const handleCreateUser = async () => {
     if (!createForm.email || !createForm.password) {
@@ -159,7 +191,12 @@ const AdminUsers = () => {
         await supabase.from("user_permissions" as any).insert(permInserts);
       }
 
-      toast({ title: "✅ " + (isBn ? "সফল!" : "Success!"), description: isBn ? "নতুন ইউজার তৈরি হয়েছে" : "New user has been created" });
+      // Admin-created accounts are approved immediately
+      if (data?.user_id) {
+        try { await statusReq({ data: { userId: data.user_id, status: "approved" } }); } catch { /* non-fatal */ }
+      }
+
+      toast({ title: "✅ " + (isBn ? "সফল!" : "Success!"), description: isBn ? "নতুন ইউজার তৈরি ও অনুমোদিত হয়েছে" : "New user created and approved" });
       setShowCreate(false);
       setCreateForm({ email: "", password: "", full_name: "", phone: "", roles: ["user"], permissions: [] });
       fetchUsers();
@@ -254,13 +291,16 @@ const AdminUsers = () => {
       (roleFilter === "admin" && u.roles.includes("admin")) ||
       (roleFilter === "call_center" && u.roles.includes("call_center")) ||
       (roleFilter === "user" && !u.roles.includes("admin") && !u.roles.includes("call_center"));
-    return matchSearch && matchRole;
+    const matchStatus = statusFilter === "all" || (u.account_status || "approved") === statusFilter;
+    return matchSearch && matchRole && matchStatus;
   });
 
   const pagedUsers = filtered.slice((userPage - 1) * userPageSize, userPage * userPageSize);
 
   const stats = {
     total: users.length,
+    pending: users.filter(u => (u.account_status || "approved") === "pending").length,
+    suspended: users.filter(u => u.account_status === "suspended").length,
     admins: users.filter(u => u.roles.includes("admin")).length,
     callCenter: users.filter(u => u.roles.includes("call_center")).length,
     thisMonth: users.filter(u => {
@@ -340,9 +380,11 @@ const AdminUsers = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {[
           { label: isBn ? "মোট ইউজার" : "Total Users", value: stats.total, color: "text-primary" },
+          { label: isBn ? "অনুমোদনের অপেক্ষায়" : "Pending Approval", value: stats.pending, color: "text-amber-600" },
+          { label: isBn ? "স্থগিত" : "Suspended", value: stats.suspended, color: "text-destructive" },
           { label: isBn ? "অ্যাডমিন" : "Admins", value: stats.admins, color: "text-destructive" },
           { label: isBn ? "কল সেন্টার" : "Call Center", value: stats.callCenter, color: "text-blue-500" },
           { label: isBn ? "এই মাসে নতুন" : "New This Month", value: stats.thisMonth, color: "text-success" },
@@ -364,6 +406,17 @@ const AdminUsers = () => {
             placeholder={isBn ? "নাম, ফোন বা কোম্পানি দিয়ে সার্চ..." : "Search by name, phone or company..."}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/40 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 transition-all"
           />
+        </div>
+        <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50 flex-wrap">
+          {(["all", "pending", "approved", "suspended"] as const).map(f => (
+            <button
+              key={f}
+              onClick={() => { setStatusFilter(f); setUserPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${statusFilter === f ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              {f === "all" ? (isBn ? "সব অবস্থা" : "All status") : f === "pending" ? (isBn ? "অপেক্ষমাণ" : "Pending") : f === "approved" ? (isBn ? "অনুমোদিত" : "Approved") : (isBn ? "স্থগিত" : "Suspended")}
+            </button>
+          ))}
         </div>
         <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50 flex-wrap">
           {(["all", "admin", "call_center", "user"] as const).map(f => (
@@ -423,6 +476,12 @@ const AdminUsers = () => {
                         {u.roles.includes("call_center") && <Badge className="text-[10px] bg-accent/15 text-accent-foreground border-0">CC</Badge>}
                         {u.roles.includes("moderator") && <Badge variant="outline" className="text-[10px]">Mod</Badge>}
                         {!isAdmin && !u.roles.includes("call_center") && <Badge variant="secondary" className="text-[10px]">User</Badge>}
+                        {(u.account_status || "approved") === "pending" && (
+                          <Badge className="text-[10px] bg-amber-500/15 text-amber-700 border-0">{isBn ? "অপেক্ষমাণ" : "Pending"}</Badge>
+                        )}
+                        {u.account_status === "suspended" && (
+                          <Badge variant="destructive" className="text-[10px]">{isBn ? "স্থগিত" : "Suspended"}</Badge>
+                        )}
                         {u.permissions.length > 0 && (
                           <Badge variant="outline" className="text-[10px]">{u.permissions.length} {isBn ? "পারমিশন" : "perms"}</Badge>
                         )}
@@ -430,6 +489,25 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center justify-end gap-1.5">
+                        {(u.account_status || "approved") !== "approved" ? (
+                          <button
+                            onClick={() => changeStatus(u.user_id, "approved")}
+                            disabled={statusBusy === u.user_id}
+                            className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-600 transition-colors disabled:opacity-50"
+                            title={isBn ? "অ্যাকাউন্ট অনুমোদন" : "Approve account"}
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => changeStatus(u.user_id, "suspended")}
+                            disabled={statusBusy === u.user_id || isAdmin}
+                            className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors disabled:opacity-40"
+                            title={isBn ? "অ্যাকাউন্ট স্থগিত" : "Suspend account"}
+                          >
+                            <PauseCircle className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => setSelectedUser(u)}
                           className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors"

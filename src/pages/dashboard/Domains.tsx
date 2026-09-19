@@ -12,6 +12,8 @@ import { Link } from "@/lib/router-compat";
 import { getDashboardDomains } from "@/lib/dashboard.functions";
 import DataPagination from "@/components/DataPagination";
 import { logApiError } from "@/lib/errorReporting";
+import { StaffPageHeader, StaffMetricStrip, type StaffMetric } from "@/components/staff/StaffConsole";
+import { RefreshCw, CalendarClock } from "lucide-react";
 
 const DashboardDomains = () => {
   const { user } = useAuth();
@@ -60,38 +62,42 @@ const DashboardDomains = () => {
 
   const activeDomains = domains.filter(d => d.status === "active").length;
   const expiringSoon = domains.filter(d => isExpiringSoon(d.expiry_date)).length;
+  const nextExpiry = domains
+    .map(d => d.expiry_date)
+    .filter((d): d is string => !!d && new Date(d).getTime() > Date.now())
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0];
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{bn ? "আমার ডোমেইন" : "My Domains"}</h1>
-          <p className="text-sm text-muted-foreground">{bn ? "আপনার নিবন্ধিত ডোমেইন পরিচালনা করুন" : "Manage your registered domains"}</p>
-        </div>
-        <Link to="/domain-search" className="flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
-          {bn ? "নতুন ডোমেইন" : "Register Domain"}
-        </Link>
-      </div>
+      <StaffPageHeader
+        title={bn ? "আমার ডোমেইন" : "My Domains"}
+        description={bn ? "নিবন্ধিত ডোমেইন, মেয়াদ ও রিনিউয়াল এক জায়গায়" : "Registered domains, expiry dates and renewals in one place"}
+        actions={
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => domainsQuery.refetch()}
+              disabled={domainsQuery.isFetching}
+              className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${domainsQuery.isFetching ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">{bn ? "রিফ্রেশ" : "Refresh"}</span>
+            </button>
+            <Link to="/domain-search" className="inline-flex h-11 items-center gap-2 gradient-primary text-primary-foreground px-4 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
+              {bn ? "নতুন ডোমেইন" : "Register Domain"}
+            </Link>
+          </div>
+        }
+      />
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="glass-card rounded-xl p-4 text-center">
-          <Globe className="w-5 h-5 text-primary mx-auto mb-1.5" />
-          <p className="text-lg font-bold text-foreground">{domains.length}</p>
-          <p className="text-[10px] text-muted-foreground">{bn ? "মোট ডোমেইন" : "Total"}</p>
-        </div>
-        <div className="glass-card rounded-xl p-4 text-center">
-          <Shield className="w-5 h-5 text-success mx-auto mb-1.5" />
-          <p className="text-lg font-bold text-success">{activeDomains}</p>
-          <p className="text-[10px] text-muted-foreground">{bn ? "সক্রিয়" : "Active"}</p>
-        </div>
-        <div className="glass-card rounded-xl p-4 text-center">
-          <AlertTriangle className="w-5 h-5 text-warning mx-auto mb-1.5" />
-          <p className="text-lg font-bold text-warning">{expiringSoon}</p>
-          <p className="text-[10px] text-muted-foreground">{bn ? "শীঘ্রই শেষ" : "Expiring"}</p>
-        </div>
-      </div>
+      <StaffMetricStrip
+        metrics={[
+          { label: bn ? "মোট ডোমেইন" : "Total domains", value: domains.length, detail: bn ? "অ্যাকাউন্টে" : "on account", icon: Globe },
+          { label: bn ? "সক্রিয়" : "Active", value: activeDomains, detail: bn ? "চালু আছে" : "resolving", icon: Shield, tone: "success" },
+          { label: bn ? "শীঘ্রই মেয়াদ শেষ" : "Expiring soon", value: expiringSoon, detail: bn ? "৩০ দিনের মধ্যে" : "within 30 days", icon: AlertTriangle, tone: "warning" },
+          { label: bn ? "পরবর্তী মেয়াদ" : "Next expiry", value: nextExpiry ? new Date(nextExpiry).toLocaleDateString(bn ? "bn-BD" : "en-US", { day: "numeric", month: "short" }) : "—", detail: bn ? "নিকটতম ডোমেইন" : "closest domain", icon: CalendarClock },
+        ] satisfies StaffMetric[]}
+      />
 
       {/* Search */}
       {domains.length > 0 && (
