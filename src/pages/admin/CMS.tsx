@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { CMSSkeleton } from "@/components/DashboardSkeleton";
 import {
   Plus, Pencil, Trash2, Save, X, FileText, MessageSquare,
-  Plus, Pencil, Trash2, Save, X, FileText, MessageSquare,
   HelpCircle, Layout, Eye, EyeOff, Globe, RefreshCcw, SearchX, Languages
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
