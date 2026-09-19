@@ -352,6 +352,11 @@ const Checkout = () => {
           }
           throw new Error(data?.error || error?.message);
         }
+        const gatewayUrl = data?.gateway_url || data?.callBackUrl || data?.payment_url;
+        if (!gatewayUrl) throw new Error(bn ? "নগদ পেমেন্ট লিংক পাওয়া যায়নি" : "Nagad payment link was not returned");
+        clearCart();
+        window.location.href = gatewayUrl;
+        return;
       } else if (selectedPayment === "bank") {
         // Mark order as confirmed (awaiting bank transfer)
         await supabase.from("orders").update({ status: "confirmed" as const, confirmed_at: new Date().toISOString() }).eq("id", orderId);

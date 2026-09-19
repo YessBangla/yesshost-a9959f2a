@@ -45,3 +45,16 @@ export const getAccountsSummaries = createServerFn({ method: "POST" })
     if (periods.error || trial.error) throw new Error("Accounts summary could not be loaded");
     return { periods: periods.data ?? [], trial: trial.data ?? [] };
   });
+
+export const payInvoiceFromWallet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ invoiceId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: result, error } = await supabaseAdmin.rpc("pay_invoice_from_wallet_for_user", {
+      _invoice_id: data.invoiceId,
+      _user_id: context.userId,
+    });
+    if (error) throw new Error(error.message.includes("insufficient_balance") ? "Insufficient balance" : "Payment failed");
+    return result as { success?: boolean; new_balance?: number; already_paid?: boolean };
+  });

@@ -43,6 +43,7 @@ const DashboardProfile = () => {
   const [notifTicket, setNotifTicket] = useState(true);
   const [notifPromo, setNotifPromo] = useState(false);
   const [notifService, setNotifService] = useState(true);
+  const [notifSaving, setNotifSaving] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -56,6 +57,26 @@ const DashboardProfile = () => {
       setVatId(profile.vat_id || "");
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (!user) return;
+    void supabase.from("notification_preferences").select("order_updates,payment_billing,support_tickets,service_status,offers_promotions").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (!data) return;
+      setNotifOrder(data.order_updates); setNotifPayment(data.payment_billing); setNotifTicket(data.support_tickets);
+      setNotifService(data.service_status); setNotifPromo(data.offers_promotions);
+    });
+  }, [user]);
+
+  const saveNotificationPreferences = async () => {
+    if (!user) return;
+    setNotifSaving(true);
+    const { error } = await supabase.from("notification_preferences").upsert({
+      user_id: user.id, order_updates: notifOrder, payment_billing: notifPayment,
+      support_tickets: notifTicket, service_status: notifService, offers_promotions: notifPromo,
+    }, { onConflict: "user_id" });
+    setNotifSaving(false);
+    toast({ title: error ? (bn ? "সেভ করা যায়নি" : "Could not save") : (bn ? "নোটিফিকেশন পছন্দ সেভ হয়েছে" : "Notification preferences saved"), variant: error ? "destructive" : "default" });
+  };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -346,10 +367,9 @@ const DashboardProfile = () => {
           <ToggleSwitch checked={notifService} onChange={setNotifService} label={bn ? "🖥️ সার্ভিস স্ট্যাটাস" : "🖥️ Service Status"} />
           <ToggleSwitch checked={notifPromo} onChange={setNotifPromo} label={bn ? "🎁 অফার ও প্রমোশন" : "🎁 Offers & Promotions"} />
         </div>
-
-        <p className="text-[11px] text-muted-foreground mt-4">
-          {bn ? "* নোটিফিকেশন সেটিংস আপনার ব্রাউজারে সেভ থাকবে।" : "* Notification settings are saved in your browser."}
-        </p>
+        <button type="button" onClick={saveNotificationPreferences} disabled={notifSaving} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          <Save className="size-4" />{notifSaving ? (bn ? "সেভ হচ্ছে…" : "Saving…") : (bn ? "পছন্দ সেভ করুন" : "Save preferences")}
+        </button>
       </div>
     </div>
   );
