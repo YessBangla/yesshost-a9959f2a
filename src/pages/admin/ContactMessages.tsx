@@ -39,6 +39,9 @@ const ContactMessages = () => {
   const [sending, setSending] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [replies, setReplies] = useState<ContactReplyRow[]>([]);
+  const [repliesLoading, setRepliesLoading] = useState(false);
+  const replyReq = useServerFn(replyToContactMessage);
 
   const fetchMessages = async () => {
     setLoading(true);
