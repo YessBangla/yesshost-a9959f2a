@@ -40,7 +40,7 @@ describe("ticket SLA", () => {
   it("formats durations in both languages", () => {
     expect(formatMinutes(45, false)).toBe("45m");
     expect(formatMinutes(90, false)).toBe("1h 30m");
-    expect(formatMinutes(90, true)).toBe("১ ঘন্টা ৩০ মিনিট".replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d))).replace(/\d/g, (d) => d));
+    expect(formatMinutes(90, true)).toBe("1 ঘন্টা 30 মিনিট");
   });
 });
 
