@@ -41,14 +41,24 @@ serve(async (req) => {
   }
 
   try {
-    const { invoice_id, amount, customer_name, customer_email, customer_phone, description, success_url, fail_url, cancel_url } = await req.json();
+    const { invoice_id, customer_name, customer_email, customer_phone, description, is_wallet_deposit } = await req.json();
 
-    if (!invoice_id || !amount) {
+    if (!invoice_id) {
       return new Response(
-        JSON.stringify({ error: "invoice_id and amount are required" }),
+        JSON.stringify({ error: "invoice_id is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const authClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const token = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+    const { data: auth } = token ? await authClient.auth.getUser(token) : { data: { user: null } };
+    if (!auth.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const source = is_wallet_deposit ? "wallet_transactions" : "invoices";
+    const amountField = is_wallet_deposit ? "amount_bdt" : "amount_bdt";
+    const { data: payable } = await authClient.from(source).select(`id,user_id,status,${amountField}`).eq("id", invoice_id).eq("user_id", auth.user.id).eq("status", "pending").maybeSingle();
+    const amount = Number(payable?.amount_bdt);
+    if (!payable || !Number.isFinite(amount) || amount <= 0) return new Response(JSON.stringify({ error: "Payable record not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const cfg = await loadSslCfg();
     if (!cfg.enabled) {
@@ -70,9 +80,9 @@ serve(async (req) => {
     formData.append("total_amount", String(amount));
     formData.append("currency", "BDT");
     formData.append("tran_id", tran_id);
-    formData.append("success_url", success_url || `${SUPABASE_URL}/functions/v1/payment-callback`);
-    formData.append("fail_url", fail_url || `${SUPABASE_URL}/functions/v1/payment-callback`);
-    formData.append("cancel_url", cancel_url || `${SUPABASE_URL}/functions/v1/payment-callback`);
+    formData.append("success_url", `${SUPABASE_URL}/functions/v1/payment-callback`);
+    formData.append("fail_url", `${SUPABASE_URL}/functions/v1/payment-callback`);
+    formData.append("cancel_url", `${SUPABASE_URL}/functions/v1/payment-callback`);
     formData.append("ipn_url", `${SUPABASE_URL}/functions/v1/payment-callback`);
     formData.append("cus_name", customer_name || "Customer");
     formData.append("cus_email", customer_email || "customer@example.com");

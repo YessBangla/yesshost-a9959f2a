@@ -44,7 +44,16 @@ serve(async (req) => {
   }
 
   try {
-    const { invoice_id, amount } = await req.json();
+    const { invoice_id, is_wallet_deposit } = await req.json();
+    if (!invoice_id) return new Response(JSON.stringify({ error: "invoice_id is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const bearer = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+    const { data: auth } = bearer ? await db.auth.getUser(bearer) : { data: { user: null } };
+    if (!auth.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const source = is_wallet_deposit ? "wallet_transactions" : "invoices";
+    const { data: payable } = await db.from(source).select("id,user_id,status,amount_bdt").eq("id", invoice_id).eq("user_id", auth.user.id).eq("status", "pending").maybeSingle();
+    const amount = Number(payable?.amount_bdt);
+    if (!payable || !Number.isFinite(amount) || amount <= 0) return new Response(JSON.stringify({ error: "Payable record not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const cfg = await loadNagadCfg();
     if (!cfg.enabled) {
