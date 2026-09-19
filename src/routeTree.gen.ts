@@ -92,7 +92,6 @@ import { Route as ApiDashboardIncomeRouteImport } from './routes/api/dashboard/i
 import { Route as ApiDashboardServicesRouteImport } from './routes/api/dashboard/services'
 import { Route as ApiPublicAccountsReportRouteImport } from './routes/api/public/accounts-report'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
-import { Route as ApiPublicLiveChatMessagesRouteImport } from './routes/api/public/live-chat-messages'
 import { Route as ThemesSlugIndexRouteImport } from './routes/themes/$slug/index'
 import { Route as ThemesSlugDemoRouteImport } from './routes/themes/$slug/demo'
 
@@ -512,12 +511,6 @@ const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   path: '/api/public/health',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicLiveChatMessagesRoute =
-  ApiPublicLiveChatMessagesRouteImport.update({
-    id: '/api/public/live-chat-messages',
-    path: '/api/public/live-chat-messages',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ThemesSlugIndexRoute = ThemesSlugIndexRouteImport.update({
   id: '/themes/$slug/',
   path: '/themes/$slug/',
@@ -613,7 +606,6 @@ export interface FileRoutesByFullPath {
   '/api/dashboard/services': typeof ApiDashboardServicesRoute
   '/api/public/accounts-report': typeof ApiPublicAccountsReportRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug/': typeof ThemesSlugIndexRoute
 }
@@ -698,7 +690,6 @@ export interface FileRoutesByTo {
   '/api/dashboard/services': typeof ApiDashboardServicesRoute
   '/api/public/accounts-report': typeof ApiPublicAccountsReportRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug': typeof ThemesSlugIndexRoute
 }
@@ -787,7 +778,6 @@ export interface FileRoutesById {
   '/api/dashboard/services': typeof ApiDashboardServicesRoute
   '/api/public/accounts-report': typeof ApiPublicAccountsReportRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
   '/themes/$slug/': typeof ThemesSlugIndexRoute
 }
@@ -877,7 +867,6 @@ export interface FileRouteTypes {
     | '/api/dashboard/services'
     | '/api/public/accounts-report'
     | '/api/public/health'
-    | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
     | '/themes/$slug/'
   fileRoutesByTo: FileRoutesByTo
@@ -962,7 +951,6 @@ export interface FileRouteTypes {
     | '/api/dashboard/services'
     | '/api/public/accounts-report'
     | '/api/public/health'
-    | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
     | '/themes/$slug'
   id:
@@ -1050,7 +1038,6 @@ export interface FileRouteTypes {
     | '/api/dashboard/services'
     | '/api/public/accounts-report'
     | '/api/public/health'
-    | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
     | '/themes/$slug/'
   fileRoutesById: FileRoutesById
@@ -1092,7 +1079,6 @@ export interface RootRouteChildren {
   ApiDashboardServicesRoute: typeof ApiDashboardServicesRoute
   ApiPublicAccountsReportRoute: typeof ApiPublicAccountsReportRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
-  ApiPublicLiveChatMessagesRoute: typeof ApiPublicLiveChatMessagesRoute
   ThemesSlugDemoRoute: typeof ThemesSlugDemoRoute
   ThemesSlugIndexRoute: typeof ThemesSlugIndexRoute
 }
@@ -1680,13 +1666,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/live-chat-messages': {
-      id: '/api/public/live-chat-messages'
-      path: '/api/public/live-chat-messages'
-      fullPath: '/api/public/live-chat-messages'
-      preLoaderRoute: typeof ApiPublicLiveChatMessagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/themes/$slug/': {
       id: '/themes/$slug/'
       path: '/themes/$slug'
@@ -1865,7 +1844,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDashboardServicesRoute: ApiDashboardServicesRoute,
   ApiPublicAccountsReportRoute: ApiPublicAccountsReportRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
-  ApiPublicLiveChatMessagesRoute: ApiPublicLiveChatMessagesRoute,
   ThemesSlugDemoRoute: ThemesSlugDemoRoute,
   ThemesSlugIndexRoute: ThemesSlugIndexRoute,
 }
