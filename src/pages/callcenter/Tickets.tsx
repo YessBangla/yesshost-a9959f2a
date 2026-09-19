@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Send, RefreshCw, HeadphonesIcon, Search, Clock3, UserRound } from "lucide-react";
+import { Send, RefreshCw, HeadphonesIcon, Search, Clock3, UserRound, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 
 type TicketWithReplies = Tables<"support_tickets"> & { replies: Tables<"ticket_replies">[]; user_name?: string };
 
@@ -69,13 +70,18 @@ const CallCenterTickets = () => {
     const active = ["open", "in_progress"].includes(ticket.status);
     return (status === "all" || (status === "active" ? active : ticket.status === status)) && (priority === "all" || ticket.priority === priority) && [ticket.subject, ticket.ticket_number, ticket.user_name].some((value) => value?.toLowerCase().includes(query));
   });
+  const exportCsv = () => {
+    downloadCsv(`tickets-${csvDate(new Date().toISOString())}`,
+      [bn ? "টিকেট" : "Ticket", bn ? "বিষয়" : "Subject", bn ? "গ্রাহক" : "Customer", bn ? "বিভাগ" : "Department", bn ? "অগ্রাধিকার" : "Priority", bn ? "স্ট্যাটাস" : "Status", bn ? "উত্তর" : "Replies", bn ? "সর্বশেষ আপডেট" : "Last update"],
+      filtered.map((ticket) => [ticket.ticket_number, ticket.subject, ticket.user_name || "", ticket.department, ticket.priority, ticket.status, ticket.replies.length, csvDate(ticket.updated_at)]));
+  };
   const highPriority = tickets.filter((ticket) => ["high", "urgent"].includes(ticket.priority) && ["open", "in_progress"].includes(ticket.status)).length;
   const stale = tickets.filter((ticket) => ["open", "in_progress"].includes(ticket.status) && Date.now() - new Date(ticket.updated_at).getTime() > 24 * 60 * 60 * 1000).length;
   if (loading) return <div className="grid gap-4 lg:grid-cols-[340px_1fr]"><div className="staff-panel p-4"><Skeleton className="mb-4 h-10" />{[0,1,2,3,4].map((row) => <Skeleton key={row} className="mb-3 h-16" />)}</div><div className="staff-panel p-4"><Skeleton className="h-full min-h-96" /></div></div>;
 
   return (
     <div className="space-y-4">
-      <StaffPageHeader title={bn ? "সাপোর্ট ও SLA" : "Support & SLA"} description={bn ? "অগ্রাধিকার, বিভাগ ও অপেক্ষার সময় অনুযায়ী টিকেট পরিচালনা" : "Manage tickets by priority, department and wait time"} actions={<Button variant="outline" onClick={fetchTickets}><RefreshCw />{bn ? "রিফ্রেশ" : "Refresh"}</Button>} />
+      <StaffPageHeader title={bn ? "সাপোর্ট ও SLA" : "Support & SLA"} description={bn ? "অগ্রাধিকার, বিভাগ ও অপেক্ষার সময় অনুযায়ী টিকেট পরিচালনা" : "Manage tickets by priority, department and wait time"} actions={<><Button variant="outline" onClick={exportCsv} disabled={filtered.length === 0}><Download className="size-4" />{bn ? "CSV ডাউনলোড" : "Export CSV"}</Button><Button variant="outline" onClick={fetchTickets}><RefreshCw />{bn ? "রিফ্রেশ" : "Refresh"}</Button></>} />
       <StaffMetricStrip metrics={[{label:bn?"সক্রিয়":"Active",value:tickets.filter((t)=>["open","in_progress"].includes(t.status)).length,detail:bn?"খোলা টিকেট":"open tickets",icon:HeadphonesIcon,tone:"primary"},{label:bn?"জরুরি":"Priority",value:highPriority,detail:bn?"দ্রুত উত্তর":"need attention",icon:Clock3,tone:"warning"},{label:bn?"২৪ ঘণ্টা+":"Over 24 hours",value:stale,detail:bn?"SLA ঝুঁকি":"SLA risk",icon:Clock3,tone:stale?"danger":"success"},{label:bn?"সমাধান":"Resolved",value:tickets.filter((t)=>["resolved","closed"].includes(t.status)).length,detail:bn?"সম্পন্ন":"completed",icon:HeadphonesIcon,tone:"success"}]} />
 
       <div className="grid grid-cols-1 overflow-hidden staff-panel lg:grid-cols-[350px_1fr] lg:h-[calc(100vh-310px)]">

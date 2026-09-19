@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PhoneIncoming, PhoneOff, PhoneMissed, Phone, RefreshCw, Clock, Search, NotebookPen, Loader2 } from "lucide-react";
+import { PhoneIncoming, PhoneOff, PhoneMissed, Phone, RefreshCw, Clock, Search, Download, NotebookPen, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import DataPagination from "@/components/DataPagination";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
 
 interface CallRecord {
@@ -51,6 +52,12 @@ const CallHistory = () => {
     { key: "no_answer", label: bn ? "সাড়া পাওয়া যায়নি" : "No answer" },
     { key: "escalated", label: bn ? "টিকেটে পাঠানো হয়েছে" : "Escalated to ticket" },
   ];
+
+  const exportCsv = () => {
+    downloadCsv(`call-history-${csvDate(new Date().toISOString())}`,
+      [bn ? "গ্রাহক" : "Customer", bn ? "ফোন" : "Phone", bn ? "স্ট্যাটাস" : "Status", bn ? "সময়কাল (সেকেন্ড)" : "Duration (s)", bn ? "শুরু" : "Started", bn ? "ফলাফল" : "Outcome", bn ? "নোট" : "Notes"],
+      filteredCalls.map((call) => [call.live_chats?.visitor_name || "", call.live_chats?.visitor_phone || "", call.status, call.duration_seconds ?? "", call.started_at, call.outcome || "", call.notes || ""]));
+  };
 
   const startEdit = (call: CallRecord) => {
     setEditing(call.id);
@@ -130,7 +137,7 @@ const CallHistory = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <StaffPageHeader title={bn ? "কল ফলাফল ও ইতিহাস" : "Call Outcomes & History"} description={bn ? "কলের ফলাফল, সময়কাল ও ফলো-আপের অগ্রাধিকার" : "Call outcomes, duration and follow-up priority"} actions={<Button variant="outline" onClick={fetchCalls}><RefreshCw className={loading?"animate-spin":""}/>{bn?"রিফ্রেশ":"Refresh"}</Button>} />
+      <StaffPageHeader title={bn ? "কল ফলাফল ও ইতিহাস" : "Call Outcomes & History"} description={bn ? "কলের ফলাফল, সময়কাল ও ফলো-আপের অগ্রাধিকার" : "Call outcomes, duration and follow-up priority"} actions={<><Button variant="outline" onClick={exportCsv} disabled={filteredCalls.length === 0}><Download className="size-4" />{bn ? "CSV ডাউনলোড" : "Export CSV"}</Button><Button variant="outline" onClick={fetchCalls}><RefreshCw className={loading?"animate-spin":""}/>{bn?"রিফ্রেশ":"Refresh"}</Button></>} />
 
       {/* Stats */}
       <StaffMetricStrip metrics={stats.map((item,index)=>({label:item.label,value:item.value,detail:index===0?(bn?"সাম্প্রতিক ১০০":"latest 100"):index===1?(bn?"সফল সংযোগ":"successful"):index===2?(bn?"ফলো-আপ":"follow-up"):(bn?"সম্পন্ন কল":"completed calls"),icon:item.icon,tone:index===1?"success":index===2?"danger":"primary"}))} />
