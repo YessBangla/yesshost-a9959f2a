@@ -554,6 +554,22 @@ const DashboardBilling = () => {
               />
             </div>
           )}
+          {selectedIds.size > 0 && (
+            <div className="mb-4 glass-card rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 border-primary/30">
+              <p className="text-sm text-foreground">
+                <span className="font-bold">{selectedInvoices.length}</span> {isBn ? "টি ইনভয়েস নির্বাচিত" : "invoice(s) selected"} — {isBn ? "মোট" : "Total"} <span className="font-bold text-primary">৳{formatAmount(selectedTotal, lang)}</span>
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="h-9" onClick={() => setSelectedIds(new Set())} disabled={massPaying}>
+                  {isBn ? "বাতিল" : "Clear"}
+                </Button>
+                <Button size="sm" className="h-9 gap-1.5" onClick={handleMassPay} disabled={massPaying}>
+                  {massPaying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wallet className="w-3.5 h-3.5" />}
+                  {isBn ? "ওয়ালেট থেকে সব পরিশোধ করুন" : "Pay All with Wallet"}
+                </Button>
+              </div>
+            </div>
+          )}
           {invoices.length === 0 ? (
             <EmptyState
               icon={FileText}
