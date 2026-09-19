@@ -36,18 +36,23 @@ const AdminAccounts = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [jPage, setJPage] = useState(1);
+  const [cash, setCash] = useState<CashRow[]>([]);
+  const [statementMonth, setStatementMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [cbForm, setCbForm] = useState({ direction: "in", method: "bank", amount: "", date: new Date().toISOString().slice(0, 10), counterparty: "", bank_name: "", account_number: "", reference: "", contra_code: "4000", note: "" });
+  const [savingCb, setSavingCb] = useState(false);
 
   const money = useCallback((value: number) => `৳${Math.round(value || 0).toLocaleString(bn ? "bn-BD" : "en-US")}`, [bn]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const [periodResult, trialResult, journalResult, paymentResult, profileResult] = await Promise.all([
+    const [periodResult, trialResult, journalResult, paymentResult, profileResult, cashResult] = await Promise.all([
       supabase.rpc("accounts_period_summary", { _granularity: granularity, _from: from, _to: to }),
       supabase.rpc("accounts_trial_balance", { _from: from, _to: to }),
-      supabase.from("journal_entries").select("id,entry_date,reference,description,source,journal_lines(debit_bdt,credit_bdt,ledger_accounts(code,name_bn,name_en))").gte("entry_date", from).lte("entry_date", to).order("entry_date", { ascending: false }).limit(1000),
-      supabase.from("invoices").select("id,invoice_number,amount_bdt,paid_at,created_at,payment_method,description,user_id").eq("status", "paid").order("paid_at", { ascending: false }).limit(1000),
+      supabase.from("journal_entries").select("id,entry_date,reference,description,source,journal_lines(debit_bdt,credit_bdt,ledger_accounts(code,name_bn,name_en,type))").gte("entry_date", from).lte("entry_date", to).order("entry_date", { ascending: false }).limit(1000),
+      supabase.from("invoices").select("id,invoice_number,amount_bdt,paid_at,created_at,payment_method,description,user_id,due_date").eq("status", "paid").order("paid_at", { ascending: false }).limit(1000),
       supabase.from("profiles").select("user_id,full_name,phone").limit(2000),
+      supabase.from("cash_bank_transactions").select("id,direction,method,amount_bdt,txn_date,counterparty,bank_name,account_number,reference,contra_code,note").order("txn_date", { ascending: false }).limit(1000),
     ]);
     if ([periodResult.error, trialResult.error, journalResult.error, paymentResult.error].some(Boolean)) {
       setError(bn ? "হিসাবের সব তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।" : "Some accounting data could not be loaded. Please try again.");
@@ -56,6 +61,7 @@ const AdminAccounts = () => {
     setTrial((trialResult.data || []) as TrialRow[]);
     setJournal((journalResult.data || []) as unknown as JournalRow[]);
     setPayments((paymentResult.data || []) as ClientPayment[]);
+    setCash((cashResult.data || []) as CashRow[]);
     const map: Record<string, { name: string; phone: string | null }> = {};
     for (const row of profileResult.data || []) map[row.user_id] = { name: row.full_name || (bn ? "নামহীন ক্লায়েন্ট" : "Unnamed client"), phone: row.phone };
     setClients(map);
