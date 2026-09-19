@@ -191,7 +191,12 @@ const AdminUsers = () => {
         await supabase.from("user_permissions" as any).insert(permInserts);
       }
 
-      toast({ title: "✅ " + (isBn ? "সফল!" : "Success!"), description: isBn ? "নতুন ইউজার তৈরি হয়েছে" : "New user has been created" });
+      // Admin-created accounts are approved immediately
+      if (data?.user_id) {
+        try { await statusReq({ data: { userId: data.user_id, status: "approved" } }); } catch { /* non-fatal */ }
+      }
+
+      toast({ title: "✅ " + (isBn ? "সফল!" : "Success!"), description: isBn ? "নতুন ইউজার তৈরি ও অনুমোদিত হয়েছে" : "New user created and approved" });
       setShowCreate(false);
       setCreateForm({ email: "", password: "", full_name: "", phone: "", roles: ["user"], permissions: [] });
       fetchUsers();
