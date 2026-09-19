@@ -2135,6 +2135,10 @@ export type Database = {
           period_start: string
         }[]
       }
+      accounts_reconciliation: {
+        Args: { _from: string; _to: string }
+        Returns: Json
+      }
       accounts_trial_balance: {
         Args: { _from?: string; _to?: string }
         Returns: {

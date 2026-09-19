@@ -46,6 +46,35 @@ export const getAccountsSummaries = createServerFn({ method: "POST" })
     return { periods: periods.data ?? [], trial: trial.data ?? [] };
   });
 
+export type AccountsReconciliation = {
+  from: string;
+  to: string;
+  invoices_paid_total: number;
+  ledger_income_total: number;
+  payment_events_total: number;
+  invoice_ledger_diff: number;
+  invoice_payment_diff: number;
+  missing_ledger_entries: Array<{ id: string; invoice_number: string; amount_bdt: number; paid_at: string | null }>;
+  orphan_ledger_entries: Array<{ id: string; entry_date: string; reference: string; description: string | null; source_id: string | null }>;
+};
+
+export const getAccountsReconciliation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({
+    from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  }).parse(data))
+  .handler(async ({ data, context }) => {
+    await requireRole(context.supabase, context.userId, ["admin"]);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: result, error } = await supabaseAdmin.rpc("accounts_reconciliation", {
+      _from: data.from,
+      _to: data.to,
+    });
+    if (error) throw new Error("Reconciliation could not be generated");
+    return result as unknown as AccountsReconciliation;
+  });
+
 export const payInvoiceFromWallet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ invoiceId: z.string().uuid() }).parse(data))
