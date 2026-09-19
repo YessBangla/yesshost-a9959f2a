@@ -1,3 +1,4 @@
+import { StaffPageHeader } from "@/components/staff/StaffConsole";
 import { useEffect, useState, useMemo } from "react";
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, CreditCard, Building2, Loader2, CheckCircle2, Clock, XCircle, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

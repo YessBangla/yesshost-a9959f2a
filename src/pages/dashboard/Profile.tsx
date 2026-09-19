@@ -1,3 +1,4 @@
+import { StaffPageHeader } from "@/components/staff/StaffConsole";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
