@@ -101,9 +101,8 @@ const NeedHelpSection = () => {
               </motion.div>
             );
 
-            if (opt.action) return <div key={i} onClick={() => handleClick(opt)}>{inner}</div>;
             if (opt.external) return <a key={i} href={opt.href} target="_blank" rel="noopener noreferrer">{inner}</a>;
-            return <Link key={i} to={opt.href!}>{inner}</Link>;
+            return <Link key={i} to={opt.href as any}>{inner}</Link>;
           })}
         </div>
       </div>
