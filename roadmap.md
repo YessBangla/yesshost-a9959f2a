@@ -37,6 +37,6 @@
 - [x] Verify header, navigation, service pages, invoice flow, and chat on 430px and 384px mobile screens
 
 # Mobile homepage hero refinement
-- [ ] Upgrade the mobile hero to a more polished international corporate composition
-- [ ] Verify the refined hero at 430px and 384px with navigation and chat unobstructed
-- [ ] Add a desktop-screen-style corporate banner inside the mobile homepage hero
+- [x] Upgrade the mobile hero to a more polished international corporate composition
+- [x] Verify the refined hero at 430px and 384px with navigation and chat unobstructed
+- [x] Add a desktop-screen-style corporate banner inside the mobile homepage hero
