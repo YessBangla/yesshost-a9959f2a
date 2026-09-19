@@ -1,11 +1,15 @@
-import { useState, useEffect } from "react";
-import { Tag, Plus, Pencil, Trash2, Loader2, Search, ToggleLeft, ToggleRight, Copy, BarChart3 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Tag, Plus, Pencil, Trash2, Copy, Download, RefreshCw, CirclePercent, ShoppingCart, Timer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DataPagination from "@/components/DataPagination";
+import { StaffEmpty, StaffLoading, StaffMetricStrip, StaffPageHeader, StaffSearch } from "@/components/staff/StaffConsole";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 
 interface Coupon {
   id: string;
@@ -45,28 +49,38 @@ const AdminCoupons = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [status, setStatus] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const fetchCoupons = async () => {
-    setLoading(true);
-    const { data } = await supabase
+  const fetchCoupons = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
+    setError("");
+    const { data, error: loadError } = await supabase
       .from("coupons")
       .select("*")
       .order("created_at", { ascending: false });
     setCoupons((data as any as Coupon[]) || []);
+    if (loadError) setError(bn ? "কুপনের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।" : "Coupon data could not be loaded. Please try again.");
     setLoading(false);
-  };
+  }, [bn]);
 
-  useEffect(() => { fetchCoupons(); }, []);
+  useEffect(() => { void fetchCoupons(); }, [fetchCoupons]);
+  useEffect(() => { setPage(1); }, [search, status, pageSize]);
 
-  const filtered = coupons.filter(c =>
-    c.code.toLowerCase().includes(search.toLowerCase()) ||
-    (c.description || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const stateOf = (coupon: Coupon) => !coupon.is_active ? "inactive" : coupon.expires_at && Date.parse(coupon.expires_at) < Date.now() ? "expired" : coupon.max_uses && coupon.used_count >= coupon.max_uses ? "exhausted" : "active";
+  const filtered = useMemo(() => coupons.filter(c => {
+    const query = search.trim().toLowerCase();
+    return (!query || c.code.toLowerCase().includes(query) || (c.description || "").toLowerCase().includes(query)) && (status === "all" || stateOf(c) === status);
+  }), [coupons, search, status]);
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   // Stats
   const totalCoupons = coupons.length;
-  const activeCoupons = coupons.filter(c => c.is_active).length;
+  const activeCoupons = coupons.filter(c => stateOf(c) === "active").length;
   const totalUsed = coupons.reduce((s, c) => s + c.used_count, 0);
+  const expiringSoon = coupons.filter(c => c.expires_at && Date.parse(c.expires_at) >= Date.now() && Date.parse(c.expires_at) <= Date.now() + 30 * 86400000).length;
 
   const openCreate = () => {
     setEditingId(null);
@@ -126,7 +140,7 @@ const AdminCoupons = () => {
     } else {
       toast({ title: bn ? "সফল!" : "Success!" });
       setDialogOpen(false);
-      fetchCoupons();
+      void fetchCoupons(true);
     }
   };
 
@@ -136,13 +150,14 @@ const AdminCoupons = () => {
       toast({ title: bn ? "ডিলিট ব্যর্থ" : "Delete failed", variant: "destructive" });
     } else {
       toast({ title: bn ? "ডিলিট হয়েছে" : "Deleted" });
-      fetchCoupons();
+      void fetchCoupons(true);
     }
   };
 
   const toggleActive = async (c: Coupon) => {
-    await supabase.from("coupons").update({ is_active: !c.is_active }).eq("id", c.id);
-    fetchCoupons();
+    const { error: actionError } = await supabase.from("coupons").update({ is_active: !c.is_active }).eq("id", c.id);
+    if (actionError) { toast({ title: bn ? "স্ট্যাটাস বদলানো যায়নি" : "Status update failed", variant: "destructive" }); return; }
+    void fetchCoupons(true);
   };
 
   const copyCode = (code: string) => {
@@ -150,67 +165,26 @@ const AdminCoupons = () => {
     toast({ title: bn ? "কপি হয়েছে!" : "Copied!" });
   };
 
+  const exportRows = () => downloadCsv("yesshost-coupons", ["code", "description", "discount_type", "discount_value", "used", "limit", "status", "expires"], filtered.map(c => [c.code, c.description || "", c.discount_type, c.discount_value, c.used_count, c.max_uses || "unlimited", stateOf(c), csvDate(c.expires_at)]));
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Tag className="w-6 h-6 text-primary" />
-            {bn ? "কুপন ম্যানেজমেন্ট" : "Coupon Management"}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">{bn ? "প্রোমো কোড তৈরি ও ম্যানেজ করুন" : "Create and manage promo codes"}</p>
+    <div className="staff-console space-y-5">
+      <StaffPageHeader title={bn ? "কুপন অপারেশনস" : "Coupon Operations"} description={bn ? "প্রচার, ব্যবহার সীমা ও মেয়াদ এক জায়গা থেকে নিয়ন্ত্রণ করুন" : "Control promotions, usage limits and expiry from one workspace"} actions={<div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => void fetchCoupons()} disabled={loading}><RefreshCw className="size-4" />{bn ? "রিফ্রেশ" : "Refresh"}</Button><Button variant="outline" onClick={exportRows} disabled={!filtered.length}><Download className="size-4" />CSV</Button><Button onClick={openCreate}><Plus className="size-4" />{bn ? "নতুন কুপন" : "New Coupon"}</Button></div>} />
+      <StaffMetricStrip metrics={[
+        { label: bn ? "মোট কুপন" : "TOTAL COUPONS", value: totalCoupons, detail: bn ? "তৈরি করা" : "created", icon: Tag },
+        { label: bn ? "সক্রিয়" : "ACTIVE", value: activeCoupons, detail: bn ? "বর্তমানে ব্যবহারযোগ্য" : "currently usable", icon: CirclePercent, tone: "success" },
+        { label: bn ? "মোট ব্যবহার" : "TOTAL USES", value: totalUsed, detail: bn ? "চেকআউট প্রয়োগ" : "checkout uses", icon: ShoppingCart },
+        { label: bn ? "শীঘ্র মেয়াদ শেষ" : "EXPIRING SOON", value: expiringSoon, detail: bn ? "পরবর্তী ৩০ দিন" : "next 30 days", icon: Timer, tone: "warning" },
+      ]} />
+
+      <section className="staff-panel overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border p-3 sm:flex-row">
+          <StaffSearch value={search} onChange={setSearch} placeholder={bn ? "কোড বা বিবরণ খুঁজুন" : "Search code or description"} />
+          <Select value={status} onValueChange={setStatus}><SelectTrigger className="h-11 w-full sm:w-48"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{bn ? "সব স্ট্যাটাস" : "All statuses"}</SelectItem><SelectItem value="active">{bn ? "সক্রিয়" : "Active"}</SelectItem><SelectItem value="inactive">{bn ? "নিষ্ক্রিয়" : "Inactive"}</SelectItem><SelectItem value="expired">{bn ? "মেয়াদোত্তীর্ণ" : "Expired"}</SelectItem><SelectItem value="exhausted">{bn ? "সীমা পূর্ণ" : "Limit reached"}</SelectItem></SelectContent></Select>
         </div>
-        <button onClick={openCreate} className="gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20">
-          <Plus className="w-4 h-4" /> {bn ? "নতুন কুপন" : "New Coupon"}
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { label: bn ? "মোট কুপন" : "Total Coupons", value: totalCoupons, color: "text-primary" },
-          { label: bn ? "সক্রিয়" : "Active", value: activeCoupons, color: "text-green-500" },
-          { label: bn ? "মোট ব্যবহার" : "Total Uses", value: totalUsed, color: "text-orange-500" },
-        ].map((s, i) => (
-          <div key={i} className="glass-card rounded-xl p-4 text-center">
-            <BarChart3 className={`w-5 h-5 mx-auto mb-1 ${s.color}`} />
-            <p className={`text-2xl font-extrabold ${s.color}`}>{s.value}</p>
-            <p className="text-xs text-muted-foreground">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder={bn ? "কুপন খুঁজুন..." : "Search coupons..."}
-          maxLength={50}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
-        />
-      </div>
-
-      {/* Table */}
-      {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-12 glass-card rounded-xl">
-          <Tag className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">{bn ? "কোনো কুপন পাওয়া যায়নি" : "No coupons found"}</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <AnimatePresence>
-            {filtered.map(c => (
-              <motion.div
-                key={c.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="glass-card rounded-xl p-4"
-              >
+        {loading ? <div className="p-4"><StaffLoading rows={6} /></div> : error ? <StaffEmpty icon={Tag} title={bn ? "তথ্য লোড হয়নি" : "Data unavailable"} description={error} /> : paged.length === 0 ? <StaffEmpty icon={Tag} title={bn ? "কোনো কুপন পাওয়া যায়নি" : "No coupons found"} description={bn ? "সার্চ বা স্ট্যাটাস ফিল্টার পরিবর্তন করুন।" : "Try changing the search or status filter."} /> : <div className="divide-y divide-border">
+            {paged.map(c => (
+              <article key={c.id} className="p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${c.is_active ? "bg-primary/10" : "bg-muted"}`}>
@@ -219,14 +193,10 @@ const AdminCoupons = () => {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-foreground font-mono">{c.code}</span>
-                        <button onClick={() => copyCode(c.code)} className="text-muted-foreground hover:text-primary transition-colors">
+                        <Button size="icon" variant="ghost" onClick={() => copyCode(c.code)} aria-label={bn ? "কোড কপি" : "Copy code"}>
                           <Copy className="w-3.5 h-3.5" />
-                        </button>
-                        {!c.is_active && (
-                          <span className="text-[9px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm font-medium">
-                            {bn ? "নিষ্ক্রিয়" : "Inactive"}
-                          </span>
-                        )}
+                        </Button>
+                        <span className="rounded-md bg-secondary px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">{stateOf(c)}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {c.discount_type === "percentage" ? `${formatPrice(c.discount_value, lang)}%` : `৳${formatPrice(c.discount_value, lang)}`}
@@ -242,15 +212,13 @@ const AdminCoupons = () => {
                       <p className="text-[10px] text-muted-foreground">{c.max_uses ? `/ ${c.max_uses}` : (bn ? "ব্যবহার" : "uses")}</p>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <button onClick={() => toggleActive(c)} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors" title={c.is_active ? "Deactivate" : "Activate"}>
-                        {c.is_active ? <ToggleRight className="w-5 h-5 text-primary" /> : <ToggleLeft className="w-5 h-5" />}
-                      </button>
-                      <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors">
+                       <Button size="sm" variant={c.is_active ? "outline" : "default"} onClick={() => void toggleActive(c)}>{c.is_active ? (bn ? "বন্ধ করুন" : "Deactivate") : (bn ? "সক্রিয় করুন" : "Activate")}</Button>
+                       <Button size="icon" variant="ghost" onClick={() => openEdit(c)} aria-label={bn ? "সম্পাদনা" : "Edit"}>
                         <Pencil className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                       </Button>
+                       <Button size="icon" variant="ghost" onClick={() => void handleDelete(c.id)} aria-label={bn ? "মুছুন" : "Delete"}>
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                       </Button>
                     </div>
                   </div>
                 </div>
@@ -265,11 +233,11 @@ const AdminCoupons = () => {
                   )}
                   <span>{bn ? "তৈরি:" : "Created:"} {new Date(c.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
                 </div>
-              </motion.div>
+               </article>
             ))}
-          </AnimatePresence>
-        </div>
-      )}
+        </div>}
+      </section>
+      <DataPagination total={filtered.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} pageSizeOptions={[5, 10, 25, 50]} />
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -378,13 +346,13 @@ const AdminCoupons = () => {
               />
               <label htmlFor="coupon-active" className="text-sm text-foreground">{bn ? "সক্রিয়" : "Active"}</label>
             </div>
-            <button
+            <Button
               onClick={handleSave}
               disabled={saving}
-              className="w-full gradient-primary text-primary-foreground py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-primary/20"
+              className="w-full"
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingId ? (bn ? "আপডেট করুন" : "Update") : (bn ? "তৈরি করুন" : "Create"))}
-            </button>
+              {saving ? (bn ? "সেভ হচ্ছে…" : "Saving…") : (editingId ? (bn ? "আপডেট করুন" : "Update") : (bn ? "তৈরি করুন" : "Create"))}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
