@@ -14,6 +14,8 @@ type Ticket = Tables<"support_tickets">;
 type Chat = Tables<"live_chats">;
 type Order = Tables<"orders">;
 type Call = Tables<"call_history">;
+type Invoice = Tables<"invoices">;
+type Service = Tables<"services">;
 type QueueItem = { id: string; title: string; detail: string; time: string; href: string; type: "chat" | "ticket" | "order" | "call"; urgent: boolean };
 
 const CallCenterDashboard = () => {
@@ -21,24 +23,30 @@ const CallCenterDashboard = () => {
   const bn = lang === "bn";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [data, setData] = useState<{ chats: Chat[]; tickets: Ticket[]; orders: Order[]; calls: Call[] }>({ chats: [], tickets: [], orders: [], calls: [] });
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [data, setData] = useState<{ chats: Chat[]; tickets: Ticket[]; orders: Order[]; calls: Call[]; invoices: Invoice[]; services: Service[] }>({ chats: [], tickets: [], orders: [], calls: [], invoices: [], services: [] });
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     setError("");
-    const [chats, tickets, orders, calls] = await Promise.all([
+    const soon = new Date(Date.now() + 30 * 864e5).toISOString();
+    const [chats, tickets, orders, calls, invoices, services] = await Promise.all([
       supabase.from("live_chats").select("*").order("updated_at", { ascending: false }).limit(30),
       supabase.from("support_tickets").select("*").order("updated_at", { ascending: false }).limit(30),
       supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(30),
       supabase.from("call_history").select("*").order("created_at", { ascending: false }).limit(30),
+      supabase.from("invoices").select("*").in("status", ["unpaid", "overdue"]).order("due_date", { ascending: true }).limit(30),
+      supabase.from("services").select("*").not("expiry_date", "is", null).lte("expiry_date", soon).order("expiry_date", { ascending: true }).limit(30),
     ]);
     const failed = [chats.error, tickets.error, orders.error, calls.error].find(Boolean);
     if (failed) setError(bn ? "অপারেশন ডেটা লোড করা যায়নি। আবার চেষ্টা করুন।" : "Operations data could not be loaded. Please try again.");
-    setData({ chats: chats.data || [], tickets: tickets.data || [], orders: orders.data || [], calls: calls.data || [] });
+    setData({ chats: chats.data || [], tickets: tickets.data || [], orders: orders.data || [], calls: calls.data || [], invoices: invoices.data || [], services: services.data || [] });
+    setLastSync(new Date());
     setLoading(false);
   };
 
   useEffect(() => { load(); }, [bn]);
+  useEffect(() => { const timer = setInterval(() => load(true), 60000); return () => clearInterval(timer); }, [bn]);
 
   const openChats = data.chats.filter((item) => item.status === "open");
   const openTickets = data.tickets.filter((item) => ["open", "in_progress"].includes(item.status));
