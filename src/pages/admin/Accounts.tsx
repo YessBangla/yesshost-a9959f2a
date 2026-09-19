@@ -14,7 +14,7 @@ import { StaffEmpty, StaffLoading, StaffMetricStrip, StaffPageHeader, StaffSearc
 import { csvDate, downloadCsv } from "@/lib/export-csv";
 import { useServerFn } from "@tanstack/react-start";
 import { getAccountsReportSettings, saveAccountsReportSettings, sendAccountsReportNow } from "@/lib/accounts-report.functions";
-import { getAccountsSummaries } from "@/lib/secure-operations.functions";
+import { getAccountsSummaries, getAccountsReconciliation, type AccountsReconciliation } from "@/lib/secure-operations.functions";
 import { Mail, Send } from "lucide-react";
 
 type Granularity = "day" | "week" | "month" | "year";
