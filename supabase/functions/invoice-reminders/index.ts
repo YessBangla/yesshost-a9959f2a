@@ -15,6 +15,22 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    // Scheduled job: only the cron caller holding the shared secret may run it.
+    const provided = req.headers.get("x-cron-secret") ?? "";
+    const { data: cronCfg } = await supabase
+      .from("communication_config")
+      .select("config_value")
+      .eq("config_key", "accounts_report")
+      .maybeSingle();
+    const dbSecret = (cronCfg?.config_value as Record<string, string> | null)?.cron_secret ?? "";
+    const envSecret = Deno.env.get("CRON_SECRET") ?? "";
+    if (!provided || (provided !== dbSecret && provided !== envSecret)) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const now = new Date();
 
     // Get unpaid/overdue invoices with due dates
