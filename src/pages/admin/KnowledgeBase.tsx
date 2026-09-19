@@ -200,7 +200,7 @@ const AdminKnowledgeBase = () => {
     return categories.filter((cat) => {
       const catMatch = !q || cat.title_en.toLowerCase().includes(q) || cat.title_bn.toLowerCase().includes(q) || cat.slug.toLowerCase().includes(q);
       const hasArticles = articles.some((a) => a.category_id === cat.id && matchesArticle(a));
-      if (status !== "all") return hasArticles || (catMatch && articles.every((a) => a.category_id !== cat.id) && false);
+      if (status !== "all") return hasArticles;
       return catMatch || hasArticles;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
