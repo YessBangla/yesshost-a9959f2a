@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { KeyRound, Copy, RefreshCw, ShieldCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { generateSupportPin } from "@/lib/support-pin.functions";
 import { useServerFn } from "@tanstack/react-start";
-
-const VALID_MS = 60 * 60 * 1000; // 1 hour
 
 interface StoredPin {
   pin: string;
