@@ -489,6 +489,41 @@ const AdminAccounts = () => {
               <p className="text-xs text-muted-foreground">{bn ? "সব তথ্য হিসাব খাতা থেকে স্বয়ংক্রিয়ভাবে তৈরি — আলাদা করে লিখতে হবে না।" : "Generated automatically from the ledger — nothing to type in twice."}</p>
             </div>
 
+            {/* Scheduled email of statement + trial balance to outside accountants */}
+            <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Mail className="size-4 text-primary" />
+                <h3 className="text-sm font-semibold">{bn ? "নিয়মিত ইমেইল রিপোর্ট" : "Scheduled email report"}</h3>
+                <span className={`rounded-sm px-2 py-0.5 text-[10px] font-medium ${reportEnabled ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                  {reportEnabled ? (bn ? "চালু" : "On") : (bn ? "বন্ধ" : "Off")}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {bn
+                  ? "প্রতি মাসের ১ তারিখে আগের মাসের আয়–ব্যয় বিবরণী, অফিস খরচ, ব্যাংক ও ক্যাশ এন্ট্রি এবং ট্রায়াল ব্যালেন্স এই ঠিকানাগুলোতে চলে যাবে।"
+                  : "On the 1st of each month the previous month's statement, office expenses, bank & cash entries and trial balance are emailed to these addresses."}
+              </p>
+              <Input
+                value={reportRecipients}
+                onChange={(e) => setReportRecipients(e.target.value)}
+                placeholder={bn ? "accountant@example.com, auditor@example.com" : "accountant@example.com, auditor@example.com"}
+                className="h-11"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button className="h-11" disabled={reportBusy} onClick={() => void saveReport(true)}>
+                  {bn ? "সংরক্ষণ ও চালু করুন" : "Save & enable"}
+                </Button>
+                <Button variant="outline" className="h-11" disabled={reportBusy} onClick={() => void saveReport(false)}>
+                  {bn ? "বন্ধ করুন" : "Turn off"}
+                </Button>
+                <Button variant="outline" className="h-11" disabled={reportBusy || !reportRecipients.trim()} onClick={() => void sendReport()}>
+                  <Send className="mr-2 size-4" />{bn ? "এখনই পাঠান" : "Send now"}
+                </Button>
+              </div>
+            </div>
+
+
+
             <div className="grid gap-4 lg:grid-cols-2">
               <div className="rounded-lg border border-border bg-card">
                 <div className="border-b border-border p-3 font-medium">{bn ? "আয়" : "Income"}</div>
