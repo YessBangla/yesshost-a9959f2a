@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { CMSSkeleton } from "@/components/DashboardSkeleton";
 import {
   Plus, Pencil, Trash2, Save, X, FileText, MessageSquare,
-  HelpCircle, Layout, Eye, EyeOff, GripVertical, Search, Globe
+  HelpCircle, Layout, Eye, EyeOff, Globe, RefreshCcw, SearchX, Languages
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatPrice } from "@/lib/formatPrice";
+import { Button } from "@/components/ui/button";
+import { StaffEmpty, StaffLoading, StaffMetricStrip, StaffPageHeader, StaffSearch } from "@/components/staff/StaffConsole";
 
 type Tab = "content" | "plans" | "testimonials" | "faqs" | "domains";
 
@@ -21,6 +23,8 @@ const AdminCMS = () => {
   const [tab, setTab] = useState<Tab>("content");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const [contents, setContents] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
@@ -33,8 +37,9 @@ const AdminCMS = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [addForm, setAddForm] = useState<any>({});
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
+    setError("");
     const [c, p, t, f, d] = await Promise.all([
       supabase.from("site_content").select("*").order("page").order("sort_order"),
       supabase.from("pricing_plans").select("*").order("category").order("sort_order"),
@@ -47,8 +52,9 @@ const AdminCMS = () => {
     setTestimonials(t.data || []);
     setFaqs(f.data || []);
     setDomainPrices(d.data || []);
+    if ([c.error, p.error, t.error, f.error, d.error].some(Boolean)) setError(isBn ? "কিছু কন্টেন্ট লোড করা যায়নি। আবার চেষ্টা করুন।" : "Some content could not be loaded. Please try again.");
     setLoading(false);
-  };
+  }, [isBn]);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -56,6 +62,7 @@ const AdminCMS = () => {
   const cancelEdit = () => { setEditingId(null); setEditForm({}); };
 
   const saveEdit = async (table: string) => {
+    setSaving(true);
     const { id, created_at, ...rest } = editForm;
     if (table === "pricing_plans" && typeof rest.features === "string") {
       try { rest.features = JSON.parse(rest.features); } catch { /* keep */ }
@@ -63,24 +70,31 @@ const AdminCMS = () => {
     if (table === "site_content" && typeof rest.metadata === "string") {
       try { rest.metadata = JSON.parse(rest.metadata); } catch { /* keep */ }
     }
-    await (supabase.from(table as any) as any).update(rest).eq("id", id);
+    const { error: saveError } = await (supabase.from(table as any) as any).update(rest).eq("id", id);
+    setSaving(false);
+    if (saveError) { toast({ title: isBn ? "আপডেট করা যায়নি" : "Update failed", description: isBn ? "তথ্য যাচাই করে আবার চেষ্টা করুন।" : "Check the information and try again.", variant: "destructive" }); return; }
     toast({ title: isBn ? "সফলভাবে আপডেট হয়েছে" : "Updated successfully" });
     cancelEdit();
     fetchAll();
   };
 
   const deleteItem = async (table: string, id: string) => {
-    await (supabase.from(table as any) as any).delete().eq("id", id);
+    if (!window.confirm(isBn ? "এই আইটেমটি স্থায়ীভাবে মুছবেন?" : "Permanently delete this item?")) return;
+    const { error: deleteError } = await (supabase.from(table as any) as any).delete().eq("id", id);
+    if (deleteError) { toast({ title: isBn ? "মুছে ফেলা যায়নি" : "Delete failed", variant: "destructive" }); return; }
     toast({ title: isBn ? "সফলভাবে মুছে ফেলা হয়েছে" : "Deleted successfully" });
     fetchAll();
   };
 
   const addItem = async (table: string) => {
+    setSaving(true);
     const form = { ...addForm };
     if (table === "pricing_plans" && typeof form.features === "string") {
       try { form.features = JSON.parse(form.features); } catch { form.features = []; }
     }
-    await (supabase.from(table as any) as any).insert(form);
+    const { error: addError } = await (supabase.from(table as any) as any).insert(form);
+    setSaving(false);
+    if (addError) { toast({ title: isBn ? "আইটেম যোগ করা যায়নি" : "Item could not be added", description: isBn ? "প্রয়োজনীয় ঘরগুলো পূরণ করে আবার চেষ্টা করুন।" : "Complete the required fields and try again.", variant: "destructive" }); return; }
     toast({ title: isBn ? "সফলভাবে যোগ করা হয়েছে" : "Added successfully" });
     setShowAdd(false);
     setAddForm({});
@@ -97,6 +111,22 @@ const AdminCMS = () => {
 
   const tableForTab: Record<Tab, string> = { content: "site_content", plans: "pricing_plans", testimonials: "testimonials", faqs: "faqs", domains: "domain_pricing" };
 
+  const metrics = useMemo(() => {
+    const all = [...contents, ...plans, ...domainPrices, ...testimonials, ...faqs];
+    const active = all.filter(item => item.is_active !== false).length;
+    const bilingual = [...contents, ...testimonials, ...faqs].filter(item => {
+      const bnValue = item.title_bn || item.content_bn || item.question_bn || item.answer_bn;
+      const enValue = item.title_en || item.content_en || item.question_en || item.answer_en;
+      return Boolean(bnValue && enValue);
+    }).length;
+    return [
+      { label: isBn ? "মোট আইটেম" : "TOTAL CONTENT", value: all.length, detail: isBn ? "সব সংগ্রহ" : "across collections", icon: Layout },
+      { label: isBn ? "প্রকাশিত" : "PUBLISHED", value: active, detail: `${all.length ? Math.round(active / all.length * 100) : 0}% ${isBn ? "লাইভ" : "live"}`, icon: Eye, tone: "success" as const },
+      { label: isBn ? "খসড়া/নিষ্ক্রিয়" : "DRAFT / INACTIVE", value: all.length - active, detail: isBn ? "পর্যালোচনা প্রয়োজন" : "requires review", icon: EyeOff, tone: "warning" as const },
+      { label: isBn ? "দ্বিভাষিক" : "BILINGUAL", value: bilingual, detail: isBn ? "বাংলা ও ইংরেজি" : "Bangla and English", icon: Languages },
+    ];
+  }, [contents, plans, domainPrices, testimonials, faqs, isBn]);
+
   const InputField = ({ label, value, onChange, multiline }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean }) => (
     <div>
       <label className="text-[11px] font-semibold text-muted-foreground mb-1.5 block uppercase tracking-wider">{label}</label>
@@ -110,7 +140,7 @@ const AdminCMS = () => {
     </div>
   );
 
-  if (loading) return <CMSSkeleton />;
+  if (loading) return <div className="space-y-5"><CMSSkeleton /><StaffLoading rows={4} /></div>;
 
   const getAddDefaults = (): any => {
     switch (tab) {
@@ -395,46 +425,34 @@ const AdminCMS = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{isBn ? "কন্টেন্ট ম্যানেজমেন্ট" : "Content Management"}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{isBn ? "সাইটের সকল ডায়নামিক কন্টেন্ট পরিচালনা করুন" : "Manage all dynamic site content"}</p>
-      </div>
+    <div className="staff-console space-y-5">
+      <StaffPageHeader title={isBn ? "কন্টেন্ট অপারেশনস" : "Content Operations"} description={isBn ? "সাইট কন্টেন্ট, মূল্য ও প্রকাশনার অবস্থা এক জায়গায় পরিচালনা করুন" : "Manage site content, pricing and publishing status in one workspace"} actions={<Button variant="outline" onClick={() => void fetchAll()} disabled={loading}><RefreshCcw />{isBn ? "রিফ্রেশ" : "Refresh"}</Button>} />
+      <StaffMetricStrip metrics={metrics} />
+      {error && <div className="rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground">{error}</div>}
 
-      {/* Tabs + Search + Add */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex gap-1 p-1 rounded-xl bg-secondary/30 border border-border/50">
+      <div className="staff-panel flex flex-col gap-3 p-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="no-scrollbar flex w-full gap-1 overflow-x-auto lg:w-auto">
           {tabs.map(t => (
-            <button
+            <Button
               key={t.key}
               onClick={() => { setTab(t.key); setShowAdd(false); cancelEdit(); setSearch(""); }}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                tab === t.key ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
+              variant={tab === t.key ? "default" : "ghost"}
+              className="h-11 shrink-0"
             >
               <t.icon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{isBn ? t.label : t.labelEn}</span>
               <span className="text-[10px] opacity-60">({t.count})</span>
-            </button>
+            </Button>
           ))}
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-48">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder={isBn ? "সার্চ..." : "Search..."}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary/30 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30"
-            />
-          </div>
-          <button
+        <div className="flex w-full gap-2 lg:max-w-md">
+          <StaffSearch value={search} onChange={setSearch} placeholder={isBn ? "শিরোনাম, পেজ বা ক্যাটাগরি খুঁজুন" : "Search title, page or category"} />
+          <Button
             onClick={() => { setShowAdd(true); setAddForm(getAddDefaults()); }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shrink-0"
+            className="h-11 shrink-0"
           >
             <Plus className="w-4 h-4" /> {isBn ? "যোগ করুন" : "Add New"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -455,19 +473,21 @@ const AdminCMS = () => {
               />
             ))}
             <div className="flex gap-2 pt-2">
-              <button onClick={() => addItem(tableForTab[tab])} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"><Save className="w-4 h-4" /> {isBn ? "সেভ করুন" : "Save"}</button>
-              <button onClick={() => { setShowAdd(false); setAddForm({}); }} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary text-foreground text-sm font-semibold"><X className="w-4 h-4" /> {isBn ? "বাতিল" : "Cancel"}</button>
+              <Button onClick={() => void addItem(tableForTab[tab])} disabled={saving}><Save className="w-4 h-4" /> {saving ? (isBn ? "সেভ হচ্ছে…" : "Saving…") : (isBn ? "সেভ করুন" : "Save")}</Button>
+              <Button variant="secondary" onClick={() => { setShowAdd(false); setAddForm({}); }}><X className="w-4 h-4" /> {isBn ? "বাতিল" : "Cancel"}</Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Tab Content */}
-      {tab === "content" && renderContent()}
-      {tab === "plans" && renderPlans()}
-      {tab === "domains" && renderDomains()}
-      {tab === "testimonials" && renderTestimonials()}
-      {tab === "faqs" && renderFaqs()}
+      <section className="min-h-52">
+        {tab === "content" && (contents.length ? renderContent() : <StaffEmpty icon={SearchX} title={isBn ? "কোনো সাইট কন্টেন্ট নেই" : "No site content"} description={isBn ? "প্রথম কন্টেন্ট আইটেম যোগ করুন।" : "Add the first content item."} />)}
+        {tab === "plans" && (plans.length ? renderPlans() : <StaffEmpty icon={SearchX} title={isBn ? "কোনো মূল্য পরিকল্পনা নেই" : "No pricing plans"} description={isBn ? "প্রথম মূল্য পরিকল্পনা যোগ করুন।" : "Add the first pricing plan."} />)}
+        {tab === "domains" && (domainPrices.length ? renderDomains() : <StaffEmpty icon={SearchX} title={isBn ? "কোনো ডোমেইন মূল্য নেই" : "No domain pricing"} description={isBn ? "প্রথম ডোমেইন মূল্য যোগ করুন।" : "Add the first domain price."} />)}
+        {tab === "testimonials" && (testimonials.length ? renderTestimonials() : <StaffEmpty icon={SearchX} title={isBn ? "কোনো টেস্টিমোনিয়াল নেই" : "No testimonials"} description={isBn ? "প্রথম টেস্টিমোনিয়াল যোগ করুন।" : "Add the first testimonial."} />)}
+        {tab === "faqs" && (faqs.length ? renderFaqs() : <StaffEmpty icon={SearchX} title={isBn ? "কোনো FAQ নেই" : "No FAQs"} description={isBn ? "প্রথম FAQ যোগ করুন।" : "Add the first FAQ."} />)}
+      </section>
     </div>
   );
 };
