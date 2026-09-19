@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { PhoneIncoming, PhoneOff, PhoneMissed, Phone, RefreshCw, Clock, Search } from "lucide-react";
+import { PhoneIncoming, PhoneOff, PhoneMissed, Phone, RefreshCw, Clock, Search, NotebookPen, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import DataPagination from "@/components/DataPagination";
 import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
@@ -17,6 +20,8 @@ interface CallRecord {
   duration_seconds: number | null;
   status: string;
   created_at: string;
+  outcome?: string | null;
+  notes?: string | null;
   live_chats?: { visitor_name: string; visitor_email: string | null; visitor_phone: string | null } | null;
 }
 
