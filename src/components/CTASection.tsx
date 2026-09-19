@@ -62,7 +62,7 @@ const CTASection = () => {
               >
                 <MessageCircle className="w-4 h-4" />
                 {lang === "bn" ? (contacts.chat_label_bn || tr("cta.liveChat")) : (contacts.chat_label_en || tr("cta.liveChat"))}
-              </a>
+              </button>
               <a
                 href={`mailto:${contacts.email || "support@yesshost.com"}`}
                 className="flex items-center gap-2 text-primary-foreground border border-primary-foreground/25 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold text-sm hover:bg-white/10 transition-all"
