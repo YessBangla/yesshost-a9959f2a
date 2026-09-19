@@ -14,9 +14,9 @@ import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
 import sslLogo from "@/assets/partners/ssl-wireless.png";
 
-const paymentMethods = [
+const basePaymentMethods = [
   { id: "wallet", label: "Wallet Balance", labelBn: "ওয়ালেট ব্যালেন্স", icon: Wallet, desc: "Pay from your wallet balance", descBn: "ওয়ালেট ব্যালেন্স থেকে পে করুন", ready: true },
-  { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", ready: true },
+  { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", ready: false },
   { id: "bkash", label: "bKash", labelBn: "বিকাশ", logo: bkashLogo, desc: "bKash Tokenized Payment", ready: false },
   { id: "nagad", label: "Nagad", labelBn: "নগদ", logo: nagadLogo, desc: "Nagad Digital Payment", ready: false },
   { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, desc: "Manual Bank Transfer", ready: true },
