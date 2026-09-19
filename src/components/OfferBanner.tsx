@@ -1,38 +1,44 @@
-import { useState } from "react";
-import { X, Star, Zap, Tag } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { X, Star, Zap, Tag, Gift, Percent, Megaphone, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
-const offers = [
-  {
-    icon: Star,
-    en: "🔥 .TOP Domain only ৳180/year! Register now →",
-    bn: "🔥 .TOP ডোমেইন মাত্র ১৮০ টাকা/বছর! এখনই রেজিস্টার করুন →",
-  },
-  {
-    icon: Tag,
-    en: "💰 Up to 50% OFF on Reseller Hosting! Use code: RH50",
-    bn: "💰 রিসেলার হোস্টিংয়ে সর্বোচ্চ ৫০% ছাড়! কোড: RH50",
-  },
-  {
-    icon: Zap,
-    en: "⚡ .COM Domain Registration only ৳990 — Limited Time!",
-    bn: "⚡ .COM ডোমেইন রেজিস্ট্রেশন মাত্র ৯৯০ টাকা — সীমিত সময়!",
-  },
+const iconMap: Record<string, typeof Star> = { Star, Zap, Tag, Gift, Percent, Megaphone, Sparkles };
+
+const fallbackOffers = [
+  { icon: "Star", en: "🔥 .TOP Domain only ৳180/year! Register now →", bn: "🔥 .TOP ডোমেইন মাত্র ১৮০ টাকা/বছর! এখনই রেজিস্টার করুন →" },
+  { icon: "Tag", en: "💰 Up to 50% OFF on Reseller Hosting! Use code: RH50", bn: "💰 রিসেলার হোস্টিংয়ে সর্বোচ্চ ৫০% ছাড়! কোড: RH50" },
+  { icon: "Zap", en: "⚡ .COM Domain Registration only ৳990 — Limited Time!", bn: "⚡ .COM ডোমেইন রেজিস্ট্রেশন মাত্র ৯৯০ টাকা — সীমিত সময়!" },
 ];
 
 const OfferBanner = () => {
   const [visible, setVisible] = useState(true);
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const [cms, setCms] = useState<any>(null);
 
-  if (!visible) return null;
+  useEffect(() => {
+    supabase.from("site_content").select("*")
+      .eq("page", "home").eq("section_key", "offer_banner").eq("is_active", true)
+      .maybeSingle()
+      .then(({ data }) => setCms(data));
+  }, []);
+
+  const offers = useMemo(() => {
+    const list = cms?.metadata?.offers;
+    return Array.isArray(list) && list.length ? list : fallbackOffers;
+  }, [cms]);
+
+  const speed = Number(cms?.metadata?.speed_seconds) > 0 ? Number(cms.metadata.speed_seconds) : 60;
+
+  if (!visible || offers.length === 0) return null;
 
   return (
     <div className="relative h-8 sm:h-9 flex items-center bg-primary text-primary-foreground overflow-hidden">
       <div className="flex-1 min-w-0 overflow-hidden">
-        <div className="flex whitespace-nowrap" style={{ animation: "marquee 60s linear infinite" }}>
-          {[...offers, ...offers].map((offer, i) => {
-            const Icon = offer.icon;
+        <div className="flex whitespace-nowrap" style={{ animation: `marquee ${speed}s linear infinite` }}>
+          {[...offers, ...offers].map((offer: any, i: number) => {
+            const Icon = iconMap[offer.icon] || Star;
             return (
               <span
                 key={i}
