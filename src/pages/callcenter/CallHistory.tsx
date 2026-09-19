@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
-import { PhoneIncoming, PhoneOff, PhoneMissed, Phone, RefreshCw, Clock } from "lucide-react";
+import { PhoneIncoming, PhoneOff, PhoneMissed, Phone, RefreshCw, Clock, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import DataPagination from "@/components/DataPagination";
+import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
 
 interface CallRecord {
   id: string;
@@ -9,7 +14,7 @@ interface CallRecord {
   caller_role: string;
   started_at: string;
   ended_at: string | null;
-  duration_seconds: number;
+  duration_seconds: number | null;
   status: string;
   created_at: string;
   live_chats?: { visitor_name: string; visitor_email: string | null; visitor_phone: string | null } | null;
@@ -28,6 +33,9 @@ const CallHistory = () => {
   const [calls, setCalls] = useState<CallRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchCalls = async () => {
     setLoading(true);
@@ -48,7 +56,7 @@ const CallHistory = () => {
 
   useEffect(() => { fetchCalls(); }, [filter]);
 
-  const formatDuration = (s: number) => {
+  const formatDuration = (s: number | null) => {
     if (!s) return "—";
     const m = Math.floor(s / 60);
     const sec = s % 60;
@@ -65,7 +73,7 @@ const CallHistory = () => {
   const completedCalls = calls.filter(c => c.status === "completed").length;
   const missedCalls = calls.filter(c => c.status === "missed").length;
   const avgDuration = completedCalls
-    ? Math.round(calls.filter(c => c.status === "completed").reduce((a, c) => a + c.duration_seconds, 0) / completedCalls)
+    ? Math.round(calls.filter(c => c.status === "completed").reduce((a, c) => a + (c.duration_seconds || 0), 0) / completedCalls)
     : 0;
 
   const stats = [
@@ -82,58 +90,36 @@ const CallHistory = () => {
     { key: "ringing", label: bn ? "রিংিং" : "Ringing" },
   ];
 
-  if (loading && calls.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const query = search.toLowerCase();
+  const filteredCalls = calls.filter((call) => [call.live_chats?.visitor_name, call.live_chats?.visitor_email, call.live_chats?.visitor_phone, call.caller_role].some((value) => value?.toLowerCase().includes(query)));
+  const pagedCalls = filteredCalls.slice((page - 1) * pageSize, page * pageSize);
+  useEffect(() => setPage(1), [filter, search]);
+
+  if (loading && calls.length === 0) return <div className="space-y-4"><div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{[0,1,2,3].map((item)=><Skeleton key={item} className="h-28" />)}</div>{[0,1,2,3,4].map((item)=><Skeleton key={item} className="h-14" />)}</div>;
 
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">{bn ? "কল হিস্ট্রি" : "Call History"}</h1>
-        <button onClick={fetchCalls} className="p-2 rounded-xl hover:bg-secondary/60 text-muted-foreground transition-colors active:scale-95">
-          <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
-        </button>
-      </div>
+      <StaffPageHeader title={bn ? "কল ফলাফল ও ইতিহাস" : "Call Outcomes & History"} description={bn ? "কলের ফলাফল, সময়কাল ও ফলো-আপের অগ্রাধিকার" : "Call outcomes, duration and follow-up priority"} actions={<Button variant="outline" onClick={fetchCalls}><RefreshCw className={loading?"animate-spin":""}/>{bn?"রিফ্রেশ":"Refresh"}</Button>} />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {stats.map((s) => (
-          <div key={s.label} className="glass-card rounded-xl p-4 flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.color}`}>
-              <s.icon className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-              <p className="text-lg font-bold text-foreground tabular-nums">{s.value}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <StaffMetricStrip metrics={stats.map((item,index)=>({label:item.label,value:item.value,detail:index===0?(bn?"সাম্প্রতিক ১০০":"latest 100"):index===1?(bn?"সফল সংযোগ":"successful"):index===2?(bn?"ফলো-আপ":"follow-up"):(bn?"সম্পন্ন কল":"completed calls"),icon:item.icon,tone:index===1?"success":index===2?"danger":"primary"}))} />
 
       {/* Filter Tabs */}
-      <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+      <div className="staff-panel flex flex-col gap-3 p-3 md:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder={bn?"নাম, ইমেইল বা ফোন খুঁজুন":"Search name, email or phone"} className="pl-9"/></div><div className="flex gap-1.5 overflow-x-auto no-scrollbar">
         {filters.map((f) => (
-          <button
+          <Button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-3.5 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all active:scale-95 ${
-              filter === f.key
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
-            }`}
+            variant={filter === f.key ? "default" : "ghost"} size="sm"
           >
             {f.label}
-          </button>
+          </Button>
         ))}
-      </div>
+      </div></div>
 
       {/* Call List */}
-      <div className="glass-card rounded-xl overflow-hidden">
+      <div className="staff-panel overflow-hidden">
         {/* Desktop Header */}
         <div className="hidden md:grid grid-cols-[1fr_120px_100px_100px_140px] gap-4 px-4 py-3 border-b border-border/50 text-xs font-semibold text-muted-foreground">
           <span>{bn ? "ভিজিটর" : "Visitor"}</span>
@@ -149,7 +135,7 @@ const CallHistory = () => {
             <p className="text-sm">{bn ? "কোনো কল হিস্ট্রি নেই" : "No call history"}</p>
           </div>
         ) : (
-          calls.map((call) => {
+          pagedCalls.map((call) => {
             const cfg = statusConfig[call.status] || statusConfig.missed;
             const StatusIcon = cfg.icon;
             return (
@@ -198,6 +184,7 @@ const CallHistory = () => {
             );
           })
         )}
+        <div className="px-4 pb-4"><DataPagination total={filteredCalls.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} /></div>
       </div>
     </div>
   );

@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, X, Eye, ShoppingCart, RefreshCw, Package, Clock, Globe, Server, Palette, CreditCard, ChevronDown, ChevronUp, Zap } from "lucide-react";
+import { Check, X, ShoppingCart, RefreshCw, Package, Clock, Globe, Server, Palette, ChevronDown, ChevronUp, Zap, Search, CircleDollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatAmount } from "@/lib/formatPrice";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import DataPagination from "@/components/DataPagination";
+import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
 
 type Order = {
   id: string;
@@ -64,6 +69,9 @@ const CallCenterOrders = () => {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "active">("all");
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchData = async () => {
     setLoading(true);
@@ -111,7 +119,12 @@ const CallCenterOrders = () => {
     if (newStatus === "processing") updateFields.processed_at = new Date().toISOString();
     if (newStatus === "cancelled") updateFields.cancelled_at = new Date().toISOString();
 
-    await supabase.from("orders").update(updateFields).eq("id", orderId);
+    const { error } = await supabase.from("orders").update(updateFields).eq("id", orderId);
+    if (error) {
+      toast({ title: bn ? "অর্ডার আপডেট হয়নি" : "Order was not updated", description: bn ? "আবার চেষ্টা করুন।" : "Please try again.", variant: "destructive" });
+      setProcessingId(null);
+      return;
+    }
     toast({ title: bn ? "অর্ডার আপডেট হয়েছে" : "Order Updated" });
     setProcessingId(null);
     fetchData();
@@ -130,9 +143,12 @@ const CallCenterOrders = () => {
     fetchData();
   };
 
-  const filteredOrders = filter === "all" ? orders :
+  const byStatus = filter === "all" ? orders :
     filter === "pending" ? orders.filter(o => ["pending", "confirmed", "processing"].includes(o.status)) :
     orders.filter(o => ["active", "completed"].includes(o.status));
+  const query = search.toLowerCase();
+  const filteredOrders = byStatus.filter((order) => [order.order_number, order.user_name, order.payment_method, order.payment_status].some((value) => value?.toLowerCase().includes(query)));
+  const pagedOrders = filteredOrders.slice((page - 1) * pageSize, page * pageSize);
 
   const stats = {
     total: orders.length,
@@ -141,57 +157,38 @@ const CallCenterOrders = () => {
     active: orders.filter(o => ["active", "completed"].includes(o.status)).length,
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  useEffect(() => setPage(1), [filter, search]);
+
+  if (loading) return <div className="space-y-4"><div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{[0,1,2,3].map((item)=><Skeleton key={item} className="h-28" />)}</div>{[0,1,2,3,4].map((item)=><Skeleton key={item} className="h-20" />)}</div>;
+
+  const totalValue = orders.reduce((sum, order) => sum + Number(order.total_bdt), 0);
+  const pendingValue = orders.filter((order) => ["pending", "confirmed", "processing"].includes(order.status)).reduce((sum, order) => sum + Number(order.total_bdt), 0);
+  const paidCount = orders.filter((order) => order.payment_status === "paid").length;
+  const conversion = orders.length ? Math.round((paidCount / orders.length) * 100) : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{bn ? "অর্ডার ম্যানেজমেন্ট" : "Order Management"}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{bn ? "সকল অর্ডার প্রসেস ও প্রভিশনিং" : "Process and provision all orders"}</p>
-        </div>
-        <button onClick={fetchData} className="p-2.5 rounded-xl hover:bg-secondary/60 text-muted-foreground active:scale-95 transition-all">
-          <RefreshCw className="w-5 h-5" />
-        </button>
-      </div>
+    <div className="space-y-5">
+      <StaffPageHeader title={bn ? "অর্ডার ও সেলস" : "Orders & Sales"} description={bn ? "পেমেন্ট, গ্রাহক ও প্রভিশনিংয়ের তথ্যভিত্তিক কিউ" : "A data-led queue for payments, customers and provisioning"} actions={<Button variant="outline" onClick={fetchData}><RefreshCw />{bn?"রিফ্রেশ":"Refresh"}</Button>} />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: bn ? "মোট" : "Total", value: stats.total, icon: ShoppingCart, color: "text-foreground" },
-          { label: bn ? "নতুন" : "New", value: stats.pending, icon: Clock, color: "text-amber-600" },
-          { label: bn ? "প্রসেসিং" : "Processing", value: stats.processing, icon: Package, color: "text-indigo-600" },
-          { label: bn ? "সক্রিয়" : "Active", value: stats.active, icon: Check, color: "text-green-600" },
-        ].map((s, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-            className="glass-card rounded-xl p-4">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <s.icon className={`w-4 h-4 ${s.color}`} />
-              <span className="text-xs font-medium">{s.label}</span>
-            </div>
-            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-          </motion.div>
-        ))}
-      </div>
+      <StaffMetricStrip metrics={[{label:bn?"মোট ভ্যালু":"Order value",value:`৳${formatAmount(totalValue,lang)}`,detail:`${stats.total} ${bn?"অর্ডার":"orders"}`,icon:CircleDollarSign,tone:"primary"},{label:bn?"অপেক্ষমাণ ভ্যালু":"Pending value",value:`৳${formatAmount(pendingValue,lang)}`,detail:`${stats.pending+stats.processing} ${bn?"কাজ":"actions"}`,icon:Clock,tone:"warning"},{label:bn?"পরিশোধিত":"Paid orders",value:paidCount,detail:`${conversion}% ${bn?"হার":"rate"}`,icon:Check,tone:"success"},{label:bn?"সক্রিয়":"Active",value:stats.active,detail:bn?"প্রভিশন সম্পন্ন":"provisioned",icon:Package,tone:"success"}]} />
 
       {/* Filter tabs */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar">
+      <div className="staff-panel flex flex-col gap-3 p-3 md:flex-row md:items-center"><div className="relative min-w-0 flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder={bn?"অর্ডার, গ্রাহক বা পেমেন্ট খুঁজুন":"Search order, customer or payment"} className="pl-9" /></div><div className="flex gap-2 overflow-x-auto no-scrollbar">
         {[
           { key: "all" as const, label: bn ? "সকল" : "All", count: orders.length },
           { key: "pending" as const, label: bn ? "পেন্ডিং" : "Pending", count: orders.filter(o => ["pending", "confirmed", "processing"].includes(o.status)).length },
           { key: "active" as const, label: bn ? "সক্রিয়" : "Active", count: orders.filter(o => ["active", "completed"].includes(o.status)).length },
         ].map(tab => (
-          <button
+          <Button
             key={tab.key}
             onClick={() => setFilter(tab.key)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-              filter === tab.key ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
-            }`}
+            variant={filter === tab.key ? "default" : "ghost"}
           >
             {tab.label} ({tab.count})
-          </button>
+          </Button>
         ))}
-      </div>
+      </div></div>
 
       {/* Orders */}
       {filteredOrders.length === 0 ? (
@@ -201,7 +198,7 @@ const CallCenterOrders = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredOrders.map((order, i) => {
+           {pagedOrders.map((order, i) => {
             const sc = statusConfig[order.status] || statusConfig.pending;
             const isExpanded = expandedOrder === order.id;
             const items = orderItems[order.id] || [];
@@ -209,7 +206,7 @@ const CallCenterOrders = () => {
 
             return (
               <motion.div key={order.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
-                className="glass-card rounded-xl overflow-hidden">
+                className="staff-panel overflow-hidden">
                 
                 {/* Header */}
                 <button onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
@@ -272,39 +269,39 @@ const CallCenterOrders = () => {
                       <div className="flex gap-2 shrink-0">
                         {order.status === "pending" && (
                           <>
-                            <button
+                             <Button
                               onClick={() => updateOrderStatus(order.id, "confirmed")}
                               disabled={isProcessing}
-                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-semibold transition-all disabled:opacity-50"
+                               variant="secondary" size="sm"
                             >
                               <Check className="w-3.5 h-3.5" /> {bn ? "কনফার্ম" : "Confirm"}
-                            </button>
-                            <button
+                             </Button>
+                             <Button
                               onClick={() => updateOrderStatus(order.id, "cancelled")}
                               disabled={isProcessing}
-                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs font-semibold transition-all disabled:opacity-50"
+                               variant="destructive" size="sm"
                             >
                               <X className="w-3.5 h-3.5" /> {bn ? "বাতিল" : "Cancel"}
-                            </button>
+                             </Button>
                           </>
                         )}
                         {order.status === "confirmed" && (
-                          <button
+                           <Button
                             onClick={() => provisionOrder(order.id)}
                             disabled={isProcessing}
-                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-500/10 text-green-600 hover:bg-green-500/20 text-xs font-bold transition-all disabled:opacity-50"
+                             variant="secondary" size="sm" className="text-success"
                           >
                             <Zap className="w-3.5 h-3.5" /> {bn ? "প্রভিশন করুন" : "Provision"}
-                          </button>
+                           </Button>
                         )}
                         {order.status === "processing" && (
-                          <button
+                           <Button
                             onClick={() => provisionOrder(order.id)}
                             disabled={isProcessing}
-                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-500/10 text-green-600 hover:bg-green-500/20 text-xs font-bold transition-all disabled:opacity-50"
+                             variant="secondary" size="sm" className="text-success"
                           >
                             <Zap className="w-3.5 h-3.5" /> {bn ? "এক্টিভেট" : "Activate"}
-                          </button>
+                           </Button>
                         )}
                       </div>
                     </div>
@@ -313,7 +310,7 @@ const CallCenterOrders = () => {
               </motion.div>
             );
           })}
-        </div>
+        <div><div className="space-y-3">{pagedOrders.length ? null : <p className="py-10 text-center text-sm text-muted-foreground">{bn?"কোনো অর্ডার পাওয়া যায়নি":"No matching orders"}</p>}</div><DataPagination total={filteredOrders.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} /></div>
       )}
     </div>
   );
