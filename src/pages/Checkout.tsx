@@ -502,12 +502,14 @@ const Checkout = () => {
                   </button>
                 ))}
               </div>
-              <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <p className="text-[11px] text-muted-foreground">
-                  {bn ? "বর্তমানে SSLCommerz Sandbox (টেস্ট) মোডে চলছে। লাইভ পেমেন্টের জন্য মার্চেন্ট credentials প্রয়োজন।" : "SSLCommerz is currently in Sandbox (test) mode. Merchant credentials needed for live payments."}
-                </p>
-              </div>
+              {paymentMethods.some((m) => m.ready && (m as { isSandbox?: boolean }).isSandbox) && (
+                <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-muted-foreground">
+                    {bn ? "চিহ্নিত পদ্ধতিগুলো এখন টেস্ট (স্যান্ডবক্স) মোডে চলছে — আসল টাকা কাটা হবে না।" : "Methods marked Sandbox are in test mode — no real money is charged."}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Order Note */}
