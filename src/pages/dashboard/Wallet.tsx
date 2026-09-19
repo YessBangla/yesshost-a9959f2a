@@ -1,3 +1,4 @@
+import { StaffPageHeader } from "@/components/staff/StaffConsole";
 import { useEffect, useState, useMemo } from "react";
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, CreditCard, Building2, Loader2, CheckCircle2, Clock, XCircle, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -285,16 +286,17 @@ const DashboardWallet = () => {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{isBn ? "ওয়ালেট" : "Wallet"}</h1>
-          <p className="text-sm text-muted-foreground">{isBn ? "আপনার ফান্ড ব্যালেন্স ও লেনদেন" : "Your fund balance & transactions"}</p>
-        </div>
-        <Button onClick={() => setShowAddFund(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          {isBn ? "ফান্ড যোগ করুন" : "Add Fund"}
-        </Button>
+      <div className="mb-6">
+        <StaffPageHeader
+          title={isBn ? "ওয়ালেট" : "Wallet"}
+          description={isBn ? "আপনার ফান্ড ব্যালেন্স, জমা ও খরচের হিসাব" : "Your fund balance, deposits and spending"}
+          actions={
+            <Button onClick={() => setShowAddFund(true)} className="h-11 gap-2">
+              <Plus className="w-4 h-4" />
+              {isBn ? "ফান্ড যোগ করুন" : "Add Fund"}
+            </Button>
+          }
+        />
       </div>
 
       {/* Balance Cards */}

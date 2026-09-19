@@ -1,3 +1,4 @@
+import { StaffPageHeader } from "@/components/staff/StaffConsole";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -158,11 +159,10 @@ const DashboardProfile = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{tr("dash.profileTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{tr("dash.profileSubtitle")}</p>
-      </div>
+      <StaffPageHeader
+        title={tr("dash.profileTitle")}
+        description={tr("dash.profileSubtitle")}
+      />
 
       {/* Avatar & Identity Card */}
       <div className="glass-card p-6">

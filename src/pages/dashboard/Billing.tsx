@@ -1,3 +1,4 @@
+import { StaffPageHeader } from "@/components/staff/StaffConsole";
 import { useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -388,8 +389,10 @@ const DashboardBilling = () => {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{tr("dash.billingTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{tr("dash.billingSubtitle")}</p>
+        <StaffPageHeader
+          title={tr("dash.billingTitle")}
+          description={tr("dash.billingSubtitle")}
+        />
       </div>
 
       {/* Stats */}
