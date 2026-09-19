@@ -1,93 +1,155 @@
-import { useEffect, useMemo, useState } from "react";
-import { Shield, Headphones, UserCog, Users as UsersIcon, Loader2, Search, Trash2, Plus } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  AlertCircle,
+  CalendarDays,
+  Headphones,
+  MessageSquareReply,
+  Plus,
+  RefreshCw,
+  Shield,
+  Trash2,
+  UserCog,
+  Users as UsersIcon,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DataPagination from "@/components/DataPagination";
+import {
+  StaffEmpty,
+  StaffLoading,
+  StaffMetricStrip,
+  StaffPageHeader,
+  StaffSearch,
+} from "@/components/staff/StaffConsole";
 
 type StaffRole = "admin" | "moderator" | "call_center" | "reseller";
+type RoleRow = { id: string; user_id: string; role: string };
+type ProfileRow = { user_id: string; full_name: string | null; phone: string | null; avatar_url: string | null; created_at: string };
+type ReplyRow = { user_id: string | null; is_staff: boolean; created_at: string };
 
-const ROLES: { key: StaffRole; bn: string; en: string; icon: any; tone: string }[] = [
-  { key: "admin", bn: "অ্যাডমিন", en: "Admin", icon: Shield, tone: "text-destructive" },
-  { key: "moderator", bn: "মডারেটর", en: "Moderator", icon: UserCog, tone: "text-primary" },
-  { key: "call_center", bn: "কল সেন্টার", en: "Call center", icon: Headphones, tone: "text-emerald-600" },
-  { key: "reseller", bn: "রিসেলার", en: "Reseller", icon: UsersIcon, tone: "text-amber-600" },
+const ROLES: { key: StaffRole; bn: string; en: string; icon: typeof Shield }[] = [
+  { key: "admin", bn: "অ্যাডমিন", en: "Admin", icon: Shield },
+  { key: "moderator", bn: "মডারেটর", en: "Moderator", icon: UserCog },
+  { key: "call_center", bn: "কল সেন্টার", en: "Call center", icon: Headphones },
+  { key: "reseller", bn: "রিসেলার", en: "Reseller", icon: UsersIcon },
 ];
 
 const AdminStaff = () => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
-  const [roles, setRoles] = useState<any[]>([]);
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [replies, setReplies] = useState<any[]>([]);
+  const [roles, setRoles] = useState<RoleRow[]>([]);
+  const [profiles, setProfiles] = useState<ProfileRow[]>([]);
+  const [tickets, setTickets] = useState<{ status: string }[]>([]);
+  const [replies, setReplies] = useState<ReplyRow[]>([]);
   const [query, setQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | StaffRole>("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [addOpen, setAddOpen] = useState(false);
   const [addSearch, setAddSearch] = useState("");
 
-  const load = async () => {
-    const [r, p, t, rep] = await Promise.all([
-      supabase.from("user_roles").select("id,user_id,role"),
-      supabase.from("profiles").select("user_id,full_name,phone,avatar_url,created_at"),
-      supabase.from("support_tickets").select("status"),
-      supabase.from("ticket_replies").select("user_id,is_staff,created_at"),
-    ]);
-    setRoles(r.data || []);
-    setProfiles(p.data || []);
-    setTickets(t.data || []);
-    setReplies(rep.data || []);
-    setLoading(false);
-  };
+  const load = useCallback(async (quiet = false) => {
+    if (quiet) setRefreshing(true);
+    else setLoading(true);
+    setError("");
+    try {
+      const [r, p, t, rep] = await Promise.all([
+        supabase.from("user_roles").select("id,user_id,role"),
+        supabase.from("profiles").select("user_id,full_name,phone,avatar_url,created_at"),
+        supabase.from("support_tickets").select("status"),
+        supabase.from("ticket_replies").select("user_id,is_staff,created_at"),
+      ]);
+      const firstError = r.error || p.error || t.error || rep.error;
+      if (firstError) throw firstError;
+      setRoles((r.data || []) as RoleRow[]);
+      setProfiles((p.data || []) as ProfileRow[]);
+      setTickets(t.data || []);
+      setReplies((rep.data || []) as ReplyRow[]);
+    } catch (loadError) {
+      const message = loadError instanceof Error ? loadError.message : "Unknown error";
+      console.error("[AdminStaff] load failed", { message });
+      setError(bn ? "স্টাফ তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।" : "Staff data could not be loaded. Please try again.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [bn]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { setPage(1); }, [query, roleFilter]);
 
-  const profileOf = (uid: string) => profiles.find(p => p.user_id === uid);
-
-  const staff = useMemo(() => {
-    const map: Record<string, StaffRole[]> = {};
-    roles.forEach(r => {
-      if (r.role === "user") return;
-      map[r.user_id] = [...(map[r.user_id] || []), r.role];
+  const profileMap = useMemo(() => new Map(profiles.map((profile) => [profile.user_id, profile])), [profiles]);
+  const replyCount = useMemo(() => {
+    const counts = new Map<string, number>();
+    replies.forEach((reply) => {
+      if (reply.user_id && reply.is_staff) counts.set(reply.user_id, (counts.get(reply.user_id) || 0) + 1);
     });
-    return Object.entries(map)
-      .map(([user_id, userRoles]) => ({
-        user_id,
-        roles: userRoles,
-        profile: profileOf(user_id),
-        replies: replies.filter(x => x.user_id === user_id && x.is_staff).length,
-      }))
-      .filter(s => {
-        if (!query.trim()) return true;
-        const q = query.toLowerCase();
-        return (s.profile?.full_name || "").toLowerCase().includes(q) || (s.profile?.phone || "").includes(q);
-      })
-      .sort((a, b) => (a.profile?.full_name || "").localeCompare(b.profile?.full_name || ""));
-  }, [roles, profiles, replies, query]);
+    return counts;
+  }, [replies]);
+
+  const allStaff = useMemo(() => {
+    const map = new Map<string, StaffRole[]>();
+    roles.forEach((row) => {
+      if (row.role === "user" || !ROLES.some((role) => role.key === row.role)) return;
+      const role = row.role as StaffRole;
+      map.set(row.user_id, [...(map.get(row.user_id) || []), role]);
+    });
+    return Array.from(map, ([user_id, userRoles]) => ({
+      user_id,
+      roles: userRoles,
+      profile: profileMap.get(user_id),
+      replies: replyCount.get(user_id) || 0,
+    })).sort((a, b) => (a.profile?.full_name || "").localeCompare(b.profile?.full_name || ""));
+  }, [roles, profileMap, replyCount]);
+
+  const filteredStaff = useMemo(() => {
+    const normalized = query.trim().toLocaleLowerCase();
+    return allStaff.filter((member) => {
+      const matchesRole = roleFilter === "all" || member.roles.includes(roleFilter);
+      const matchesQuery = !normalized || [member.profile?.full_name, member.profile?.phone]
+        .some((value) => (value || "").toLocaleLowerCase().includes(normalized));
+      return matchesRole && matchesQuery;
+    });
+  }, [allStaff, query, roleFilter]);
+
+  const pagedStaff = useMemo(
+    () => filteredStaff.slice((page - 1) * pageSize, page * pageSize),
+    [filteredStaff, page, pageSize],
+  );
 
   const candidates = useMemo(() => {
-    const staffIds = new Set(roles.filter(r => r.role !== "user").map(r => r.user_id));
-    const q = addSearch.trim().toLowerCase();
+    const staffIds = new Set(allStaff.map((member) => member.user_id));
+    const normalized = addSearch.trim().toLocaleLowerCase();
     return profiles
-      .filter(p => !staffIds.has(p.user_id))
-      .filter(p => !q || (p.full_name || "").toLowerCase().includes(q) || (p.phone || "").includes(q))
+      .filter((profile) => !staffIds.has(profile.user_id))
+      .filter((profile) => !normalized || [profile.full_name, profile.phone]
+        .some((value) => (value || "").toLocaleLowerCase().includes(normalized)))
       .slice(0, 8);
-  }, [profiles, roles, addSearch]);
+  }, [profiles, allStaff, addSearch]);
 
   const toggleRole = async (userId: string, role: StaffRole, enabled: boolean) => {
     setSaving(`${userId}-${role}`);
     try {
       if (enabled) {
-        const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: role as any });
-        if (error && !error.message.includes("duplicate")) throw error;
+        const { error: saveError } = await supabase.from("user_roles").insert({ user_id: userId, role });
+        if (saveError && !saveError.message.includes("duplicate")) throw saveError;
       } else {
-        const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role as any);
-        if (error) throw error;
+        const { error: saveError } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
+        if (saveError) throw saveError;
       }
-      await load();
+      await load(true);
       toast.success(bn ? "অনুমতি হালনাগাদ হয়েছে" : "Role updated");
-    } catch (e: any) {
-      toast.error(bn ? "সংরক্ষণ ব্যর্থ: " + e.message : "Could not save: " + e.message);
+    } catch (saveError) {
+      console.error("[AdminStaff] role update failed", { userId, role, enabled, saveError });
+      toast.error(bn ? "অনুমতি সংরক্ষণ করা যায়নি" : "Could not save the role");
     } finally {
       setSaving(null);
     }
@@ -95,136 +157,105 @@ const AdminStaff = () => {
 
   const removeStaff = async (userId: string) => {
     setSaving(userId);
-    const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).neq("role", "user" as any);
+    const { error: removeError } = await supabase.from("user_roles").delete().eq("user_id", userId).neq("role", "user");
     setSaving(null);
-    if (error) { toast.error(bn ? "সরানো যায়নি" : "Could not remove"); return; }
-    await load();
+    if (removeError) {
+      console.error("[AdminStaff] remove failed", { userId, removeError });
+      toast.error(bn ? "স্টাফ সরানো যায়নি" : "Could not remove staff");
+      return;
+    }
+    await load(true);
     toast.success(bn ? "স্টাফ সরানো হয়েছে" : "Staff removed");
   };
 
   const counts = useMemo(() => ({
-    admin: roles.filter(r => r.role === "admin").length,
-    moderator: roles.filter(r => r.role === "moderator").length,
-    call_center: roles.filter(r => r.role === "call_center").length,
-    reseller: roles.filter(r => r.role === "reseller").length,
-    openTickets: tickets.filter(t => t.status === "open" || t.status === "in_progress").length,
-  }), [roles, tickets]);
+    admins: roles.filter((role) => role.role === "admin").length,
+    support: roles.filter((role) => role.role === "call_center" || role.role === "moderator").length,
+    replies: replies.filter((reply) => reply.is_staff).length,
+    openTickets: tickets.filter((ticket) => ticket.status === "open" || ticket.status === "in_progress").length,
+  }), [roles, replies, tickets]);
 
-  if (loading) {
-    return <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-16 rounded-xl bg-muted animate-pulse" />)}</div>;
-  }
+  const metrics = [
+    { label: bn ? "মোট স্টাফ" : "Total staff", value: allStaff.length, detail: bn ? "সক্রিয় সদস্য" : "team members", icon: UsersIcon },
+    { label: bn ? "অ্যাডমিন" : "Administrators", value: counts.admins, detail: bn ? "পূর্ণ অনুমতি" : "full access", icon: Shield, tone: "danger" as const },
+    { label: bn ? "কাস্টমার কেয়ার" : "Customer care", value: counts.support, detail: bn ? "সহায়তা ভূমিকা" : "support roles", icon: Headphones, tone: "warning" as const },
+    { label: bn ? "সাপোর্ট কাজ" : "Support activity", value: counts.replies, detail: `${counts.openTickets} ${bn ? "খোলা টিকেট" : "open tickets"}`, icon: MessageSquareReply, tone: "success" as const },
+  ];
+
+  if (loading) return <div className="space-y-5"><StaffLoading rows={1} /><StaffLoading rows={5} /></div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold">{bn ? "স্টাফ ও ম্যানেজার" : "Staff & Managers"}</h1>
-          <p className="text-sm text-muted-foreground">{bn ? "কর্মীদের অধিকার নিয়ন্ত্রণ ও কাজের সারসংক্ষেপ" : "Control team access and see workload"}</p>
-        </div>
-        <button onClick={() => setAddOpen(v => !v)} className="flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-lg bg-primary text-primary-foreground text-sm font-medium">
-          <Plus className="w-4 h-4" /> {bn ? "স্টাফ যোগ করুন" : "Add staff"}
-        </button>
-      </div>
+    <div className="staff-console space-y-5">
+      <StaffPageHeader
+        title={bn ? "স্টাফ ও অনুমতি" : "Staff & Access"}
+        description={bn ? "দলের ভূমিকা, অ্যাক্সেস ও সাপোর্ট কার্যক্রম পরিচালনা করুন" : "Manage team roles, access and support activity"}
+        actions={<div className="flex gap-2"><Button variant="outline" onClick={() => void load(true)} disabled={refreshing}><RefreshCw className={refreshing ? "animate-spin" : ""} />{bn ? "রিফ্রেশ" : "Refresh"}</Button><Button onClick={() => setAddOpen((open) => !open)}><Plus />{bn ? "স্টাফ যোগ করুন" : "Add staff"}</Button></div>}
+      />
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        {ROLES.map(r => (
-          <div key={r.key} className="rounded-xl border border-border bg-card p-4">
-            <div className={`flex items-center gap-2 text-[11px] font-medium ${r.tone}`}>
-              <r.icon className="w-3.5 h-3.5" /> {bn ? r.bn : r.en}
-            </div>
-            <p className="mt-2 text-lg font-bold">{counts[r.key]}</p>
-          </div>
-        ))}
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-[11px] font-medium text-muted-foreground">{bn ? "খোলা টিকিট" : "Open tickets"}</p>
-          <p className="mt-2 text-lg font-bold">{counts.openTickets}</p>
-        </div>
-      </div>
+      <StaffMetricStrip metrics={metrics} />
 
-      {addOpen && (
-        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-2 border border-border rounded-lg px-3">
-            <Search className="w-4 h-4 text-muted-foreground" />
-            <input
-              value={addSearch}
-              onChange={e => setAddSearch(e.target.value)}
-              placeholder={bn ? "নাম বা ফোন দিয়ে গ্রাহক খুঁজুন" : "Search customer by name or phone"}
-              className="flex-1 bg-transparent py-2.5 text-sm outline-hidden min-h-[44px]"
-            />
-          </div>
-          <div className="space-y-2">
-            {candidates.map(c => (
-              <div key={c.user_id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2 last:border-0">
-                <span className="text-sm font-medium">{c.full_name || (bn ? "নামবিহীন" : "Unnamed")} <span className="text-muted-foreground text-xs">{c.phone}</span></span>
-                <div className="flex gap-1.5">
-                  {ROLES.map(r => (
-                    <button
-                      key={r.key}
-                      onClick={() => toggleRole(c.user_id, r.key, true)}
-                      className="px-2.5 py-1.5 rounded-md border border-border text-[11px] font-medium hover:bg-accent/10"
-                    >
-                      + {bn ? r.bn : r.en}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-            {candidates.length === 0 && <p className="text-sm text-muted-foreground py-4 text-center">{bn ? "কোনো গ্রাহক পাওয়া যায়নি" : "No matching customer"}</p>}
-          </div>
+      {error && (
+        <div className="staff-panel flex flex-col gap-3 border-destructive/30 p-4 sm:flex-row sm:items-center sm:justify-between" role="alert">
+          <div className="flex items-start gap-3"><AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" /><div><p className="font-medium text-foreground">{bn ? "তথ্য পাওয়া যায়নি" : "Data unavailable"}</p><p className="text-sm text-muted-foreground">{error}</p></div></div>
+          <Button variant="outline" onClick={() => void load()}>{bn ? "আবার চেষ্টা করুন" : "Try again"}</Button>
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-card">
-        <div className="flex items-center gap-2 border-b border-border px-4">
-          <Search className="w-4 h-4 text-muted-foreground" />
-          <input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder={bn ? "স্টাফ খুঁজুন" : "Search staff"}
-            className="flex-1 bg-transparent py-3 text-sm outline-hidden min-h-[44px]"
-          />
-        </div>
-        <div className="divide-y divide-border">
-          {staff.map(s => (
-            <div key={s.user_id} className="p-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">{s.profile?.full_name || (bn ? "নামবিহীন ব্যবহারকারী" : "Unnamed user")}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {s.profile?.phone || "—"} · {bn ? "সাপোর্ট উত্তর" : "Support replies"}: {s.replies}
-                </p>
+      {addOpen && !error && (
+        <section className="staff-panel overflow-hidden" aria-labelledby="add-staff-title">
+          <div className="border-b border-border p-4"><h2 id="add-staff-title" className="font-semibold text-foreground">{bn ? "গ্রাহক থেকে স্টাফ যোগ করুন" : "Add staff from customers"}</h2><p className="mt-1 text-xs text-muted-foreground">{bn ? "একজন গ্রাহক খুঁজে প্রয়োজনীয় ভূমিকা দিন" : "Find a customer and assign the required role"}</p></div>
+          <div className="p-4"><Input value={addSearch} onChange={(event) => setAddSearch(event.target.value)} placeholder={bn ? "নাম বা ফোন দিয়ে খুঁজুন" : "Search by name or phone"} className="h-11" /></div>
+          <div className="divide-y divide-border border-t border-border">
+            {candidates.map((candidate) => (
+              <div key={candidate.user_id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{candidate.full_name || (bn ? "নামবিহীন গ্রাহক" : "Unnamed customer")}</p><p className="text-xs text-muted-foreground">{candidate.phone || (bn ? "ফোন দেওয়া হয়নি" : "No phone provided")}</p></div>
+                <div className="grid grid-cols-2 gap-2 sm:flex">
+                  {ROLES.map((role) => <Button key={role.key} variant="outline" size="sm" disabled={saving === `${candidate.user_id}-${role.key}`} onClick={() => void toggleRole(candidate.user_id, role.key, true)}>+ {bn ? role.bn : role.en}</Button>)}
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {ROLES.map(r => {
-                  const active = s.roles.includes(r.key);
-                  const busy = saving === `${s.user_id}-${r.key}`;
-                  return (
-                    <button
-                      key={r.key}
-                      disabled={busy}
-                      onClick={() => toggleRole(s.user_id, r.key, !active)}
-                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-medium border transition-colors ${active ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-accent/10"}`}
-                    >
-                      {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : <r.icon className="w-3 h-3" />}
-                      {bn ? r.bn : r.en}
-                    </button>
-                  );
-                })}
-                <button
-                  disabled={saving === s.user_id}
-                  onClick={() => removeStaff(s.user_id)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-medium border border-destructive/30 text-destructive hover:bg-destructive/10"
-                >
-                  {saving === s.user_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
-                  {bn ? "সরান" : "Remove"}
-                </button>
-              </div>
+            ))}
+            {candidates.length === 0 && <StaffEmpty icon={UsersIcon} title={bn ? "কোনো গ্রাহক পাওয়া যায়নি" : "No customer found"} description={bn ? "অন্য নাম বা ফোন নম্বর দিয়ে খুঁজুন।" : "Try another name or phone number."} />}
+          </div>
+        </section>
+      )}
+
+      {!error && (
+        <section className="space-y-4">
+          <div className="staff-panel flex flex-col gap-3 p-3 md:flex-row">
+            <StaffSearch value={query} onChange={setQuery} placeholder={bn ? "নাম বা ফোন দিয়ে স্টাফ খুঁজুন" : "Search staff by name or phone"} />
+            <Select value={roleFilter} onValueChange={(value) => setRoleFilter(value as "all" | StaffRole)}>
+              <SelectTrigger className="h-11 w-full md:w-52" aria-label={bn ? "ভূমিকা ফিল্টার" : "Filter by role"}><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="all">{bn ? "সব ভূমিকা" : "All roles"}</SelectItem>{ROLES.map((role) => <SelectItem key={role.key} value={role.key}>{bn ? role.bn : role.en}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+
+          <div className="staff-panel overflow-hidden">
+            <div className="hidden grid-cols-[minmax(220px,1.4fr)_minmax(190px,1fr)_120px_150px] gap-4 border-b border-border bg-secondary/30 px-4 py-3 text-xs font-semibold text-muted-foreground lg:grid">
+              <span>{bn ? "দলের সদস্য" : "Team member"}</span><span>{bn ? "ভূমিকা ও অনুমতি" : "Roles & access"}</span><span>{bn ? "সাপোর্ট উত্তর" : "Support replies"}</span><span className="text-right">{bn ? "কার্যক্রম" : "Actions"}</span>
             </div>
-          ))}
-          {staff.length === 0 && (
-            <p className="text-sm text-muted-foreground py-12 text-center">{bn ? "কোনো স্টাফ নেই" : "No staff members"}</p>
-          )}
-        </div>
-      </div>
+            <div className="divide-y divide-border">
+              {pagedStaff.map((member) => (
+                <article key={member.user_id} className="grid gap-4 p-4 lg:grid-cols-[minmax(220px,1.4fr)_minmax(190px,1fr)_120px_150px] lg:items-center">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 font-semibold text-primary">{(member.profile?.full_name || "U").charAt(0).toUpperCase()}</div>
+                    <div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{member.profile?.full_name || (bn ? "নামবিহীন ব্যবহারকারী" : "Unnamed user")}</p><p className="truncate text-xs text-muted-foreground">{member.profile?.phone || (bn ? "ফোন দেওয়া হয়নি" : "No phone provided")}</p>{member.profile?.created_at && <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground"><CalendarDays className="size-3" />{bn ? "যোগদান" : "Joined"} {new Date(member.profile.created_at).toLocaleDateString(bn ? "bn-BD" : "en-US")}</p>}</div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ROLES.map((role) => {
+                      const active = member.roles.includes(role.key);
+                      return <Button key={role.key} variant={active ? "default" : "outline"} size="sm" className="min-h-10" disabled={saving === `${member.user_id}-${role.key}`} onClick={() => void toggleRole(member.user_id, role.key, !active)} aria-pressed={active}>{bn ? role.bn : role.en}</Button>;
+                    })}
+                  </div>
+                  <div><span className="lg:hidden text-xs text-muted-foreground">{bn ? "সাপোর্ট উত্তর: " : "Support replies: "}</span><strong className="text-sm tabular-nums text-foreground">{member.replies}</strong></div>
+                  <div className="lg:text-right"><Button variant="outline" size="sm" className="min-h-10 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={saving === member.user_id} onClick={() => void removeStaff(member.user_id)}><Trash2 />{bn ? "সরান" : "Remove"}</Button></div>
+                </article>
+              ))}
+              {filteredStaff.length === 0 && <StaffEmpty icon={UsersIcon} title={query || roleFilter !== "all" ? (bn ? "কোনো মিল পাওয়া যায়নি" : "No matching staff") : (bn ? "কোনো স্টাফ নেই" : "No staff members")} description={query || roleFilter !== "all" ? (bn ? "সার্চ বা ভূমিকা ফিল্টার পরিবর্তন করুন।" : "Change the search or role filter.") : (bn ? "গ্রাহক তালিকা থেকে প্রথম স্টাফ সদস্য যোগ করুন।" : "Add the first staff member from the customer list.")} />}
+            </div>
+          </div>
+          <DataPagination total={filteredStaff.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} pageSizeOptions={[5, 10, 25, 50]} />
+        </section>
+      )}
     </div>
   );
 };
