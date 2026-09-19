@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.settle_theme_orders_on_invoice_paid() FROM PUBLIC, anon, authenticated;
