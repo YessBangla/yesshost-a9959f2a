@@ -128,8 +128,8 @@ const WhyChooseUs = () => {
                 <stat.icon className="w-5 h-5 text-primary-foreground" />
               </div>
               <p className="text-xl md:text-3xl font-extrabold text-foreground mb-0.5">
-                {stat.isDecimal ? (
-                  <span className="tabular-nums">99.9%</span>
+                {stat.display ? (
+                  <span className="tabular-nums">{stat.display}</span>
                 ) : (
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                 )}
