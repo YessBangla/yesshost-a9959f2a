@@ -20,7 +20,7 @@
 - [x] Phase 1: Secure payments, Support PIN, staff permissions, invoice guards, cron, and CSV
 - [ ] Phase 2: Complete checkout redirects, retry/idempotency, and reconciliation (server-authoritative order and gateway amounts complete)
 - [x] Phase 3: Client dashboard preferences and invoice deep-links (?invoice=&action=pay + copy link)
-- [ ] Phase 4: Add server pagination and accounting reconciliation
+- [ ] Phase 4: Add server pagination (accounting reconciliation tab complete)
 - [ ] Phase 5: Correct support SLA timing and call-center workflows
 - [ ] Phase 6: Fix hydration, accessibility, navigation, language SSR (dynamic SEO for service/theme detail complete)
 - [ ] Phase 7: Standardize controls, Skeletons, mobile layouts, and bilingual presentation
