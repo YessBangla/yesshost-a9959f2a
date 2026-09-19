@@ -42,12 +42,9 @@ export const createInvoiceShareLink = createServerFn({ method: "POST" })
   });
 
 export const getSharedInvoice = createServerFn({ method: "GET" })
-  .inputValidator((data: { token: string }) => {
-    const token = data?.token?.trim();
-    if (!tokenPattern.test(token)) throw new Error("Invalid invoice link");
-    return { token };
-  })
+  .inputValidator((data: { token: string }) => ({ token: (data?.token ?? "").trim() }))
   .handler(async ({ data }): Promise<SharedInvoice | null> => {
+    if (!tokenPattern.test(data.token)) return null;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tokenHash = await hashToken(data.token);
     const { data: invoice, error } = await supabaseAdmin
