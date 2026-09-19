@@ -106,8 +106,7 @@ const CallCenterTickets = () => {
                   </div>
                 ))}
               </div>
-               <div className="border-t border-border bg-secondary/20 p-3"><div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><UserRound className="size-3" />{selectedTicket.user_name} • {selectedTicket.priority}</div><div className="flex gap-2"><Input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === "Enter" && sendReply()} placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="h-11" /><Button onClick={sendReply} disabled={!reply.trim()} aria-label={bn?"উত্তর পাঠান":"Send reply"}><Send /></Button></div></div>
-              </div>
+                <div className="border-t border-border bg-secondary/20 p-3"><div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><UserRound className="size-3" />{selectedTicket.user_name} • {selectedTicket.priority}</div><div className="flex gap-2"><Input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === "Enter" && sendReply()} placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="h-11" /><Button onClick={sendReply} disabled={!reply.trim()} aria-label={bn?"উত্তর পাঠান":"Send reply"}><Send /></Button></div></div>
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2">

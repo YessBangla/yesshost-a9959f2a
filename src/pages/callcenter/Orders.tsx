@@ -310,7 +310,8 @@ const CallCenterOrders = () => {
               </motion.div>
             );
           })}
-        <div><div className="space-y-3">{pagedOrders.length ? null : <p className="py-10 text-center text-sm text-muted-foreground">{bn?"কোনো অর্ডার পাওয়া যায়নি":"No matching orders"}</p>}</div><DataPagination total={filteredOrders.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} /></div>
+          <DataPagination total={filteredOrders.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} />
+        </div>
       )}
     </div>
   );
