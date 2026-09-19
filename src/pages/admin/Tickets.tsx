@@ -168,25 +168,9 @@ const AdminTickets = () => {
     setSending(false);
   };
 
-  const stats = {
-    total: tickets.length,
-    open: tickets.filter(t => t.status === "open").length,
-    inProgress: tickets.filter(t => t.status === "in_progress").length,
-    urgent: tickets.filter(t => t.priority === "urgent" && t.status !== "closed" && t.status !== "resolved").length,
-  };
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter, priorityFilter]);
 
-  const filtered = tickets.filter(t => {
-    const matchSearch = !search || t.subject.toLowerCase().includes(search.toLowerCase()) ||
-      t.ticket_number.includes(search) ||
-      (t.profiles?.full_name || "").toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || t.status === statusFilter;
-    const matchPriority = priorityFilter === "all" || t.priority === priorityFilter;
-    return matchSearch && matchStatus && matchPriority;
-  });
-
-  useEffect(() => { setPage(1); }, [search, statusFilter, priorityFilter]);
-
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const paged = tickets;
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString(isBn ? "bn-BD" : "en-US", { month: "short", day: "numeric", year: "numeric" });
   const formatTime = (d: string) => new Date(d).toLocaleTimeString(isBn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" });
