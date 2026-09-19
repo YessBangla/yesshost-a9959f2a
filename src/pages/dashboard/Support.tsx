@@ -142,17 +142,43 @@ const DashboardSupport = () => {
     );
   }
 
+  const bn = lang === "bn";
+  const openCount = tickets.filter(t => t.status === "open").length;
+  const progressCount = tickets.filter(t => t.status === "in_progress" || t.status === "waiting").length;
+  const resolvedCount = tickets.filter(t => t.status === "resolved" || t.status === "closed").length;
+
+  const filteredTickets = tickets.filter(t => {
+    const matchSearch = !search ||
+      t.subject.toLowerCase().includes(search.toLowerCase()) ||
+      t.ticket_number.toLowerCase().includes(search.toLowerCase());
+    const matchStatus =
+      statusFilter === "all" ||
+      (statusFilter === "open" && (t.status === "open" || t.status === "in_progress" || t.status === "waiting")) ||
+      (statusFilter === "closed" && (t.status === "resolved" || t.status === "closed"));
+    return matchSearch && matchStatus;
+  });
+  const pagedTickets = filteredTickets.slice((page - 1) * pageSize, page * pageSize);
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{tr("dash.supportTitle")}</h1>
-          <p className="text-sm text-muted-foreground">{tr("dash.supportSubtitle")}</p>
-        </div>
-        <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
-          <Plus className="w-4 h-4" /> {tr("dash.newTicket")}
-        </button>
-      </div>
+    <div className="space-y-5">
+      <StaffPageHeader
+        title={tr("dash.supportTitle")}
+        description={tr("dash.supportSubtitle")}
+        actions={
+          <button onClick={() => setShowCreate(true)} className="inline-flex h-11 items-center gap-2 gradient-primary text-primary-foreground px-4 rounded-xl font-semibold text-sm hover:opacity-90 shadow-lg shadow-primary/20">
+            <Plus className="w-4 h-4" /> {tr("dash.newTicket")}
+          </button>
+        }
+      />
+
+      <StaffMetricStrip
+        metrics={[
+          { label: bn ? "মোট টিকিট" : "Total tickets", value: tickets.length, detail: bn ? "সব সময়ের" : "all time", icon: HeadphonesIcon },
+          { label: bn ? "খোলা" : "Open", value: openCount, detail: bn ? "উত্তরের অপেক্ষায়" : "awaiting reply", icon: Clock, tone: "warning" },
+          { label: bn ? "চলমান" : "In progress", value: progressCount, detail: bn ? "টিম কাজ করছে" : "being handled", icon: Loader2 },
+          { label: bn ? "সমাধান হয়েছে" : "Resolved", value: resolvedCount, detail: bn ? "বন্ধ টিকিট" : "closed tickets", icon: CheckCircle2, tone: "success" },
+        ] satisfies StaffMetric[]}
+      />
 
       {tickets.length === 0 ? (
         <EmptyState
@@ -164,7 +190,36 @@ const DashboardSupport = () => {
         />
       ) : (
         <div className="space-y-3">
-          {tickets.map(ticket => (
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                placeholder={bn ? "বিষয় বা টিকিট নম্বর খুঁজুন..." : "Search subject or ticket number..."}
+                className="w-full h-11 pl-10 pr-4 rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30 text-sm"
+              />
+            </div>
+            <div className="flex gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/50">
+              {(["all", "open", "closed"] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => { setStatusFilter(f); setPage(1); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${statusFilter === f ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  {f === "all" ? (bn ? "সব" : "All") : f === "open" ? (bn ? "চলমান" : "Active") : (bn ? "সমাধান" : "Resolved")}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filteredTickets.length === 0 && (
+            <div className="glass-card rounded-xl p-10 text-center text-sm text-muted-foreground">
+              {bn ? "এই ফিল্টারে কোনো টিকিট নেই" : "No tickets match this filter"}
+            </div>
+          )}
+
+          {pagedTickets.map(ticket => (
             <button key={ticket.id} onClick={() => setSelectedTicket(ticket.id)} className="w-full glass-card p-5 text-left hover:shadow-lg transition-all">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
