@@ -25,3 +25,5 @@
 - [x] Phase 6: Fix hydration, accessibility, navigation, language SSR (dynamic SEO for service/theme detail complete)
 - [ ] Phase 7: Standardize controls, Skeletons, mobile layouts, and bilingual presentation
 - [x] Phase 8: Run automated, browser, security, accounting, and release checks
+
+- [ ] Refine the mobile public-site template to a more premium international corporate standard.
