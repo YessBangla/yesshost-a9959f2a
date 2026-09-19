@@ -13,6 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StaffMetricStrip, StaffPageHeader } from "@/components/staff/StaffConsole";
 import { csvDate, downloadCsv } from "@/lib/export-csv";
+import { formatGap, formatStamp, isSlowGap } from "@/lib/time-gap";
+import { formatMinutes, slaMinutes, slaToneClass, ticketSla } from "@/lib/ticket-sla";
 
 type TicketWithReplies = Tables<"support_tickets"> & { replies: Tables<"ticket_replies">[]; user_name?: string };
 
