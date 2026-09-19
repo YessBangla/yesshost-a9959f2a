@@ -113,6 +113,43 @@ const DashboardBilling = () => {
   const fetchInvoices = () => { void billingQuery.refetch(); };
   const fetchWalletBalance = () => { void billingQuery.refetch(); };
 
+  // Deep link support: /dashboard/billing?invoice=<id|number>&action=pay
+  const search = useSearch({ from: "/dashboard/billing" });
+  const [deepLinkDone, setDeepLinkDone] = useState(false);
+  useEffect(() => {
+    if (deepLinkDone || !search.invoice || invoices.length === 0) return;
+    const target = invoices.find(
+      (i) => i.id === search.invoice || i.invoice_number === search.invoice
+    );
+    if (!target) return;
+    setDeepLinkDone(true);
+    const payable = target.status === "unpaid" || target.status === "overdue";
+    if (search.action === "pay" && payable) {
+      setPayInvoice(target);
+      setSelectedPayment("");
+    } else {
+      setReportInvoice(target);
+    }
+  }, [search.invoice, search.action, invoices, deepLinkDone]);
+
+  const copyInvoiceLink = async (inv: Tables<"invoices">) => {
+    const url = `${window.location.origin}/dashboard/billing?invoice=${encodeURIComponent(inv.invoice_number)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: isBn ? "লিংক কপি হয়েছে" : "Link copied",
+        description: inv.invoice_number,
+      });
+    } catch {
+      toast({
+        title: isBn ? "কপি করা যায়নি" : "Copy failed",
+        description: url,
+        variant: "destructive",
+      });
+    }
+  };
+
+
 
   const handlePay = async () => {
     if (!payInvoice || !selectedPayment) return;
