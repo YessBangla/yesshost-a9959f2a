@@ -76,6 +76,61 @@ const AdminAccounts = () => {
   useEffect(() => { setPage(1); }, [search, pageSize]);
   useEffect(() => { setJPage(1); }, [journalSearch]);
 
+  // Scheduled statement + trial balance email (monthly, to outside accountants)
+  const loadReportSettings = useServerFn(getAccountsReportSettings);
+  const persistReportSettings = useServerFn(saveAccountsReportSettings);
+  const sendReportNow = useServerFn(sendAccountsReportNow);
+  const [reportRecipients, setReportRecipients] = useState("");
+  const [reportEnabled, setReportEnabled] = useState(false);
+  const [reportBusy, setReportBusy] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const settings = await loadReportSettings();
+        setReportRecipients(settings.recipients.join(", "));
+        setReportEnabled(settings.enabled);
+      } catch {
+        /* non-admins never reach this page */
+      }
+    })();
+  }, [loadReportSettings]);
+
+  const parsedRecipients = () =>
+    reportRecipients.split(/[\s,;]+/).map((v) => v.trim()).filter(Boolean);
+
+  const saveReport = async (enabled: boolean) => {
+    setReportBusy(true);
+    try {
+      const settings = await persistReportSettings({
+        data: { recipients: parsedRecipients(), enabled, includeExpenses: true, includeCashbank: true },
+      });
+      setReportEnabled(settings.enabled);
+      setReportRecipients(settings.recipients.join(", "));
+      toast({ title: bn ? "সেটিংস সংরক্ষিত হয়েছে" : "Settings saved" });
+    } catch (e) {
+      toast({ title: bn ? "সংরক্ষণ করা যায়নি" : "Could not save", description: String((e as Error)?.message || e), variant: "destructive" });
+    }
+    setReportBusy(false);
+  };
+
+  const sendReport = async () => {
+    setReportBusy(true);
+    try {
+      const res = await sendReportNow({ data: { month: statementMonth } });
+      toast({
+        title: res.ok ? (bn ? "রিপোর্ট পাঠানো হয়েছে" : "Report sent") : (bn ? "পাঠানো যায়নি" : "Could not send"),
+        description: res.ok
+          ? `${res.sent.join(", ")}`
+          : res.detail || res.failed.map((f) => `${f.to}: ${f.detail || ""}`).join(" · "),
+        variant: res.ok ? undefined : "destructive",
+      });
+    } catch (e) {
+      toast({ title: bn ? "পাঠানো যায়নি" : "Could not send", description: String((e as Error)?.message || e), variant: "destructive" });
+    }
+    setReportBusy(false);
+  };
+
   const totals = useMemo(() => {
     const income = periods.reduce((sum, row) => sum + Number(row.income || 0), 0);
     const expense = periods.reduce((sum, row) => sum + Number(row.expense || 0), 0);
