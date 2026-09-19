@@ -9,14 +9,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PublicLayout from "@/components/PublicLayout";
 import { formatPrice, formatAmount } from "@/lib/formatPrice";
+import { getGatewayAvailability } from "@/lib/payment-gateways.functions";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
 import sslLogo from "@/assets/partners/ssl-wireless.png";
 
-const paymentMethods = [
+const basePaymentMethods = [
   { id: "wallet", label: "Wallet Balance", labelBn: "ওয়ালেট ব্যালেন্স", icon: Wallet, desc: "Pay from your wallet balance", descBn: "ওয়ালেট ব্যালেন্স থেকে পে করুন", ready: true },
-  { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", ready: true },
+  { id: "sslcommerz", label: "SSLCommerz", labelBn: "SSLCommerz", logo: sslLogo, desc: "Visa, Master, bKash, Nagad, Mobile Banking", ready: false },
   { id: "bkash", label: "bKash", labelBn: "বিকাশ", logo: bkashLogo, desc: "bKash Tokenized Payment", ready: false },
   { id: "nagad", label: "Nagad", labelBn: "নগদ", logo: nagadLogo, desc: "Nagad Digital Payment", ready: false },
   { id: "bank", label: "Bank Transfer", labelBn: "ব্যাংক ট্রান্সফার", icon: Building2, desc: "Manual Bank Transfer", ready: true },
@@ -49,6 +50,26 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrderNumber, setPlacedOrderNumber] = useState("");
+
+  // Which online gateways the admin has switched on (server-provided, no credentials).
+  const [gatewayState, setGatewayState] = useState<Record<string, { enabled: boolean; isSandbox: boolean }>>({});
+  useEffect(() => {
+    let active = true;
+    getGatewayAvailability()
+      .then((res) => {
+        if (!active) return;
+        const map: Record<string, { enabled: boolean; isSandbox: boolean }> = {};
+        for (const g of res.gateways) map[g.gateway] = { enabled: g.enabled, isSandbox: g.isSandbox };
+        setGatewayState(map);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  const paymentMethods = basePaymentMethods.map((m) => {
+    const gw = gatewayState[m.id];
+    return gw ? { ...m, ready: gw.enabled, isSandbox: gw.isSandbox } : { ...m, isSandbox: false };
+  });
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
@@ -464,7 +485,7 @@ const Checkout = () => {
                         {!method.ready && (
                           <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm">{bn ? "শীঘ্রই আসছে" : "Coming Soon"}</span>
                         )}
-                        {method.id === "sslcommerz" && (
+                        {method.ready && (method as { isSandbox?: boolean }).isSandbox && (
                           <span className="text-[9px] font-bold gradient-primary text-primary-foreground px-1.5 py-0.5 rounded-sm">🧪 Sandbox</span>
                         )}
                       </div>
@@ -482,12 +503,14 @@ const Checkout = () => {
                   </button>
                 ))}
               </div>
-              <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <p className="text-[11px] text-muted-foreground">
-                  {bn ? "বর্তমানে SSLCommerz Sandbox (টেস্ট) মোডে চলছে। লাইভ পেমেন্টের জন্য মার্চেন্ট credentials প্রয়োজন।" : "SSLCommerz is currently in Sandbox (test) mode. Merchant credentials needed for live payments."}
-                </p>
-              </div>
+              {paymentMethods.some((m) => m.ready && (m as { isSandbox?: boolean }).isSandbox) && (
+                <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-muted-foreground">
+                    {bn ? "চিহ্নিত পদ্ধতিগুলো এখন টেস্ট (স্যান্ডবক্স) মোডে চলছে — আসল টাকা কাটা হবে না।" : "Methods marked Sandbox are in test mode — no real money is charged."}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Order Note */}

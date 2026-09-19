@@ -105,3 +105,20 @@ export async function saveGateway(input: SaveGatewayInput, userId: string) {
   if (error) return { ok: false as const, code: "save_failed", detail: error.message };
   return { ok: true as const };
 }
+
+export type GatewayAvailability = { gateway: GatewayId; enabled: boolean; isSandbox: boolean };
+
+/** Public-safe availability (no credentials) used by the checkout UI. */
+export async function listGatewayAvailability(): Promise<{ gateways: GatewayAvailability[] }> {
+  const db = await admin();
+  const { data } = await db
+    .from("payment_gateway_settings")
+    .select("gateway, enabled, is_sandbox");
+  const rows = (data ?? []) as Array<{ gateway: string; enabled: boolean; is_sandbox: boolean }>;
+  return {
+    gateways: GATEWAYS.map((def) => {
+      const row = rows.find((r) => r.gateway === def.id);
+      return { gateway: def.id, enabled: !!row?.enabled, isSandbox: row ? !!row.is_sandbox : true };
+    }),
+  };
+}

@@ -33,3 +33,9 @@ export const savePaymentGateway = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     return saveGateway(data, context.userId);
   });
+
+/** Public: which online gateways the admin has switched on (no credentials exposed). */
+export const getGatewayAvailability = createServerFn({ method: "GET" }).handler(async () => {
+  const { listGatewayAvailability } = await import("./payment-gateways.server");
+  return listGatewayAvailability();
+});
