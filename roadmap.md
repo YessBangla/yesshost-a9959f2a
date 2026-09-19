@@ -7,6 +7,6 @@
 - [x] Step 3: Modernize Finance Dashboard
 - [x] Step 4: Modernize Marketing and CMS
 - [x] Step 5: Modernize Coupons and Theme Store
-- [ ] Step 6: Modernize Knowledge Base Admin
+- [x] Step 6: Modernize Knowledge Base Admin
 - [ ] Step 7: Modernize Contact Messages and Communication Settings
 - [ ] Step 8: Unify Client, Reseller, Theme Seller, and Affiliate dashboards
