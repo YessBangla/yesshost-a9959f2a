@@ -87,6 +87,8 @@ const DashboardBilling = () => {
   const [filterMethod, setFilterMethod] = useState<string>("all");
   const [invSearch, setInvSearch] = useState("");
   const [invStatus, setInvStatus] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [massPaying, setMassPaying] = useState(false);
 
   // Billing data is fetched on the server (server function -> Supabase) so the
   // page renders with real data and stays identical across domains/environments.
