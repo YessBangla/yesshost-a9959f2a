@@ -217,6 +217,7 @@ const DashboardLayout = () => {
     { title: tr("dash.support"), url: "/dashboard/support", icon: HeadphonesIcon },
     { title: tr("dash.domains"), url: "/dashboard/domains", icon: Globe },
     { title: bn ? "অ্যাফিলিয়েট" : "Affiliate", url: "/dashboard/affiliate", icon: Share2 },
+    { title: bn ? "আমার থিম" : "My Themes", url: "/dashboard/my-themes", icon: Palette },
     { title: bn ? "থিম বিক্রি" : "Sell Themes", url: "/dashboard/theme-seller", icon: Palette },
     { title: bn ? "সমস্যা নির্ণয়" : "Troubleshoot", url: "/dashboard/troubleshoot", icon: LifeBuoy },
     ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),
