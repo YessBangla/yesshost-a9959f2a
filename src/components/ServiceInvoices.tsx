@@ -3,6 +3,9 @@ import { Link } from "@/lib/router-compat";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatAmount } from "@/lib/formatPrice";
 import type { Tables } from "@/integrations/supabase/types";
+import { createInvoiceShareLink } from "@/lib/invoice-share.functions";
+import { useState } from "react";
+import { toast } from "sonner";
 
 type Invoice = Tables<"invoices">;
 
@@ -26,11 +29,24 @@ const statusLabel: Record<string, { bn: string; en: string }> = {
 const ServiceInvoices = ({ invoices, compact = false }: { invoices: Invoice[]; compact?: boolean }) => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const [sharingId, setSharingId] = useState<string | null>(null);
   const fmtDate = (v: string | null) =>
     v ? new Date(v).toLocaleDateString(bn ? "bn-BD" : "en-US", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
   const paidTotal = invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.amount_bdt), 0);
   const dueTotal = invoices.filter(i => i.status === "unpaid" || i.status === "overdue").reduce((s, i) => s + Number(i.amount_bdt), 0);
+
+  const openInvoice = async (invoiceId: string) => {
+    setSharingId(invoiceId);
+    try {
+      const result = await createInvoiceShareLink({ data: { invoiceId } });
+      window.open(`/invoice/${result.token}`, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : (bn ? "ইনভয়েস খোলা যায়নি" : "Could not open invoice"));
+    } finally {
+      setSharingId(null);
+    }
+  };
 
   if (invoices.length === 0) {
     return (
@@ -70,9 +86,9 @@ const ServiceInvoices = ({ invoices, compact = false }: { invoices: Invoice[]; c
             </div>
             <div className="mt-3 flex items-center justify-between gap-3">
               <strong className="text-sm tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</strong>
-              <Link to={`/dashboard/billing?invoice=${encodeURIComponent(inv.invoice_number)}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-primary">
-                <Download className="size-3.5" /> {bn ? "ইনভয়েস" : "Invoice"}
-              </Link>
+              <button type="button" disabled={sharingId === inv.id} onClick={() => openInvoice(inv.id)} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-primary disabled:opacity-60">
+                <Download className="size-3.5" /> {sharingId === inv.id ? (bn ? "খুলছে…" : "Opening…") : (bn ? "ইনভয়েস" : "Invoice")}
+              </button>
             </div>
           </div>
         ))}
@@ -92,7 +108,11 @@ const ServiceInvoices = ({ invoices, compact = false }: { invoices: Invoice[]; c
           <tbody>
             {invoices.map(inv => (
               <tr key={inv.id} className="border-t border-border/60">
-                <td className="py-1.5 pr-3 font-mono text-[11px] text-foreground">{inv.invoice_number}</td>
+                <td className="py-1.5 pr-3">
+                  <button type="button" disabled={sharingId === inv.id} onClick={() => openInvoice(inv.id)} className="font-mono text-[11px] text-primary hover:underline disabled:opacity-60">
+                    {inv.invoice_number}
+                  </button>
+                </td>
                 {!compact && <td className="py-1.5 pr-3 text-muted-foreground">{fmtDate(inv.created_at)}</td>}
                 <td className="py-1.5 pr-3 text-muted-foreground">{fmtDate(inv.paid_at)}</td>
                 {!compact && <td className="py-1.5 pr-3 capitalize text-muted-foreground">{inv.payment_method || "—"}</td>}
