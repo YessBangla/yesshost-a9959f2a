@@ -656,6 +656,8 @@ export type Database = {
           paid_at: string | null
           payment_method: string | null
           service_id: string | null
+          share_expires_at: string | null
+          share_token_hash: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           updated_at: string
           user_id: string
@@ -670,6 +672,8 @@ export type Database = {
           paid_at?: string | null
           payment_method?: string | null
           service_id?: string | null
+          share_expires_at?: string | null
+          share_token_hash?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           updated_at?: string
           user_id: string
@@ -684,6 +688,8 @@ export type Database = {
           paid_at?: string | null
           payment_method?: string | null
           service_id?: string | null
+          share_expires_at?: string | null
+          share_token_hash?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           updated_at?: string
           user_id?: string
@@ -2201,6 +2207,10 @@ export type Database = {
         Returns: string
       }
       provision_order: { Args: { _order_id: string }; Returns: undefined }
+      set_invoice_share_token: {
+        Args: { _expires_at: string; _invoice_id: string; _token_hash: string }
+        Returns: undefined
+      }
       set_support_pin: {
         Args: { _expires_at: string; _pin: string }
         Returns: undefined
