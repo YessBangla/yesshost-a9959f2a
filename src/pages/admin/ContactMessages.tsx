@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { replyToContactMessage, getContactReplies } from "@/lib/contact-reply.functions";
+import type { ContactReplyRow } from "@/lib/contact-reply.server";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Mail, MailOpen, Trash2, Eye, Send, ArrowLeft, Clock, User, AtSign,
