@@ -71,3 +71,94 @@ export async function setAccountStatus(
 
   return { ok: true, status, emailStatus, detail };
 }
+
+export interface CreateClientResult {
+  ok: boolean;
+  userId?: string;
+  emailStatus: "sent" | "skipped" | "failed";
+  detail?: string;
+  error?: string;
+}
+
+/**
+ * Admin-side client creation: makes a confirmed auth user, assigns roles,
+ * marks the profile approved and emails the sign-in credentials.
+ */
+export async function createClientAccount(
+  adminUserId: string,
+  input: {
+    email: string;
+    password: string;
+    fullName?: string;
+    phone?: string;
+    roles?: string[];
+    siteUrl: string;
+  },
+): Promise<CreateClientResult> {
+  const email = input.email.trim().toLowerCase();
+  const phone = input.phone?.trim();
+
+  if (phone) {
+    const { data: dupe } = await supabaseAdmin
+      .from("profiles").select("id").eq("phone", phone).maybeSingle();
+    if (dupe) {
+      return { ok: false, emailStatus: "skipped", error: "phone_in_use" };
+    }
+  }
+
+  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password: input.password,
+    email_confirm: true,
+    user_metadata: { full_name: input.fullName ?? "", phone: phone ?? "" },
+  });
+  if (createError || !created?.user) {
+    return { ok: false, emailStatus: "skipped", error: createError?.message ?? "create_failed" };
+  }
+  const userId = created.user.id;
+
+  const extraRoles = (input.roles ?? []).filter((r) => r && r !== "user");
+  if (extraRoles.length) {
+    await supabaseAdmin
+      .from("user_roles")
+      .insert(extraRoles.map((role) => ({ user_id: userId, role: role as never })));
+  }
+
+  await supabaseAdmin
+    .from("profiles")
+    .update({
+      account_status: "approved",
+      approved_at: new Date().toISOString(),
+      approved_by: adminUserId,
+      ...(input.fullName ? { full_name: input.fullName } : {}),
+      ...(phone ? { phone } : {}),
+    })
+    .eq("user_id", userId);
+
+  await supabaseAdmin.from("notifications").insert({
+    user_id: userId,
+    title: "Welcome to Yess Host",
+    message: "Your client account is active. Sign in to manage services, domains, billing and support.",
+    type: "success",
+  });
+
+  const loginUrl = `${input.siteUrl.replace(/\/$/, "")}/login`;
+  const html = emailShell(
+    `<h2 style="margin:0 0 12px;font-size:19px">Welcome to Yess Host</h2>
+     <p>Your client account has been created and approved. Use the details below to sign in:</p>
+     <p style="margin:16px 0;padding:14px;border-radius:10px;background:#f4f6fb">
+       <strong>Email:</strong> ${escapeHtml(email)}<br/>
+       <strong>Temporary password:</strong> ${escapeHtml(input.password)}
+     </p>
+     <p><a href="${escapeHtml(loginUrl)}" style="display:inline-block;padding:11px 18px;border-radius:9px;background:#1d4ed8;color:#fff;text-decoration:none">Sign in to your dashboard</a></p>
+     <p style="font-size:13px;color:#64748b">For your security, change this password from Dashboard → Profile after your first sign-in.</p>`,
+  );
+  const res = await sendAppEmail(email, "Your Yess Host account is ready", html);
+
+  return {
+    ok: true,
+    userId,
+    emailStatus: res.ok ? "sent" : res.transport === "none" ? "skipped" : "failed",
+    detail: res.detail,
+  };
+}

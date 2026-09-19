@@ -17,7 +17,7 @@ import { Download } from "lucide-react";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
 import DataPagination from "@/components/DataPagination";
 import { useServerFn } from "@tanstack/react-start";
-import { updateClientAccountStatus } from "@/lib/client-accounts.functions";
+import { updateClientAccountStatus, createClientAccountFn } from "@/lib/client-accounts.functions";
 import { CheckCircle2, PauseCircle } from "lucide-react";
 
 type UserWithRoles = Tables<"profiles"> & { roles: string[]; permissions: string[]; services_count?: number; invoices_total?: number };
@@ -65,6 +65,7 @@ const AdminUsers = () => {
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "suspended">("all");
   const [statusBusy, setStatusBusy] = useState<string | null>(null);
   const statusReq = useServerFn(updateClientAccountStatus);
+  const createReq = useServerFn(createClientAccountFn);
   const [userPage, setUserPage] = useState(1);
   const [userPageSize, setUserPageSize] = useState(25);
   const [loading, setLoading] = useState(true);
@@ -173,30 +174,39 @@ const AdminUsers = () => {
     }
     setCreating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("admin-create-user", {
-        body: {
-          email: createForm.email,
+      const res = await createReq({
+        data: {
+          email: createForm.email.trim(),
           password: createForm.password,
-          full_name: createForm.full_name,
-          phone: createForm.phone,
+          fullName: createForm.full_name || undefined,
+          phone: createForm.phone || undefined,
           roles: createForm.roles,
+          siteUrl: window.location.origin,
         },
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (!res.ok) {
+        throw new Error(
+          res.error === "phone_in_use"
+            ? isBn
+              ? "এই ফোন নাম্বার দিয়ে ইতোমধ্যে একটি অ্যাকাউন্ট আছে"
+              : "Phone number already in use"
+            : res.error || (isBn ? "ইউজার তৈরি করা যায়নি" : "Could not create user"),
+        );
+      }
 
-      // Save permissions
-      if (createForm.permissions.length > 0 && data?.user_id) {
-        const permInserts = createForm.permissions.map(p => ({ user_id: data.user_id, permission: p }));
+      if (createForm.permissions.length > 0 && res.userId) {
+        const permInserts = createForm.permissions.map((p) => ({ user_id: res.userId!, permission: p }));
         await supabase.from("user_permissions" as any).insert(permInserts);
       }
 
-      // Admin-created accounts are approved immediately
-      if (data?.user_id) {
-        try { await statusReq({ data: { userId: data.user_id, status: "approved" } }); } catch { /* non-fatal */ }
-      }
-
-      toast({ title: "✅ " + (isBn ? "সফল!" : "Success!"), description: isBn ? "নতুন ইউজার তৈরি ও অনুমোদিত হয়েছে" : "New user created and approved" });
+      toast({ title: "✅ " + (isBn ? "সফল!" : "Success!"), description:
+          res.emailStatus === "sent"
+            ? isBn
+              ? "নতুন ক্লায়েন্ট তৈরি ও অনুমোদিত হয়েছে — লগইন তথ্য ইমেইলে পাঠানো হয়েছে"
+              : "Client created and approved — sign-in details emailed"
+            : isBn
+              ? "নতুন ক্লায়েন্ট তৈরি ও অনুমোদিত হয়েছে। ইমেইল সার্ভিস চালু নেই, তাই লগইন তথ্য নিজে জানিয়ে দিন।"
+              : "Client created and approved. Email service is off, so share the sign-in details manually." });
       setShowCreate(false);
       setCreateForm({ email: "", password: "", full_name: "", phone: "", roles: ["user"], permissions: [] });
       fetchUsers();
