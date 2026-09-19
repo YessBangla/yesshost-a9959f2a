@@ -7,7 +7,7 @@ import {
   Bell, Clock, TrendingUp, Zap, ChevronRight, CreditCard, Activity,
   RefreshCw, ShoppingBag,
   CheckCircle2, Calendar, MapPin, Mail, User, LogIn, Wallet,
-  AlertTriangle, ChevronDown, ChevronUp
+  AlertTriangle, ChevronDown, ChevronUp, ShieldCheck
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";

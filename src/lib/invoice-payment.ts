@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { payInvoiceFromWallet } from "@/lib/secure-operations.functions";
 
 export type PayMethod = "wallet" | "sslcommerz" | "bkash" | "nagad" | "bank";
 
@@ -38,7 +37,13 @@ export async function payInvoice(input: PayInvoiceInput): Promise<PayInvoiceResu
   if (method === "bank") return { status: "bank" };
 
   if (method === "wallet") {
-    return { status: "error", code: "failed", detail: "Use the protected wallet payment action" };
+    const { data, error } = await supabase.functions.invoke("wallet-pay-invoice", {
+      body: { invoice_id: invoiceId },
+    });
+    if (error || !data?.success) {
+      return { status: "error", code: "failed", detail: data?.error || error?.message };
+    }
+    return { status: "paid" };
   }
 
   if (method === "sslcommerz") {
