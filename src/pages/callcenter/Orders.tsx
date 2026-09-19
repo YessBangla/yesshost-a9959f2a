@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, X, ShoppingCart, RefreshCw, Package, Clock, Globe, Server, Palette, ChevronDown, ChevronUp, Zap, Search, CircleDollarSign } from "lucide-react";
+import { Check, X, ShoppingCart, RefreshCw, Package, Clock, Globe, Server, Palette, ChevronDown, ChevronUp, Zap, Search, CircleDollarSign, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatAmount } from "@/lib/formatPrice";

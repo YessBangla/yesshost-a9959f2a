@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Send, RefreshCw, HeadphonesIcon, Search, Clock3, UserRound } from "lucide-react";
+import { Send, RefreshCw, HeadphonesIcon, Search, Clock3, UserRound, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
