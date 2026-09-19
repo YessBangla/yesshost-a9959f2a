@@ -68,13 +68,13 @@ const NeedHelpSection = () => {
           className="text-center mb-6 md:mb-10"
         >
           <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold gradient-primary text-primary-foreground mb-3">
-            {bn ? "সাহায্য" : "Support"}
+            {(bn ? headingMeta.badge_bn : headingMeta.badge_en) || (bn ? "সাহায্য" : "Support")}
           </span>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-2">
-            {bn ? "সাহায্য দরকার? আমরা এখানে আছি" : "Need Help? We Are Here"}
+            {(bn ? heading?.title_bn : heading?.title_en) || (bn ? "সাহায্য দরকার? আমরা এখানে আছি" : "Need Help? We Are Here")}
           </h2>
           <p className="text-muted-foreground text-xs sm:text-sm max-w-lg mx-auto">
-            {bn ? "যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন" : "Contact us anytime — our team is always ready to help"}
+            {(bn ? heading?.content_bn : heading?.content_en) || (bn ? "যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন" : "Contact us anytime — our team is always ready to help")}
           </p>
         </motion.div>
 
