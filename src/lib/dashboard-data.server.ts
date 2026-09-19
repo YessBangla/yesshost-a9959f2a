@@ -250,9 +250,3 @@ export type ChatMessage = {
   created_at: string;
 };
 
-export async function loadChatMessages(chatId: string): Promise<ChatMessage[]> {
-  // Chat transcripts are no longer readable through the public API, so this
-  // read runs with the service-role client scoped to a single chat id.
-  const { readChatMessages } = await import("./live-chat.server");
-  return readChatMessages(chatId);
-}
