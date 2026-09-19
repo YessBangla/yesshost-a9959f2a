@@ -1,12 +1,16 @@
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Eye, ShoppingCart, Check, Star, Package, Server, Shield, Globe, ChevronRight,
+  ArrowLeft, Eye, ShoppingCart, Check, Star, Package, Server, Shield, Globe, ChevronRight, Zap, Store,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useParams, Link } from "@/lib/router-compat";
+import { useParams, Link, useNavigate } from "@/lib/router-compat";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { buyTheme } from "@/lib/theme-store.functions";
 import PublicLayout from "@/components/PublicLayout";
 import SEOHead from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
