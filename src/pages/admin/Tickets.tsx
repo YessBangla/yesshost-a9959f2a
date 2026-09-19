@@ -139,6 +139,7 @@ const AdminTickets = () => {
       toast({ title: "✅", description: isBn ? `টিকেট "${sc?.label_bn || status}" এ আপডেট হয়েছে` : `Ticket updated to "${sc?.label_en || status}"` });
     }
     fetchData();
+    fetchStats();
     if (selectedTicket?.id === id) setSelectedTicket({ ...selectedTicket, status: status as any });
   };
 
@@ -295,8 +296,7 @@ const AdminTickets = () => {
           <p className="text-sm text-muted-foreground mt-1">{isBn ? "সকল সাপোর্ট টিকেট পরিচালনা ও রিপ্লাই করুন" : "Manage and reply to all support tickets"}</p>
         </div>
         <button
-          onClick={() => downloadCsv("yesshost-tickets", ["ticket_number", "subject", "client", "status", "priority", "created"],
-            filtered.map((t: any) => [t.ticket_number, t.subject, t.profiles?.full_name || "", t.status, t.priority, csvDate(t.created_at)]))}
+          onClick={exportCsv}
           className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary shrink-0"
         >
           <Download className="w-4 h-4" />
@@ -359,7 +359,7 @@ const AdminTickets = () => {
 
       {/* Tickets - Card based for better mobile */}
       <div className="space-y-3">
-        {filtered.length === 0 && (
+        {tickets.length === 0 && (
           <EmptyState
             icon={Inbox}
             title={isBn ? "কোনো টিকেট পাওয়া যায়নি" : "No tickets found"}
@@ -421,9 +421,9 @@ const AdminTickets = () => {
         })}
       </div>
 
-      {filtered.length > 0 && (
+      {totalCount > 0 && (
         <DataPagination
-          total={filtered.length}
+          total={totalCount}
           page={page}
           pageSize={pageSize}
           onPage={setPage}
