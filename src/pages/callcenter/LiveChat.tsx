@@ -1,12 +1,18 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, RefreshCw, MessageCircle, Phone, PhoneOff, PhoneIncoming, Mic, MicOff } from "lucide-react";
+import { Send, RefreshCw, MessageCircle, Phone, PhoneOff, PhoneIncoming, Mic, MicOff, Mail, Search, ShoppingCart, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useWebRTCCall } from "@/hooks/useWebRTCCall";
 import { useRingtone } from "@/hooks/useRingtone";
 import type { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "@/lib/router-compat";
+import { StaffPageHeader } from "@/components/staff/StaffConsole";
 
 const CallCenterLiveChat = () => {
   const { lang } = useLanguage();
@@ -17,6 +23,9 @@ const CallCenterLiveChat = () => {
   const [messages, setMessages] = useState<Tables<"live_chat_messages">[]>([]);
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("open");
+  const [customerOrders, setCustomerOrders] = useState<Tables<"orders">[]>([]);
   const msgEnd = useRef<HTMLDivElement>(null);
 
   const { startRingtone, stopRingtone } = useRingtone();
@@ -61,6 +70,12 @@ const CallCenterLiveChat = () => {
   useEffect(() => { if (selectedChat) fetchMessages(selectedChat); }, [selectedChat]);
 
   useEffect(() => {
+    const chat = chats.find((item) => item.id === selectedChat);
+    if (!chat?.user_id) { setCustomerOrders([]); return; }
+    supabase.from("orders").select("*").eq("user_id", chat.user_id).order("created_at", { ascending: false }).limit(3).then(({ data }) => setCustomerOrders(data || []));
+  }, [selectedChat, chats]);
+
+  useEffect(() => {
     if (!selectedChat) return;
     const channel = supabase.channel(`cc-chat-${selectedChat}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_chat_messages", filter: `chat_id=eq.${selectedChat}` },
@@ -75,38 +90,39 @@ const CallCenterLiveChat = () => {
     setReply("");
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <div className="grid gap-3 lg:grid-cols-[280px_1fr_300px]">{[0,1,2].map((column) => <div key={column} className="staff-panel space-y-3 p-4">{[0,1,2,3,4].map((row) => <Skeleton key={row} className="h-14" />)}</div>)}</div>;
 
   const selectedChatData = chats.find(c => c.id === selectedChat);
+  const filteredChats = chats.filter((chat) => {
+    const query = search.toLowerCase();
+    return (status === "all" || chat.status === status) && [chat.visitor_name, chat.visitor_email, chat.visitor_phone].some((value) => value?.toLowerCase().includes(query));
+  });
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">{bn ? "লাইভ চ্যাট" : "Live Chat"}</h1>
-        <button onClick={fetchChats} className="p-2 rounded-xl hover:bg-secondary/60 text-muted-foreground"><RefreshCw className="w-5 h-5" /></button>
-      </div>
+      <StaffPageHeader title={bn ? "লাইভ কথোপকথন" : "Live Conversations"} description={bn ? "গ্রাহক কিউ, কল এবং অ্যাকাউন্ট তথ্য একই জায়গায়" : "Customer queue, calls and account context in one workspace"} actions={<Button variant="outline" onClick={fetchChats}><RefreshCw />{bn ? "রিফ্রেশ" : "Refresh"}</Button>} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-200px)]">
+      <div className="grid grid-cols-1 overflow-hidden staff-panel lg:grid-cols-[280px_minmax(360px,1fr)_300px] lg:h-[calc(100vh-190px)]">
         {/* Chat list */}
-        <div className="glass-card rounded-xl overflow-auto">
-          <div className="p-3 border-b border-border/50 text-sm font-semibold text-foreground">{bn ? "চ্যাট তালিকা" : "Chat List"} ({chats.length})</div>
-          {chats.map(c => (
+        <div className="flex min-h-[320px] flex-col overflow-hidden border-b border-border lg:border-b-0 lg:border-r">
+          <div className="space-y-2 border-b border-border bg-secondary/30 p-3"><div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={bn ? "কিউ খুঁজুন..." : "Search queue..."} className="pl-9" /></div><div className="grid grid-cols-2 gap-1 rounded-md bg-secondary p-1">{["open","all"].map((key) => <Button key={key} size="sm" variant={status === key ? "default" : "ghost"} onClick={() => setStatus(key)}>{key === "open" ? (bn ? "খোলা" : "Open") : (bn ? "সব" : "All")}</Button>)}</div></div>
+          <div className="overflow-auto">{filteredChats.map(c => (
             <button key={c.id} onClick={() => setSelectedChat(c.id)}
-              className={`w-full text-left p-3 border-b border-border/30 hover:bg-secondary/40 transition-all ${selectedChat === c.id ? "bg-primary/10" : ""}`}>
-              <p className="text-sm font-medium text-foreground">{c.visitor_name}</p>
-              <p className="text-xs text-muted-foreground">{c.visitor_email || c.visitor_phone || "—"}</p>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-sm ${c.status === "open" ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>{c.status}</span>
+              className={`min-h-[72px] w-full border-b border-border p-3 text-left transition-colors hover:bg-secondary/40 ${selectedChat === c.id ? "bg-primary/10 shadow-[inset_3px_0_0_hsl(var(--primary))]" : ""}`}>
+              <div className="flex items-center justify-between gap-2"><p className="truncate text-sm font-semibold text-foreground">{c.visitor_name}</p><span className="text-[10px] text-muted-foreground">{new Date(c.updated_at).toLocaleTimeString(bn ? "bn-BD" : "en-US", {hour:"2-digit",minute:"2-digit"})}</span></div>
+              <p className="truncate text-xs text-muted-foreground">{c.visitor_email || c.visitor_phone || "—"}</p>
+              <Badge className={`mt-1 border-0 ${c.status === "open" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>{c.status}</Badge>
             </button>
           ))}
-          {chats.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">{bn ? "কোনো চ্যাট নেই" : "No chats"}</p>}
+          {filteredChats.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">{bn ? "কোনো চ্যাট পাওয়া যায়নি" : "No conversations found"}</p>}</div>
         </div>
 
         {/* Messages */}
-        <div className="lg:col-span-2 glass-card rounded-xl flex flex-col">
+        <div className="flex min-h-[520px] flex-col border-b border-border lg:border-b-0 lg:border-r">
           {selectedChat ? (
             <>
               <div className="p-3 border-b border-border/50 flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">{selectedChatData?.visitor_name}</span>
+                <div><span className="text-sm font-semibold text-foreground">{selectedChatData?.visitor_name}</span><p className="text-[10px] text-success">{selectedChatData?.status === "open" ? (bn ? "অনলাইন • যাচাইকৃত সেশন" : "Online • Active session") : (bn ? "কথোপকথন বন্ধ" : "Conversation closed")}</p></div>
                 {/* Call status indicator in header */}
                 {callStatus === "idle" && (
                   <span className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -141,20 +157,20 @@ const CallCenterLiveChat = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button
+                         <Button
                           onClick={acceptCall}
-                          className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-colors flex items-center gap-1.5"
+                           className="bg-success text-success-foreground hover:bg-success/90"
                         >
                           <Phone className="w-4 h-4" />
                           {bn ? "রিসিভ" : "Accept"}
-                        </button>
-                        <button
+                         </Button>
+                         <Button
                           onClick={endCall}
-                          className="px-4 py-2 rounded-xl bg-destructive text-destructive-foreground text-sm font-medium hover:bg-destructive/90 transition-colors flex items-center gap-1.5"
+                           variant="destructive"
                         >
                           <PhoneOff className="w-4 h-4" />
                           {bn ? "বাতিল" : "Decline"}
-                        </button>
+                         </Button>
                       </div>
                     </div>
                   </motion.div>
@@ -227,10 +243,9 @@ const CallCenterLiveChat = () => {
                 ))}
                 <div ref={msgEnd} />
               </div>
-              <div className="p-3 border-t border-border/50 flex gap-2">
-                <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === "Enter" && sendReply()}
-                  placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="flex-1 px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
-                <button onClick={sendReply} className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground"><Send className="w-4 h-4" /></button>
+               <div className="flex gap-2 border-t border-border p-3">
+                 <Input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === "Enter" && sendReply()} placeholder={bn ? "উত্তর লিখুন..." : "Type reply..."} className="h-11" />
+                 <Button onClick={sendReply} disabled={!reply.trim()} aria-label={bn ? "পাঠান" : "Send reply"}><Send /></Button>
               </div>
             </>
           ) : (
@@ -240,6 +255,7 @@ const CallCenterLiveChat = () => {
             </div>
           )}
         </div>
+        <aside className="bg-secondary/20 p-4"><p className="staff-eyebrow">{bn ? "গ্রাহক প্রোফাইল" : "Customer profile"}</p>{selectedChatData ? <div className="mt-4 space-y-5"><div className="flex items-center gap-3"><div className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary"><UserRound /></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{selectedChatData.visitor_name}</p><p className="text-xs text-muted-foreground">{selectedChatData.user_id ? (bn ? "নিবন্ধিত গ্রাহক" : "Registered customer") : (bn ? "ভিজিটর" : "Visitor")}</p></div></div><div className="space-y-2 border-y border-border py-4 text-xs">{selectedChatData.visitor_email && <p className="flex items-center gap-2"><Mail className="size-3.5 text-muted-foreground" /><span className="truncate">{selectedChatData.visitor_email}</span></p>}{selectedChatData.visitor_phone && <p className="flex items-center gap-2"><Phone className="size-3.5 text-muted-foreground" />{selectedChatData.visitor_phone}</p>}</div><div><div className="mb-2 flex items-center justify-between"><p className="staff-eyebrow">{bn ? "সাম্প্রতিক অর্ডার" : "Recent orders"}</p><Button asChild variant="link" size="sm"><Link to="/call-center/orders">{bn ? "সব" : "All"}</Link></Button></div>{customerOrders.length ? <div className="space-y-2">{customerOrders.map((order) => <div key={order.id} className="rounded-md border border-border bg-card p-3"><div className="flex items-center justify-between gap-2"><p className="text-xs font-semibold">{order.order_number}</p><Badge variant="secondary">{order.status}</Badge></div><p className="mt-1 text-xs text-muted-foreground">৳{Number(order.total_bdt).toLocaleString(bn ? "bn-BD" : "en-US")}</p></div>)}</div> : <p className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">{bn ? "কোনো যুক্ত অর্ডার নেই" : "No linked orders"}</p>}</div><Button asChild variant="outline" className="w-full"><Link to="/call-center/tickets"><ShoppingCart />{bn ? "সাপোর্ট টিকেট দেখুন" : "View support tickets"}</Link></Button></div> : <div className="flex min-h-60 items-center justify-center text-center text-sm text-muted-foreground">{bn ? "গ্রাহকের তথ্য দেখতে কথোপকথন বাছুন" : "Select a conversation to view customer context"}</div>}</aside>
       </div>
     </div>
   );
