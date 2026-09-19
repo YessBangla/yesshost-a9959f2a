@@ -183,7 +183,11 @@ const AdminTickets = () => {
                 <p className="text-sm text-muted-foreground">{isBn ? "এখনো কোনো মেসেজ নেই" : "No messages yet"}</p>
               </div>
             )}
-            {replies.map((r) => (
+            {replies.map((r, idx) => {
+              const prevAt = idx > 0 ? replies[idx - 1]!.created_at : selectedTicket.created_at;
+              const gap = formatGap(prevAt, r.created_at, isBn);
+              const slow = isSlowGap(prevAt, r.created_at);
+              return (
               <motion.div
                 key={r.id}
                 initial={{ opacity: 0, y: 10 }}
