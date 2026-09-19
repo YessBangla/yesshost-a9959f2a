@@ -1,4 +1,4 @@
-import { FileText, ExternalLink } from "lucide-react";
+import { FileText, ExternalLink, Download } from "lucide-react";
 import { Link } from "@/lib/router-compat";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatAmount } from "@/lib/formatPrice";
@@ -56,7 +56,28 @@ const ServiceInvoices = ({ invoices, compact = false }: { invoices: Invoice[]; c
           )}
         </p>
       </div>
-      <div className="overflow-x-auto">
+      <div className="space-y-2 sm:hidden">
+        {invoices.map(inv => (
+          <div key={inv.id} className="rounded-xl border border-border/70 bg-card/55 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-mono text-xs font-semibold text-primary">{inv.invoice_number}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{bn ? "শেষ তারিখ" : "Due"}: {fmtDate(inv.due_date)}</p>
+              </div>
+              <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusStyle[inv.status] || "bg-secondary"}`}>
+                {bn ? statusLabel[inv.status]?.bn ?? inv.status : statusLabel[inv.status]?.en ?? inv.status}
+              </span>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <strong className="text-sm tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</strong>
+              <Link to={`/dashboard/billing?invoice=${encodeURIComponent(inv.invoice_number)}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-primary">
+                <Download className="size-3.5" /> {bn ? "ইনভয়েস" : "Invoice"}
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="hidden overflow-x-auto sm:block">
         <table className="w-full text-xs">
           <thead>
             <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -88,7 +109,7 @@ const ServiceInvoices = ({ invoices, compact = false }: { invoices: Invoice[]; c
       </div>
       {dueTotal > 0 && (
         <Link
-          to="/dashboard/billing"
+          to={`/dashboard/billing?invoice=${encodeURIComponent(invoices.find(i => i.status === "unpaid" || i.status === "overdue")?.invoice_number || "")}&action=pay`}
           className="mt-2 inline-flex items-center gap-1.5 rounded-lg gradient-primary px-3 py-1.5 text-[11px] font-semibold text-primary-foreground hover:opacity-90"
         >
           {bn ? "এখনই বিল পরিশোধ করুন" : "Pay this bill"} <ExternalLink className="h-3 w-3" />
