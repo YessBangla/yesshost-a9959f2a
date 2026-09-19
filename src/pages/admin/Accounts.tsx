@@ -133,8 +133,113 @@ const AdminAccounts = () => {
   }, [journal, journalSearch]);
   const pagedJournal = filteredJournal.slice((jPage - 1) * 15, jPage * 15);
 
-  const sourceLabel = (source: string) => source === "invoice" ? (bn ? "ইনভয়েস" : "Invoice") : source === "wallet" ? (bn ? "ওয়ালেট" : "Wallet") : source === "expense" ? (bn ? "খরচ" : "Expense") : (bn ? "ম্যানুয়াল" : "Manual");
+  const sourceLabel = (source: string) => source === "invoice" ? (bn ? "ইনভয়েস" : "Invoice") : source === "wallet" ? (bn ? "ওয়ালেট" : "Wallet") : source === "expense" ? (bn ? "খরচ" : "Expense") : source === "cashbank" ? (bn ? "ব্যাংক/ক্যাশ" : "Bank/Cash") : (bn ? "ম্যানুয়াল" : "Manual");
   const accountName = (line: JournalLine) => bn ? line.ledger_accounts?.name_bn : line.ledger_accounts?.name_en;
+
+  const monthOptions = useMemo(() => {
+    const set = new Set<string>([statementMonth]);
+    for (const row of journal) set.add(row.entry_date.slice(0, 7));
+    for (const row of payments) set.add((row.paid_at || row.created_at).slice(0, 7));
+    return [...set].sort().reverse();
+  }, [journal, payments, statementMonth]);
+
+  const statement = useMemo(() => {
+    const lines = new Map<string, { code: string; name: string; type: string; amount: number }>();
+    for (const entry of journal.filter((row) => row.entry_date.startsWith(statementMonth))) {
+      for (const line of entry.journal_lines) {
+        const account = line.ledger_accounts;
+        if (!account || !["income", "expense"].includes(account.type)) continue;
+        const value = account.type === "income" ? Number(line.credit_bdt || 0) - Number(line.debit_bdt || 0) : Number(line.debit_bdt || 0) - Number(line.credit_bdt || 0);
+        if (!value) continue;
+        const current = lines.get(account.code) || { code: account.code, name: bn ? account.name_bn : account.name_en, type: account.type, amount: 0 };
+        current.amount += value;
+        lines.set(account.code, current);
+      }
+    }
+    const all = [...lines.values()].sort((a, b) => a.code.localeCompare(b.code));
+    const income = all.filter((row) => row.type === "income");
+    const expense = all.filter((row) => row.type === "expense");
+    const incomeTotal = income.reduce((sum, row) => sum + row.amount, 0);
+    const expenseTotal = expense.reduce((sum, row) => sum + row.amount, 0);
+    const invoiceRows = payments
+      .filter((row) => (row.paid_at || row.created_at).startsWith(statementMonth))
+      .map((row) => ({
+        id: row.id,
+        invoice: row.invoice_number,
+        client: clients[row.user_id]?.name || (bn ? "অজানা ক্লায়েন্ট" : "Unknown client"),
+        billed: row.created_at,
+        due: row.due_date,
+        paid: row.paid_at || row.created_at,
+        method: row.payment_method || "—",
+        amount: Number(row.amount_bdt || 0),
+      }))
+      .sort((a, b) => Date.parse(a.paid) - Date.parse(b.paid));
+    return { income, expense, incomeTotal, expenseTotal, net: incomeTotal - expenseTotal, invoiceRows };
+  }, [journal, payments, clients, statementMonth, bn]);
+
+  const monthLabel = useCallback((key: string) => new Date(`${key}-01T00:00:00`).toLocaleDateString(bn ? "bn-BD" : "en-US", { month: "long", year: "numeric" }), [bn]);
+
+  const cashTotals = useMemo(() => {
+    const inflow = cash.filter((row) => row.direction === "in").reduce((sum, row) => sum + Number(row.amount_bdt || 0), 0);
+    const outflow = cash.filter((row) => row.direction === "out").reduce((sum, row) => sum + Number(row.amount_bdt || 0), 0);
+    const bankBalance = cash.filter((row) => row.method === "bank").reduce((sum, row) => sum + (row.direction === "in" ? 1 : -1) * Number(row.amount_bdt || 0), 0);
+    const cashBalance = cash.filter((row) => row.method === "cash").reduce((sum, row) => sum + (row.direction === "in" ? 1 : -1) * Number(row.amount_bdt || 0), 0);
+    return { inflow, outflow, bankBalance, cashBalance };
+  }, [cash]);
+
+  const contraOptions = useMemo(() => cbForm.direction === "in"
+    ? [
+        { code: "4000", label: bn ? "হোস্টিং ও সেবা আয়" : "Hosting & service revenue" },
+        { code: "4100", label: bn ? "থিম বিক্রয় আয়" : "Theme sales revenue" },
+        { code: "1100", label: bn ? "প্রাপ্য আদায়" : "Receivable collection" },
+        { code: "3000", label: bn ? "মূলধন জমা" : "Owner capital" },
+      ]
+    : [
+        { code: "5000", label: bn ? "সার্ভার ও ডেটাসেন্টার" : "Servers & datacenter" },
+        { code: "5100", label: bn ? "বেতন" : "Salaries" },
+        { code: "5200", label: bn ? "মার্কেটিং" : "Marketing" },
+        { code: "5300", label: bn ? "সফটওয়্যার ও লাইসেন্স" : "Software & licences" },
+        { code: "5400", label: bn ? "অফিস" : "Office" },
+        { code: "5900", label: bn ? "অন্যান্য ব্যয়" : "Other expenses" },
+      ], [cbForm.direction, bn]);
+
+  const saveCashEntry = async () => {
+    const amount = Number(cbForm.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast({ title: bn ? "পরিমাণ দিন" : "Enter amount", description: bn ? "সঠিক টাকার পরিমাণ লিখুন।" : "Enter a valid amount.", variant: "destructive" });
+      return;
+    }
+    setSavingCb(true);
+    const { error: insertError } = await supabase.from("cash_bank_transactions").insert({
+      direction: cbForm.direction,
+      method: cbForm.method,
+      amount_bdt: amount,
+      txn_date: cbForm.date,
+      counterparty: cbForm.counterparty.trim() || null,
+      bank_name: cbForm.method === "bank" ? cbForm.bank_name.trim() || null : null,
+      account_number: cbForm.method === "bank" ? cbForm.account_number.trim() || null : null,
+      reference: cbForm.reference.trim() || null,
+      contra_code: cbForm.contra_code,
+      note: cbForm.note.trim() || null,
+    });
+    setSavingCb(false);
+    if (insertError) {
+      toast({ title: bn ? "সংরক্ষণ হয়নি" : "Not saved", description: insertError.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: bn ? "এন্ট্রি যোগ হয়েছে" : "Entry recorded", description: bn ? "হিসাব খাতায় স্বয়ংক্রিয়ভাবে বসে গেছে।" : "Posted to the ledger automatically." });
+    setCbForm({ ...cbForm, amount: "", counterparty: "", reference: "", note: "" });
+    void load();
+  };
+
+  const removeCashEntry = async (id: string) => {
+    const { error: deleteError } = await supabase.from("cash_bank_transactions").delete().eq("id", id);
+    if (deleteError) {
+      toast({ title: bn ? "মুছতে সমস্যা" : "Delete failed", description: deleteError.message, variant: "destructive" });
+      return;
+    }
+    void load();
+  };
 
   return (
     <div className="space-y-6">
