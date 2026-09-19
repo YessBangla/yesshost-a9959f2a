@@ -90,6 +90,7 @@ import { Route as ApiDashboardBillingRouteImport } from './routes/api/dashboard/
 import { Route as ApiDashboardDomainsRouteImport } from './routes/api/dashboard/domains'
 import { Route as ApiDashboardIncomeRouteImport } from './routes/api/dashboard/income'
 import { Route as ApiDashboardServicesRouteImport } from './routes/api/dashboard/services'
+import { Route as ApiPublicAccountsReportRouteImport } from './routes/api/public/accounts-report'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicLiveChatMessagesRouteImport } from './routes/api/public/live-chat-messages'
 import { Route as ThemesSlugIndexRouteImport } from './routes/themes/$slug/index'
@@ -501,6 +502,11 @@ const ApiDashboardServicesRoute = ApiDashboardServicesRouteImport.update({
   path: '/api/dashboard/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAccountsReportRoute = ApiPublicAccountsReportRouteImport.update({
+  id: '/api/public/accounts-report',
+  path: '/api/public/accounts-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
@@ -605,6 +611,7 @@ export interface FileRoutesByFullPath {
   '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
   '/api/dashboard/income': typeof ApiDashboardIncomeRoute
   '/api/dashboard/services': typeof ApiDashboardServicesRoute
+  '/api/public/accounts-report': typeof ApiPublicAccountsReportRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
@@ -689,6 +696,7 @@ export interface FileRoutesByTo {
   '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
   '/api/dashboard/income': typeof ApiDashboardIncomeRoute
   '/api/dashboard/services': typeof ApiDashboardServicesRoute
+  '/api/public/accounts-report': typeof ApiPublicAccountsReportRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
@@ -777,6 +785,7 @@ export interface FileRoutesById {
   '/api/dashboard/domains': typeof ApiDashboardDomainsRoute
   '/api/dashboard/income': typeof ApiDashboardIncomeRoute
   '/api/dashboard/services': typeof ApiDashboardServicesRoute
+  '/api/public/accounts-report': typeof ApiPublicAccountsReportRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/live-chat-messages': typeof ApiPublicLiveChatMessagesRoute
   '/themes/$slug/demo': typeof ThemesSlugDemoRoute
@@ -866,6 +875,7 @@ export interface FileRouteTypes {
     | '/api/dashboard/domains'
     | '/api/dashboard/income'
     | '/api/dashboard/services'
+    | '/api/public/accounts-report'
     | '/api/public/health'
     | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
@@ -950,6 +960,7 @@ export interface FileRouteTypes {
     | '/api/dashboard/domains'
     | '/api/dashboard/income'
     | '/api/dashboard/services'
+    | '/api/public/accounts-report'
     | '/api/public/health'
     | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
@@ -1037,6 +1048,7 @@ export interface FileRouteTypes {
     | '/api/dashboard/domains'
     | '/api/dashboard/income'
     | '/api/dashboard/services'
+    | '/api/public/accounts-report'
     | '/api/public/health'
     | '/api/public/live-chat-messages'
     | '/themes/$slug/demo'
@@ -1078,6 +1090,7 @@ export interface RootRouteChildren {
   ApiDashboardDomainsRoute: typeof ApiDashboardDomainsRoute
   ApiDashboardIncomeRoute: typeof ApiDashboardIncomeRoute
   ApiDashboardServicesRoute: typeof ApiDashboardServicesRoute
+  ApiPublicAccountsReportRoute: typeof ApiPublicAccountsReportRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicLiveChatMessagesRoute: typeof ApiPublicLiveChatMessagesRoute
   ThemesSlugDemoRoute: typeof ThemesSlugDemoRoute
@@ -1653,6 +1666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDashboardServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/accounts-report': {
+      id: '/api/public/accounts-report'
+      path: '/api/public/accounts-report'
+      fullPath: '/api/public/accounts-report'
+      preLoaderRoute: typeof ApiPublicAccountsReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/health': {
       id: '/api/public/health'
       path: '/api/public/health'
@@ -1843,6 +1863,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDashboardDomainsRoute: ApiDashboardDomainsRoute,
   ApiDashboardIncomeRoute: ApiDashboardIncomeRoute,
   ApiDashboardServicesRoute: ApiDashboardServicesRoute,
+  ApiPublicAccountsReportRoute: ApiPublicAccountsReportRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicLiveChatMessagesRoute: ApiPublicLiveChatMessagesRoute,
   ThemesSlugDemoRoute: ThemesSlugDemoRoute,
