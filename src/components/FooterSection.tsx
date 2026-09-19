@@ -241,12 +241,12 @@ const FooterSection = () => {
         <div className="border-t border-white/[0.06] bg-black/20">
           <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-[11px] sm:text-xs text-white/35 text-center sm:text-left">
-              © {new Date().getFullYear()} YessHost.com — {tr("footer.allRights")}
+              © {new Date().getFullYear()} {bottomMeta.company || "YessHost.com"} — {(bn ? bottom?.content_bn : bottom?.content_en) || tr("footer.allRights")}
             </p>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[11px] text-white/40">{tr("footer.allSystems")}</span>
+                <span className="text-[11px] text-white/40">{(bn ? bottomMeta.status_bn : bottomMeta.status_en) || tr("footer.allSystems")}</span>
               </div>
               <button
                 onClick={scrollToTop}
