@@ -258,6 +258,30 @@ const ThemeDetail = () => {
                   </Link>
                 )}
 
+                {/* Buy Now */}
+                <button
+                  onClick={() => void handleBuyNow()}
+                  disabled={buying}
+                  className="w-full bg-primary text-primary-foreground py-4 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-60"
+                >
+                  <Zap className="w-5 h-5" />
+                  {buying ? (bn ? "প্রসেস হচ্ছে..." : "Processing...") : bn ? "এখনই কিনুন" : "Buy Now"}
+                </button>
+
+                {seller && (
+                  <Link
+                    to={`/sellers/${seller.slug}`}
+                    className="flex items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    {seller.logo_url ? (
+                      <img src={seller.logo_url} alt={seller.display_name} className="w-6 h-6 rounded-full object-cover" />
+                    ) : (
+                      <Store className="w-4 h-4 text-primary" />
+                    )}
+                    <span>{bn ? "সেলার: " : "Seller: "}<strong className="text-foreground">{seller.display_name}</strong></span>
+                  </Link>
+                )}
+
                 {/* Add to Cart Button */}
                 {inCart ? (
                   <div className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-secondary text-foreground border border-border font-semibold">
