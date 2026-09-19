@@ -41,6 +41,7 @@ import { Route as AdminCmsRouteImport } from './routes/admin/cms'
 import { Route as AdminCommunicationConfigRouteImport } from './routes/admin/communication-config'
 import { Route as AdminContactMessagesRouteImport } from './routes/admin/contact-messages'
 import { Route as AdminCouponsRouteImport } from './routes/admin/coupons'
+import { Route as AdminExpensesRouteImport } from './routes/admin/expenses'
 import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
 import { Route as AdminKnowledgeBaseRouteImport } from './routes/admin/knowledge-base'
 import { Route as AdminLiveChatRouteImport } from './routes/admin/live-chat'
@@ -253,6 +254,11 @@ const AdminContactMessagesRoute = AdminContactMessagesRouteImport.update({
 const AdminCouponsRoute = AdminCouponsRouteImport.update({
   id: '/coupons',
   path: '/coupons',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminExpensesRoute = AdminExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminFinanceRoute = AdminFinanceRouteImport.update({
@@ -549,6 +555,7 @@ export interface FileRoutesByFullPath {
   '/admin/communication-config': typeof AdminCommunicationConfigRoute
   '/admin/contact-messages': typeof AdminContactMessagesRoute
   '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/live-chat': typeof AdminLiveChatRoute
@@ -632,6 +639,7 @@ export interface FileRoutesByTo {
   '/admin/communication-config': typeof AdminCommunicationConfigRoute
   '/admin/contact-messages': typeof AdminContactMessagesRoute
   '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/live-chat': typeof AdminLiveChatRoute
@@ -719,6 +727,7 @@ export interface FileRoutesById {
   '/admin/communication-config': typeof AdminCommunicationConfigRoute
   '/admin/contact-messages': typeof AdminContactMessagesRoute
   '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/live-chat': typeof AdminLiveChatRoute
@@ -807,6 +816,7 @@ export interface FileRouteTypes {
     | '/admin/communication-config'
     | '/admin/contact-messages'
     | '/admin/coupons'
+    | '/admin/expenses'
     | '/admin/finance'
     | '/admin/knowledge-base'
     | '/admin/live-chat'
@@ -890,6 +900,7 @@ export interface FileRouteTypes {
     | '/admin/communication-config'
     | '/admin/contact-messages'
     | '/admin/coupons'
+    | '/admin/expenses'
     | '/admin/finance'
     | '/admin/knowledge-base'
     | '/admin/live-chat'
@@ -976,6 +987,7 @@ export interface FileRouteTypes {
     | '/admin/communication-config'
     | '/admin/contact-messages'
     | '/admin/coupons'
+    | '/admin/expenses'
     | '/admin/finance'
     | '/admin/knowledge-base'
     | '/admin/live-chat'
@@ -1296,6 +1308,13 @@ declare module '@tanstack/react-router' {
       path: '/coupons'
       fullPath: '/admin/coupons'
       preLoaderRoute: typeof AdminCouponsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/expenses': {
+      id: '/admin/expenses'
+      path: '/expenses'
+      fullPath: '/admin/expenses'
+      preLoaderRoute: typeof AdminExpensesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/finance': {
@@ -1676,6 +1695,7 @@ interface AdminRouteRouteChildren {
   AdminCommunicationConfigRoute: typeof AdminCommunicationConfigRoute
   AdminContactMessagesRoute: typeof AdminContactMessagesRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
+  AdminExpensesRoute: typeof AdminExpensesRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminKnowledgeBaseRoute: typeof AdminKnowledgeBaseRoute
   AdminLiveChatRoute: typeof AdminLiveChatRoute
@@ -1701,6 +1721,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCommunicationConfigRoute: AdminCommunicationConfigRoute,
   AdminContactMessagesRoute: AdminContactMessagesRoute,
   AdminCouponsRoute: AdminCouponsRoute,
+  AdminExpensesRoute: AdminExpensesRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminKnowledgeBaseRoute: AdminKnowledgeBaseRoute,
   AdminLiveChatRoute: AdminLiveChatRoute,

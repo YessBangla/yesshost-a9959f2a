@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.post_cash_bank_to_ledger() FROM PUBLIC, anon, authenticated;
