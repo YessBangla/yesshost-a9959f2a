@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,13 +36,18 @@ async function loadSslCfg() {
   };
 }
 
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { invoice_id, customer_name, customer_email, customer_phone, description, is_wallet_deposit } = await req.json();
+    const { invoice_id, customer_name, customer_email, customer_phone, description, is_wallet_deposit, share_token } = await req.json();
 
     if (!invoice_id) {
       return new Response(
@@ -53,12 +59,14 @@ serve(async (req) => {
     const authClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const token = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
     const { data: auth } = token ? await authClient.auth.getUser(token) : { data: { user: null } };
-    if (!auth.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const source = is_wallet_deposit ? "wallet_transactions" : "invoices";
     const amountField = is_wallet_deposit ? "amount_bdt" : "amount_bdt";
-    let payableQuery = authClient.from(source).select(`id,user_id,status,${amountField}`).eq("id", invoice_id).eq("user_id", auth.user.id);
-    payableQuery = is_wallet_deposit ? payableQuery.eq("status", "pending") : payableQuery.in("status", ["pending", "overdue"]);
+    let payableQuery = authClient.from(source).select(`id,user_id,status,${amountField},share_token_hash,share_expires_at`).eq("id", invoice_id);
+    if (auth.user) payableQuery = payableQuery.eq("user_id", auth.user.id);
+    payableQuery = is_wallet_deposit ? payableQuery.eq("status", "pending") : payableQuery.in("status", ["unpaid", "overdue"]);
     const { data: payable } = await payableQuery.maybeSingle();
+    const validShareToken = !is_wallet_deposit && !!share_token && payable?.share_token_hash === await sha256Hex(String(share_token)) && !!payable.share_expires_at && new Date(payable.share_expires_at).getTime() > Date.now();
+    if (!auth.user && !validShareToken) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const amount = Number(payable?.amount_bdt);
     if (!payable || !Number.isFinite(amount) || amount <= 0) return new Response(JSON.stringify({ error: "Payable record not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 

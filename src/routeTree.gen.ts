@@ -77,6 +77,7 @@ import { Route as DashboardSupportPinRouteImport } from './routes/dashboard/supp
 import { Route as DashboardThemeSellerRouteImport } from './routes/dashboard/theme-seller'
 import { Route as DashboardTroubleshootRouteImport } from './routes/dashboard/troubleshoot'
 import { Route as DashboardWalletRouteImport } from './routes/dashboard/wallet'
+import { Route as InvoiceTokenRouteImport } from './routes/invoice/$token'
 import { Route as KnowledgeBaseIndexRouteImport } from './routes/knowledge-base/index'
 import { Route as KnowledgeBaseSlugRouteImport } from './routes/knowledge-base/$slug'
 import { Route as PaymentIndexRouteImport } from './routes/payment/index'
@@ -436,6 +437,11 @@ const DashboardWalletRoute = DashboardWalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const InvoiceTokenRoute = InvoiceTokenRouteImport.update({
+  id: '/invoice/$token',
+  path: '/invoice/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KnowledgeBaseIndexRoute = KnowledgeBaseIndexRouteImport.update({
   id: '/knowledge-base/',
   path: '/knowledge-base/',
@@ -588,6 +594,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/theme-seller': typeof DashboardThemeSellerRoute
   '/dashboard/troubleshoot': typeof DashboardTroubleshootRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
+  '/invoice/$token': typeof InvoiceTokenRoute
   '/knowledge-base/$slug': typeof KnowledgeBaseSlugRoute
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
@@ -672,6 +679,7 @@ export interface FileRoutesByTo {
   '/dashboard/theme-seller': typeof DashboardThemeSellerRoute
   '/dashboard/troubleshoot': typeof DashboardTroubleshootRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
+  '/invoice/$token': typeof InvoiceTokenRoute
   '/knowledge-base/$slug': typeof KnowledgeBaseSlugRoute
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
@@ -760,6 +768,7 @@ export interface FileRoutesById {
   '/dashboard/theme-seller': typeof DashboardThemeSellerRoute
   '/dashboard/troubleshoot': typeof DashboardTroubleshootRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
+  '/invoice/$token': typeof InvoiceTokenRoute
   '/knowledge-base/$slug': typeof KnowledgeBaseSlugRoute
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/fail': typeof PaymentFailRoute
@@ -849,6 +858,7 @@ export interface FileRouteTypes {
     | '/dashboard/theme-seller'
     | '/dashboard/troubleshoot'
     | '/dashboard/wallet'
+    | '/invoice/$token'
     | '/knowledge-base/$slug'
     | '/payment/cancel'
     | '/payment/fail'
@@ -933,6 +943,7 @@ export interface FileRouteTypes {
     | '/dashboard/theme-seller'
     | '/dashboard/troubleshoot'
     | '/dashboard/wallet'
+    | '/invoice/$token'
     | '/knowledge-base/$slug'
     | '/payment/cancel'
     | '/payment/fail'
@@ -1020,6 +1031,7 @@ export interface FileRouteTypes {
     | '/dashboard/theme-seller'
     | '/dashboard/troubleshoot'
     | '/dashboard/wallet'
+    | '/invoice/$token'
     | '/knowledge-base/$slug'
     | '/payment/cancel'
     | '/payment/fail'
@@ -1064,6 +1076,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  InvoiceTokenRoute: typeof InvoiceTokenRoute
   KnowledgeBaseSlugRoute: typeof KnowledgeBaseSlugRoute
   PaymentCancelRoute: typeof PaymentCancelRoute
   PaymentFailRoute: typeof PaymentFailRoute
@@ -1561,6 +1574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardWalletRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/invoice/$token': {
+      id: '/invoice/$token'
+      path: '/invoice/$token'
+      fullPath: '/invoice/$token'
+      preLoaderRoute: typeof InvoiceTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/knowledge-base/': {
       id: '/knowledge-base/'
       path: '/knowledge-base'
@@ -1829,6 +1849,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  InvoiceTokenRoute: InvoiceTokenRoute,
   KnowledgeBaseSlugRoute: KnowledgeBaseSlugRoute,
   PaymentCancelRoute: PaymentCancelRoute,
   PaymentFailRoute: PaymentFailRoute,

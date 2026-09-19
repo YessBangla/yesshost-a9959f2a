@@ -28,6 +28,7 @@ import { Link2 } from "lucide-react";
 import DataToolbar from "@/components/DataToolbar";
 import DataPagination from "@/components/DataPagination";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
+import { createInvoiceShareLink } from "@/lib/invoice-share.functions";
 
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
@@ -95,6 +96,7 @@ const DashboardBilling = () => {
   // Billing data is fetched on the server (server function -> Supabase) so the
   // page renders with real data and stays identical across domains/environments.
   const fetchBilling = useServerFn(getDashboardBilling);
+  const createShareLink = useServerFn(createInvoiceShareLink);
   const billingQuery = useQuery({
     queryKey: ["dashboard", "billing", user?.id ?? "anon"],
     queryFn: () => fetchBilling(),
@@ -133,8 +135,9 @@ const DashboardBilling = () => {
   }, [search.invoice, search.action, invoices, deepLinkDone]);
 
   const copyInvoiceLink = async (inv: Tables<"invoices">) => {
-    const url = `${window.location.origin}/dashboard/billing?invoice=${encodeURIComponent(inv.invoice_number)}`;
     try {
+      const { token } = await createShareLink({ data: { invoiceId: inv.id } });
+      const url = `${window.location.origin}/invoice/${encodeURIComponent(token)}`;
       await navigator.clipboard.writeText(url);
       toast({
         title: isBn ? "লিংক কপি হয়েছে" : "Link copied",
@@ -143,7 +146,7 @@ const DashboardBilling = () => {
     } catch {
       toast({
         title: isBn ? "কপি করা যায়নি" : "Copy failed",
-        description: url,
+        description: isBn ? "নিরাপদ ইনভয়েস লিংক তৈরি করা যায়নি" : "Could not create a secure invoice link",
         variant: "destructive",
       });
     }
@@ -621,7 +624,38 @@ const DashboardBilling = () => {
             </div>
           ) : (
             <div className="glass-card overflow-hidden rounded-xl">
-              <div className="overflow-x-auto">
+              <div className="space-y-3 p-3 sm:hidden">
+                {pagedInvoices.map((inv) => {
+                  const canPay = inv.status === "unpaid" || inv.status === "overdue";
+                  const sl = statusLabels[inv.status] || { bn: inv.status, en: inv.status };
+                  return (
+                    <article key={inv.id} className="rounded-2xl border border-border/70 bg-card/55 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-mono text-xs font-semibold text-primary">{inv.invoice_number}</p>
+                          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{inv.description || "—"}</p>
+                        </div>
+                        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${statusColors[inv.status]}`}>
+                          {isBn ? sl.bn : sl.en}
+                        </span>
+                      </div>
+                      <div className="my-4 flex items-end justify-between gap-3 border-y border-border/60 py-3">
+                        <div>
+                          <p className="text-[11px] text-muted-foreground">{tr("dash.amount")}</p>
+                          <p className="text-xl font-bold tabular-nums">৳{formatAmount(Number(inv.amount_bdt), lang)}</p>
+                        </div>
+                        <p className="text-right text-[11px] text-muted-foreground">{tr("dash.dueDate")}<br />{inv.due_date ? new Date(inv.due_date).toLocaleDateString(isBn ? "bn-BD" : "en-US") : "—"}</p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {canPay && <Button size="sm" className="h-11 gap-1 rounded-xl" onClick={() => { setPayInvoice(inv); setSelectedPayment(""); }}><CreditCard className="size-3.5" />{isBn ? "পে" : "Pay"}</Button>}
+                        <Button size="sm" variant="outline" className="h-11 gap-1 rounded-xl" onClick={() => setReportInvoice(inv)}><Eye className="size-3.5" />{isBn ? "দেখুন" : "View"}</Button>
+                        <Button size="sm" variant="outline" className="h-11 gap-1 rounded-xl" onClick={() => void copyInvoiceLink(inv)}><Link2 className="size-3.5" />{isBn ? "শেয়ার" : "Share"}</Button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+              <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-secondary/20">
