@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
-  Share2, Users, MousePointer, DollarSign, Wallet, Copy, TrendingUp,
+  Users, MousePointer, DollarSign, Wallet, Copy, TrendingUp,
   Clock, CheckCircle2, XCircle, RefreshCw, Link2, Send, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { StaffPageHeader, StaffMetricStrip, StaffLoading } from "@/components/staff/StaffConsole";
+
 
 const fmtBDT = (v: number, bn: boolean) =>
   `৳${Number(v || 0).toLocaleString(bn ? "bn-BD" : "en-US")}`;
@@ -126,31 +129,21 @@ const AffiliateDashboard = () => {
     return <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${m.cls}`}>{m.label}</span>;
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <div className="space-y-4"><StaffLoading rows={5} /></div>;
 
   return (
     <div className="space-y-4 sm:space-y-5">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shrink-0">
-              <Share2 className="w-4 h-4 text-primary-foreground" />
-            </div>
-            {bn ? "অ্যাফিলিয়েট ড্যাশবোর্ড" : "Affiliate Dashboard"}
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1 ml-10">
-            {bn ? "রেফার করুন ও ১৫% কমিশন আয় করুন" : "Refer & earn 15% commission"}
-          </p>
-        </div>
-        <button onClick={loadData} className="p-2 rounded-xl border border-border/50 hover:bg-secondary/50 text-muted-foreground transition-all" title="Refresh">
-          <RefreshCw className="w-4 h-4" />
-        </button>
-      </div>
+      <StaffPageHeader
+        title={bn ? "অ্যাফিলিয়েট ড্যাশবোর্ড" : "Affiliate Dashboard"}
+        description={bn ? "রেফার করুন, পারফরম্যান্স দেখুন ও ১৫% কমিশন আয় করুন" : "Refer, track performance and earn 15% commission"}
+        actions={
+          <Button variant="outline" size="sm" className="h-11 gap-2" onClick={loadData}>
+            <RefreshCw className="size-4" />
+            {bn ? "রিফ্রেশ" : "Refresh"}
+          </Button>
+        }
+      />
+
 
       {/* Referral Link Card */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -176,23 +169,15 @@ const AffiliateDashboard = () => {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-        {[
-          { label: bn ? "লিংক ক্লিক" : "Link Clicks", value: stats.clicks, icon: MousePointer, cls: "text-blue-500 bg-blue-500/10" },
-          { label: bn ? "রেফারেল" : "Referrals", value: `${stats.referrals}${stats.activeReferrals ? ` · ${stats.activeReferrals} ${bn ? "সক্রিয়" : "active"}` : ""}`, icon: Users, cls: "text-emerald-500 bg-emerald-500/10" },
-          { label: bn ? "মোট আয়" : "Total Earned", value: fmtBDT(stats.earned, bn), icon: TrendingUp, cls: "text-primary bg-primary/10" },
-          { label: bn ? "উত্তোলনযোগ্য" : "Available", value: fmtBDT(stats.available, bn), icon: Wallet, cls: "text-amber-500 bg-amber-500/10" },
-        ].map((s, i) => (
-          <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
-            className="glass-card rounded-xl p-3 sm:p-4">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${s.cls}`}>
-              <s.icon className="w-4 h-4" />
-            </div>
-            <p className="text-base sm:text-lg font-bold text-foreground leading-tight">{s.value}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
-          </motion.div>
-        ))}
-      </div>
+      <StaffMetricStrip
+        metrics={[
+          { label: bn ? "লিংক ক্লিক" : "Link clicks", value: stats.clicks, detail: bn ? "মোট" : "total", icon: MousePointer, tone: "primary" },
+          { label: bn ? "রেফারেল" : "Referrals", value: stats.referrals, detail: `${stats.activeReferrals} ${bn ? "সক্রিয়" : "active"}`, icon: Users, tone: "success" },
+          { label: bn ? "মোট আয়" : "Total earned", value: fmtBDT(stats.earned, bn), detail: bn ? "অনুমোদিত" : "approved", icon: TrendingUp, tone: "primary" },
+          { label: bn ? "উত্তোলনযোগ্য" : "Available", value: fmtBDT(stats.available, bn), detail: bn ? "সর্বনিম্ন ৳৫০০" : "min ৳500", icon: Wallet, tone: stats.available >= 500 ? "success" : "warning" },
+        ]}
+      />
+
 
       {/* Earnings breakdown + Request payout */}
       <div className="glass-card rounded-xl p-4 sm:p-5">
