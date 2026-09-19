@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWebRTCCall } from "@/hooks/useWebRTCCall";
 import LiveChatCallUI from "@/components/LiveChatCallUI";
+import { formatGap, formatStamp, isSlowGap } from "@/lib/time-gap";
 
 const CHAT_STORAGE_KEY = "yesshost_live_chat_id";
 const CHAT_OPEN_KEY = "yesshost_live_chat_open";
@@ -340,7 +341,7 @@ const LiveChatWidget = () => {
                 <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
                   {messages.map((m, idx) => {
                     const prev = idx > 0 ? messages[idx - 1]!.created_at : null;
-                    const gap = formatGap(prev, m.created_at, isBn);
+                    const gap = formatGap(prev, m.created_at, bn);
                     const slow = isSlowGap(prev, m.created_at);
                     return (
                     <div key={m.id} className={`flex flex-col ${m.sender_type === "visitor" ? "items-end" : "items-start"}`}>
@@ -351,7 +352,7 @@ const LiveChatWidget = () => {
                       }`}>
                         <p className="break-words whitespace-pre-wrap">{m.message}</p>
                         <p className={`text-[9px] mt-1 ${m.sender_type === "visitor" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                          {formatStamp(m.created_at, isBn)}
+                          {formatStamp(m.created_at, bn)}
                         </p>
                       </div>
                       {gap && (
