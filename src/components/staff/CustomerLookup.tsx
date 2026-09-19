@@ -175,13 +175,13 @@ const CustomerLookup = () => {
 
         <div className="space-y-2 rounded-md border border-border bg-secondary/20 p-3">
           <p className="text-xs font-semibold text-foreground">{bn ? "সাপোর্ট পিন যাচাই" : "Verify support PIN"}</p>
-          {!pinRow ? <p className="text-xs text-muted-foreground">{bn ? "এই গ্রাহক এখনো কোনো সাপোর্ট পিন তৈরি করেননি — ড্যাশবোর্ডের সাপোর্ট পিন পাতা থেকে তৈরি করতে বলুন।" : "This customer has not generated a support PIN yet — ask them to create one from the Support PIN page."} </p> : <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Input value={pinInput} onChange={(event) => { setPinInput(event.target.value); setPinResult(null); }} inputMode="numeric" maxLength={6} placeholder={bn ? "৬ সংখ্যার পিন" : "6-digit PIN"} className="h-11 w-40" />
             <Button variant="outline" onClick={verifyPin} disabled={pinInput.trim().length < 4}><ShieldCheck className="size-4" />{bn ? "যাচাই করুন" : "Verify"}</Button>
             {pinResult === "match" && <Badge className="bg-success/15 text-success">{bn ? "পরিচয় নিশ্চিত" : "Identity verified"}</Badge>}
             {pinResult === "wrong" && <Badge variant="destructive">{bn ? "পিন মেলেনি" : "PIN does not match"}</Badge>}
             {pinResult === "expired" && <Badge variant="secondary">{bn ? "পিনের মেয়াদ শেষ" : "PIN expired"}</Badge>}
-          </div>}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 border-t border-border pt-3">
