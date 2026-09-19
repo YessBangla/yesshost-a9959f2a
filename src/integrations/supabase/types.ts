@@ -943,6 +943,7 @@ export type Database = {
           visitor_email: string | null
           visitor_name: string
           visitor_phone: string | null
+          visitor_token_hash: string | null
         }
         Insert: {
           created_at?: string
@@ -953,6 +954,7 @@ export type Database = {
           visitor_email?: string | null
           visitor_name?: string
           visitor_phone?: string | null
+          visitor_token_hash?: string | null
         }
         Update: {
           created_at?: string
@@ -963,6 +965,7 @@ export type Database = {
           visitor_email?: string | null
           visitor_name?: string
           visitor_phone?: string | null
+          visitor_token_hash?: string | null
         }
         Relationships: []
       }
