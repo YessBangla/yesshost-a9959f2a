@@ -1,7 +1,12 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
-import { Shield, Clock, Headphones, Server, Award, Users } from "lucide-react";
+import { useRef, useState, useEffect, useMemo } from "react";
+import { Shield, Clock, Headphones, Server, Award, Users, Zap, Globe, Lock, Rocket, HardDrive, BarChart3 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
+
+const iconMap: Record<string, typeof Shield> = {
+  Shield, Clock, Headphones, Server, Award, Users, Zap, Globe, Lock, Rocket, HardDrive, BarChart3,
+};
 
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 
