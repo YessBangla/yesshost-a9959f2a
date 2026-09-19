@@ -370,7 +370,7 @@ const HostingPlans = () => {
         {!loading && grouped.length > 0 && (
           <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40 shadow-xs">
             <div className="container mx-auto px-4">
-              <div className="flex overflow-x-auto gap-1.5 py-2.5 max-w-5xl mx-auto no-scrollbar justify-start md:justify-center">
+              <div className="flex overflow-x-auto gap-1.5 py-2.5 max-w-5xl mx-auto no-scrollbar snap-x snap-mandatory scroll-px-4 pr-4 justify-start md:justify-center">
                 {grouped.map((cat) => {
                   const label = categoryLabels[cat.key];
                   const Icon = cat.icon;
