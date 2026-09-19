@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { downloadCsv, csvDate } from "@/lib/export-csv";
 import { supabase } from "@/integrations/supabase/client";
+import { formatGap, isSlowGap } from "@/lib/time-gap";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
