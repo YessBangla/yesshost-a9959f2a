@@ -64,6 +64,7 @@ const ContactMessages = () => {
     }
     setSelected(msg.is_read ? msg : { ...msg, is_read: true });
     setReplyText("");
+    void loadReplies(msg.id);
   };
 
   const deleteMessage = async (id: string) => {
