@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Save, X, Palette, Search, Eye, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2, Power, Monitor, ExternalLink, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Palette, EyeOff, Star, Upload, ImagePlus, FileArchive, Download, Loader2, Power, Monitor, ExternalLink, AlertCircle, CheckCircle2, XCircle, RefreshCw, ShoppingBag, Banknote, Clock3 } from "lucide-react";
 import { ThemesSkeleton } from "@/components/DashboardSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DataPagination from "@/components/DataPagination";
+import { StaffEmpty, StaffMetricStrip, StaffPageHeader, StaffSearch } from "@/components/staff/StaffConsole";
+import { csvDate, downloadCsv } from "@/lib/export-csv";
 
 const CATEGORIES = ["business", "ecommerce", "portfolio", "restaurant", "blog", "landing", "education", "healthcare", "news", "agency", "realestate", "travel"] as const;
 
@@ -41,6 +46,9 @@ const AdminThemes = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
@@ -52,19 +60,23 @@ const AdminThemes = () => {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [sellerPayouts, setSellerPayouts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
 
   const fetchThemes = async () => {
     setLoading(true);
-    const [{ data }, { data: po }] = await Promise.all([
+    const [{ data }, { data: po }, { data: orderData }] = await Promise.all([
       supabase.from("themes").select("*").order("sort_order").order("created_at", { ascending: false }),
       supabase.from("theme_seller_payouts").select("*").order("created_at", { ascending: false }),
+      supabase.from("theme_orders").select("id,theme_id,amount_bdt,status,payment_method,paid_at,created_at").order("created_at", { ascending: false }).limit(1000),
     ]);
     setThemes(data || []);
     setSellerPayouts(po || []);
+    setOrders(orderData || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchThemes(); }, []);
+  useEffect(() => { setPage(1); }, [search, filterCat, filterStatus, pageSize]);
 
   const setApproval = async (theme: any, status: "approved" | "rejected") => {
     let note: string | null = null;
@@ -180,8 +192,17 @@ const AdminThemes = () => {
   const filtered = themes.filter(t => {
     const matchSearch = t.name.toLowerCase().includes(search.toLowerCase()) || t.slug.includes(search.toLowerCase());
     const matchCat = filterCat === "all" || t.category === filterCat;
-    return matchSearch && matchCat;
+    const approval = (t as any).approval_status || (t.is_active ? "approved" : "draft");
+    const matchStatus = filterStatus === "all" || approval === filterStatus || (filterStatus === "live" && t.is_active);
+    return matchSearch && matchCat && matchStatus;
   });
+  const pagedThemes = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const paidOrders = orders.filter(order => order.status === "paid" || order.paid_at);
+  const grossSales = paidOrders.reduce((sum, order) => sum + Number(order.amount_bdt || 0), 0);
+  const pendingReviews = themes.filter(theme => (theme as any).seller_user_id && !["approved", "rejected"].includes((theme as any).approval_status)).length;
+  const payoutQueue = sellerPayouts.filter(payout => ["requested", "approved"].includes(payout.status)).reduce((sum, payout) => sum + Number(payout.amount_bdt || 0), 0);
+  const money = (value: number) => `৳${Number(value || 0).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}`;
+  const exportSales = () => downloadCsv("yesshost-theme-sales", ["order_id", "theme", "amount_bdt", "status", "payment_method", "paid_at", "created_at"], orders.map(order => [order.id, themes.find(theme => theme.id === order.theme_id)?.name || order.theme_id, order.amount_bdt, order.status, order.payment_method || "", csvDate(order.paid_at), csvDate(order.created_at)]));
 
   const inputClass = "w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30";
 
@@ -462,35 +483,23 @@ const AdminThemes = () => {
   if (loading) return <ThemesSkeleton />;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Palette className="w-6 h-6" /> থিম ম্যানেজমেন্ট
-          </h1>
-          <p className="text-sm text-muted-foreground">মোট {themes.length} টি থিম</p>
-        </div>
-        <button
-          onClick={() => { setShowAdd(true); setAddForm({ ...emptyForm }); setEditingId(null); }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-lg shadow-primary/20"
-        >
-          <Plus className="w-4 h-4" /> নতুন থিম যোগ করুন
-        </button>
-      </div>
+    <div className="staff-console space-y-5">
+      <StaffPageHeader title={lang === "bn" ? "থিম স্টোর অপারেশনস" : "Theme Store Operations"} description={lang === "bn" ? "ক্যাটালগ, বিক্রেতা অনুমোদন, বিক্রি ও পেআউট এক জায়গা থেকে পরিচালনা করুন" : "Manage catalogue, seller approvals, sales and payouts from one workspace"} actions={<div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => void fetchThemes()}><RefreshCw className="size-4" />{lang === "bn" ? "রিফ্রেশ" : "Refresh"}</Button><Button variant="outline" onClick={exportSales} disabled={!orders.length}><Download className="size-4" />{lang === "bn" ? "বিক্রির CSV" : "Sales CSV"}</Button><Button onClick={() => { setShowAdd(true); setAddForm({ ...emptyForm }); setEditingId(null); }}><Plus className="size-4" />{lang === "bn" ? "নতুন থিম" : "New Theme"}</Button></div>} />
+      <StaffMetricStrip metrics={[
+        { label: lang === "bn" ? "লাইভ থিম" : "LIVE THEMES", value: themes.filter(theme => theme.is_active).length, detail: `${themes.length} ${lang === "bn" ? "মোট" : "total"}`, icon: Palette },
+        { label: lang === "bn" ? "পর্যালোচনা অপেক্ষমাণ" : "REVIEW QUEUE", value: pendingReviews, detail: lang === "bn" ? "বিক্রেতার জমা" : "seller submissions", icon: Clock3, tone: "warning" },
+        { label: lang === "bn" ? "পরিশোধিত বিক্রি" : "PAID SALES", value: paidOrders.length, detail: lang === "bn" ? "সম্পন্ন অর্ডার" : "completed orders", icon: ShoppingBag, tone: "success" },
+        { label: lang === "bn" ? "মোট বিক্রি" : "GROSS SALES", value: money(grossSales), detail: `${money(payoutQueue)} ${lang === "bn" ? "পেআউট বাকি" : "payout due"}`, icon: Banknote, tone: payoutQueue ? "warning" : "success" },
+      ]} />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="থিম সার্চ করুন..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-2 focus:ring-primary/30" />
+      <section className="staff-panel overflow-hidden">
+      <div className="flex flex-col gap-3 border-b border-border p-3 lg:flex-row">
+        <StaffSearch value={search} onChange={setSearch} placeholder={lang === "bn" ? "নাম বা স্লাগ খুঁজুন" : "Search name or slug"} />
+        <div className="grid grid-cols-2 gap-2">
+          <Select value={filterCat} onValueChange={setFilterCat}><SelectTrigger className="h-11 min-w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{lang === "bn" ? "সব ক্যাটাগরি" : "All categories"}</SelectItem>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{categoryLabels[c]?.[lang] || c}</SelectItem>)}</SelectContent></Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}><SelectTrigger className="h-11 min-w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{lang === "bn" ? "সব স্ট্যাটাস" : "All statuses"}</SelectItem><SelectItem value="live">{lang === "bn" ? "লাইভ" : "Live"}</SelectItem><SelectItem value="pending">{lang === "bn" ? "পর্যালোচনায়" : "In review"}</SelectItem><SelectItem value="approved">{lang === "bn" ? "অনুমোদিত" : "Approved"}</SelectItem><SelectItem value="rejected">{lang === "bn" ? "বাতিল" : "Rejected"}</SelectItem><SelectItem value="draft">{lang === "bn" ? "ড্রাফট" : "Draft"}</SelectItem></SelectContent></Select>
         </div>
-        <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground outline-hidden focus:ring-2 focus:ring-primary/30">
-          <option value="all">সব ক্যাটাগরি</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{categoryLabels[c]?.[lang] || c}</option>)}
-        </select>
       </div>
 
       {/* Add Form */}
@@ -499,8 +508,8 @@ const AdminThemes = () => {
       )}
 
       {/* Theme List */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-        {filtered.map(theme => (
+      <div className="grid grid-cols-1 gap-2 p-3 xl:grid-cols-2">
+        {pagedThemes.map(theme => (
           <div key={theme.id} className={editingId === theme.id ? "xl:col-span-2" : ""}>
             {editingId === theme.id ? (
               <ThemeForm form={editForm} setForm={setEditForm} onSave={() => handleSave(false)} onCancel={() => { setEditingId(null); setEditForm({}); }} />
@@ -599,7 +608,7 @@ const AdminThemes = () => {
           </div>
         ))}
 
-        {filtered.length === 0 && (
+        {pagedThemes.length === 0 && (
           <div className="xl:col-span-2">
           <EmptyState
             icon={Palette}
@@ -609,6 +618,8 @@ const AdminThemes = () => {
           </div>
         )}
       </div>
+      </section>
+      <DataPagination total={filtered.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} pageSizeOptions={[5, 10, 25, 50]} />
 
       {/* Seller payout requests */}
       {sellerPayouts.length > 0 && (
