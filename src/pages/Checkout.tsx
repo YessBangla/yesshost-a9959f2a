@@ -73,6 +73,14 @@ const Checkout = () => {
     })
     .filter((m) => m.ready);
 
+  // Keep the selection valid when gateway availability changes
+  useEffect(() => {
+    if (paymentMethods.length === 0) return;
+    if (!paymentMethods.some((m) => m.id === selectedPayment)) {
+      setSelectedPayment(paymentMethods[0].id);
+    }
+  }, [paymentMethods, selectedPayment]);
+
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
