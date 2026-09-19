@@ -31,6 +31,10 @@ const CustomerLookup = () => {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState("");
+  const { user } = useAuth();
+  const [ticketOpen, setTicketOpen] = useState(false);
+  const [form, setForm] = useState({ subject: "", department: "technical", priority: "medium", message: "" });
+  const [saving, setSaving] = useState(false);
 
   const search = async () => {
     const value = term.trim();
