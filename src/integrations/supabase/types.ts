@@ -1510,6 +1510,71 @@ export type Database = {
           },
         ]
       }
+      reseller_invoices: {
+        Row: {
+          amount_bdt: number
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          description: string | null
+          domain: string | null
+          due_date: string | null
+          id: string
+          invoice_number: string
+          issue_date: string
+          paid_at: string | null
+          payment_method: string | null
+          reseller_account_id: string | null
+          reseller_user_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_bdt?: number
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          description?: string | null
+          domain?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          issue_date?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          reseller_account_id?: string | null
+          reseller_user_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_bdt?: number
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          description?: string | null
+          domain?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          reseller_account_id?: string | null
+          reseller_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reseller_invoices_reseller_account_id_fkey"
+            columns: ["reseller_account_id"]
+            isOneToOne: false
+            referencedRelation: "reseller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reseller_packages: {
         Row: {
           created_at: string
