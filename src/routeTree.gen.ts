@@ -70,6 +70,7 @@ import { Route as DashboardOrderServiceRouteImport } from './routes/dashboard/or
 import { Route as DashboardOrdersRouteImport } from './routes/dashboard/orders'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
 import { Route as DashboardResellerRouteImport } from './routes/dashboard/reseller'
+import { Route as DashboardResellerInvoicesRouteImport } from './routes/dashboard/reseller-invoices'
 import { Route as DashboardServerStatusRouteImport } from './routes/dashboard/server-status'
 import { Route as DashboardServicesRouteImport } from './routes/dashboard/services'
 import { Route as DashboardSupportRouteImport } from './routes/dashboard/support'
@@ -402,6 +403,12 @@ const DashboardResellerRoute = DashboardResellerRouteImport.update({
   path: '/reseller',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardResellerInvoicesRoute =
+  DashboardResellerInvoicesRouteImport.update({
+    id: '/reseller-invoices',
+    path: '/reseller-invoices',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardServerStatusRoute = DashboardServerStatusRouteImport.update({
   id: '/server-status',
   path: '/server-status',
@@ -587,6 +594,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/reseller': typeof DashboardResellerRoute
+  '/dashboard/reseller-invoices': typeof DashboardResellerInvoicesRoute
   '/dashboard/server-status': typeof DashboardServerStatusRoute
   '/dashboard/services': typeof DashboardServicesRoute
   '/dashboard/support': typeof DashboardSupportRoute
@@ -672,6 +680,7 @@ export interface FileRoutesByTo {
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/reseller': typeof DashboardResellerRoute
+  '/dashboard/reseller-invoices': typeof DashboardResellerInvoicesRoute
   '/dashboard/server-status': typeof DashboardServerStatusRoute
   '/dashboard/services': typeof DashboardServicesRoute
   '/dashboard/support': typeof DashboardSupportRoute
@@ -761,6 +770,7 @@ export interface FileRoutesById {
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/reseller': typeof DashboardResellerRoute
+  '/dashboard/reseller-invoices': typeof DashboardResellerInvoicesRoute
   '/dashboard/server-status': typeof DashboardServerStatusRoute
   '/dashboard/services': typeof DashboardServicesRoute
   '/dashboard/support': typeof DashboardSupportRoute
@@ -851,6 +861,7 @@ export interface FileRouteTypes {
     | '/dashboard/orders'
     | '/dashboard/profile'
     | '/dashboard/reseller'
+    | '/dashboard/reseller-invoices'
     | '/dashboard/server-status'
     | '/dashboard/services'
     | '/dashboard/support'
@@ -936,6 +947,7 @@ export interface FileRouteTypes {
     | '/dashboard/orders'
     | '/dashboard/profile'
     | '/dashboard/reseller'
+    | '/dashboard/reseller-invoices'
     | '/dashboard/server-status'
     | '/dashboard/services'
     | '/dashboard/support'
@@ -1024,6 +1036,7 @@ export interface FileRouteTypes {
     | '/dashboard/orders'
     | '/dashboard/profile'
     | '/dashboard/reseller'
+    | '/dashboard/reseller-invoices'
     | '/dashboard/server-status'
     | '/dashboard/services'
     | '/dashboard/support'
@@ -1525,6 +1538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardResellerRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/reseller-invoices': {
+      id: '/dashboard/reseller-invoices'
+      path: '/reseller-invoices'
+      fullPath: '/dashboard/reseller-invoices'
+      preLoaderRoute: typeof DashboardResellerInvoicesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/server-status': {
       id: '/dashboard/server-status'
       path: '/server-status'
@@ -1791,6 +1811,7 @@ interface DashboardRouteRouteChildren {
   DashboardOrdersRoute: typeof DashboardOrdersRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardResellerRoute: typeof DashboardResellerRoute
+  DashboardResellerInvoicesRoute: typeof DashboardResellerInvoicesRoute
   DashboardServerStatusRoute: typeof DashboardServerStatusRoute
   DashboardServicesRoute: typeof DashboardServicesRoute
   DashboardSupportRoute: typeof DashboardSupportRoute
@@ -1813,6 +1834,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardOrdersRoute: DashboardOrdersRoute,
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardResellerRoute: DashboardResellerRoute,
+  DashboardResellerInvoicesRoute: DashboardResellerInvoicesRoute,
   DashboardServerStatusRoute: DashboardServerStatusRoute,
   DashboardServicesRoute: DashboardServicesRoute,
   DashboardSupportRoute: DashboardSupportRoute,
