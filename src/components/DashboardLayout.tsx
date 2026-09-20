@@ -36,6 +36,7 @@ const breadcrumbMap: Record<string, { en: string; bn: string }> = {
   "/dashboard/domains": { en: "Domains", bn: "ডোমেইন" },
   "/dashboard/profile": { en: "Profile", bn: "প্রোফাইল" },
   "/dashboard/reseller": { en: "Reseller", bn: "রিসেলার" },
+  "/dashboard/reseller-invoices": { en: "Customer Invoices", bn: "গ্রাহক ইনভয়েস" },
   "/dashboard/affiliate": { en: "Affiliate", bn: "অ্যাফিলিয়েট" },
   "/dashboard/wallet": { en: "Wallet", bn: "ওয়ালেট" },
   "/dashboard/income": { en: "Income & Payments", bn: "আয় ও পেমেন্ট" },
@@ -221,7 +222,12 @@ const DashboardLayout = () => {
     { title: bn ? "আমার থিম" : "My Themes", url: "/dashboard/my-themes", icon: Palette },
     { title: bn ? "থিম বিক্রি" : "Sell Themes", url: "/dashboard/theme-seller", icon: Palette },
     { title: bn ? "সমস্যা নির্ণয়" : "Troubleshoot", url: "/dashboard/troubleshoot", icon: LifeBuoy },
-    ...(isReseller ? [{ title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 }] : []),
+    ...(isReseller
+      ? [
+          { title: bn ? "রিসেলার" : "Reseller", url: "/dashboard/reseller", icon: Share2 },
+          { title: bn ? "গ্রাহক ইনভয়েস" : "Customer Invoices", url: "/dashboard/reseller-invoices", icon: CreditCard },
+        ]
+      : []),
   ];
 
   const bottomItems = [
